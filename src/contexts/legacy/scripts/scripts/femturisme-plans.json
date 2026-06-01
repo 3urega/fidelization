@@ -1,0 +1,47 @@
+[
+  {
+    "id": "2b3f4d3b-8c93-4c37-8fa0-2e2c6a3b2d11",
+    "title": "Excursión al Montseny con transporte público",
+    "description": "Plan de día para familias: senderos fáciles, áreas de picnic y miradores. Acceso recomendado en tren hasta Sant Celoni y bus local. Mejor en primavera u otoño.",
+    "location": "Parc Natural del Montseny (Barcelona)",
+    "url": "https://example.com/planes/montseny-transporte-publico",
+    "tags": ["naturaleza", "familias", "excursion", "transporte-publico"],
+    "children_friendly": true,
+    "vehicle_required": false,
+    "overnight_possible": false
+  },
+  {
+    "id": "bdb5c1ff-5c0a-4b3a-8c0b-4f7ff55a07a9",
+    "title": "Museos gratis en Barcelona (sábado por la tarde)",
+    "description": "Ruta cultural por 2-3 museos con entrada gratuita en franjas horarias. Ideal para días de lluvia y para ir con peques. Combina con merienda cerca del Born.",
+    "location": "Barcelona",
+    "url": "https://example.com/planes/museos-gratis-barcelona",
+    "tags": ["cultura", "ciudad", "lluvia", "familias"],
+    "children_friendly": true,
+    "vehicle_required": false,
+    "overnight_possible": false
+  },
+  {
+    "id": "9b0b7c30-52d0-4b6c-8f6b-4e7a6f2c0a44",
+    "title": "Escapada a Girona con noche y paseo por el casco antiguo",
+    "description": "Plan de fin de semana: tren a Girona, paseo por el Barri Vell, muralla, y cena tranquila. Opción de alojarse una noche y visitar un mercado local por la mañana.",
+    "location": "Girona",
+    "url": "https://example.com/planes/girona-fin-de-semana",
+    "tags": ["escapada", "gastronomia", "historia", "romantico"],
+    "children_friendly": null,
+    "vehicle_required": false,
+    "overnight_possible": true
+  },
+  {
+    "id": "6a7a2c15-5d0f-4a9e-92d9-2b3c4d5e6f70",
+    "title": "Calas de la Costa Brava en coche (mañana temprana)",
+    "description": "Ruta de calas poco concurridas saliendo temprano. Recomendado llevar calzado para rocas, agua y comida. Aparcamiento limitado; mejor fuera de temporada alta.",
+    "location": "Costa Brava",
+    "url": "https://example.com/planes/calas-costa-brava-coche",
+    "tags": ["playa", "verano", "coche", "naturaleza"],
+    "children_friendly": false,
+    "vehicle_required": true,
+    "overnight_possible": false
+  }
+]
+

@@ -1,0 +1,40 @@
+### Obtener sugerencias de planes (query libre)
+POST http://localhost:3000/api/femturisme/chat
+Content-Type: application/json
+
+{
+  "query": "Quiero hacer algo en familia sin coche, con niños pequeños"
+}
+
+
+### Planes de naturaleza al aire libre
+POST http://localhost:3000/api/femturisme/chat
+Content-Type: application/json
+
+{
+  "query": "Planes de naturaleza para el fin de semana"
+}
+
+
+### Escapada romántica con pernocta
+POST http://localhost:3000/api/femturisme/chat
+Content-Type: application/json
+
+{
+  "query": "Escapada romántica para dos personas con posibilidad de quedarse a dormir"
+}
+
+
+### Planes de lluvia en ciudad
+POST http://localhost:3000/api/femturisme/chat
+Content-Type: application/json
+
+{
+  "query": "Plan para un día de lluvia en la ciudad, con niños"
+}
+
+### UUIDs de planes disponibles en la base de datos de muestra:
+# 2b3f4d3b-8c93-4c37-8fa0-2e2c6a3b2d11 → Excursión al Montseny con transporte público
+# bdb5c1ff-5c0a-4b3a-8c0b-4f7ff55a07a9 → Museos gratis en Barcelona (sábado por la tarde)
+# 9b0b7c30-52d0-4b6c-8f6b-4e7a6f2c0a44 → Escapada a Girona con noche y paseo por el casco antiguo
+# 6a7a2c15-5d0f-4a9e-92d9-2b3c4d5e6f70 → Calas de la Costa Brava en coche (mañana temprana)

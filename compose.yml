@@ -1,0 +1,42 @@
+services:
+  eurega_rag_postgres_pgvector:
+    image: pgvector/pgvector:0.7.4-pg16
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: codely
+      POSTGRES_PASSWORD: c0d3ly7v
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./databases/0-enable-pgvector.sql:/docker-entrypoint-initdb.d/0-enable-pgvector.sql
+      - ./databases/1-starter.sql:/docker-entrypoint-initdb.d/1-starter.sql
+
+  # Optional: legacy RAG stack (profile: legacy)
+  eurega_rag_ollama:
+    profiles: ["legacy"]
+    image: ollama/ollama
+    volumes:
+      - ~/.ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  eurega_rag_mariadb:
+    profiles: ["legacy"]
+    image: mariadb:11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: adminpassword
+      MYSQL_DATABASE: mooc
+      MYSQL_USER: codely
+      MYSQL_PASSWORD: c0d3ly7v
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  pg_data:
+  db_data:
