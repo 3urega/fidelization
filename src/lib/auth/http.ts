@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
+import { OwnerMembershipNotFound } from "../../contexts/tenants/memberships/domain/OwnerMembershipNotFound";
+import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { SessionClaims } from "./session";
 
 export function userToJson(user: {
 	id: { value: string };
@@ -19,6 +22,32 @@ export function userToJson(user: {
 	};
 }
 
+export function tenantToJson(tenant: Tenant): Record<string, string> {
+	const primitives = tenant.toPrimitives();
+
+	return {
+		id: primitives.id,
+		name: primitives.name,
+		slug: primitives.slug,
+		logoUrl: primitives.logoUrl,
+		primaryColor: primitives.primaryColor,
+		secondaryColor: primitives.secondaryColor,
+		subscriptionPlan: primitives.subscriptionPlan,
+	};
+}
+
+export function authResponseToJson(
+	user: Parameters<typeof userToJson>[0],
+	tenant: Tenant,
+	session: SessionClaims,
+): Record<string, unknown> {
+	return {
+		user: userToJson(user),
+		tenant: tenantToJson(tenant),
+		role: session.role,
+	};
+}
+
 export function handleAuthDomainError(error: DomainError): NextResponse | undefined {
 	if (error.type === "InvalidCredentials") {
 		return HttpNextResponse.domainError(error, 401);
@@ -28,6 +57,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "UserDoesNotExist") {
 		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "OwnerMembershipNotFound") {
+		return HttpNextResponse.domainError(error, 403);
 	}
 
 	return undefined;

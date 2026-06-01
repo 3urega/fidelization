@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MembershipRole {
+  owner
+  employee
+  customer
+}
+
+model User {
+  id               String             @id @default(uuid())
+  name             String
+  email            String             @unique
+  profilePicture   String             @default("") @map("profile_picture")
+  passwordHash     String             @map("password_hash")
+  subscriptionPlan String             @default("FREE") @map("subscription_plan")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  memberships      TenantMembership[]
+
+  @@map("users")
+}
+
+model Tenant {
+  id               String             @id @default(uuid())
+  name             String
+  slug             String             @unique
+  logoUrl          String             @default("") @map("logo_url")
+  primaryColor     String             @default("#7C3AED") @map("primary_color")
+  secondaryColor   String             @default("#4F46E5") @map("secondary_color")
+  subscriptionPlan String             @default("basic") @map("subscription_plan")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  memberships      TenantMembership[]
+
+  @@map("tenants")
+}
+
+model TenantMembership {
+  id       String         @id @default(uuid())
+  tenantId String         @map("tenant_id")
+  userId   String         @map("user_id")
+  role     MembershipRole
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@map("tenant_memberships")
+}

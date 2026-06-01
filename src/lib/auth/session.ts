@@ -3,6 +3,12 @@ import { jwtVerify, SignJWT } from "jose";
 const COOKIE_NAME = "session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
+export type SessionClaims = {
+	userId: string;
+	tenantId: string;
+	role: string;
+};
+
 function getSecret(): Uint8Array {
 	const secret = process.env.AUTH_SECRET;
 	if (!secret || secret.length < 16) {
@@ -12,20 +18,30 @@ function getSecret(): Uint8Array {
 	return new TextEncoder().encode(secret);
 }
 
-export async function createSessionToken(userId: string): Promise<string> {
-	return new SignJWT({ sub: userId })
+export async function createSessionToken(claims: SessionClaims): Promise<string> {
+	return new SignJWT({
+		sub: claims.userId,
+		tenantId: claims.tenantId,
+		role: claims.role,
+	})
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
 		.setExpirationTime(`${MAX_AGE_SECONDS}s`)
 		.sign(getSecret());
 }
 
-export async function verifySessionToken(token: string): Promise<string | null> {
+export async function verifySessionToken(token: string): Promise<SessionClaims | null> {
 	try {
 		const { payload } = await jwtVerify(token, getSecret());
-		const sub = payload.sub;
+		const userId = payload.sub;
+		const tenantId = payload.tenantId;
+		const role = payload.role;
 
-		return typeof sub === "string" ? sub : null;
+		if (typeof userId !== "string" || typeof tenantId !== "string" || typeof role !== "string") {
+			return null;
+		}
+
+		return { userId, tenantId, role };
 	} catch {
 		return null;
 	}
@@ -67,10 +83,10 @@ export function clearSessionCookie(): string {
 	return `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=lax`;
 }
 
-export async function getAuthenticatedUserId(request: Request): Promise<string | null> {
+async function getSessionTokenFromRequest(request: Request): Promise<string | null> {
 	const authHeader = request.headers.get("authorization");
 	if (authHeader?.startsWith("Bearer ")) {
-		return verifySessionToken(authHeader.slice(7));
+		return authHeader.slice(7);
 	}
 
 	const cookieHeader = request.headers.get("cookie");
@@ -79,11 +95,24 @@ export async function getAuthenticatedUserId(request: Request): Promise<string |
 	}
 
 	const match = cookieHeader.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
-	if (!match) {
+
+	return match?.[1] ?? null;
+}
+
+export async function getAuthenticatedSession(request: Request): Promise<SessionClaims | null> {
+	const token = await getSessionTokenFromRequest(request);
+
+	if (!token) {
 		return null;
 	}
 
-	return verifySessionToken(match[1]);
+	return verifySessionToken(token);
+}
+
+export async function getAuthenticatedUserId(request: Request): Promise<string | null> {
+	const session = await getAuthenticatedSession(request);
+
+	return session?.userId ?? null;
 }
 
 export function jsonWithSessionCookie<T>(body: T, token: string, status = 200): Response {

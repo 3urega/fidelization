@@ -10,6 +10,36 @@ npm run build:capacitor   # export out/ + cap sync android
 
 **Tests:** la suite Jest actual apunta sobre todo a contextos legacy y puede colgar o fallar. No forma parte del flujo del starter activo hasta reescribir tests para `identity`/`billing`.
 
+# Product
+
+SaaS de fidelización y retención de clientes para cafés y pequeños negocios de hostelería. Plataforma genérica, configurable y **multi-tenant desde el día uno**: cada negocio es un tenant con datos, branding, promociones y clientes aislados. Mercado inicial: cafés; arquitectura adaptable a panaderías, heladerías, bares, restaurantes, food trucks, etc.
+
+**Tipos de usuario:** administrador de plataforma, propietario del negocio, empleado (permisos limitados), cliente (app móvil).
+
+**Núcleo del producto:**
+- Fidelización configurable por tenant: puntos, tarjetas de sellos, recompensas, referidos (opcional).
+- Flujo QR: el cliente muestra su código → el empleado escanea → se registra la compra → puntos/sellos automáticos (sin tarjetas físicas ni integración POS).
+- Promociones, cupones y notificaciones push para engagement.
+- Planes de suscripción (Basic / Pro / Premium) con feature flags por tenant.
+- Analítica básica (clientes activos, visitas, puntos, recompensas, rendimiento de promociones).
+
+**Stack cliente:** Next.js + Capacitor — una sola base de código para web, Android e iOS; mobile-first.
+
+**Prioridades MVP (en orden):** multi-tenant → auth → perfiles de cliente → QR → sellos → puntos → recompensas → promociones → cupones → push → planes → analítica básica. Integraciones futuras (POS, wallets, CRM) no condicionan la arquitectura inicial.
+
+Especificación completa: [`docs/domain.md`](docs/domain.md).
+
+# Business Rules
+
+Reglas de dominio que deben respetarse en implementación y validaciones:
+
+- **Puntos:** 1 € gastado puede generar puntos; el cálculo es configurable por tenant.
+- **Sellos:** un cliente puede tener varias campañas de sellos activas a la vez; las campañas se pueden desactivar sin borrar datos.
+- **QR:** cada cliente tiene un QR único que lo identifica de forma global; cada escaneo genera un evento auditable.
+- **Planes:** las funcionalidades se controlan con feature flags; un tenant no puede acceder a features fuera de su plan.
+
+Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
+
 # Architecture
 
 - Next.js 14, Onion Architecture, DDD.
@@ -25,6 +55,8 @@ npm run build:capacitor   # export out/ + cap sync android
 
 ```
 docs/
+├── domain.md                    # visión del producto, multi-tenant, fidelización, MVP
+├── business-rules.md            # reglas de dominio: puntos, sellos, QR, planes
 ├── code-style.md
 ├── documentation-format.md
 ├── backend/

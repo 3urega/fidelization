@@ -13,7 +13,11 @@ import { UserFinder } from "../../../identity/users/application/find/UserFinder"
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
 import { UserProfileUpdater } from "../../../identity/users/application/update_profile/UserProfileUpdater";
 import { UserRepository } from "../../../identity/users/domain/UserRepository";
-import { PostgresUserRepository } from "../../../identity/users/infrastructure/PostgresUserRepository";
+import { PrismaUserRepository } from "../../../identity/users/infrastructure/PrismaUserRepository";
+import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
+import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
+import { PrismaTenantMembershipRepository } from "../../../tenants/memberships/infrastructure/PrismaTenantMembershipRepository";
+import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
 import { PostgresConnection } from "../postgres/PostgresConnection";
 
 loadProjectEnv();
@@ -33,13 +37,18 @@ builder
 	})
 	.asSingleton();
 
-builder.register(UserRepository).use(PostgresUserRepository);
-builder.registerAndUse(PostgresUserRepository);
+builder.register(UserRepository).use(PrismaUserRepository);
+builder.registerAndUse(PrismaUserRepository);
+
+builder.register(TenantMembershipRepository).use(PrismaTenantMembershipRepository);
+builder.registerAndUse(PrismaTenantMembershipRepository);
 
 builder.registerAndUse(UserRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(UserProfileUpdater);
+builder.registerAndUse(OwnerMembershipFinder);
+builder.registerAndUse(TenantFinder);
 
 builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);
 builder.registerAndUse(PostgresGooglePlaySubscriptionRepository);

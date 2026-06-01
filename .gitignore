@@ -3,6 +3,8 @@
 /.next/
 /out/
 /build
+.env
 .env*.local
+/generated/prisma
 .capacitor-api-stash
 *.tsbuildinfo
