@@ -71,4 +71,8 @@ docs/
 └── testing/
     ├── mock-objects.md
     └── object-mothers.md
+
+.agents/skills/
+├── prisma/                      # Prisma Postgres, migraciones, seed, src/lib/prisma.ts
+└── kanban-board/                # issues GitHub 3urega/fidelization
 ```

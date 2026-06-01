@@ -1,7 +1,7 @@
 import { Service } from "diod";
 
-import { Tenant } from "../../domain/Tenant";
 import { TenantMembershipRepository } from "../../../memberships/domain/TenantMembershipRepository";
+import { Tenant } from "../../domain/Tenant";
 
 @Service()
 export class TenantFinder {

@@ -1,7 +1,10 @@
 import { Service } from "diod";
 
 import { OwnerMembershipNotFound } from "../../domain/OwnerMembershipNotFound";
-import { OwnerMembership, TenantMembershipRepository } from "../../domain/TenantMembershipRepository";
+import {
+	OwnerMembership,
+	TenantMembershipRepository,
+} from "../../domain/TenantMembershipRepository";
 
 @Service()
 export class OwnerMembershipFinder {

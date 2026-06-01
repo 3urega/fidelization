@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { OwnerMembershipNotFound } from "../../contexts/tenants/memberships/domain/OwnerMembershipNotFound";
-import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { SessionClaims } from "./session";
 
 export function userToJson(user: {

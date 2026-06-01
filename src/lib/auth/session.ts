@@ -83,7 +83,7 @@ export function clearSessionCookie(): string {
 	return `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=lax`;
 }
 
-async function getSessionTokenFromRequest(request: Request): Promise<string | null> {
+function getSessionTokenFromRequest(request: Request): string | null {
 	const authHeader = request.headers.get("authorization");
 	if (authHeader?.startsWith("Bearer ")) {
 		return authHeader.slice(7);
@@ -100,7 +100,7 @@ async function getSessionTokenFromRequest(request: Request): Promise<string | nu
 }
 
 export async function getAuthenticatedSession(request: Request): Promise<SessionClaims | null> {
-	const token = await getSessionTokenFromRequest(request);
+	const token = getSessionTokenFromRequest(request);
 
 	if (!token) {
 		return null;

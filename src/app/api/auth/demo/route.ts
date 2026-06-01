@@ -4,9 +4,9 @@ import { NextResponse } from "next/server";
 
 import { UserAuthenticator } from "../../../../contexts/identity/users/application/authenticate/UserAuthenticator";
 import { InvalidCredentials } from "../../../../contexts/identity/users/domain/InvalidCredentials";
+import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { OwnerMembershipFinder } from "../../../../contexts/tenants/memberships/application/find/OwnerMembershipFinder";
 import { OwnerMembershipNotFound } from "../../../../contexts/tenants/memberships/domain/OwnerMembershipNotFound";
-import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { authResponseToJson, handleAuthDomainError } from "../../../../lib/auth/http";
 import { createSessionToken, jsonWithSessionCookie } from "../../../../lib/auth/session";
 
@@ -24,10 +24,7 @@ export async function POST(): Promise<Response> {
 
 		return jsonWithSessionCookie(authResponseToJson(user, membership.tenant, session), token);
 	} catch (error) {
-		if (
-			error instanceof InvalidCredentials ||
-			error instanceof OwnerMembershipNotFound
-		) {
+		if (error instanceof InvalidCredentials || error instanceof OwnerMembershipNotFound) {
 			const response = handleAuthDomainError(error);
 
 			if (response) {

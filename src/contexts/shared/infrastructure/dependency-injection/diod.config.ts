@@ -17,6 +17,9 @@ import { PrismaUserRepository } from "../../../identity/users/infrastructure/Pri
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
 import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
 import { PrismaTenantMembershipRepository } from "../../../tenants/memberships/infrastructure/PrismaTenantMembershipRepository";
+import { OwnerRegistrar } from "../../../tenants/owners/application/register/OwnerRegistrar";
+import { OwnerOnboardingRepository } from "../../../tenants/owners/domain/OwnerOnboardingRepository";
+import { PrismaOwnerOnboardingRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerOnboardingRepository";
 import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
 import { PostgresConnection } from "../postgres/PostgresConnection";
 
@@ -43,7 +46,11 @@ builder.registerAndUse(PrismaUserRepository);
 builder.register(TenantMembershipRepository).use(PrismaTenantMembershipRepository);
 builder.registerAndUse(PrismaTenantMembershipRepository);
 
+builder.register(OwnerOnboardingRepository).use(PrismaOwnerOnboardingRepository);
+builder.registerAndUse(PrismaOwnerOnboardingRepository);
+
 builder.registerAndUse(UserRegistrar);
+builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(UserProfileUpdater);

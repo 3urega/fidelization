@@ -2,10 +2,7 @@ import { Service } from "diod";
 
 import { prisma } from "../../../../lib/prisma";
 import { Tenant } from "../../tenants/domain/Tenant";
-import {
-	OwnerMembership,
-	TenantMembershipRepository,
-} from "../domain/TenantMembershipRepository";
+import { OwnerMembership, TenantMembershipRepository } from "../domain/TenantMembershipRepository";
 import { TenantRole } from "../domain/TenantRole";
 
 @Service()

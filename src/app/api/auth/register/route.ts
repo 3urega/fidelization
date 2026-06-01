@@ -2,92 +2,62 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { UserFinder } from "../../../contexts/identity/users/application/find/UserFinder";
-import { UserProfileUpdater } from "../../../contexts/identity/users/application/update_profile/UserProfileUpdater";
-import { UserDoesNotExist } from "../../../contexts/identity/users/domain/UserDoesNotExist";
-import { TenantFinder } from "../../../contexts/tenants/tenants/application/find/TenantFinder";
-import { container } from "../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { handleAuthDomainError, tenantToJson, userToJson } from "../../../lib/auth/http";
-import { getAuthenticatedSession } from "../../../lib/auth/session";
+import { EmailAlreadyRegistered } from "../../../../contexts/identity/users/domain/EmailAlreadyRegistered";
+import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { OwnerRegistrar } from "../../../../contexts/tenants/owners/application/register/OwnerRegistrar";
+import { RegisterOwnerResult } from "../../../../contexts/tenants/owners/domain/OwnerOnboardingRepository";
+import { authResponseToJson, handleAuthDomainError } from "../../../../lib/auth/http";
+import { createSessionToken, jsonWithSessionCookie } from "../../../../lib/auth/session";
 
-export const dynamic = "force-dynamic";
-
-export async function GET(request: Request): Promise<Response> {
-	const session = await getAuthenticatedSession(request);
-	if (!session) {
-		return NextResponse.json({ error: { description: "Unauthorized" } }, { status: 401 });
-	}
-
-	try {
-		const user = await container.get(UserFinder).find(session.userId);
-		const tenant = await container.get(TenantFinder).find(session.tenantId);
-
-		if (!tenant) {
-			return NextResponse.json({ error: { description: "Tenant not found" } }, { status: 404 });
-		}
-
-		return NextResponse.json({
-			user: userToJson(user),
-			tenant: tenantToJson(tenant),
-			role: session.role,
-		});
-	} catch (error) {
-		if (error instanceof UserDoesNotExist) {
-			const response = handleAuthDomainError(error);
-			if (response) {
-				return response;
-			}
-		}
-
-		throw error;
-	}
-}
-
-type PatchBody = {
-	name?: string;
+type Body = {
+	name: string;
+	email: string;
+	password: string;
+	businessName: string;
 	profilePicture?: string;
 };
 
-export async function PATCH(request: Request): Promise<Response> {
-	const session = await getAuthenticatedSession(request);
-	if (!session) {
-		return NextResponse.json({ error: { description: "Unauthorized" } }, { status: 401 });
-	}
-
-	const body = (await request.json()) as PatchBody;
-	if (body.name === undefined && body.profilePicture === undefined) {
-		return NextResponse.json(
-			{ error: { description: "name or profilePicture required" } },
-			{ status: 400 },
-		);
-	}
-
+export async function POST(request: Request): Promise<Response> {
 	try {
-		const finder = container.get(UserFinder);
-		const current = await finder.find(session.userId);
-		const updater = container.get(UserProfileUpdater);
-		const user = await updater.update({
-			userId: session.userId,
-			name: body.name ?? current.name.value,
-			profilePicture: body.profilePicture ?? current.profilePicture.value,
-		});
-		const tenant = await container.get(TenantFinder).find(session.tenantId);
-
-		if (!tenant) {
-			return NextResponse.json({ error: { description: "Tenant not found" } }, { status: 404 });
+		const body = (await request.json()) as Body;
+		if (!body.name || !body.email || !body.password || !body.businessName) {
+			return NextResponse.json(
+				{ error: { description: "name, email, password and businessName are required" } },
+				{ status: 400 },
+			);
 		}
 
-		return NextResponse.json({
-			user: userToJson(user),
-			tenant: tenantToJson(tenant),
-			role: session.role,
+		const result: RegisterOwnerResult = await container.get(OwnerRegistrar).register({
+			name: body.name,
+			email: body.email,
+			password: body.password,
+			businessName: body.businessName,
+			profilePicture: body.profilePicture,
 		});
+
+		const session = {
+			userId: result.user.id.value,
+			tenantId: result.tenant.id,
+			role: result.role,
+		};
+		const token = await createSessionToken(session);
+
+		return jsonWithSessionCookie(
+			authResponseToJson(result.user, result.tenant, session),
+			token,
+			201,
+		);
 	} catch (error) {
-		if (error instanceof UserDoesNotExist) {
+		if (error instanceof EmailAlreadyRegistered) {
 			const response = handleAuthDomainError(error);
+
 			if (response) {
 				return response;
 			}
+		}
+
+		if (error instanceof Error && error.message.includes("AUTH_SECRET")) {
+			return NextResponse.json({ error: { description: error.message } }, { status: 500 });
 		}
 
 		throw error;

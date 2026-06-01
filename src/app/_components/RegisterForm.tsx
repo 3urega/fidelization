@@ -7,6 +7,7 @@ import { useState } from "react";
 export function RegisterForm(): React.ReactElement {
 	const router = useRouter();
 	const [name, setName] = useState("");
+	const [businessName, setBusinessName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export function RegisterForm(): React.ReactElement {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
-			body: JSON.stringify({ name, email, password }),
+			body: JSON.stringify({ name, businessName, email, password }),
 		});
 		setLoading(false);
 		if (!res.ok) {
@@ -40,10 +41,19 @@ export function RegisterForm(): React.ReactElement {
 			style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
 		>
 			<label>
-				Nombre
+				Tu nombre
 				<input
 					value={name}
 					onChange={(e) => setName(e.target.value)}
+					required
+					style={{ display: "block", width: "100%", padding: "0.5rem" }}
+				/>
+			</label>
+			<label>
+				Nombre del negocio
+				<input
+					value={businessName}
+					onChange={(e) => setBusinessName(e.target.value)}
 					required
 					style={{ display: "block", width: "100%", padding: "0.5rem" }}
 				/>
