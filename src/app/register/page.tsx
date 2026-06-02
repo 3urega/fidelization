@@ -1,10 +1,13 @@
 import { RegisterForm } from "../_components/RegisterForm";
+import { AppShell } from "../_components/ui/AppShell";
 
 export default function RegisterPage(): React.ReactElement {
 	return (
-		<main style={{ maxWidth: "24rem", margin: "2rem auto", padding: "0 1rem" }}>
-			<h1>Registro</h1>
+		<AppShell
+			title="Crear cuenta"
+			description="Registra tu negocio y empieza a fidelizar clientes en minutos."
+		>
 			<RegisterForm />
-		</main>
+		</AppShell>
 	);
 }

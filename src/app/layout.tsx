@@ -3,13 +3,14 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import { StarterNav } from "./_components/StarterNav";
+import { AppNav } from "./_components/AppNav";
+import { ThemeProvider } from "./_components/theme/ThemeProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-	title: "Next.js + Capacitor Starter",
-	description: "Starter point: DDD, identity, billing, Android shell",
+	title: "Fidelización",
+	description: "Plataforma SaaS de fidelización para cafés y hostelería",
 };
 
 export default function RootLayout({
@@ -18,10 +19,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }): React.ReactElement {
 	return (
-		<html lang="es">
-			<body className={inter.className}>
-				<StarterNav />
-				{children}
+		<html lang="es" className={inter.variable}>
+			<body className="min-h-screen font-sans antialiased">
+				<ThemeProvider>
+					<AppNav />
+					{children}
+				</ThemeProvider>
 			</body>
 		</html>
 	);

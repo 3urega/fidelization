@@ -1,11 +1,15 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { getSessionCookieFromHeader, verifySessionTokenEdge } from "./lib/auth/middlewareSession";
+
 const allowedOrigins = new Set([
 	"capacitor://localhost",
 	"ionic://localhost",
 	"http://localhost:3000",
 	"http://127.0.0.1:3000",
+	"http://localhost:3001",
+	"http://127.0.0.1:3001",
 ]);
 
 function corsHeaders(origin: string | null): HeadersInit {
@@ -20,8 +24,33 @@ function corsHeaders(origin: string | null): HeadersInit {
 	};
 }
 
-export function middleware(request: NextRequest): NextResponse {
-	if (!request.nextUrl.pathname.startsWith("/api/")) {
+async function getSession(request: NextRequest): Promise<boolean> {
+	const token = getSessionCookieFromHeader(request.headers.get("cookie"));
+	if (!token) {
+		return false;
+	}
+
+	const session = await verifySessionTokenEdge(token);
+
+	return session !== null;
+}
+
+export async function middleware(request: NextRequest): Promise<NextResponse> {
+	const { pathname } = request.nextUrl;
+
+	if (pathname === "/home") {
+		if (!(await getSession(request))) {
+			return NextResponse.redirect(new URL("/login", request.url));
+		}
+	}
+
+	if (pathname === "/login" || pathname === "/register" || pathname === "/") {
+		if (await getSession(request)) {
+			return NextResponse.redirect(new URL("/home", request.url));
+		}
+	}
+
+	if (!pathname.startsWith("/api/")) {
 		return NextResponse.next();
 	}
 
@@ -42,5 +71,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-	matcher: "/api/:path*",
+	matcher: ["/", "/home", "/login", "/register", "/api/:path*"],
 };

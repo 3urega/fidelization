@@ -2,10 +2,23 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 
-export function RegisterForm(): React.ReactElement {
+import { useTheme } from "./theme/ThemeProvider";
+import { Button } from "./ui/Button";
+import { Field } from "./ui/Field";
+import { Input } from "./ui/Input";
+
+type AuthResponse = {
+	tenant: {
+		primaryColor: string;
+		secondaryColor: string;
+	};
+};
+
+export function RegisterForm(): ReactElement {
 	const router = useRouter();
+	const { applyTheme } = useTheme();
 	const [name, setName] = useState("");
 	const [businessName, setBusinessName] = useState("");
 	const [email, setEmail] = useState("");
@@ -17,74 +30,77 @@ export function RegisterForm(): React.ReactElement {
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
-		const res = await fetch("/api/auth/register", {
+
+		const response = await fetch("/api/auth/register", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
 			body: JSON.stringify({ name, businessName, email, password }),
 		});
+
 		setLoading(false);
-		if (!res.ok) {
-			const data = (await res.json()) as { error?: { description?: string } };
+
+		if (!response.ok) {
+			const data = (await response.json()) as { error?: { description?: string } };
 			setError(data.error?.description ?? "Error al registrarse");
 
 			return;
 		}
-		router.push("/profile");
+
+		const data = (await response.json()) as AuthResponse;
+		applyTheme({
+			primaryColor: data.tenant.primaryColor,
+			secondaryColor: data.tenant.secondaryColor,
+		});
+		router.push("/home");
 	}
 
 	return (
-		<form
-			onSubmit={(e) => {
-				void submit(e);
-			}}
-			style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-		>
-			<label>
-				Tu nombre
-				<input
+		<form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
+			<Field label="Tu nombre">
+				<Input
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					required
-					style={{ display: "block", width: "100%", padding: "0.5rem" }}
+					autoComplete="name"
 				/>
-			</label>
-			<label>
-				Nombre del negocio
-				<input
+			</Field>
+			<Field label="Nombre del negocio">
+				<Input
 					value={businessName}
 					onChange={(e) => setBusinessName(e.target.value)}
 					required
-					style={{ display: "block", width: "100%", padding: "0.5rem" }}
+					autoComplete="organization"
 				/>
-			</label>
-			<label>
-				Email
-				<input
+			</Field>
+			<Field label="Email">
+				<Input
 					type="email"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					style={{ display: "block", width: "100%", padding: "0.5rem" }}
+					autoComplete="email"
 				/>
-			</label>
-			<label>
-				Contraseña
-				<input
+			</Field>
+			<Field label="Contraseña">
+				<Input
 					type="password"
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 					required
 					minLength={8}
-					style={{ display: "block", width: "100%", padding: "0.5rem" }}
+					autoComplete="new-password"
 				/>
-			</label>
-			{error ? <p style={{ color: "crimson" }}>{error}</p> : null}
-			<button type="submit" disabled={loading}>
-				{loading ? "..." : "Crear cuenta"}
-			</button>
-			<p>
-				¿Ya tienes cuenta? <Link href="/login">Login</Link>
+			</Field>
+			{error ? <p className="text-sm text-error">{error}</p> : null}
+			<Button type="submit" disabled={loading} className="w-full">
+				{loading ? "Creando cuenta..." : "Crear cuenta"}
+			</Button>
+			<p className="text-center text-sm text-muted">
+				¿Ya tienes cuenta?{" "}
+				<Link href="/login" className="text-primary underline-offset-2 hover:underline">
+					Inicia sesión
+				</Link>
 			</p>
 		</form>
 	);

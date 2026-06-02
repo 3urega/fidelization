@@ -1,10 +1,13 @@
 import { LoginForm } from "../_components/LoginForm";
+import { AppShell } from "../_components/ui/AppShell";
 
 export default function LoginPage(): React.ReactElement {
 	return (
-		<main style={{ maxWidth: "24rem", margin: "2rem auto", padding: "0 1rem" }}>
-			<h1>Login</h1>
+		<AppShell
+			title="Iniciar sesión"
+			description="Accede al panel de tu negocio para gestionar la fidelización de clientes."
+		>
 			<LoginForm />
-		</main>
+		</AppShell>
 	);
 }
