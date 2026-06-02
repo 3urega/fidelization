@@ -37,7 +37,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | `(public)` | `/` | `PublicNav` — marketing |
 | `(auth)` | `/login`, `/register` | `AuthNav` — sin shell de app |
 | `(app)` | `/home`, `/profile` | `TenantAdminShell` (sidebar + top bar, branding vía `TenantSessionProvider`) — sesión tenant requerida (middleware) |
-| `(platform)` | `/platform`, `/platform/login` | `PlatformNav` — sesión `kind: platform` (apex only) |
+| `(platform)` | `/platform`, `/platform/login` | `PlatformAdminShell` (sidebar + top bar) — sesión `kind: platform` (apex only) |
 
 ### Three application contexts
 

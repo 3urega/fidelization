@@ -48,8 +48,10 @@ async function main(): Promise<void> {
 
 	console.log(`✅ GET /api/platform/tenants (${listBody.tenants.length} rows)`);
 
-	const target =
-		listBody.tenants.find((t) => t.slug === "cafe-demo") ?? listBody.tenants[0];
+	const ownerTenantSlug = process.env.OWNER_VERIFY_TENANT_SLUG?.trim() ?? "la-chismosa";
+	const target = ownerEmail
+		? (listBody.tenants.find((t) => t.slug === ownerTenantSlug) ?? listBody.tenants[0])
+		: (listBody.tenants.find((t) => t.slug === "cafe-demo") ?? listBody.tenants[0]);
 	const originalStatus = target.status;
 	const toggleTo = originalStatus === "active" ? "suspended" : "active";
 

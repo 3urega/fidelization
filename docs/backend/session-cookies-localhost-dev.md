@@ -38,6 +38,10 @@ The login response may be 200, but the browser drops the cookie; `/platform` or 
 | Superadmin | `http://localhost:3000/platform/login` | `POST /api/platform/auth/login` |
 | Owner / staff | `http://localhost:3000/login` or `http://{slug}.localhost:3000/login` | `POST /api/auth/login` |
 
+### ✅ Good: Owner session can open `/platform/login` to switch to superadmin
+
+The middleware must not redirect `/platform/login` to `/home` when only a tenant cookie exists; otherwise owners never reach the superadmin form.
+
 ### ❌ Bad: Superadmin on tenant `/login` or owner on `/platform/login`
 
 `POST /api/auth/login` with a platform superadmin account → **403** `PlatformUserCannotUseTenantLogin`.  
