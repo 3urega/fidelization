@@ -1,0 +1,227 @@
+# SaaS Architecture
+
+## Overview
+
+This system is a multi-tenant SaaS platform for customer loyalty, promotions, and engagement for local businesses (cafés, restaurants, etc.).
+
+The architecture is built around strict tenant isolation, feature-flag-driven functionality, and a centralized superadmin control layer.
+
+**How to read this document:** it describes the **target platform architecture** (roles, isolation, billing model, feature flags, subdomains). Product vision and MVP priorities are summarized in [`AGENTS.md`](../AGENTS.md) (section Product); domain rules in [`business-rules.md`](business-rules.md); commercial plans in [`business-model.md`](business-model.md). For what is **already in the repo**, see [Implementation status](#implementation-status-current-repo) below before planning new work.
+
+---
+
+## Implementation status (current repo)
+
+| Area in this doc | Target | Implemented now | Notes |
+|------------------|--------|-------------------|-------|
+| Multi-tenant model | Tenant per business, isolated data | **Partial** | Prisma: `Tenant`, `TenantMembership`, `User`; roles `owner` \| `employee` \| `customer` in [`prisma/schema.prisma`](../prisma/schema.prisma) |
+| Tenant context in requests | Every query scoped by tenant | **Partial** | JWT session: `tenantId` + `role` ([`src/lib/auth/session.ts`](../src/lib/auth/session.ts)); repos filter by membership — no RLS yet |
+| Business owner onboarding | — | **Yes** | `OwnerRegistrar` + `POST /api/auth/register` with `businessName`; demo seed |
+| Owner UI shell | — | **Yes** | `/home`, login/register, theme presets ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
+| Employee / customer flows | QR, purchases, app | **No** | Roles exist in schema only |
+| Superadmin | Platform-wide control | **No** | Not in schema, API, or UI |
+| Feature flags (global + tenant) | Plan-driven modules | **No** | `subscriptionPlan` string on tenant/user; no `features` map or enforcement |
+| Billing (this doc) | Stripe, subscription per tenant | **No** | Starter context `billing` = Google Play **per user** ([`src/contexts/billing/`](../src/contexts/billing/)), not tenant Stripe |
+| Subdomains per tenant | `tenant.app.com` | **No** | Single app origin; tenant resolved via session after login |
+| Branding | Per tenant | **Partial** | `primaryColor`, `secondaryColor`, `logoUrl` on tenant; runtime via `ThemeProvider` |
+| Postgres RLS | Recommended future | **No** | Prisma Postgres; isolation in application layer |
+
+**Active bounded contexts:** `identity`, `tenants`, `shared`, `billing` (Google Play demo). Legacy under `src/contexts/legacy/` is not wired in DI.
+
+**Conclusion:** the **direction** of this document matches the product vision in `AGENTS.md`, but most sections below are **specification**, not a description of running code. Do not assume superadmin, feature flags, Stripe tenant billing, or subdomains exist until corresponding issues are implemented.
+
+---
+
+# 1. System Roles
+
+## 1.1 Superadmin (Platform Owner)
+
+The highest level of access in the system.
+
+### Responsibilities:
+
+* Manage all tenants (create, suspend, delete)
+* Manage subscription plans
+* Enable/disable global modules (e.g. gamification engine)
+* Monitor platform-wide analytics
+* Control billing infrastructure
+* Manage feature availability at platform level
+
+### Important:
+
+Superadmin does NOT belong to any tenant.
+
+---
+
+## 1.2 Tenant (Business Account)
+
+Represents a single business (e.g. café, bakery, restaurant).
+
+Each tenant is fully isolated.
+
+### Tenant owns:
+
+* Branding configuration
+* Customers
+* Employees
+* Promotions
+* Loyalty programs
+* Feature flags (within plan limits)
+* Analytics data
+
+### Tenant lifecycle:
+
+**Target (this document):**
+
+* Created by Superadmin
+* Activates subscription plan
+* Configures features
+* Starts onboarding customers
+
+**Current (Fase 0):** tenant is created when a **business owner registers** (`businessName` → new `Tenant` + `TenantMembership` role `owner`). Superadmin-created tenants and feature configuration are not implemented yet.
+
+---
+
+## 1.3 Users (Within a Tenant)
+
+### Types:
+
+#### Business Owner / Admin
+
+* Full control over tenant configuration
+* Manages employees, promotions, rewards, analytics
+
+#### Employee
+
+* Limited operational access
+* Scans QR codes
+* Registers purchases
+* Redeems rewards
+
+#### End Customer
+
+* Uses mobile/web app
+* Has QR identity
+* Participates in loyalty programs
+* Receives promotions and rewards
+
+---
+
+# 2. Multi-Tenant Isolation Strategy
+
+Each tenant must have complete data separation.
+
+### Rules:
+
+* No cross-tenant data access
+* Every query must include tenant context
+* Tenant ID is required in all domain entities
+
+### Suggested approach:
+
+* Tenant ID in every table
+* Middleware-based tenant resolution
+* Future: Row Level Security (PostgreSQL recommended)
+
+---
+
+# 3. Feature Flag System
+
+Features are controlled at two levels:
+
+## 3.1 Global Feature Availability (Superadmin)
+
+Superadmin defines which features exist in the system:
+
+* loyalty
+* promotions
+* gamification
+* referrals
+* analytics
+* coupons
+
+---
+
+## 3.2 Tenant Feature Activation
+
+Each tenant can only enable features allowed by their plan.
+
+Example (target shape — **not** in the database yet):
+
+```ts
+tenant.features = {
+  loyalty: true,
+  promotions: true,
+  gamification: false,
+  referrals: true,
+  analytics: true,
+};
+```
+
+---
+
+# 4. Billing System
+
+Billing is subscription-based per tenant.
+
+## Key principles:
+
+* Each tenant has exactly one active plan
+* Plans define feature access
+* Billing is managed externally (**Stripe recommended** for tenant subscriptions in this architecture)
+
+> **Current repo:** user-level Google Play billing from the starter (`billing` context) is unrelated to per-tenant Stripe; replace or extend when implementing SaaS billing.
+
+---
+
+## Billing model:
+
+* Monthly recurring subscription
+* Optional yearly discount
+* Upgrade/downgrade supported
+
+---
+
+## Plan controls:
+
+* Feature availability
+* Usage limits (future)
+* Add-on modules
+
+---
+
+# 5. Subdomain Strategy
+
+Each tenant is accessible via subdomain:
+
+### Example:
+
+```
+tenant-a.app-domain.com
+```
+
+Future optional:
+
+```
+custom-domain.com (white-label)
+```
+
+---
+
+# 6. System Principles
+
+* Multi-tenant by design (not retrofitted)
+* Feature flags over hardcoded logic
+* Modular architecture
+* Mobile-first (Capacitor)
+* API-driven backend logic
+
+---
+
+# 7. Future Extensions
+
+* Row Level Security (PostgreSQL)
+* Event-driven architecture for loyalty actions
+* White-label tenant domains
+* Advanced segmentation engine
+* AI-driven promotions

@@ -27,7 +27,7 @@ SaaS de fidelización y retención de clientes para cafés y pequeños negocios 
 
 **Prioridades MVP (en orden):** multi-tenant → auth → perfiles de cliente → QR → sellos → puntos → recompensas → promociones → cupones → push → planes → analítica básica. Integraciones futuras (POS, wallets, CRM) no condicionan la arquitectura inicial.
 
-Especificación completa: [`docs/domain.md`](docs/domain.md).
+Documentación de producto y negocio: [`docs/saas-architecture.md`](docs/saas-architecture.md) (arquitectura, roles, MVP técnico), [`docs/business-model.md`](docs/business-model.md) (planes, ingresos), [`docs/business-rules.md`](docs/business-rules.md) (reglas de dominio). Resumen ejecutivo en la sección **Product** de este archivo.
 
 # Business Rules
 
@@ -43,7 +43,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 # Architecture
 
 - Next.js 14, Onion Architecture, DDD.
-- **Active contexts**: `identity` (users, auth), `billing` (Google Play), `shared` (infra, DI).
+- **Active contexts**: `identity` (users, auth), `tenants` (tenant, memberships, owner onboarding), `billing` (Google Play — starter, not tenant Stripe), `shared` (infra, DI).
 - **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
 
@@ -55,7 +55,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
 ```
 docs/
-├── domain.md                    # visión del producto, multi-tenant, fidelización, MVP
+├── saas-architecture.md         # arquitectura SaaS objetivo + estado implementado vs spec
+├── business-model.md            # planes comerciales, add-ons, ingresos + estado vs código
 ├── business-rules.md            # reglas de dominio: puntos, sellos, QR, planes
 ├── code-style.md
 ├── documentation-format.md
@@ -68,9 +69,23 @@ docs/
 │   ├── not-null-fields.md
 │   ├── table-naming-singular-plural-convention.md
 │   └── text-over-varchar-char-convention.md
+├── frontend/
+│   └── style-guidelines.md      # UI theme-driven, tokens, sin colores hardcodeados
 └── testing/
     ├── mock-objects.md
     └── object-mothers.md
+
+# Cuándo leer cada doc (no cargar todo)
+
+| Tarea | Leer primero |
+|-------|----------------|
+| Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/saas-architecture.md`, `docs/business-rules.md` |
+| Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/business-model.md` (sección *Implementation status*) |
+| Superadmin, tenant isolation, feature flags, billing SaaS, subdominios | `docs/saas-architecture.md` (sección *Implementation status*) |
+| Billing / Google Play / `UserPlan` FREE-PREMIUM (starter) | `src/contexts/billing/`, `UserPlan` — no confundir con planes tenant del business-model |
+| API routes, DI, hexagonal | `docs/backend/*` |
+| Prisma, tablas, migraciones | `docs/database/*`, `.agents/skills/prisma/` |
+| UI, theming, presets | `docs/frontend/style-guidelines.md`, `src/app/theme/tokens.css`, `src/app/_components/theme/` |
 
 .agents/skills/
 ├── prisma/                      # Prisma Postgres, migraciones, seed, src/lib/prisma.ts
