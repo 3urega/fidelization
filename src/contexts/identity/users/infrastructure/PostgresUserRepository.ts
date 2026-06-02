@@ -72,6 +72,10 @@ export class PostgresUserRepository extends PostgresRepository<User> implements 
 		`;
 	}
 
+	async isPlatformSuperadmin(_userId: string): Promise<boolean> {
+		return false;
+	}
+
 	protected toAggregate(row: DatabaseUserRow): User {
 		return User.fromPrimitives({
 			id: row.id,

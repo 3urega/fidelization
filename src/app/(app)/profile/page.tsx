@@ -1,10 +1,11 @@
 import { ProfilePanel } from "../../_components/ProfilePanel";
+import { PageHeader } from "../../_components/shell/PageHeader";
 
 export default function ProfilePage(): React.ReactElement {
 	return (
-		<main className="mx-auto w-full max-w-md px-4 py-8">
-			<h1 className="mb-6 text-2xl font-semibold text-foreground">Perfil</h1>
+		<>
+			<PageHeader title="Perfil" description="Tu cuenta y opciones de facturación demo" />
 			<ProfilePanel />
-		</main>
+		</>
 	);
 }

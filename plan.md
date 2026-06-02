@@ -142,3 +142,14 @@ app/
   superadmin/
   admin/
   app/ (customers)
+
+---
+
+## Nota de implementación (repo)
+
+La implementación **no** usa `users.tenant_id` ni un único `users.role` global. Usa:
+
+- `users.platform_role` = `superadmin` (mundo plataforma, sin membership)
+- `tenant_memberships.role` = `owner` | `employee` | `admin` | `customer` (mundo negocio)
+- JWT con `kind`: `platform` | `tenant` ([`src/lib/auth/session.ts`](src/lib/auth/session.ts))
+- Clientes finales: tabla `customers` (mundo loyalty), no el login de `/login`

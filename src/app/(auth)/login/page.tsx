@@ -1,6 +1,6 @@
+import { getResolvedTenantFromHeaders } from "../../../lib/tenant/getResolvedTenant";
 import { LoginForm } from "../../_components/LoginForm";
 import { AppShell } from "../../_components/ui/AppShell";
-import { getResolvedTenantFromHeaders } from "../../../lib/tenant/getResolvedTenant";
 
 export default function LoginPage(): React.ReactElement {
 	const hostTenant = getResolvedTenantFromHeaders();

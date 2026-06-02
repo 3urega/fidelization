@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
-import { SessionClaims } from "./session";
+import { TenantSessionClaims } from "./session";
 
 export function userToJson(user: {
 	id: { value: string };
@@ -38,12 +38,24 @@ export function tenantToJson(tenant: Tenant): Record<string, string> {
 export function authResponseToJson(
 	user: Parameters<typeof userToJson>[0],
 	tenant: Tenant,
-	session: SessionClaims,
+	session: TenantSessionClaims,
 ): Record<string, unknown> {
 	return {
 		user: userToJson(user),
 		tenant: tenantToJson(tenant),
 		role: session.role,
+		kind: session.kind,
+	};
+}
+
+export function platformAuthResponseToJson(
+	user: Parameters<typeof userToJson>[0],
+	session: { role: string; kind: string },
+): Record<string, unknown> {
+	return {
+		user: userToJson(user),
+		role: session.role,
+		kind: session.kind,
 	};
 }
 
@@ -68,6 +80,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "InvalidTenantSession") {
 		return HttpNextResponse.domainError(error, 401);
+	}
+	if (error.type === "PlatformAccessDenied") {
+		return HttpNextResponse.domainError(error, 401);
+	}
+	if (error.type === "PlatformUserCannotUseTenantLogin") {
+		return HttpNextResponse.domainError(error, 403);
 	}
 
 	return undefined;

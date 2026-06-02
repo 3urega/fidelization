@@ -11,7 +11,8 @@ export function AuthTenantBanner(): ReactElement | null {
 
 		return (
 			<p className="mb-4 text-center text-sm text-muted">
-				Accediendo a <span className="font-medium text-foreground">{branding?.name ?? tenant.slug}</span>
+				Accediendo a{" "}
+				<span className="font-medium text-foreground">{branding?.name ?? tenant.slug}</span>
 			</p>
 		);
 	}

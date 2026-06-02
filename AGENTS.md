@@ -8,6 +8,10 @@ npm run lint:fix
 npm run verify:saas-base   # issue #4 — route groups, tenant stub, env
 npm run verify:tenant-resolution   # issue #5 — extractSubdomain + mock slug map
 npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross-tenant session
+npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, PlatformAuthenticator
+npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
+npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
+npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
 
@@ -43,6 +47,12 @@ Reglas de dominio que deben respetarse en implementación y validaciones:
 
 Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
+# Local auth / tenants (dev)
+
+- **Owner/staff login:** `/login` en `http://localhost:3000` → `/home` en el mismo host (cookie host-only). Subdominio: `http://{slug}.localhost:3000/login` → `/home` en ese host. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
+- **Superadmin:** solo `http://localhost:3000/platform/login` (apex) — no usar `/login` ni subdominios de negocio.
+- **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
+
 # Architecture
 
 - Next.js 14, Onion Architecture, DDD.
@@ -71,6 +81,7 @@ docs/
 │   ├── api-routes-reflect-metadata.md
 │   ├── dependency-injection-diod.md
 │   ├── hexagonal-architecture.md
+│   ├── session-cookies-localhost-dev.md   # cookies sin Domain en localhost; rutas login dev
 │   └── thin-api-routes.md
 ├── database/
 │   ├── data-model.md            # esquema implementado (Fase 0) + entidades target + roadmap migraciones
@@ -91,6 +102,7 @@ docs/
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/business-model.md` (sección *Implementation status*) |
 | Superadmin, tenant isolation, feature flags, billing SaaS, subdominios | `docs/saas-architecture.md` (sección *Implementation status*) |
 | Resolución de tenant (subdominio, JWT `tenantId`, middleware, login) | `docs/teenant-resolution.md` (sección *Implementation status*) + `src/middleware.ts`, `src/lib/auth/session.ts` |
+| Login dev atascado / cookie / superadmin vs owner | `docs/backend/session-cookies-localhost-dev.md` + `npm run verify:platform-login` / `verify:owner-login` |
 | Billing / Google Play / `UserPlan` FREE-PREMIUM (starter) | `src/contexts/billing/`, `UserPlan` — no confundir con planes tenant del business-model |
 | API routes, DI, hexagonal | `docs/backend/*` |
 | Modelo de datos, nuevas tablas, `tenant_id`, membership | `docs/database/data-model.md` (§ Implemented) + `prisma/schema.prisma` + `docs/database/*` |

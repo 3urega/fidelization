@@ -2,6 +2,8 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 
+import { hashPassword } from "../src/lib/auth/password";
+
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -16,8 +18,30 @@ const DEMO_TENANT_ID = "00000000-0000-4000-8000-000000000002";
 const DEMO_MEMBERSHIP_ID = "00000000-0000-4000-8000-000000000003";
 const DEMO_PLAN_BASIC_ID = "00000000-0000-4000-8000-000000000004";
 const DEMO_CUSTOMER_ID = "00000000-0000-4000-8000-000000000005";
+const SUPERADMIN_USER_ID = "00000000-0000-4000-8000-000000000010";
 
 async function main(): Promise<void> {
+	const superadminEmail = (process.env.SUPERADMIN_EMAIL ?? "superadmin@platform.local").toLowerCase().trim();
+	const superadminPassword = process.env.SUPERADMIN_PASSWORD ?? "change-me-superadmin";
+	const superadminPasswordHash = await hashPassword(superadminPassword);
+
+	await prisma.user.upsert({
+		where: { id: SUPERADMIN_USER_ID },
+		update: {
+			email: superadminEmail,
+			platformRole: "superadmin",
+			passwordHash: superadminPasswordHash,
+		},
+		create: {
+			id: SUPERADMIN_USER_ID,
+			name: "Platform Superadmin",
+			email: superadminEmail,
+			profilePicture: "",
+			passwordHash: superadminPasswordHash,
+			subscriptionPlan: "FREE",
+			platformRole: "superadmin",
+		},
+	});
 	await prisma.user.upsert({
 		where: { id: DEMO_USER_ID },
 		update: {},
@@ -86,6 +110,7 @@ async function main(): Promise<void> {
 	});
 
 	console.log("Seed: demo owner + plan basic + customer QR (demo-qr-cafe-demo)");
+	console.log(`Seed: superadmin ${superadminEmail} (no tenant membership)`);
 }
 
 main()

@@ -2,9 +2,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getSessionCookieFromHeader, verifySessionTokenEdge } from "./lib/auth/middlewareSession";
+import { isPlatformSession, isTenantSession } from "./lib/auth/sessionClaims";
 import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
 import { forwardResolvedTenantHeaders } from "./lib/tenant/forwardResolvedTenantHeaders";
-import { resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
+import { getAppDomain, resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
 
 const allowedOrigins = new Set([
 	"capacitor://localhost",
@@ -44,45 +45,82 @@ function corsHeaders(origin: string | null): HeadersInit {
 	};
 }
 
-async function getSession(request: NextRequest): Promise<boolean> {
+async function getSession(request: NextRequest) {
 	const token = getSessionCookieFromHeader(request.headers.get("cookie"));
 	if (!token) {
-		return false;
+		return null;
 	}
 
-	const session = await verifySessionTokenEdge(token);
-
-	return session !== null;
+	return verifySessionTokenEdge(token);
 }
 
-function nextWithTenantContext(request: NextRequest, tenant: { slug: string; tenantId: string } | null): NextResponse {
+function nextWithTenantContext(
+	request: NextRequest,
+	tenant: { slug: string; tenantId: string } | null,
+): NextResponse {
 	const headers = forwardResolvedTenantHeaders(request, tenant);
 
-	return attachResolvedTenantHeaders(
-		NextResponse.next({ request: { headers } }),
-		tenant,
-	);
+	return attachResolvedTenantHeaders(NextResponse.next({ request: { headers } }), tenant);
+}
+
+function isPlatformPath(pathname: string): boolean {
+	return pathname === "/platform" || pathname.startsWith("/platform/");
 }
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const resolution = await resolveTenantFromRequest(request);
 
 	const { pathname } = request.nextUrl;
+	const resolvedTenant = resolution.status === "resolved" ? resolution.tenant : null;
+	const session = await getSession(request);
+	const hasPlatformSession = session !== null && isPlatformSession(session);
+	const hasTenantSession = session !== null && isTenantSession(session);
 
 	if (resolution.status === "not_found" && pathname !== "/tenant-not-found") {
 		return NextResponse.rewrite(new URL("/tenant-not-found", request.url), { status: 404 });
 	}
 
-	const resolvedTenant = resolution.status === "resolved" ? resolution.tenant : null;
+	if (resolvedTenant && isPlatformPath(pathname)) {
+		const appDomain = getAppDomain();
+		if (appDomain) {
+			const apex = new URL(request.url);
+			apex.hostname = appDomain;
+			if (pathname !== "/platform/login") {
+				apex.pathname = "/platform/login";
+			}
+
+			return NextResponse.redirect(apex);
+		}
+
+		return NextResponse.redirect(new URL("/login", request.url));
+	}
+
+	if (isPlatformPath(pathname)) {
+		if (hasTenantSession) {
+			return NextResponse.redirect(new URL("/home", request.url));
+		}
+
+		if (pathname === "/platform/login") {
+			if (hasPlatformSession) {
+				return NextResponse.redirect(new URL("/platform", request.url));
+			}
+		} else if (!hasPlatformSession) {
+			return NextResponse.redirect(new URL("/platform/login", request.url));
+		}
+	} else if (hasPlatformSession && (pathname === "/home" || pathname === "/profile")) {
+		return NextResponse.redirect(new URL("/platform", request.url));
+	} else if (hasPlatformSession && (pathname === "/login" || pathname === "/register")) {
+		return NextResponse.redirect(new URL("/platform", request.url));
+	}
 
 	if (pathname === "/home" || pathname === "/profile") {
-		if (!(await getSession(request))) {
+		if (!hasTenantSession) {
 			return NextResponse.redirect(new URL("/login", request.url));
 		}
 	}
 
 	if (pathname === "/login" || pathname === "/register" || pathname === "/") {
-		if (await getSession(request)) {
+		if (hasTenantSession) {
 			return NextResponse.redirect(new URL("/home", request.url));
 		}
 	}
@@ -108,5 +146,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-	matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+	matcher: [
+		"/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+	],
 };

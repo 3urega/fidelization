@@ -4,7 +4,10 @@
  * @example extractSubdomain("cafe-demo.localhost:3000", "localhost") → "cafe-demo"
  * @example extractSubdomain("localhost:3000", "localhost") → null
  */
-export function extractSubdomain(hostHeader: string | null, appDomain: string | undefined): string | null {
+export function extractSubdomain(
+	hostHeader: string | null,
+	appDomain: string | undefined,
+): string | null {
 	if (!appDomain || !hostHeader) {
 		return null;
 	}

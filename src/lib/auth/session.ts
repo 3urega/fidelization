@@ -3,26 +3,37 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { env } from "../env";
+import { parseSessionPayload, SESSION_COOKIE_NAME, type SessionClaims } from "./sessionClaims";
 
-const COOKIE_NAME = "session";
+export {
+	isPlatformSession,
+	isTenantSession,
+	parseSessionPayload,
+	type PlatformSessionClaims,
+	SESSION_COOKIE_NAME,
+	type SessionClaims,
+	type TenantSessionClaims,
+} from "./sessionClaims";
+
+const COOKIE_NAME = SESSION_COOKIE_NAME;
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
-
-export type SessionClaims = {
-	userId: string;
-	tenantId: string;
-	role: string;
-};
 
 function getSecret(): Uint8Array {
 	return new TextEncoder().encode(env.authSecret);
 }
 
 export async function createSessionToken(claims: SessionClaims): Promise<string> {
-	return new SignJWT({
-		sub: claims.userId,
-		tenantId: claims.tenantId,
-		role: claims.role,
-	})
+	const payload =
+		claims.kind === "platform"
+			? { kind: "platform" as const, sub: claims.userId, role: claims.role }
+			: {
+					kind: "tenant" as const,
+					sub: claims.userId,
+					tenantId: claims.tenantId,
+					role: claims.role,
+				};
+
+	return new SignJWT(payload)
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
 		.setExpirationTime(`${MAX_AGE_SECONDS}s`)
@@ -32,15 +43,8 @@ export async function createSessionToken(claims: SessionClaims): Promise<string>
 export async function verifySessionToken(token: string): Promise<SessionClaims | null> {
 	try {
 		const { payload } = await jwtVerify(token, getSecret());
-		const userId = payload.sub;
-		const tenantId = payload.tenantId;
-		const role = payload.role;
 
-		if (typeof userId !== "string" || typeof tenantId !== "string" || typeof role !== "string") {
-			return null;
-		}
-
-		return { userId, tenantId, role };
+		return parseSessionPayload(payload as Record<string, unknown>);
 	} catch {
 		return null;
 	}
@@ -131,7 +135,8 @@ export async function getAuthenticatedUserId(request: Request): Promise<string |
 }
 
 export function jsonWithSessionCookie<T>(body: T, token: string, status = 200): NextResponse {
-	setSessionCookie(token);
+	const response = NextResponse.json(body, { status });
+	response.headers.append("Set-Cookie", buildSessionCookie(token));
 
-	return NextResponse.json(body, { status });
+	return response;
 }

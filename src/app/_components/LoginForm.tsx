@@ -9,11 +9,14 @@ import { Button } from "./ui/Button";
 import { Field } from "./ui/Field";
 import { Input } from "./ui/Input";
 
+type TenantAuthPayload = {
+	slug: string;
+	primaryColor: string;
+	secondaryColor: string;
+};
+
 type AuthResponse = {
-	tenant: {
-		primaryColor: string;
-		secondaryColor: string;
-	};
+	tenant: TenantAuthPayload;
 };
 
 type LoginFormProps = {
@@ -28,23 +31,39 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
-	async function handleAuthResponse(response: Response): Promise<boolean> {
-		if (!response.ok) {
-			const data = (await response.json()) as {
-				error?: { description?: string; type?: string };
-			};
-			setError(data.error?.description ?? "Error al iniciar sesión");
+	async function handleAuthResponse(response: Response): Promise<TenantAuthPayload | null> {
+		let data: { error?: { description?: string; type?: string }; tenant?: TenantAuthPayload };
+		try {
+			data = (await response.json()) as typeof data;
+		} catch {
+			setError("Respuesta inválida del servidor");
 
-			return false;
+			return null;
 		}
 
-		const data = (await response.json()) as AuthResponse;
+		if (!response.ok) {
+			const description = data.error?.description ?? `Error al iniciar sesión (${response.status})`;
+			setError(
+				data.error?.type === "PlatformUserCannotUseTenantLogin"
+					? `${description} (ruta: /platform/login en el host apex, p. ej. localhost)`
+					: description,
+			);
+
+			return null;
+		}
+
+		if (!data.tenant) {
+			setError("Respuesta sin datos del negocio");
+
+			return null;
+		}
+
 		applyTheme({
 			primaryColor: data.tenant.primaryColor,
 			secondaryColor: data.tenant.secondaryColor,
 		});
 
-		return true;
+		return data.tenant;
 	}
 
 	async function submit(e: React.FormEvent): Promise<void> {
@@ -52,17 +71,22 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 		setLoading(true);
 		setError(null);
 
-		const response = await fetch("/api/auth/login", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ email, password }),
-		});
+		try {
+			const response = await fetch("/api/auth/login", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ email, password }),
+			});
 
-		setLoading(false);
-
-		if (await handleAuthResponse(response)) {
-			navigateAfterAuth();
+			const tenant = await handleAuthResponse(response);
+			if (tenant) {
+				navigateAfterAuth(tenant);
+			}
+		} catch {
+			setError("No se pudo conectar con el servidor");
+		} finally {
+			setLoading(false);
 		}
 	}
 
@@ -70,17 +94,41 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 		setLoading(true);
 		setError(null);
 
-		const response = await fetch("/api/auth/demo", { method: "POST", credentials: "include" });
-
-		setLoading(false);
-
-		if (await handleAuthResponse(response)) {
-			navigateAfterAuth();
+		try {
+			const response = await fetch("/api/auth/demo", { method: "POST", credentials: "include" });
+			const tenant = await handleAuthResponse(response);
+			if (tenant) {
+				navigateAfterAuth(tenant);
+			}
+		} catch {
+			setError("No se pudo conectar con el servidor");
+		} finally {
+			setLoading(false);
 		}
 	}
 
-	function navigateAfterAuth(): void {
-		// Full navigation so middleware receives the new httpOnly session cookie.
+	function isApexDevHost(hostname: string): boolean {
+		return hostname === "localhost" || hostname === "127.0.0.1";
+	}
+
+	function navigateAfterAuth(tenant: TenantAuthPayload): void {
+		const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN?.trim();
+		const { protocol, port, hostname } = window.location;
+
+		// Cookies are host-only on localhost; redirecting apex → subdomain drops the session.
+		if (appDomain && tenant.slug && !isApexDevHost(hostname)) {
+			const tenantHost = port
+				? `${tenant.slug}.${appDomain}:${port}`
+				: `${tenant.slug}.${appDomain}`;
+			const alreadyOnTenantHost = hostname === `${tenant.slug}.${appDomain}`;
+
+			if (!alreadyOnTenantHost) {
+				window.location.assign(`${protocol}//${tenantHost}/home`);
+
+				return;
+			}
+		}
+
 		window.location.assign("/home");
 	}
 
@@ -88,8 +136,9 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 		<form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
 			{hostTenantMissing ? (
 				<p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-muted">
-					Usa la URL de tu negocio (por ejemplo <code className="text-xs">cafe-demo.localhost</code>) para
-					iniciar sesión en ese local.
+					Tras iniciar sesión en localhost serás redirigido al subdominio de tu negocio si{" "}
+					<code className="text-xs">NEXT_PUBLIC_APP_DOMAIN</code> está configurado. También puedes
+					abrir directamente <code className="text-xs">tu-slug.localhost</code>/login.
 				</p>
 			) : null}
 			<Field label="Email">

@@ -36,6 +36,7 @@ export async function POST(request: Request): Promise<Response> {
 		});
 
 		const session = {
+			kind: "tenant" as const,
 			userId: result.user.id.value,
 			tenantId: result.tenant.id,
 			role: result.role,

@@ -6,9 +6,13 @@ const STAFF = new Set(["owner", "employee", "admin"]);
 
 async function main(): Promise<void> {
 	const users = await prisma.user.findMany({
+		orderBy: { email: "asc" },
 		select: {
 			id: true,
+			name: true,
 			email: true,
+			platformRole: true,
+			subscriptionPlan: true,
 			memberships: {
 				select: { role: true, tenant: { select: { slug: true, name: true } } },
 			},
@@ -32,11 +36,20 @@ async function main(): Promise<void> {
 		);
 	}
 
-	console.log("\nDetalle:");
+	console.log("\nDetalle (roles):");
 	for (const u of users) {
-		console.log(
-			`  ${u.email}: ${u.memberships.map((m) => `${m.role} → ${m.tenant.slug} (${m.tenant.name})`).join("; ") || "(ninguno)"}`,
-		);
+		const platform = u.platformRole ? `platform:${u.platformRole}` : null;
+		const tenantRoles =
+			u.memberships.map((m) => `tenant:${m.role}@${m.tenant.slug}`).join("; ") || null;
+		const roles = [platform, tenantRoles].filter(Boolean).join(" | ") || "(sin rol)";
+		console.log(`  ${u.email} (${u.name})`);
+		console.log(`    id: ${u.id}`);
+		console.log(`    roles: ${roles}`);
+		if (u.memberships.length > 0) {
+			for (const m of u.memberships) {
+				console.log(`      → ${m.tenant.name} (${m.tenant.slug}): ${m.role}`);
+			}
+		}
 	}
 }
 

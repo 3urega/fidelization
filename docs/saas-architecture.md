@@ -18,9 +18,9 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Tenant context in requests | Every query scoped by tenant | **Partial** | JWT session: `tenantId` + `role` ([`src/lib/auth/session.ts`](../src/lib/auth/session.ts)); repos filter by `tenant_id`; middleware stub [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) (no-op until subdomain) |
 | Next.js App Router base (issue #4) | Route groups + layouts + env | **Yes** | [`(public)`](../src/app/(public)/), [`(auth)`](../src/app/(auth)/), [`(app)`](../src/app/(app)/); [`src/lib/env.ts`](../src/lib/env.ts) |
 | Business owner onboarding | — | **Yes** | `OwnerRegistrar` + `POST /api/auth/register` with `businessName`; demo seed |
-| Owner UI shell | — | **Yes** | `/home`, `/profile`, login/register, theme presets ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
+| Owner UI shell | Sidebar + top bar + tenant branding | **Yes** | [`TenantAdminShell`](../src/app/_components/shell/TenantAdminShell.tsx), [`TenantSessionProvider`](../src/app/_components/shell/TenantSessionProvider.tsx), `/home`, `/profile`; auth card [`AppShell`](../src/app/_components/ui/AppShell.tsx); theme tokens ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
 | Employee / customer flows | QR, purchases, app | **No** | DB + Prisma repos exist; no UI/API flows yet |
-| Superadmin | Platform-wide control | **No** | Not in schema, API, or UI |
+| Superadmin | Platform-wide control | **Partial** | `users.platform_role`, seed `SUPERADMIN_*`, `/platform/login`, JWT `kind: platform`, `POST /api/platform/auth/login` |
 | Feature flags (global + tenant) | Plan-driven modules | **Partial** | `tenants.features` JSON migrated; no runtime enforcement |
 | Billing (this doc) | Stripe, subscription per tenant | **Partial** | `subscription_plans` / `subscriptions` migrated; starter Google Play **per user** still in [`src/contexts/billing/`](../src/contexts/billing/) |
 | Subdomains per tenant | `tenant.app.com` | **Partial (mock)** | `APP_DOMAIN` + middleware; see [`teenant-resolution.md`](teenant-resolution.md) |
@@ -35,9 +35,18 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 |-------|--------|--------|
 | `(public)` | `/` | `PublicNav` — marketing |
 | `(auth)` | `/login`, `/register` | `AuthNav` — sin shell de app |
-| `(app)` | `/home`, `/profile` | `AppNav` — sesión requerida (middleware) |
+| `(app)` | `/home`, `/profile` | `TenantAdminShell` (sidebar + top bar, branding vía `TenantSessionProvider`) — sesión tenant requerida (middleware) |
+| `(platform)` | `/platform`, `/platform/login` | `PlatformNav` — sesión `kind: platform` (apex only) |
 
-**Conclusion:** platform **foundation** (issue #4) and Fase 0 auth are in place. Superadmin, subdomain tenant resolution, feature-flag enforcement, and Stripe tenant billing remain specification.
+### Three application contexts
+
+| Context | Who | Login | JWT `kind` | Tenant in session |
+|---------|-----|-------|------------|-------------------|
+| Platform | Superadmin (`users.platform_role`) | `/platform/login` (apex) | `platform` | No |
+| Tenant staff | Owner / employee / admin (`tenant_memberships`) | `/login` (subdomain or apex) | `tenant` | Yes |
+| End customer | `customers` table (future) | QR / app loyalty (not `/login`) | TBD | Yes |
+
+**Conclusion:** platform **foundation** (issue #4), Fase 0 tenant auth, and **superadmin shell** are in place. Feature-flag enforcement, tenant CRUD from platform UI, customer QR auth, and Stripe tenant billing remain follow-ups.
 
 ---
 

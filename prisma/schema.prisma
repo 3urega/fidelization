@@ -7,6 +7,10 @@ datasource db {
   provider = "postgresql"
 }
 
+enum PlatformRole {
+  superadmin
+}
+
 enum MembershipRole {
   owner
   employee
@@ -58,6 +62,7 @@ model User {
   profilePicture   String             @default("") @map("profile_picture")
   passwordHash     String             @map("password_hash")
   subscriptionPlan String             @default("FREE") @map("subscription_plan")
+  platformRole     PlatformRole?      @map("platform_role")
   createdAt        DateTime           @default(now()) @map("created_at")
   memberships      TenantMembership[]
   loyaltyTransactionsCreated LoyaltyTransaction[] @relation("LoyaltyTransactionCreatedBy")

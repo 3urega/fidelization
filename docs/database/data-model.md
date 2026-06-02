@@ -26,7 +26,7 @@ The system is built around strict tenant isolation and (target) event-driven loy
 | `rewards`, `stamp_campaigns`, `customer_stamp_progress` | **Yes** | § 2.6–2.7 |
 | `promotions`, `coupons`, `notifications` | **Yes** | § 2.8–2.10 |
 | `subscription_plans`, `subscriptions`, tenant `status` / `features` / FK | **Yes** | § 2.1, billing |
-| Superadmin tables | **No** | Future |
+| Superadmin (`users.platform_role`) | **Yes** | `PlatformRole.superadmin` on `users`; no `tenant_memberships` row |
 
 **Migrations (loyalty target):** `20260602120000_loyalty_customers` … `20260602120600_tenant_billing` (ver [`prisma/migrations/`](../../prisma/migrations/)).
 
@@ -96,6 +96,7 @@ Platform identity. **No `tenant_id`** — tenant scope via `tenant_memberships`.
 | `profile_picture` | text | Default `''` |
 | `password_hash` | text | |
 | `subscription_plan` | text | Starter: `FREE` \| `PREMIUM` ([`UserPlan`](../../src/contexts/identity/users/domain/UserPlan.ts)) — **not** tenant Basic/Pro/Premium |
+| `platform_role` | enum | Optional: `superadmin` — platform operator, **not** tenant `MembershipRole.admin` |
 | `created_at` | timestamp | |
 
 ### Table `tenant_memberships` (`tenant_memberships`)
@@ -122,7 +123,7 @@ Platform identity. **No `tenant_id`** — tenant scope via `tenant_memberships`.
 | `owner` | Used (registration, demo seed) |
 | `employee` | In schema; no operational flows yet |
 | `customer` | In schema; reserved — see [Customer (target)](#23-customer-target) vs app login for end users |
-| `admin` | **Not in schema** — future tenant-level admin if needed |
+| `admin` | Tenant-level staff (panel); **not** platform superadmin (`users.platform_role`) |
 
 ---
 

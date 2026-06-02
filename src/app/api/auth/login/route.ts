@@ -3,9 +3,10 @@ import "reflect-metadata";
 import { NextResponse } from "next/server";
 
 import { InvalidCredentials } from "../../../../contexts/identity/users/domain/InvalidCredentials";
+import { PlatformUserCannotUseTenantLogin } from "../../../../contexts/platform/domain/PlatformUserCannotUseTenantLogin";
+import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { TenantStaffLogin } from "../../../../contexts/tenants/memberships/application/authenticate/TenantStaffLogin";
 import { StaffMembershipNotFound } from "../../../../contexts/tenants/memberships/domain/StaffMembershipNotFound";
-import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { authResponseToJson, handleAuthDomainError } from "../../../../lib/auth/http";
 import { createSessionToken, jsonWithSessionCookie } from "../../../../lib/auth/session";
 import { getResolvedTenantFromRequest } from "../../../../lib/tenant/getResolvedTenant";
@@ -26,22 +27,28 @@ export async function POST(request: Request): Promise<Response> {
 		}
 
 		const hostTenant = getResolvedTenantFromRequest(request);
-		const result = await container.get(TenantStaffLogin).loginWithPassword(
-			body.email,
-			body.password,
-			hostTenant?.tenantId ?? null,
-		);
+		const result = await container
+			.get(TenantStaffLogin)
+			.loginWithPassword(body.email, body.password, hostTenant?.tenantId ?? null);
 
 		const session = {
+			kind: "tenant" as const,
 			userId: result.user.id.value,
 			tenantId: result.membership.tenant.id,
 			role: result.membership.role,
 		};
 		const token = await createSessionToken(session);
 
-		return jsonWithSessionCookie(authResponseToJson(result.user, result.membership.tenant, session), token);
+		return jsonWithSessionCookie(
+			authResponseToJson(result.user, result.membership.tenant, session),
+			token,
+		);
 	} catch (error) {
-		if (error instanceof InvalidCredentials || error instanceof StaffMembershipNotFound) {
+		if (
+			error instanceof InvalidCredentials ||
+			error instanceof StaffMembershipNotFound ||
+			error instanceof PlatformUserCannotUseTenantLogin
+		) {
 			const response = handleAuthDomainError(error);
 
 			if (response) {

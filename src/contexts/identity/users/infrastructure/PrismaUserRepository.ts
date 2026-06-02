@@ -61,6 +61,15 @@ export class PrismaUserRepository extends UserRepository {
 		});
 	}
 
+	async isPlatformSuperadmin(userId: string): Promise<boolean> {
+		const row = await prisma.user.findUnique({
+			where: { id: userId },
+			select: { platformRole: true },
+		});
+
+		return row?.platformRole === "superadmin";
+	}
+
 	private toAggregate(row: {
 		id: string;
 		name: string;

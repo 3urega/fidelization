@@ -1,9 +1,12 @@
 import { Service } from "diod";
 
-import { SessionClaims } from "../../../../../lib/auth/session";
+import { isTenantSession, type SessionClaims, type TenantSessionClaims } from "../../../../../lib/auth/session";
 import { CrossTenantAccessDenied } from "../../domain/CrossTenantAccessDenied";
 import { InvalidTenantSession } from "../../domain/InvalidTenantSession";
-import { StaffMembership, TenantMembershipRepository } from "../../domain/TenantMembershipRepository";
+import {
+	StaffMembership,
+	TenantMembershipRepository,
+} from "../../domain/TenantMembershipRepository";
 
 @Service()
 export class TenantSessionVerifier {
@@ -11,6 +14,17 @@ export class TenantSessionVerifier {
 
 	async verify(
 		session: SessionClaims,
+		hostTenantId: string | null | undefined,
+	): Promise<StaffMembership> {
+		if (!isTenantSession(session)) {
+			throw new InvalidTenantSession();
+		}
+
+		return this.verifyTenantSession(session, hostTenantId);
+	}
+
+	private async verifyTenantSession(
+		session: TenantSessionClaims,
 		hostTenantId: string | null | undefined,
 	): Promise<StaffMembership> {
 		const membership = await this.membershipRepository.findStaffMembership(

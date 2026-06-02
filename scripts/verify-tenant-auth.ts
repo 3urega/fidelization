@@ -67,7 +67,7 @@ const repo = new StubMembershipRepository(
 const verifier = new TenantSessionVerifier(repo);
 
 async function run(): Promise<void> {
-	const session = { userId, tenantId: DEMO_TENANT_ID, role: "owner" as const };
+	const session = { kind: "tenant" as const, userId, tenantId: DEMO_TENANT_ID, role: "owner" as const };
 
 	const ok = await verifier.verify(session, DEMO_TENANT_ID);
 	if (!ok || ok.tenant.id !== DEMO_TENANT_ID) {
@@ -100,11 +100,16 @@ async function run(): Promise<void> {
 		}
 	}
 
+	const userRepo = {
+		isPlatformSuperadmin: async () => false,
+	} as never;
+
 	const login = new TenantStaffLogin(
 		{
 			login: async () => ({ id: { value: userId } }),
 			loginDemo: async () => ({ id: { value: userId } }),
 		} as never,
+		userRepo,
 		repo,
 	);
 

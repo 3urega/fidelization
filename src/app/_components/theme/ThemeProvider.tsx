@@ -24,13 +24,6 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-type MeResponse = {
-	tenant?: {
-		primaryColor: string;
-		secondaryColor: string;
-	};
-};
-
 export function ThemeProvider({ children }: { children: ReactNode }): ReactElement {
 	const [activePresetId, setActivePresetId] = useState<ThemePresetId>(defaultPresetId);
 
@@ -50,20 +43,6 @@ export function ThemeProvider({ children }: { children: ReactNode }): ReactEleme
 	useEffect(() => {
 		applyPreset(defaultPresetId);
 	}, [applyPreset]);
-
-	useEffect(() => {
-		void fetch("/api/me", { credentials: "include" })
-			.then((response) => (response.ok ? (response.json() as Promise<MeResponse>) : null))
-			.then((data) => {
-				if (data?.tenant) {
-					applyTheme({
-						primaryColor: data.tenant.primaryColor,
-						secondaryColor: data.tenant.secondaryColor,
-					});
-				}
-			})
-			.catch(() => {});
-	}, [applyTheme]);
 
 	const value = useMemo(
 		() => ({

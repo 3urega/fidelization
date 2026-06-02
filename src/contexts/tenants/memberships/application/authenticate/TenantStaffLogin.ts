@@ -1,9 +1,14 @@
 import { Service } from "diod";
 
-import { User } from "../../../../identity/users/domain/User";
 import { UserAuthenticator } from "../../../../identity/users/application/authenticate/UserAuthenticator";
+import { User } from "../../../../identity/users/domain/User";
+import { UserRepository } from "../../../../identity/users/domain/UserRepository";
+import { PlatformUserCannotUseTenantLogin } from "../../../../platform/domain/PlatformUserCannotUseTenantLogin";
 import { StaffMembershipNotFound } from "../../domain/StaffMembershipNotFound";
-import { StaffMembership, TenantMembershipRepository } from "../../domain/TenantMembershipRepository";
+import {
+	StaffMembership,
+	TenantMembershipRepository,
+} from "../../domain/TenantMembershipRepository";
 
 export type TenantStaffLoginResult = {
 	user: User;
@@ -14,6 +19,7 @@ export type TenantStaffLoginResult = {
 export class TenantStaffLogin {
 	constructor(
 		private readonly userAuthenticator: UserAuthenticator,
+		private readonly userRepository: UserRepository,
 		private readonly membershipRepository: TenantMembershipRepository,
 	) {}
 
@@ -33,7 +39,14 @@ export class TenantStaffLogin {
 		return this.resolveMembership(user, tenantId);
 	}
 
-	private async resolveMembership(user: User, tenantId: string | null): Promise<TenantStaffLoginResult> {
+	private async resolveMembership(
+		user: User,
+		tenantId: string | null,
+	): Promise<TenantStaffLoginResult> {
+		if (await this.userRepository.isPlatformSuperadmin(user.id.value)) {
+			throw new PlatformUserCannotUseTenantLogin();
+		}
+
 		const membership = tenantId
 			? await this.membershipRepository.findStaffMembership(user.id.value, tenantId)
 			: await this.membershipRepository.findFirstStaffMembershipByUserId(user.id.value);

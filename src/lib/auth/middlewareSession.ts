@@ -1,16 +1,20 @@
 import { jwtVerify } from "jose";
 
-import { env } from "../env";
-import type { SessionClaims } from "./session";
+import { parseSessionPayload, SESSION_COOKIE_NAME, type SessionClaims } from "./sessionClaims";
 
-const COOKIE_NAME = "session";
-
+/** Edge-safe: read AUTH_SECRET without throwing (middleware runs on Edge). */
 function getSecret(): Uint8Array | null {
-	try {
-		return new TextEncoder().encode(env.authSecret);
-	} catch {
+	const raw = process.env.AUTH_SECRET?.trim();
+	if (!raw || raw.length < 16) {
+		if (process.env.NODE_ENV === "development") {
+			// eslint-disable-next-line no-console
+			console.warn("[middleware] AUTH_SECRET missing or too short — sessions will not verify");
+		}
+
 		return null;
 	}
+
+	return new TextEncoder().encode(raw);
 }
 
 export async function verifySessionTokenEdge(token: string): Promise<SessionClaims | null> {
@@ -21,15 +25,8 @@ export async function verifySessionTokenEdge(token: string): Promise<SessionClai
 
 	try {
 		const { payload } = await jwtVerify(token, secret);
-		const userId = payload.sub;
-		const tenantId = payload.tenantId;
-		const role = payload.role;
 
-		if (typeof userId !== "string" || typeof tenantId !== "string" || typeof role !== "string") {
-			return null;
-		}
-
-		return { userId, tenantId, role };
+		return parseSessionPayload(payload as Record<string, unknown>);
 	} catch {
 		return null;
 	}
@@ -40,7 +37,7 @@ export function getSessionCookieFromHeader(cookieHeader: string | null): string 
 		return null;
 	}
 
-	const match = cookieHeader.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
+	const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE_NAME}=([^;]+)`));
 
 	return match?.[1] ?? null;
 }

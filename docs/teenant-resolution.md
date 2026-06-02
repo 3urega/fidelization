@@ -26,8 +26,8 @@ Tenant resolution is critical because it underpins:
 
 | Area in this doc | Target | Implemented now | Notes |
 |------------------|--------|-----------------|-------|
-| Subdomain → tenant slug | `{slug}.domain.com` resolves tenant | **Yes (mock)** | `APP_DOMAIN` + [`extractSubdomain`](../src/lib/tenant/extractSubdomain.ts); dev: `cafe-demo.localhost:3000` |
-| Middleware tenant resolution | Parse host, load tenant, inject context | **Yes (mock)** | [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) + [`mockTenantBySlug`](../src/lib/tenant/mockTenantBySlug.ts); unknown slug → 404 |
+| Subdomain → tenant slug | `{slug}.domain.com` resolves tenant | **Yes** | `APP_DOMAIN` + [`extractSubdomain`](../src/lib/tenant/extractSubdomain.ts); mock fast-path + [`GET /api/tenant/resolve`](../src/app/api/tenant/resolve/route.ts) (Prisma) |
+| Middleware tenant resolution | Parse host, load tenant, inject context | **Yes** | [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) + [`tenantSlugResolver`](../src/lib/tenant/tenantSlugResolver.ts); unknown slug → 404 |
 | Tenant context in requests | Every request has resolved tenant | **Partial** | Middleware: `x-tenant-id` / `x-tenant-slug`; server: [`getResolvedTenantFromHeaders`](../src/lib/tenant/getResolvedTenant.ts); JWT still on APIs |
 | User ↔ tenant data model | Scoped users | **Partial** | **Global `users`** + **`tenant_memberships`** — **not** `users.tenant_id` ([`data-model.md`](database/data-model.md)) |
 | Login / register tenant scope | Tenant from subdomain | **Yes (login)** | [`TenantStaffLogin`](../src/contexts/tenants/memberships/application/authenticate/TenantStaffLogin.ts): host `x-tenant-id` on login/demo; apex → first staff membership; register unchanged (`OwnerRegistrar`) |
@@ -40,7 +40,7 @@ Tenant resolution is critical because it underpins:
 | Custom domains / white-label | DNS + domain table | **No** | Spec only (§1) |
 | Disabled / unknown tenant pages | 404 / billing expired | **Partial** | Unknown subdomain → [`/tenant-not-found`](../src/app/(public)/tenant-not-found/page.tsx) (404); suspended tenant not implemented |
 
-**Conclusion:** With `APP_DOMAIN` set, hostname resolves tenant (mock map, slug `cafe-demo` from seed). Without subdomain or `APP_DOMAIN`, tenant context still comes from JWT after login. Prisma lookup by slug is a follow-up (replace mock). Scope business data by `tenant_id`; never add `tenant_id` to `users`.
+**Conclusion:** With `APP_DOMAIN` set, hostname resolves tenant (mock `cafe-demo` + Prisma by slug via internal API). Post-login redirect to another `*.localhost` host from apex **breaks** host-only cookies — login on apex stays on `/home` at `localhost`; use `{slug}.localhost` for subdomain UX. See [`backend/session-cookies-localhost-dev.md`](backend/session-cookies-localhost-dev.md). Without subdomain or `APP_DOMAIN`, tenant context still comes from JWT after login. Scope business data by `tenant_id`; never add `tenant_id` to `users`.
 
 ### Local dev (subdomain)
 
@@ -81,7 +81,7 @@ sequenceDiagram
 
 **Middleware:** [`src/middleware.ts`](../src/middleware.ts) resolves tenant from `Host` when `APP_DOMAIN` is set, forwards `x-tenant-*` headers, returns 404 for unknown slugs, protects `/home` and `/profile`, and applies CORS on `/api/*`.
 
-**Verification:** `npm run verify:tenant-auth` (domain checks without DB); manual: login on `cafe-demo.localhost`, cross-tenant cookie on another host → 403 on `/api/me`.
+**Verification:** `npm run verify:tenant-auth` (domain checks without DB); `npm run verify:owner-login`, `npm run verify:platform-login`; manual: login on `cafe-demo.localhost`, cross-tenant cookie on another host → 403 on `/api/me`.
 
 ---
 

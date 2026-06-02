@@ -9,7 +9,9 @@ type HostTenantThemeApplierProps = {
 };
 
 /** Applies tenant branding from subdomain resolution (issue #5). */
-export function HostTenantThemeApplier({ theme }: HostTenantThemeApplierProps): ReactElement | null {
+export function HostTenantThemeApplier({
+	theme,
+}: HostTenantThemeApplierProps): ReactElement | null {
 	useEffect(() => {
 		applyThemeToDocument(theme);
 	}, [theme.primaryColor, theme.secondaryColor, theme]);

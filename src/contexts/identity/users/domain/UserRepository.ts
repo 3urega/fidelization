@@ -14,4 +14,6 @@ export abstract class UserRepository {
 	abstract searchByEmail(email: string): Promise<UserWithPasswordHash | null>;
 
 	abstract updatePasswordHash(userId: UserId, passwordHash: string): Promise<void>;
+
+	abstract isPlatformSuperadmin(userId: string): Promise<boolean>;
 }

@@ -3,7 +3,7 @@ import { Service } from "diod";
 import { prisma } from "../../../../lib/prisma";
 import { Tenant } from "../../tenants/domain/Tenant";
 import { StaffMembership, TenantMembershipRepository } from "../domain/TenantMembershipRepository";
-import { TenantRole, isStaffRole } from "../domain/TenantRole";
+import { isStaffRole, TenantRole } from "../domain/TenantRole";
 
 const STAFF_ROLES = ["owner", "employee", "admin"] as const;
 
