@@ -21,7 +21,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Owner UI shell | Sidebar + top bar + tenant branding | **Yes** | [`TenantAdminShell`](../src/app/_components/shell/TenantAdminShell.tsx), [`TenantSessionProvider`](../src/app/_components/shell/TenantSessionProvider.tsx), `/home`, `/profile`; auth card [`AppShell`](../src/app/_components/ui/AppShell.tsx); theme tokens ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
 | Employee / customer flows | QR, purchases, app | **No** | DB + Prisma repos exist; no UI/API flows yet |
 | Superadmin foundation (issue #8) | Separate platform auth, protected routes, tenant isolation | **Yes** | `users.platform_role`, seed `SUPERADMIN_*`, `/platform/login` + `/platform` (apex), JWT `kind: platform`, `requirePlatformSession` / `requireTenantSession`, `npm run verify:platform-isolation` |
-| Superadmin dashboard (CRUD tenants, plans) | Platform-wide control UI | **Partial** | [`PlatformDashboard`](../src/app/(platform)/platform/PlatformDashboard.tsx) placeholder only — follow-up issue |
+| Superadmin dashboard (CRUD tenants, plans) | Platform-wide control UI | **Yes** | [`PlatformTenantsTable`](../src/app/_components/platform/PlatformTenantsTable.tsx), `GET/PATCH /api/platform/tenants`, toggle `active`/`suspended`, `npm run verify:platform-tenants` |
 | Feature flags (global + tenant) | Plan-driven modules | **Partial** | `tenants.features` JSON migrated; no runtime enforcement |
 | Billing (this doc) | Stripe, subscription per tenant | **Partial** | `subscription_plans` / `subscriptions` migrated; starter Google Play **per user** still in [`src/contexts/billing/`](../src/contexts/billing/) |
 | Subdomains per tenant | `tenant.app.com` | **Partial (mock)** | `APP_DOMAIN` + middleware; see [`teenant-resolution.md`](teenant-resolution.md) |
@@ -47,7 +47,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Tenant staff | Owner / employee / admin (`tenant_memberships`) | `/login` (subdomain or apex) | `tenant` | Yes |
 | End customer | `customers` table (future) | QR / app loyalty (not `/login`) | TBD | Yes |
 
-**Conclusion:** platform **foundation** (issue #4), Fase 0 tenant auth, and **superadmin foundation** (issue #8: login, guards, `/platform`) are in place. Feature-flag enforcement, tenant CRUD from platform UI, customer QR auth, and Stripe tenant billing remain follow-ups.
+**Conclusion:** platform **foundation** (issue #4), Fase 0 tenant auth, **superadmin foundation** (issue #8), and **minimal superadmin dashboard** (issue #9: tenant list + status toggle) are in place. Feature-flag enforcement, tenant create/delete from UI, customer QR auth, and Stripe tenant billing remain follow-ups.
 
 ---
 

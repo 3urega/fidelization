@@ -4,6 +4,8 @@ import { UserAuthenticator } from "../../../../identity/users/application/authen
 import { User } from "../../../../identity/users/domain/User";
 import { UserRepository } from "../../../../identity/users/domain/UserRepository";
 import { PlatformUserCannotUseTenantLogin } from "../../../../platform/domain/PlatformUserCannotUseTenantLogin";
+import { TenantAccessSuspended } from "../../../tenants/domain/TenantAccessSuspended";
+import { TenantStatus } from "../../../tenants/domain/TenantStatus";
 import { StaffMembershipNotFound } from "../../domain/StaffMembershipNotFound";
 import {
 	StaffMembership,
@@ -53,6 +55,10 @@ export class TenantStaffLogin {
 
 		if (!membership) {
 			throw new StaffMembershipNotFound(user.id.value, tenantId ?? "apex");
+		}
+
+		if (membership.tenant.status === TenantStatus.Suspended) {
+			throw new TenantAccessSuspended(membership.tenant.id);
 		}
 
 		return { user, membership };

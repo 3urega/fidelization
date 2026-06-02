@@ -96,10 +96,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	}
 
 	if (isPlatformPath(pathname)) {
-		if (hasTenantSession) {
-			return NextResponse.redirect(new URL("/home", request.url));
-		}
-
 		if (pathname === "/platform/login") {
 			if (hasPlatformSession) {
 				return NextResponse.redirect(new URL("/platform", request.url));

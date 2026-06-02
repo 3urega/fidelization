@@ -31,6 +31,7 @@ import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
 import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
 import { ListPlatformTenants } from "../../../platform/application/tenants/ListPlatformTenants";
+import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
 import { PlatformAuthenticator } from "../../../platform/application/authenticate/PlatformAuthenticator";
 import { TenantStaffLogin } from "../../../tenants/memberships/application/authenticate/TenantStaffLogin";
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
@@ -81,6 +82,7 @@ builder.registerAndUse(PlatformAuthenticator);
 builder.register(TenantRepository).use(PrismaTenantRepository);
 builder.registerAndUse(PrismaTenantRepository);
 builder.registerAndUse(ListPlatformTenants);
+builder.registerAndUse(SetTenantPlatformStatus);
 builder.registerAndUse(TenantStaffLogin);
 builder.registerAndUse(TenantSessionVerifier);
 builder.registerAndUse(TenantFinder);

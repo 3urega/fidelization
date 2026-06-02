@@ -7,6 +7,7 @@ import { PlatformUserCannotUseTenantLogin } from "../../../../contexts/platform/
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { TenantStaffLogin } from "../../../../contexts/tenants/memberships/application/authenticate/TenantStaffLogin";
 import { StaffMembershipNotFound } from "../../../../contexts/tenants/memberships/domain/StaffMembershipNotFound";
+import { TenantAccessSuspended } from "../../../../contexts/tenants/tenants/domain/TenantAccessSuspended";
 import { authResponseToJson, handleAuthDomainError } from "../../../../lib/auth/http";
 import { createSessionToken, jsonWithSessionCookie } from "../../../../lib/auth/session";
 import { getResolvedTenantFromRequest } from "../../../../lib/tenant/getResolvedTenant";
@@ -32,7 +33,8 @@ export async function POST(request: Request): Promise<Response> {
 		if (
 			error instanceof InvalidCredentials ||
 			error instanceof StaffMembershipNotFound ||
-			error instanceof PlatformUserCannotUseTenantLogin
+			error instanceof PlatformUserCannotUseTenantLogin ||
+			error instanceof TenantAccessSuspended
 		) {
 			const response = handleAuthDomainError(error);
 

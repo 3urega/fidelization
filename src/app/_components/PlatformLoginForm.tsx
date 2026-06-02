@@ -58,7 +58,8 @@ export function PlatformLoginForm(): ReactElement {
 		<form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
 			<p className="text-sm text-muted">
 				Acceso restringido a operadores de la plataforma. Sin registro público. Usa el host apex (
-				<code className="text-xs">localhost</code>, no un subdominio de negocio).
+				<code className="text-xs">localhost</code>, no un subdominio de negocio). Si tenías sesión de
+				negocio (owner), al entrar aquí se sustituye por la sesión de plataforma.
 			</p>
 			<Field label="Email">
 				<Input

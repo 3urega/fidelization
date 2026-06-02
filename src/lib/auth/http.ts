@@ -97,6 +97,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "PlatformUserCannotUseTenantLogin") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "TenantAccessSuspended") {
+		return HttpNextResponse.domainError(error, 403);
+	}
 
 	return undefined;
 }

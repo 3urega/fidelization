@@ -2,7 +2,8 @@
 
 import { type ReactElement, useEffect, useState } from "react";
 
-import { Card } from "../../_components/ui/Card";
+import { PlatformTenantsTable } from "../../_components/platform/PlatformTenantsTable";
+import { PageHeader } from "../../_components/shell/PageHeader";
 
 type PlatformMeResponse = {
 	user: { name: string; email: string };
@@ -37,25 +38,17 @@ export function PlatformDashboard(): ReactElement {
 	}
 
 	if (!data) {
-		return <p className="text-sm text-muted">Cargando...</p>;
+		return <p className="text-sm text-muted">Cargando…</p>;
 	}
 
 	return (
 		<div className="flex flex-col gap-6">
-			<div>
-				<p className="text-sm text-muted">Superadmin — contexto plataforma</p>
-				<h1 className="text-2xl font-semibold text-foreground">Hola, {data.user.name}</h1>
-				<p className="mt-1 text-sm text-muted">{data.user.email}</p>
-			</div>
+			<PageHeader
+				title={`Hola, ${data.user.name}`}
+				description={`Panel de plataforma · ${data.user.email}`}
+			/>
 
-			<Card>
-				<h2 className="font-medium text-foreground">Panel de plataforma</h2>
-				<p className="mt-2 text-sm text-muted">
-					CRUD de tenants, planes y feature flags globales — próxima fase. Este dashboard confirma
-					sesión <code className="text-xs">{data.kind}</code> / rol{" "}
-					<code className="text-xs">{data.role}</code>.
-				</p>
-			</Card>
+			<PlatformTenantsTable />
 		</div>
 	);
 }

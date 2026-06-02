@@ -12,6 +12,7 @@ npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, Platfo
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
+npm run verify:platform-tenants    # issue #9 — list tenants + PATCH status (OWNER_VERIFY_* opcional)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -52,6 +53,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
 - **Owner/staff login:** `/login` en `http://localhost:3000` → `/home` en el mismo host (cookie host-only). Subdominio: `http://{slug}.localhost:3000/login` → `/home` en ese host. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
 - **Superadmin (issue #8):** solo `http://localhost:3000/platform/login` (apex) → `/platform`; no usar `/login` ni subdominios de negocio. Verifies: `verify:platform-login`, `verify:platform-isolation`.
+- **Superadmin dashboard (issue #9):** en `/platform` — lista de negocios y activar/suspender. `verify:platform-tenants`.
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
 
 # Architecture
@@ -103,6 +105,7 @@ docs/
 | Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/saas-architecture.md`, `docs/business-rules.md` |
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/business-model.md` (sección *Implementation status*) |
 | Superadmin foundation (issue #8), tenant isolation | `docs/saas-architecture.md` + `npm run verify:platform-isolation` |
+| Superadmin dashboard (issue #9) | `docs/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/saas-architecture.md` (sección *Implementation status*) |
 | Resolución de tenant (subdominio, JWT `tenantId`, middleware, login) | `docs/teenant-resolution.md` (sección *Implementation status*) + `src/middleware.ts`, `src/lib/auth/session.ts` |
 | Login dev atascado / cookie / superadmin vs owner | `docs/backend/session-cookies-localhost-dev.md` + `npm run verify:platform-login` / `verify:owner-login` |
