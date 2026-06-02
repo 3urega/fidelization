@@ -38,7 +38,7 @@ async function getSession(request: NextRequest): Promise<boolean> {
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const { pathname } = request.nextUrl;
 
-	if (pathname === "/home") {
+	if (pathname === "/home" || pathname === "/profile") {
 		if (!(await getSession(request))) {
 			return NextResponse.redirect(new URL("/login", request.url));
 		}
@@ -71,5 +71,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-	matcher: ["/", "/home", "/login", "/register", "/api/:path*"],
+	matcher: ["/", "/home", "/profile", "/login", "/register", "/api/:path*"],
 };

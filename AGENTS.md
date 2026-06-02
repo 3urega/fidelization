@@ -47,6 +47,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Tenant context (Fase 0):** JWT `tenantId` + `role` after login/register — not subdomain middleware yet. Spec: [`docs/teenant-resolution.md`](docs/teenant-resolution.md).
 - **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
+- **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` authenticated shell (`AppNav`); URLs sin cambio (`/`, `/login`, `/home`, …).
 
 # Documentation
 
