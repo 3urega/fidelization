@@ -30,7 +30,9 @@ import { RewardRepository } from "../../../loyalty/rewards/domain/RewardReposito
 import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
 import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
+import { TenantStaffLogin } from "../../../tenants/memberships/application/authenticate/TenantStaffLogin";
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
+import { TenantSessionVerifier } from "../../../tenants/memberships/application/verify/TenantSessionVerifier";
 import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
 import { PrismaTenantMembershipRepository } from "../../../tenants/memberships/infrastructure/PrismaTenantMembershipRepository";
 import { OwnerRegistrar } from "../../../tenants/owners/application/register/OwnerRegistrar";
@@ -71,6 +73,8 @@ builder.registerAndUse(UserFinder);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(UserProfileUpdater);
 builder.registerAndUse(OwnerMembershipFinder);
+builder.registerAndUse(TenantStaffLogin);
+builder.registerAndUse(TenantSessionVerifier);
 builder.registerAndUse(TenantFinder);
 
 builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);

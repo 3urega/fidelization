@@ -26,46 +26,62 @@ Tenant resolution is critical because it underpins:
 
 | Area in this doc | Target | Implemented now | Notes |
 |------------------|--------|-----------------|-------|
-| Subdomain → tenant slug | `{slug}.domain.com` resolves tenant | **No** | Single origin (`localhost` / app host); `tenants.slug` exists for future routing |
-| Middleware tenant resolution | Parse host, load tenant, inject context | **Stub (issue #4)** | [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) returns `null`; called from [`src/middleware.ts`](../src/middleware.ts). Active tenant: JWT `tenantId` on APIs |
-| Tenant context in requests | Every request has resolved tenant | **Partial** | After login: JWT claims `tenantId` + `role`; APIs use [`getAuthenticatedSession`](../src/lib/auth/session.ts) |
+| Subdomain → tenant slug | `{slug}.domain.com` resolves tenant | **Yes (mock)** | `APP_DOMAIN` + [`extractSubdomain`](../src/lib/tenant/extractSubdomain.ts); dev: `cafe-demo.localhost:3000` |
+| Middleware tenant resolution | Parse host, load tenant, inject context | **Yes (mock)** | [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) + [`mockTenantBySlug`](../src/lib/tenant/mockTenantBySlug.ts); unknown slug → 404 |
+| Tenant context in requests | Every request has resolved tenant | **Partial** | Middleware: `x-tenant-id` / `x-tenant-slug`; server: [`getResolvedTenantFromHeaders`](../src/lib/tenant/getResolvedTenant.ts); JWT still on APIs |
 | User ↔ tenant data model | Scoped users | **Partial** | **Global `users`** + **`tenant_memberships`** — **not** `users.tenant_id` ([`data-model.md`](database/data-model.md)) |
-| Login / register tenant scope | Tenant from subdomain | **Partial** | No hostname tenant; login picks **owner** membership; register creates tenant + membership |
+| Login / register tenant scope | Tenant from subdomain | **Yes (login)** | [`TenantStaffLogin`](../src/contexts/tenants/memberships/application/authenticate/TenantStaffLogin.ts): host `x-tenant-id` on login/demo; apex → first staff membership; register unchanged (`OwnerRegistrar`) |
+| Anti cross-tenant session | JWT must match host tenant | **Yes** | [`requireTenantSession`](../src/lib/auth/requireTenantSession.ts) on [`/api/me`](../src/app/api/me/route.ts) and billing APIs; **403** if host tenant ≠ session |
 | Session `tenantId` | Embedded in session | **Yes** | HS256 JWT in `session` cookie; same claims verified in Edge ([`middlewareSession.ts`](../src/lib/auth/middlewareSession.ts)) |
 | Branding per tenant | Theme from tenant record | **Partial** | DB: `primaryColor`, `secondaryColor`, `logoUrl`; UI via `ThemeProvider` after auth response |
-| `x-tenant-id` header fallback | Optional explicit tenant | **No** | Not used |
+| `x-tenant-id` header fallback | Optional explicit tenant | **Yes** | Set by middleware when subdomain resolves; read via `getResolvedTenantFromRequest` |
 | React `TenantContext` / `[tenant]` route | Global tenant provider | **No** | Route groups `(public)` \| `(auth)` \| `(app)` under [`src/app/`](../src/app/); tenant from session/API |
 | Tenant lookup cache (Redis) | Per-request cache | **No** | Direct Prisma on auth flows |
 | Custom domains / white-label | DNS + domain table | **No** | Spec only (§1) |
-| Disabled / unknown tenant pages | 404 / billing expired | **No** | Not in middleware |
+| Disabled / unknown tenant pages | 404 / billing expired | **Partial** | Unknown subdomain → [`/tenant-not-found`](../src/app/(public)/tenant-not-found/page.tsx) (404); suspended tenant not implemented |
 
-**Conclusion:** Fase 0 resolves tenant **after authentication** via JWT `tenantId` (and owner onboarding at register). Subdomain middleware, request-level tenant injection, and header overrides are **not** implemented. When adding business tables or APIs, scope by `tenant_id` on domain rows and validate `session.tenantId` — never add `tenant_id` to `users`.
+**Conclusion:** With `APP_DOMAIN` set, hostname resolves tenant (mock map, slug `cafe-demo` from seed). Without subdomain or `APP_DOMAIN`, tenant context still comes from JWT after login. Prisma lookup by slug is a follow-up (replace mock). Scope business data by `tenant_id`; never add `tenant_id` to `users`.
 
-### Implemented flow (Fase 0)
+### Local dev (subdomain)
+
+1. Set `APP_DOMAIN=localhost` in `.env`.
+2. Open `http://cafe-demo.localhost:3000` (modern browsers resolve `*.localhost` without hosts file).
+3. Unknown slug: `http://unknown.localhost:3000` → 404.
+4. Apex `http://localhost:3000` — unchanged (JWT / demo login).
+
+### Implemented flow (login + session)
 
 ```mermaid
 sequenceDiagram
   participant Browser
-  participant API as POST /api/auth/login or register
-  participant Membership as OwnerMembershipFinder / OwnerRegistrar
+  participant MW as middleware
+  participant API as POST /api/auth/login
+  participant UC as TenantStaffLogin
   participant JWT as createSessionToken
   participant Me as GET /api/me
 
-  Browser->>API: email + password (or register + businessName)
-  API->>Membership: resolve owner tenant + role
-  Membership-->>API: tenant id, role
+  Browser->>MW: Host cafe-demo.localhost
+  MW->>Browser: x-tenant-id on request
+  Browser->>API: email + password
+  API->>UC: credentials + resolved tenantId
+  UC->>UC: findStaffMembership(user, tenant)
+  UC-->>API: user + membership role
   API->>JWT: userId, tenantId, role
   JWT-->>Browser: Set-Cookie session
-  Browser->>Me: Cookie or Bearer
-  Me->>JWT: verifySessionToken
+  Browser->>Me: Cookie + host headers
+  Me->>Me: requireTenantSession (membership + host match)
   Me-->>Browser: user + tenant JSON
 ```
 
 **Register:** [`POST /api/auth/register`](../src/app/api/auth/register/route.ts) → `OwnerRegistrar` creates `User`, `Tenant` (slug from `businessName` via [`slugifyBusinessName`](../src/contexts/tenants/owners/infrastructure/slugifyBusinessName.ts)), `TenantMembership` role `owner`, then session with `tenantId`.
 
-**Login:** [`POST /api/auth/login`](../src/app/api/auth/login/route.ts) → `UserAuthenticator` + `OwnerMembershipFinder` (first `tenant_memberships` row with `role = owner` for that user). No subdomain or slug in request.
+**Login:** [`POST /api/auth/login`](../src/app/api/auth/login/route.ts) → `TenantStaffLogin`: if middleware resolved a tenant (`getResolvedTenantFromRequest`), membership must exist for that `tenant_id` with role `owner`, `employee`, or `admin`; on apex without subdomain, first staff membership (owner preferred). Staff roles exclude `customer`.
 
-**Middleware:** [`src/middleware.ts`](../src/middleware.ts) calls [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) (no-op in Fase 0), protects `/home` and `/profile`, redirects auth pages when logged in, and applies CORS on `/api/*`. It does **not** read `Host` or `tenants.slug` yet.
+**Protected APIs:** [`requireTenantSession`](../src/lib/auth/requireTenantSession.ts) revalidates JWT claims against `tenant_memberships` and returns **403** when `x-tenant-id` from the host does not match `session.tenantId`.
+
+**Middleware:** [`src/middleware.ts`](../src/middleware.ts) resolves tenant from `Host` when `APP_DOMAIN` is set, forwards `x-tenant-*` headers, returns 404 for unknown slugs, protects `/home` and `/profile`, and applies CORS on `/api/*`.
+
+**Verification:** `npm run verify:tenant-auth` (domain checks without DB); manual: login on `cafe-demo.localhost`, cross-tenant cookie on another host → 403 on `/api/me`.
 
 ---
 
@@ -162,7 +178,7 @@ function resolveTenant(request: Request) {
 }
 ```
 
-**Implemented middleware** ([`src/middleware.ts`](../src/middleware.ts)): `resolveTenantFromRequest` stub (issue #4), session guards on app routes, CORS for `/api/*`. Full `resolveTenant` from subdomain is target.
+**Implemented middleware** ([`src/middleware.ts`](../src/middleware.ts)): subdomain resolution (issue #5, mock), session guards, CORS for `/api/*`. Real DB slug lookup: follow-up to replace [`mockTenantBySlug`](../src/lib/tenant/mockTenantBySlug.ts).
 
 ---
 
@@ -207,14 +223,14 @@ JWT claims ([`SessionClaims`](../src/lib/auth/session.ts)): `userId` (sub), `ten
 
 ### Login flow
 
-| Step | Target | Fase 0 |
-|------|--------|--------|
-| 1 | User accesses tenant subdomain | Single app URL |
-| 2 | Auth includes tenant from host | Email + password only |
-| 3 | Validate credentials in tenant scope | Global user + owner membership |
-| 4 | Session with tenant id | JWT `tenantId` from membership — **not** a column on `users` |
+| Step | Target | Implemented |
+|------|--------|-------------|
+| 1 | User accesses tenant subdomain | `APP_DOMAIN` + `cafe-demo.localhost` (mock map) |
+| 2 | Auth includes tenant from host | Login/demo read `x-tenant-id` from middleware |
+| 3 | Validate credentials in tenant scope | `findStaffMembership` for host tenant; apex uses first staff membership |
+| 4 | Session with tenant id | JWT `tenantId` + `role` from membership row |
 
-Cross-tenant auth must remain forbidden: APIs should treat `session.tenantId` as authoritative and verify membership when multiple roles exist.
+Cross-tenant auth is blocked: [`TenantSessionVerifier`](../src/contexts/tenants/memberships/application/verify/TenantSessionVerifier.ts) compares host tenant to session; APIs return **403** on mismatch.
 
 ---
 

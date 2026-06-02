@@ -11,6 +11,7 @@ enum MembershipRole {
   owner
   employee
   customer
+  admin
 }
 
 enum TenantStatus {

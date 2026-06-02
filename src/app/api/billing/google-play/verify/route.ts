@@ -7,7 +7,7 @@ import { PurchaseTokenAlreadyLinked } from "../../../../../contexts/billing/goog
 import { UserDoesNotExist } from "../../../../../contexts/identity/users/domain/UserDoesNotExist";
 import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { getAuthenticatedUserId } from "../../../../../lib/auth/session";
+import { requireTenantSession } from "../../../../../lib/auth/requireTenantSession";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +17,11 @@ type Body = {
 };
 
 export async function POST(request: Request): Promise<NextResponse> {
-	const userId = await getAuthenticatedUserId(request);
-	if (!userId) {
-		return NextResponse.json({ error: { description: "Unauthorized" } }, { status: 401 });
+	const auth = await requireTenantSession(request);
+	if (auth instanceof NextResponse) {
+		return auth;
 	}
+	const userId = auth.session.userId;
 
 	const body = (await request.json()) as Body;
 	if (!body.purchaseToken || !body.productId) {

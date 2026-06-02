@@ -18,8 +18,8 @@ export default function RootLayout({
 	children: React.ReactNode;
 }): React.ReactElement {
 	return (
-		<html lang="es" className={inter.variable}>
-			<body className="min-h-screen font-sans antialiased">
+		<html lang="es" className={inter.variable} suppressHydrationWarning>
+			<body className="min-h-screen font-sans antialiased" suppressHydrationWarning>
 				<ThemeProvider>{children}</ThemeProvider>
 			</body>
 		</html>

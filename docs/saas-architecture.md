@@ -23,7 +23,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Superadmin | Platform-wide control | **No** | Not in schema, API, or UI |
 | Feature flags (global + tenant) | Plan-driven modules | **Partial** | `tenants.features` JSON migrated; no runtime enforcement |
 | Billing (this doc) | Stripe, subscription per tenant | **Partial** | `subscription_plans` / `subscriptions` migrated; starter Google Play **per user** still in [`src/contexts/billing/`](../src/contexts/billing/) |
-| Subdomains per tenant | `tenant.app.com` | **No** | Single app origin; tenant resolved via session after login — see [`teenant-resolution.md`](teenant-resolution.md) |
+| Subdomains per tenant | `tenant.app.com` | **Partial (mock)** | `APP_DOMAIN` + middleware; see [`teenant-resolution.md`](teenant-resolution.md) |
 | Branding | Per tenant | **Partial** | `primaryColor`, `secondaryColor`, `logoUrl` on tenant; runtime via `ThemeProvider` |
 | Postgres RLS | Recommended future | **No** | Prisma Postgres; isolation in application layer |
 

@@ -9,6 +9,8 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "verify:saas-base": "tsx scripts/verify-saas-base.ts",
+    "verify:tenant-resolution": "tsx scripts/verify-tenant-resolution.ts",
+    "verify:tenant-auth": "tsx scripts/verify-tenant-auth.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",
     "prep": "npm run build",

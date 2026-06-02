@@ -60,6 +60,15 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "OwnerMembershipNotFound") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "StaffMembershipNotFound") {
+		return HttpNextResponse.domainError(error, 401);
+	}
+	if (error.type === "CrossTenantAccessDenied") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidTenantSession") {
+		return HttpNextResponse.domainError(error, 401);
+	}
 
 	return undefined;
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { themePresetIds, themePresetLabels } from "./theme/themePresets";
@@ -17,8 +16,12 @@ type AuthResponse = {
 	};
 };
 
-export function LoginForm(): ReactElement {
-	const router = useRouter();
+type LoginFormProps = {
+	/** Shown when host has no resolved tenant but APP_DOMAIN expects subdomain login. */
+	hostTenantMissing?: boolean;
+};
+
+export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactElement {
 	const { applyTheme, applyPreset } = useTheme();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -27,7 +30,9 @@ export function LoginForm(): ReactElement {
 
 	async function handleAuthResponse(response: Response): Promise<boolean> {
 		if (!response.ok) {
-			const data = (await response.json()) as { error?: { description?: string } };
+			const data = (await response.json()) as {
+				error?: { description?: string; type?: string };
+			};
 			setError(data.error?.description ?? "Error al iniciar sesión");
 
 			return false;
@@ -57,7 +62,7 @@ export function LoginForm(): ReactElement {
 		setLoading(false);
 
 		if (await handleAuthResponse(response)) {
-			router.push("/home");
+			navigateAfterAuth();
 		}
 	}
 
@@ -70,12 +75,23 @@ export function LoginForm(): ReactElement {
 		setLoading(false);
 
 		if (await handleAuthResponse(response)) {
-			router.push("/home");
+			navigateAfterAuth();
 		}
+	}
+
+	function navigateAfterAuth(): void {
+		// Full navigation so middleware receives the new httpOnly session cookie.
+		window.location.assign("/home");
 	}
 
 	return (
 		<form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
+			{hostTenantMissing ? (
+				<p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-muted">
+					Usa la URL de tu negocio (por ejemplo <code className="text-xs">cafe-demo.localhost</code>) para
+					iniciar sesión en ese local.
+				</p>
+			) : null}
 			<Field label="Email">
 				<Input
 					type="email"

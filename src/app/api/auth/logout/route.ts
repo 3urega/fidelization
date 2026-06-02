@@ -1,11 +1,9 @@
-import { clearSessionCookie } from "../../../../lib/auth/session";
+import { NextResponse } from "next/server";
 
-export function POST(): Response {
-	return new Response(JSON.stringify({ ok: true }), {
-		status: 200,
-		headers: {
-			"Content-Type": "application/json",
-			"Set-Cookie": clearSessionCookie(),
-		},
-	});
+import { deleteSessionCookie } from "../../../../lib/auth/session";
+
+export function POST(): NextResponse {
+	deleteSessionCookie();
+
+	return NextResponse.json({ ok: true });
 }

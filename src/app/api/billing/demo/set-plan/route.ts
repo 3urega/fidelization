@@ -5,17 +5,18 @@ import { NextResponse } from "next/server";
 import { DemoPlanSetter } from "../../../../../contexts/billing/demo/application/DemoPlanSetter";
 import { UserPlan } from "../../../../../contexts/identity/users/domain/UserPlan";
 import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { getAuthenticatedUserId } from "../../../../../lib/auth/session";
+import { requireTenantSession } from "../../../../../lib/auth/requireTenantSession";
 
 type Body = {
 	plan: string;
 };
 
 export async function POST(request: Request): Promise<NextResponse> {
-	const userId = await getAuthenticatedUserId(request);
-	if (!userId) {
-		return NextResponse.json({ error: { description: "Unauthorized" } }, { status: 401 });
+	const auth = await requireTenantSession(request);
+	if (auth instanceof NextResponse) {
+		return auth;
 	}
+	const userId = auth.session.userId;
 
 	if (process.env.ALLOW_DEMO_BILLING !== "1") {
 		return NextResponse.json(

@@ -1,4 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 import { env } from "../env";
 
@@ -80,6 +82,22 @@ export function clearSessionCookie(): string {
 	return `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=lax`;
 }
 
+/** Preferred in App Router route handlers (reliable Set-Cookie). */
+export function setSessionCookie(token: string): void {
+	const opts = sessionCookieOptions();
+	cookies().set(COOKIE_NAME, token, {
+		httpOnly: opts.httpOnly,
+		sameSite: opts.sameSite,
+		secure: opts.secure,
+		path: opts.path,
+		maxAge: opts.maxAge,
+	});
+}
+
+export function deleteSessionCookie(): void {
+	cookies().delete(COOKIE_NAME);
+}
+
 function getSessionTokenFromRequest(request: Request): string | null {
 	const authHeader = request.headers.get("authorization");
 	if (authHeader?.startsWith("Bearer ")) {
@@ -112,12 +130,8 @@ export async function getAuthenticatedUserId(request: Request): Promise<string |
 	return session?.userId ?? null;
 }
 
-export function jsonWithSessionCookie<T>(body: T, token: string, status = 200): Response {
-	return new Response(JSON.stringify(body), {
-		status,
-		headers: {
-			"Content-Type": "application/json",
-			"Set-Cookie": buildSessionCookie(token),
-		},
-	});
+export function jsonWithSessionCookie<T>(body: T, token: string, status = 200): NextResponse {
+	setSessionCookie(token);
+
+	return NextResponse.json(body, { status });
 }

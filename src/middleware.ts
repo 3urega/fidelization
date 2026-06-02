@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getSessionCookieFromHeader, verifySessionTokenEdge } from "./lib/auth/middlewareSession";
 import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
+import { forwardResolvedTenantHeaders } from "./lib/tenant/forwardResolvedTenantHeaders";
 import { resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
 
 const allowedOrigins = new Set([
@@ -14,8 +15,25 @@ const allowedOrigins = new Set([
 	"http://127.0.0.1:3001",
 ]);
 
+function isAllowedCorsOrigin(origin: string): boolean {
+	if (allowedOrigins.has(origin)) {
+		return true;
+	}
+
+	try {
+		const { hostname, protocol } = new URL(origin);
+
+		return (
+			protocol === "http:" &&
+			(hostname === "localhost" || hostname.endsWith(".localhost") || hostname === "127.0.0.1")
+		);
+	} catch {
+		return false;
+	}
+}
+
 function corsHeaders(origin: string | null): HeadersInit {
-	const allowOrigin = origin !== null && allowedOrigins.has(origin) ? origin : "*";
+	const allowOrigin = origin !== null && isAllowedCorsOrigin(origin) ? origin : "*";
 
 	return {
 		"Access-Control-Allow-Origin": allowOrigin,
@@ -37,18 +55,25 @@ async function getSession(request: NextRequest): Promise<boolean> {
 	return session !== null;
 }
 
-function nextWithTenantContext(request: NextRequest): NextResponse {
-	const tenant = resolveTenantFromRequest(request);
+function nextWithTenantContext(request: NextRequest, tenant: { slug: string; tenantId: string } | null): NextResponse {
+	const headers = forwardResolvedTenantHeaders(request, tenant);
 
 	return attachResolvedTenantHeaders(
-		NextResponse.next({ request: { headers: request.headers } }),
+		NextResponse.next({ request: { headers } }),
 		tenant,
 	);
 }
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+	const resolution = await resolveTenantFromRequest(request);
+
 	const { pathname } = request.nextUrl;
-	const resolvedTenant = resolveTenantFromRequest(request);
+
+	if (resolution.status === "not_found" && pathname !== "/tenant-not-found") {
+		return NextResponse.rewrite(new URL("/tenant-not-found", request.url), { status: 404 });
+	}
+
+	const resolvedTenant = resolution.status === "resolved" ? resolution.tenant : null;
 
 	if (pathname === "/home" || pathname === "/profile") {
 		if (!(await getSession(request))) {
@@ -63,7 +88,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	}
 
 	if (!pathname.startsWith("/api/")) {
-		return attachResolvedTenantHeaders(NextResponse.next(), resolvedTenant);
+		return nextWithTenantContext(request, resolvedTenant);
 	}
 
 	const origin = request.headers.get("origin");
@@ -72,7 +97,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
 	}
 
-	const response = nextWithTenantContext(request);
+	const response = nextWithTenantContext(request, resolvedTenant);
 	const headers = corsHeaders(origin);
 
 	Object.entries(headers).forEach(([key, value]) => {
@@ -83,5 +108,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-	matcher: ["/", "/home", "/profile", "/login", "/register", "/api/:path*"],
+	matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };

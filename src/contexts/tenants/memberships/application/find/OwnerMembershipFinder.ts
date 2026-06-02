@@ -11,7 +11,7 @@ export class OwnerMembershipFinder {
 	constructor(private readonly repository: TenantMembershipRepository) {}
 
 	async find(userId: string): Promise<OwnerMembership> {
-		const membership = await this.repository.findOwnerMembershipByUserId(userId);
+		const membership = await this.repository.findFirstStaffMembershipByUserId(userId);
 
 		if (!membership) {
 			throw new OwnerMembershipNotFound(userId);

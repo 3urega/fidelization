@@ -2,13 +2,13 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { UserAuthenticator } from "../../../../contexts/identity/users/application/authenticate/UserAuthenticator";
 import { InvalidCredentials } from "../../../../contexts/identity/users/domain/InvalidCredentials";
+import { TenantStaffLogin } from "../../../../contexts/tenants/memberships/application/authenticate/TenantStaffLogin";
+import { StaffMembershipNotFound } from "../../../../contexts/tenants/memberships/domain/StaffMembershipNotFound";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { OwnerMembershipFinder } from "../../../../contexts/tenants/memberships/application/find/OwnerMembershipFinder";
-import { OwnerMembershipNotFound } from "../../../../contexts/tenants/memberships/domain/OwnerMembershipNotFound";
 import { authResponseToJson, handleAuthDomainError } from "../../../../lib/auth/http";
 import { createSessionToken, jsonWithSessionCookie } from "../../../../lib/auth/session";
+import { getResolvedTenantFromRequest } from "../../../../lib/tenant/getResolvedTenant";
 
 type Body = {
 	email: string;
@@ -25,19 +25,23 @@ export async function POST(request: Request): Promise<Response> {
 			);
 		}
 
-		const authenticator = container.get(UserAuthenticator);
-		const user = await authenticator.login(body.email, body.password);
-		const membership = await container.get(OwnerMembershipFinder).find(user.id.value);
+		const hostTenant = getResolvedTenantFromRequest(request);
+		const result = await container.get(TenantStaffLogin).loginWithPassword(
+			body.email,
+			body.password,
+			hostTenant?.tenantId ?? null,
+		);
+
 		const session = {
-			userId: user.id.value,
-			tenantId: membership.tenant.id,
-			role: membership.role,
+			userId: result.user.id.value,
+			tenantId: result.membership.tenant.id,
+			role: result.membership.role,
 		};
 		const token = await createSessionToken(session);
 
-		return jsonWithSessionCookie(authResponseToJson(user, membership.tenant, session), token);
+		return jsonWithSessionCookie(authResponseToJson(result.user, result.membership.tenant, session), token);
 	} catch (error) {
-		if (error instanceof InvalidCredentials || error instanceof OwnerMembershipNotFound) {
+		if (error instanceof InvalidCredentials || error instanceof StaffMembershipNotFound) {
 			const response = handleAuthDomainError(error);
 
 			if (response) {

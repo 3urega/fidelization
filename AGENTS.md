@@ -6,6 +6,8 @@ docker compose up -d   # Postgres + schema starter
 npm run dev       # local dev server (not Docker)
 npm run lint:fix
 npm run verify:saas-base   # issue #4 — route groups, tenant stub, env
+npm run verify:tenant-resolution   # issue #5 — extractSubdomain + mock slug map
+npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross-tenant session
 npm run build:capacitor   # export out/ + cap sync android
 ```
 

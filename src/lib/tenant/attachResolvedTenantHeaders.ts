@@ -1,15 +1,16 @@
 import type { NextResponse } from "next/server";
 
+import { TENANT_ID_HEADER, TENANT_SLUG_HEADER } from "./forwardResolvedTenantHeaders";
 import type { ResolvedTenant } from "./resolveTenant";
 
-/** Optional request headers for downstream handlers (target multi-tenant middleware). */
+/** Mirror resolved tenant on the response (visible in Network tab). */
 export function attachResolvedTenantHeaders(
 	response: NextResponse,
 	tenant: ResolvedTenant | null,
 ): NextResponse {
 	if (tenant) {
-		response.headers.set("x-tenant-id", tenant.tenantId);
-		response.headers.set("x-tenant-slug", tenant.slug);
+		response.headers.set(TENANT_ID_HEADER, tenant.tenantId);
+		response.headers.set(TENANT_SLUG_HEADER, tenant.slug);
 	}
 
 	return response;

@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { resolveTenantFromRequest } from "../src/lib/tenant/resolveTenant";
 
+async function main(): Promise<void> {
 const root = process.cwd();
 
 const requiredPaths = [
@@ -36,13 +37,16 @@ if (!middlewareSource.includes("/profile")) {
 	process.exit(1);
 }
 
-const tenant = resolveTenantFromRequest(new Request("http://localhost/"));
+const resolution = await resolveTenantFromRequest(new Request("http://localhost/"));
 
-if (tenant !== null) {
-	console.error("❌ resolveTenantFromRequest should return null in Fase 0");
+if (resolution.status !== "inactive") {
+	console.error("❌ apex host without APP_DOMAIN should be inactive");
 	process.exit(1);
 }
 
 console.log("✅ Route groups (public)/(auth)/(app) present");
-console.log("✅ resolveTenant stub + middleware wiring");
+console.log("✅ resolveTenant + middleware wiring");
 console.log("✅ src/lib/env.ts present");
+}
+
+void main();

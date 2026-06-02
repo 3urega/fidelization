@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { useTheme } from "./theme/ThemeProvider";
@@ -17,7 +16,6 @@ type AuthResponse = {
 };
 
 export function RegisterForm(): ReactElement {
-	const router = useRouter();
 	const { applyTheme } = useTheme();
 	const [name, setName] = useState("");
 	const [businessName, setBusinessName] = useState("");
@@ -52,7 +50,7 @@ export function RegisterForm(): ReactElement {
 			primaryColor: data.tenant.primaryColor,
 			secondaryColor: data.tenant.secondaryColor,
 		});
-		router.push("/home");
+		window.location.assign("/home");
 	}
 
 	return (
