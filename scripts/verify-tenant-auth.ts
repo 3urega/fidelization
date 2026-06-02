@@ -1,4 +1,5 @@
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
+import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
 import { TenantStaffLogin } from "../src/contexts/tenants/memberships/application/authenticate/TenantStaffLogin";
 import { TenantSessionVerifier } from "../src/contexts/tenants/memberships/application/verify/TenantSessionVerifier";
 import { CrossTenantAccessDenied } from "../src/contexts/tenants/memberships/domain/CrossTenantAccessDenied";
@@ -18,6 +19,8 @@ const demoTenant = Tenant.fromPrimitives({
 	primaryColor: "#7C3AED",
 	secondaryColor: "#4F46E5",
 	subscriptionPlan: "FREE",
+	status: TenantStatus.Active,
+	createdAt: new Date().toISOString(),
 });
 
 const otherTenantId = "00000000-0000-4000-8000-000000000099";

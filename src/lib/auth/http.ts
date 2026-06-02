@@ -32,6 +32,16 @@ export function tenantToJson(tenant: Tenant): Record<string, string> {
 		primaryColor: primitives.primaryColor,
 		secondaryColor: primitives.secondaryColor,
 		subscriptionPlan: primitives.subscriptionPlan,
+		status: primitives.status,
+	};
+}
+
+export function platformTenantToJson(tenant: Tenant): Record<string, string> {
+	const primitives = tenant.toPrimitives();
+
+	return {
+		...tenantToJson(tenant),
+		createdAt: primitives.createdAt,
 	};
 }
 

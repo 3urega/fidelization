@@ -1,3 +1,5 @@
+import { TenantStatus } from "./TenantStatus";
+
 export type TenantPrimitives = {
 	id: string;
 	name: string;
@@ -6,6 +8,8 @@ export type TenantPrimitives = {
 	primaryColor: string;
 	secondaryColor: string;
 	subscriptionPlan: string;
+	status: TenantStatus;
+	createdAt: string;
 };
 
 export class Tenant {
@@ -17,6 +21,8 @@ export class Tenant {
 		public readonly primaryColor: string,
 		public readonly secondaryColor: string,
 		public readonly subscriptionPlan: string,
+		public readonly status: TenantStatus,
+		public readonly createdAt: string,
 	) {}
 
 	static fromPrimitives(primitives: TenantPrimitives): Tenant {
@@ -28,6 +34,8 @@ export class Tenant {
 			primitives.primaryColor,
 			primitives.secondaryColor,
 			primitives.subscriptionPlan,
+			primitives.status,
+			primitives.createdAt,
 		);
 	}
 
@@ -40,6 +48,8 @@ export class Tenant {
 			primaryColor: this.primaryColor,
 			secondaryColor: this.secondaryColor,
 			subscriptionPlan: this.subscriptionPlan,
+			status: this.status,
+			createdAt: this.createdAt,
 		};
 	}
 }

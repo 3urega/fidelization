@@ -6,7 +6,7 @@ import { prisma } from "../../../../lib/prisma";
 import { User } from "../../../identity/users/domain/User";
 import { UserPlan } from "../../../identity/users/domain/UserPlan";
 import { TenantRole } from "../../memberships/domain/TenantRole";
-import { Tenant } from "../../tenants/domain/Tenant";
+import { tenantFromPrismaRow } from "../../tenants/infrastructure/tenantFromPrismaRow";
 import {
 	OwnerOnboardingRepository,
 	RegisterOwnerParams,
@@ -65,15 +65,7 @@ export class PrismaOwnerOnboardingRepository extends OwnerOnboardingRepository {
 				profilePicture: result.userRow.profilePicture,
 				plan: result.userRow.subscriptionPlan as UserPlan,
 			}),
-			tenant: Tenant.fromPrimitives({
-				id: result.tenantRow.id,
-				name: result.tenantRow.name,
-				slug: result.tenantRow.slug,
-				logoUrl: result.tenantRow.logoUrl,
-				primaryColor: result.tenantRow.primaryColor,
-				secondaryColor: result.tenantRow.secondaryColor,
-				subscriptionPlan: result.tenantRow.subscriptionPlan,
-			}),
+			tenant: tenantFromPrismaRow(result.tenantRow),
 			role: TenantRole.Owner,
 		};
 	}

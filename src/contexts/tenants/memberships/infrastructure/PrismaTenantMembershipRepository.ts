@@ -2,6 +2,7 @@ import { Service } from "diod";
 
 import { prisma } from "../../../../lib/prisma";
 import { Tenant } from "../../tenants/domain/Tenant";
+import { tenantFromPrismaRow } from "../../tenants/infrastructure/tenantFromPrismaRow";
 import { StaffMembership, TenantMembershipRepository } from "../domain/TenantMembershipRepository";
 import { isStaffRole, TenantRole } from "../domain/TenantRole";
 
@@ -59,15 +60,7 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 			return null;
 		}
 
-		return Tenant.fromPrimitives({
-			id: tenant.id,
-			name: tenant.name,
-			slug: tenant.slug,
-			logoUrl: tenant.logoUrl,
-			primaryColor: tenant.primaryColor,
-			secondaryColor: tenant.secondaryColor,
-			subscriptionPlan: tenant.subscriptionPlan,
-		});
+		return tenantFromPrismaRow(tenant);
 	}
 
 	private toStaffMembership(membership: {
@@ -79,6 +72,8 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 			primaryColor: string;
 			secondaryColor: string;
 			subscriptionPlan: string;
+			status: string;
+			createdAt: Date;
 		};
 		role: string;
 	}): StaffMembership {
@@ -88,15 +83,7 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 		}
 
 		return {
-			tenant: Tenant.fromPrimitives({
-				id: membership.tenant.id,
-				name: membership.tenant.name,
-				slug: membership.tenant.slug,
-				logoUrl: membership.tenant.logoUrl,
-				primaryColor: membership.tenant.primaryColor,
-				secondaryColor: membership.tenant.secondaryColor,
-				subscriptionPlan: membership.tenant.subscriptionPlan,
-			}),
+			tenant: tenantFromPrismaRow(membership.tenant),
 			role,
 		};
 	}
