@@ -1,11 +1,9 @@
-import {
-	applyThemeTokensToDocument,
-	type ThemeTokenSet,
-} from "./applyThemeTokens";
+import { applyThemeTokensToDocument } from "./applyThemeTokens";
 import {
 	defaultPresetId,
 	resolvePresetTokens,
 	type ThemePresetId,
+	type ThemeTokenSet,
 } from "./themePresets";
 
 export type { ThemePresetId };

@@ -13,6 +13,43 @@ enum MembershipRole {
   customer
 }
 
+enum TenantStatus {
+  active
+  suspended
+}
+
+enum LoyaltyTransactionType {
+  points_earned
+  points_redeemed
+  stamp_added
+  reward_redeemed
+  manual_adjustment
+}
+
+enum RewardType {
+  free_item
+  discount
+  custom
+}
+
+enum PromotionType {
+  discount
+  bundle
+  seasonal
+}
+
+enum CouponType {
+  percentage
+  fixed
+  free_item
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  canceled
+}
+
 model User {
   id               String             @id @default(uuid())
   name             String
@@ -22,20 +59,35 @@ model User {
   subscriptionPlan String             @default("FREE") @map("subscription_plan")
   createdAt        DateTime           @default(now()) @map("created_at")
   memberships      TenantMembership[]
+  loyaltyTransactionsCreated LoyaltyTransaction[] @relation("LoyaltyTransactionCreatedBy")
 
   @@map("users")
 }
 
 model Tenant {
-  id               String             @id @default(uuid())
-  name             String
-  slug             String             @unique
-  logoUrl          String             @default("") @map("logo_url")
-  primaryColor     String             @default("#7C3AED") @map("primary_color")
-  secondaryColor   String             @default("#4F46E5") @map("secondary_color")
-  subscriptionPlan String             @default("basic") @map("subscription_plan")
-  createdAt        DateTime           @default(now()) @map("created_at")
-  memberships      TenantMembership[]
+  id                 String             @id @default(uuid())
+  name               String
+  slug               String             @unique
+  logoUrl            String             @default("") @map("logo_url")
+  primaryColor       String             @default("#7C3AED") @map("primary_color")
+  secondaryColor     String             @default("#4F46E5") @map("secondary_color")
+  subscriptionPlan   String             @default("basic") @map("subscription_plan")
+  status             TenantStatus       @default(active)
+  features           Json?
+  subscriptionPlanId String?            @map("subscription_plan_id")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  memberships        TenantMembership[]
+  plan               SubscriptionPlan?  @relation(fields: [subscriptionPlanId], references: [id])
+  customers          Customer[]
+  loyaltyTransactions LoyaltyTransaction[]
+  rewards            Reward[]
+  stampCampaigns     StampCampaign[]
+  stampProgress      CustomerStampProgress[]
+  promotions         Promotion[]
+  coupons            Coupon[]
+  notifications      Notification[]
+  subscriptions      Subscription[]
 
   @@map("tenants")
 }
@@ -50,4 +102,170 @@ model TenantMembership {
 
   @@unique([tenantId, userId])
   @@map("tenant_memberships")
+}
+
+model Customer {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  name          String
+  email         String?
+  phone         String?
+  qrValue       String   @unique @map("qr_value")
+  pointsBalance Int      @default(0) @map("points_balance")
+  visitsCount   Int      @default(0) @map("visits_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  loyaltyTransactions LoyaltyTransaction[]
+  stampProgress CustomerStampProgress[]
+
+  @@index([tenantId])
+  @@map("customers")
+}
+
+model LoyaltyTransaction {
+  id              String                 @id @default(uuid())
+  tenantId        String                 @map("tenant_id")
+  customerId      String                 @map("customer_id")
+  type            LoyaltyTransactionType
+  points          Int?
+  metadata        Json?
+  createdByUserId String?                @map("created_by_user_id")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer        Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdBy       User?                  @relation("LoyaltyTransactionCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@map("loyalty_transactions")
+}
+
+model Reward {
+  id          String     @id @default(uuid())
+  tenantId    String     @map("tenant_id")
+  name        String
+  description String     @default("")
+  costPoints  Int        @map("cost_points")
+  type        RewardType
+  isActive    Boolean    @default(true) @map("is_active")
+  stockLimit  Int?       @map("stock_limit")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stampCampaigns StampCampaign[]
+
+  @@index([tenantId])
+  @@map("rewards")
+}
+
+model StampCampaign {
+  id             String   @id @default(uuid())
+  tenantId       String   @map("tenant_id")
+  name           String
+  requiredStamps Int      @map("required_stamps")
+  rewardId       String?  @map("reward_id")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reward         Reward?  @relation(fields: [rewardId], references: [id])
+  progress       CustomerStampProgress[]
+
+  @@index([tenantId])
+  @@map("stamp_campaigns")
+}
+
+model CustomerStampProgress {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  customerId    String   @map("customer_id")
+  campaignId    String   @map("campaign_id")
+  currentStamps Int      @default(0) @map("current_stamps")
+  completed     Boolean  @default(false)
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  campaign      StampCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, campaignId])
+  @@index([tenantId])
+  @@map("customer_stamp_progress")
+}
+
+model Promotion {
+  id          String        @id @default(uuid())
+  tenantId    String        @map("tenant_id")
+  title       String
+  description String        @default("")
+  type        PromotionType
+  startDate   DateTime?     @map("start_date")
+  endDate     DateTime?     @map("end_date")
+  isActive    Boolean       @default(true) @map("is_active")
+  conditions  Json?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("promotions")
+}
+
+model Coupon {
+  id          String     @id @default(uuid())
+  tenantId    String     @map("tenant_id")
+  code        String
+  type        CouponType
+  value       String
+  usageLimit  Int?       @map("usage_limit")
+  usageCount  Int        @default(0) @map("usage_count")
+  expiresAt   DateTime?  @map("expires_at")
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("coupons")
+}
+
+model Notification {
+  id             String    @id @default(uuid())
+  tenantId       String    @map("tenant_id")
+  title          String
+  message        String
+  targetSegment  Json?     @map("target_segment")
+  sentAt         DateTime? @map("sent_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("notifications")
+}
+
+model SubscriptionPlan {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  priceMonthly Int      @map("price_monthly")
+  priceYearly  Int      @map("price_yearly")
+  features     Json?
+  limits       Json?
+  isActive     Boolean  @default(true) @map("is_active")
+  tenants      Tenant[]
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  tenantId             String             @map("tenant_id")
+  planId               String             @map("plan_id")
+  status               SubscriptionStatus @default(active)
+  startedAt            DateTime           @default(now()) @map("started_at")
+  endsAt               DateTime?          @map("ends_at")
+  stripeSubscriptionId String?            @map("stripe_subscription_id")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan                 SubscriptionPlan   @relation(fields: [planId], references: [id])
+
+  @@index([tenantId])
+  @@map("subscriptions")
 }

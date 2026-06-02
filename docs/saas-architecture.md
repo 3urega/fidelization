@@ -6,7 +6,7 @@ This system is a multi-tenant SaaS platform for customer loyalty, promotions, an
 
 The architecture is built around strict tenant isolation, feature-flag-driven functionality, and a centralized superadmin control layer.
 
-**How to read this document:** it describes the **target platform architecture** (roles, isolation, billing model, feature flags, subdomains). Product vision and MVP priorities are summarized in [`AGENTS.md`](../AGENTS.md) (section Product); domain rules in [`business-rules.md`](business-rules.md); commercial plans in [`business-model.md`](business-model.md). For what is **already in the repo**, see [Implementation status](#implementation-status-current-repo) below before planning new work.
+**How to read this document:** it describes the **target platform architecture** (roles, isolation, billing model, feature flags, subdomains). Product vision and MVP priorities are summarized in [`AGENTS.md`](../AGENTS.md) (section Product); domain rules in [`business-rules.md`](business-rules.md); commercial plans in [`business-model.md`](business-model.md); **tables and fields (implemented vs target):** [`database/data-model.md`](database/data-model.md); **tenant resolution (subdomain target, JWT session today):** [`teenant-resolution.md`](teenant-resolution.md). For what is **already in the repo**, see [Implementation status](#implementation-status-current-repo) below before planning new work.
 
 ---
 
@@ -22,7 +22,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Superadmin | Platform-wide control | **No** | Not in schema, API, or UI |
 | Feature flags (global + tenant) | Plan-driven modules | **No** | `subscriptionPlan` string on tenant/user; no `features` map or enforcement |
 | Billing (this doc) | Stripe, subscription per tenant | **No** | Starter context `billing` = Google Play **per user** ([`src/contexts/billing/`](../src/contexts/billing/)), not tenant Stripe |
-| Subdomains per tenant | `tenant.app.com` | **No** | Single app origin; tenant resolved via session after login |
+| Subdomains per tenant | `tenant.app.com` | **No** | Single app origin; tenant resolved via session after login — see [`teenant-resolution.md`](teenant-resolution.md) |
 | Branding | Per tenant | **Partial** | `primaryColor`, `secondaryColor`, `logoUrl` on tenant; runtime via `ThemeProvider` |
 | Postgres RLS | Recommended future | **No** | Prisma Postgres; isolation in application layer |
 
@@ -191,6 +191,8 @@ Billing is subscription-based per tenant.
 ---
 
 # 5. Subdomain Strategy
+
+**Implementation detail:** [`teenant-resolution.md`](teenant-resolution.md) (subdomain and middleware are target; Fase 0 uses JWT + `tenant_memberships`).
 
 Each tenant is accessible via subdomain:
 

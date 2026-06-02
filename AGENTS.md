@@ -43,7 +43,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 # Architecture
 
 - Next.js 14, Onion Architecture, DDD.
-- **Active contexts**: `identity` (users, auth), `tenants` (tenant, memberships, owner onboarding), `billing` (Google Play — starter, not tenant Stripe), `shared` (infra, DI).
+- **Active contexts**: `identity` (users, auth), `tenants` (tenant, memberships, owner onboarding), `loyalty` (customers, transactions, rewards, stamps, promos, coupons, notifications — Prisma repos), `billing` (Google Play starter + `subscriptions` tenant catalog), `shared` (infra, DI).
+- **Tenant context (Fase 0):** JWT `tenantId` + `role` after login/register — not subdomain middleware yet. Spec: [`docs/teenant-resolution.md`](docs/teenant-resolution.md).
 - **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
 
@@ -56,6 +57,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 ```
 docs/
 ├── saas-architecture.md         # arquitectura SaaS objetivo + estado implementado vs spec
+├── teenant-resolution.md        # resolución de tenant (subdomain target; JWT/membership hoy) — nombre con typo teenant
 ├── business-model.md            # planes comerciales, add-ons, ingresos + estado vs código
 ├── business-rules.md            # reglas de dominio: puntos, sellos, QR, planes
 ├── code-style.md
@@ -66,6 +68,7 @@ docs/
 │   ├── hexagonal-architecture.md
 │   └── thin-api-routes.md
 ├── database/
+│   ├── data-model.md            # esquema implementado (Fase 0) + entidades target + roadmap migraciones
 │   ├── not-null-fields.md
 │   ├── table-naming-singular-plural-convention.md
 │   └── text-over-varchar-char-convention.md
@@ -82,9 +85,11 @@ docs/
 | Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/saas-architecture.md`, `docs/business-rules.md` |
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/business-model.md` (sección *Implementation status*) |
 | Superadmin, tenant isolation, feature flags, billing SaaS, subdominios | `docs/saas-architecture.md` (sección *Implementation status*) |
+| Resolución de tenant (subdominio, JWT `tenantId`, middleware, login) | `docs/teenant-resolution.md` (sección *Implementation status*) + `src/middleware.ts`, `src/lib/auth/session.ts` |
 | Billing / Google Play / `UserPlan` FREE-PREMIUM (starter) | `src/contexts/billing/`, `UserPlan` — no confundir con planes tenant del business-model |
 | API routes, DI, hexagonal | `docs/backend/*` |
-| Prisma, tablas, migraciones | `docs/database/*`, `.agents/skills/prisma/` |
+| Modelo de datos, nuevas tablas, `tenant_id`, membership | `docs/database/data-model.md` (§ Implemented) + `prisma/schema.prisma` + `docs/database/*` |
+| Prisma, migraciones, seed | `.agents/skills/prisma/`, `prisma/schema.prisma` |
 | UI, theming, presets | `docs/frontend/style-guidelines.md`, `src/app/theme/tokens.css`, `src/app/_components/theme/` |
 
 .agents/skills/

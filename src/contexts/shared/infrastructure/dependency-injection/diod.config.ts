@@ -8,12 +8,28 @@ import { SyncUserPlanFromGooglePlay } from "../../../billing/google_play_subscri
 import { VerifyGooglePlayPurchase } from "../../../billing/google_play_subscription/application/verify/VerifyGooglePlayPurchase";
 import { GooglePlaySubscriptionRepository } from "../../../billing/google_play_subscription/domain/GooglePlaySubscriptionRepository";
 import { PostgresGooglePlaySubscriptionRepository } from "../../../billing/google_play_subscription/infrastructure/PostgresGooglePlaySubscriptionRepository";
+import { TenantBillingRepository } from "../../../billing/subscriptions/domain/TenantBillingRepository";
+import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
 import { UserProfileUpdater } from "../../../identity/users/application/update_profile/UserProfileUpdater";
 import { UserRepository } from "../../../identity/users/domain/UserRepository";
 import { PrismaUserRepository } from "../../../identity/users/infrastructure/PrismaUserRepository";
+import { CouponRepository } from "../../../loyalty/coupons/domain/CouponRepository";
+import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
+import { CustomerRepository } from "../../../loyalty/customers/domain/CustomerRepository";
+import { PrismaCustomerRepository } from "../../../loyalty/customers/infrastructure/PrismaCustomerRepository";
+import { LoyaltyTransactionRepository } from "../../../loyalty/loyalty_transactions/domain/LoyaltyTransactionRepository";
+import { PrismaLoyaltyTransactionRepository } from "../../../loyalty/loyalty_transactions/infrastructure/PrismaLoyaltyTransactionRepository";
+import { NotificationRepository } from "../../../loyalty/notifications/domain/NotificationRepository";
+import { PrismaNotificationRepository } from "../../../loyalty/notifications/infrastructure/PrismaNotificationRepository";
+import { PromotionRepository } from "../../../loyalty/promotions/domain/PromotionRepository";
+import { PrismaPromotionRepository } from "../../../loyalty/promotions/infrastructure/PrismaPromotionRepository";
+import { RewardRepository } from "../../../loyalty/rewards/domain/RewardRepository";
+import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
+import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
 import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
 import { PrismaTenantMembershipRepository } from "../../../tenants/memberships/infrastructure/PrismaTenantMembershipRepository";
@@ -63,5 +79,29 @@ builder.registerAndUse(VerifyGooglePlayPurchase);
 builder.registerAndUse(SyncUserPlanFromGooglePlay);
 
 builder.registerAndUse(DemoPlanSetter);
+
+builder.register(CustomerRepository).use(PrismaCustomerRepository);
+builder.registerAndUse(PrismaCustomerRepository);
+
+builder.register(LoyaltyTransactionRepository).use(PrismaLoyaltyTransactionRepository);
+builder.registerAndUse(PrismaLoyaltyTransactionRepository);
+
+builder.register(StampCampaignRepository).use(PrismaStampCampaignRepository);
+builder.registerAndUse(PrismaStampCampaignRepository);
+
+builder.register(RewardRepository).use(PrismaRewardRepository);
+builder.registerAndUse(PrismaRewardRepository);
+
+builder.register(PromotionRepository).use(PrismaPromotionRepository);
+builder.registerAndUse(PrismaPromotionRepository);
+
+builder.register(CouponRepository).use(PrismaCouponRepository);
+builder.registerAndUse(PrismaCouponRepository);
+
+builder.register(NotificationRepository).use(PrismaNotificationRepository);
+builder.registerAndUse(PrismaNotificationRepository);
+
+builder.register(TenantBillingRepository).use(PrismaTenantBillingRepository);
+builder.registerAndUse(PrismaTenantBillingRepository);
 
 export const container = builder.build();

@@ -12,7 +12,6 @@ import {
 function createDocumentMock(): Map<string, string> {
 	const properties = new Map<string, string>();
 
-	// @ts-expect-error minimal DOM mock for runtime theme application
 	globalThis.document = {
 		documentElement: {
 			style: {
@@ -21,7 +20,7 @@ function createDocumentMock(): Map<string, string> {
 				},
 			},
 		},
-	};
+	} as unknown as Document;
 
 	return properties;
 }

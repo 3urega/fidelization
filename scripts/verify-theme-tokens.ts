@@ -32,8 +32,7 @@ const documentElement = {
 	},
 };
 
-// @ts-expect-error minimal DOM mock for runtime theme application
-globalThis.document = { documentElement };
+globalThis.document = { documentElement } as unknown as Document;
 
 applyThemeToDocument({ primaryColor: "#112233", secondaryColor: "#445566" });
 
