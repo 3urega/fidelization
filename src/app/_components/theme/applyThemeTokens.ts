@@ -1,9 +1,11 @@
-import type { ThemeTokenSet } from "./themePresets";
+import type { ThemeTokenKey, ThemeTokenSet } from "./themePresets";
 
 export function applyThemeTokensToDocument(tokens: Partial<ThemeTokenSet>): void {
-	for (const [name, value] of Object.entries(tokens)) {
+	for (const key of Object.keys(tokens) as ThemeTokenKey[]) {
+		const value = tokens[key];
+
 		if (value !== undefined) {
-			document.documentElement.style.setProperty(name, value);
+			document.documentElement.style.setProperty(key, value);
 		}
 	}
 }

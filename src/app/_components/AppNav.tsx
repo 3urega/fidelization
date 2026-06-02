@@ -47,20 +47,14 @@ export function AppNav(): ReactElement {
 					<Link href="/home" className="text-sm text-muted hover:text-foreground">
 						Inicio
 					</Link>
+					<Link href="/profile" className="text-sm text-muted hover:text-foreground">
+						Perfil
+					</Link>
 					<Button type="button" variant="secondary" onClick={() => void logout()}>
 						Cerrar sesión
 					</Button>
 				</>
-			) : (
-				<>
-					<Link href="/login" className="text-sm text-muted hover:text-foreground">
-						Login
-					</Link>
-					<Link href="/register" className="text-sm text-muted hover:text-foreground">
-						Registro
-					</Link>
-				</>
-			)}
+			) : null}
 		</nav>
 	);
 }

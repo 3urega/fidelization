@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
-import { useTheme } from "./theme/ThemeProvider";
 import { themePresetIds, themePresetLabels } from "./theme/themePresets";
+import { useTheme } from "./theme/ThemeProvider";
 import { Button } from "./ui/Button";
 import { Field } from "./ui/Field";
 import { Input } from "./ui/Input";

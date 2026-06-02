@@ -3,7 +3,6 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import { AppNav } from "./_components/AppNav";
 import { ThemeProvider } from "./_components/theme/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -21,10 +20,7 @@ export default function RootLayout({
 	return (
 		<html lang="es" className={inter.variable}>
 			<body className="min-h-screen font-sans antialiased">
-				<ThemeProvider>
-					<AppNav />
-					{children}
-				</ThemeProvider>
+				<ThemeProvider>{children}</ThemeProvider>
 			</body>
 		</html>
 	);
