@@ -11,6 +11,7 @@ npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross
 npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, PlatformAuthenticator
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
+npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -50,7 +51,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 # Local auth / tenants (dev)
 
 - **Owner/staff login:** `/login` en `http://localhost:3000` → `/home` en el mismo host (cookie host-only). Subdominio: `http://{slug}.localhost:3000/login` → `/home` en ese host. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
-- **Superadmin:** solo `http://localhost:3000/platform/login` (apex) — no usar `/login` ni subdominios de negocio.
+- **Superadmin (issue #8):** solo `http://localhost:3000/platform/login` (apex) → `/platform`; no usar `/login` ni subdominios de negocio. Verifies: `verify:platform-login`, `verify:platform-isolation`.
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
 
 # Architecture
@@ -60,7 +61,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Tenant context (Fase 0):** JWT `tenantId` + `role` after login/register — not subdomain middleware yet. Spec: [`docs/teenant-resolution.md`](docs/teenant-resolution.md).
 - **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
-- **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` authenticated shell (`AppNav`); URLs sin cambio (`/`, `/login`, `/home`, …).
+- **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` owner shell, `(platform)/` superadmin (`/platform`, `/platform/login`); URLs sin cambio (`/`, `/login`, `/home`, …).
+- **Superadmin foundation (issue #8):** auth `kind: platform`, aislamiento de tenant APIs y middleware; dashboard operativo (CRUD) fuera de alcance.
 - **Env:** [`src/lib/env.ts`](src/lib/env.ts) — acceso centralizado server-side; ver [`.env.example`](.env.example).
 
 # Documentation
@@ -100,7 +102,8 @@ docs/
 |-------|----------------|
 | Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/saas-architecture.md`, `docs/business-rules.md` |
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/business-model.md` (sección *Implementation status*) |
-| Superadmin, tenant isolation, feature flags, billing SaaS, subdominios | `docs/saas-architecture.md` (sección *Implementation status*) |
+| Superadmin foundation (issue #8), tenant isolation | `docs/saas-architecture.md` + `npm run verify:platform-isolation` |
+| Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/saas-architecture.md` (sección *Implementation status*) |
 | Resolución de tenant (subdominio, JWT `tenantId`, middleware, login) | `docs/teenant-resolution.md` (sección *Implementation status*) + `src/middleware.ts`, `src/lib/auth/session.ts` |
 | Login dev atascado / cookie / superadmin vs owner | `docs/backend/session-cookies-localhost-dev.md` + `npm run verify:platform-login` / `verify:owner-login` |
 | Billing / Google Play / `UserPlan` FREE-PREMIUM (starter) | `src/contexts/billing/`, `UserPlan` — no confundir con planes tenant del business-model |

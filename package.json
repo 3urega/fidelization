@@ -14,6 +14,7 @@
     "verify:platform-auth": "tsx scripts/verify-platform-auth.ts",
     "verify:owner-login": "tsx scripts/verify-owner-login-flow.ts",
     "verify:platform-login": "tsx scripts/verify-platform-login-flow.ts",
+    "verify:platform-isolation": "tsx scripts/verify-platform-isolation.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

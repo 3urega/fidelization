@@ -140,3 +140,12 @@ export function jsonWithSessionCookie<T>(body: T, token: string, status = 200): 
 
 	return response;
 }
+
+/** Preferred in App Router route handlers (reliable cookie clear in the browser). */
+export function jsonWithClearSessionCookie<T>(body: T, status = 200): NextResponse {
+	const response = NextResponse.json(body, { status });
+	response.headers.append("Set-Cookie", clearSessionCookie());
+	deleteSessionCookie();
+
+	return response;
+}

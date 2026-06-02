@@ -64,7 +64,7 @@ The cookie was set for `localhost`; `la-chismosa.localhost` does not receive it 
 - [`src/app/_components/LoginForm.tsx`](../../src/app/_components/LoginForm.tsx) — `navigateAfterAuth` (no apex → subdomain redirect).
 - [`src/app/_components/PlatformLoginForm.tsx`](../../src/app/_components/PlatformLoginForm.tsx) — redirect to `/platform` with `credentials: "include"`.
 - [`src/middleware.ts`](../../src/middleware.ts) — session guards for `/home`, `/profile`, `/platform/*`.
-- [`scripts/verify-platform-login-flow.ts`](../../scripts/verify-platform-login-flow.ts), [`scripts/verify-owner-login-flow.ts`](../../scripts/verify-owner-login-flow.ts).
+- [`scripts/verify-platform-login-flow.ts`](../../scripts/verify-platform-login-flow.ts), [`scripts/verify-platform-isolation.ts`](../../scripts/verify-platform-isolation.ts), [`scripts/verify-owner-login-flow.ts`](../../scripts/verify-owner-login-flow.ts).
 
 ## ☝️ Exceptional cases: When to not take into account this convention
 
@@ -78,5 +78,5 @@ Staging on `app.staging.example.com` and tenants on `{slug}.app.staging.example.
 ## 🔗 Related agreements
 
 - [Tenant resolution (subdomain, JWT, login scope)](../teenant-resolution.md).
-- [SaaS architecture (roles, route groups)](../saas-architecture.md).
+- [SaaS architecture (roles, route groups, issue #8 superadmin foundation)](../saas-architecture.md).
 - [API routes reflect-metadata](./api-routes-reflect-metadata.md).
