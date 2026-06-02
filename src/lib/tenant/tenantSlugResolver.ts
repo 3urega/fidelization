@@ -35,7 +35,10 @@ function setCached(slug: string, tenant: ResolvedTenant | null): void {
 	}
 }
 
-async function fetchTenantBySlugFromApi(slug: string, origin: string): Promise<ResolvedTenant | null> {
+async function fetchTenantBySlugFromApi(
+	slug: string,
+	origin: string,
+): Promise<ResolvedTenant | null> {
 	const cached = getCached(slug);
 	if (cached !== undefined) {
 		return cached;

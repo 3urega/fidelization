@@ -30,9 +30,9 @@ import { RewardRepository } from "../../../loyalty/rewards/domain/RewardReposito
 import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
 import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
+import { PlatformAuthenticator } from "../../../platform/application/authenticate/PlatformAuthenticator";
 import { ListPlatformTenants } from "../../../platform/application/tenants/ListPlatformTenants";
 import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
-import { PlatformAuthenticator } from "../../../platform/application/authenticate/PlatformAuthenticator";
 import { TenantStaffLogin } from "../../../tenants/memberships/application/authenticate/TenantStaffLogin";
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
 import { TenantSessionVerifier } from "../../../tenants/memberships/application/verify/TenantSessionVerifier";

@@ -1,6 +1,10 @@
 import { Service } from "diod";
 
-import { isTenantSession, type SessionClaims, type TenantSessionClaims } from "../../../../../lib/auth/session";
+import {
+	isTenantSession,
+	type SessionClaims,
+	type TenantSessionClaims,
+} from "../../../../../lib/auth/session";
 import { CrossTenantAccessDenied } from "../../domain/CrossTenantAccessDenied";
 import { InvalidTenantSession } from "../../domain/InvalidTenantSession";
 import {
