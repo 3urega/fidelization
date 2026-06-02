@@ -14,21 +14,30 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 
 | Area in this doc | Target | Implemented now | Notes |
 |------------------|--------|-------------------|-------|
-| Multi-tenant model | Tenant per business, isolated data | **Partial** | Prisma: `Tenant`, `TenantMembership`, `User`; roles `owner` \| `employee` \| `customer` in [`prisma/schema.prisma`](../prisma/schema.prisma) |
-| Tenant context in requests | Every query scoped by tenant | **Partial** | JWT session: `tenantId` + `role` ([`src/lib/auth/session.ts`](../src/lib/auth/session.ts)); repos filter by membership — no RLS yet |
+| Multi-tenant model | Tenant per business, isolated data | **Partial** | Prisma: `Tenant`, `TenantMembership`, `User`, loyalty tables; roles `owner` \| `employee` \| `customer` in [`prisma/schema.prisma`](../prisma/schema.prisma) |
+| Tenant context in requests | Every query scoped by tenant | **Partial** | JWT session: `tenantId` + `role` ([`src/lib/auth/session.ts`](../src/lib/auth/session.ts)); repos filter by `tenant_id`; middleware stub [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) (no-op until subdomain) |
+| Next.js App Router base (issue #4) | Route groups + layouts + env | **Yes** | [`(public)`](../src/app/(public)/), [`(auth)`](../src/app/(auth)/), [`(app)`](../src/app/(app)/); [`src/lib/env.ts`](../src/lib/env.ts) |
 | Business owner onboarding | — | **Yes** | `OwnerRegistrar` + `POST /api/auth/register` with `businessName`; demo seed |
-| Owner UI shell | — | **Yes** | `/home`, login/register, theme presets ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
-| Employee / customer flows | QR, purchases, app | **No** | Roles exist in schema only |
+| Owner UI shell | — | **Yes** | `/home`, `/profile`, login/register, theme presets ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
+| Employee / customer flows | QR, purchases, app | **No** | DB + Prisma repos exist; no UI/API flows yet |
 | Superadmin | Platform-wide control | **No** | Not in schema, API, or UI |
-| Feature flags (global + tenant) | Plan-driven modules | **No** | `subscriptionPlan` string on tenant/user; no `features` map or enforcement |
-| Billing (this doc) | Stripe, subscription per tenant | **No** | Starter context `billing` = Google Play **per user** ([`src/contexts/billing/`](../src/contexts/billing/)), not tenant Stripe |
+| Feature flags (global + tenant) | Plan-driven modules | **Partial** | `tenants.features` JSON migrated; no runtime enforcement |
+| Billing (this doc) | Stripe, subscription per tenant | **Partial** | `subscription_plans` / `subscriptions` migrated; starter Google Play **per user** still in [`src/contexts/billing/`](../src/contexts/billing/) |
 | Subdomains per tenant | `tenant.app.com` | **No** | Single app origin; tenant resolved via session after login — see [`teenant-resolution.md`](teenant-resolution.md) |
 | Branding | Per tenant | **Partial** | `primaryColor`, `secondaryColor`, `logoUrl` on tenant; runtime via `ThemeProvider` |
 | Postgres RLS | Recommended future | **No** | Prisma Postgres; isolation in application layer |
 
-**Active bounded contexts:** `identity`, `tenants`, `shared`, `billing` (Google Play demo). Legacy under `src/contexts/legacy/` is not wired in DI.
+**Active bounded contexts:** `identity`, `tenants`, `loyalty`, `shared`, `billing` (Google Play demo + tenant subscription catalog). Legacy under `src/contexts/legacy/` is not wired in DI.
 
-**Conclusion:** the **direction** of this document matches the product vision in `AGENTS.md`, but most sections below are **specification**, not a description of running code. Do not assume superadmin, feature flags, Stripe tenant billing, or subdomains exist until corresponding issues are implemented.
+**App Router layout (issue #4):**
+
+| Group | Routes | Layout |
+|-------|--------|--------|
+| `(public)` | `/` | `PublicNav` — marketing |
+| `(auth)` | `/login`, `/register` | `AuthNav` — sin shell de app |
+| `(app)` | `/home`, `/profile` | `AppNav` — sesión requerida (middleware) |
+
+**Conclusion:** platform **foundation** (issue #4) and Fase 0 auth are in place. Superadmin, subdomain tenant resolution, feature-flag enforcement, and Stripe tenant billing remain specification.
 
 ---
 

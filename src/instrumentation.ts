@@ -1,16 +1,15 @@
+import { env } from "./lib/env";
+
 export function register(): void {
 	if (process.env.NEXT_RUNTIME !== "nodejs") {
 		return;
 	}
 
-	if (process.env.NODE_ENV !== "production") {
+	if (!env.isProduction) {
 		return;
 	}
 
-	const missing: string[] = [];
-	if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 16) {
-		missing.push("AUTH_SECRET (min 16 chars)");
-	}
+	const missing = env.validateProduction();
 
 	if (missing.length > 0) {
 		// eslint-disable-next-line no-console

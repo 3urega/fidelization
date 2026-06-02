@@ -1,5 +1,7 @@
 import { jwtVerify, SignJWT } from "jose";
 
+import { env } from "../env";
+
 const COOKIE_NAME = "session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
@@ -10,12 +12,7 @@ export type SessionClaims = {
 };
 
 function getSecret(): Uint8Array {
-	const secret = process.env.AUTH_SECRET;
-	if (!secret || secret.length < 16) {
-		throw new Error("AUTH_SECRET must be set (min 16 characters)");
-	}
-
-	return new TextEncoder().encode(secret);
+	return new TextEncoder().encode(env.authSecret);
 }
 
 export async function createSessionToken(claims: SessionClaims): Promise<string> {
@@ -57,7 +54,7 @@ export function sessionCookieOptions(): {
 	return {
 		httpOnly: true,
 		sameSite: "lax",
-		secure: process.env.NODE_ENV === "production",
+		secure: env.isProduction,
 		path: "/",
 		maxAge: MAX_AGE_SECONDS,
 	};

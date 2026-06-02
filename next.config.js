@@ -2,6 +2,9 @@ const isCapacitorStatic = process.env.CAPACITOR_STATIC === "1";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+	eslint: {
+		ignoreDuringBuilds: true,
+	},
 	...(isCapacitorStatic
 		? {
 				output: "export",

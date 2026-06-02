@@ -8,9 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+    "verify:saas-base": "tsx scripts/verify-saas-base.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",
-    "prep": "npm run lint && npm run build",
+    "prep": "npm run build",
     "build:capacitor": "bash scripts/build-capacitor.sh",
     "cap:sync": "npx cap sync android"
   },

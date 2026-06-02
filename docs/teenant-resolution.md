@@ -27,14 +27,14 @@ Tenant resolution is critical because it underpins:
 | Area in this doc | Target | Implemented now | Notes |
 |------------------|--------|-----------------|-------|
 | Subdomain → tenant slug | `{slug}.domain.com` resolves tenant | **No** | Single origin (`localhost` / app host); `tenants.slug` exists for future routing |
-| Middleware tenant resolution | Parse host, load tenant, inject context | **No** | [`src/middleware.ts`](../src/middleware.ts): session cookie check for page redirects + CORS on `/api/*` only |
+| Middleware tenant resolution | Parse host, load tenant, inject context | **Stub (issue #4)** | [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) returns `null`; called from [`src/middleware.ts`](../src/middleware.ts). Active tenant: JWT `tenantId` on APIs |
 | Tenant context in requests | Every request has resolved tenant | **Partial** | After login: JWT claims `tenantId` + `role`; APIs use [`getAuthenticatedSession`](../src/lib/auth/session.ts) |
 | User ↔ tenant data model | Scoped users | **Partial** | **Global `users`** + **`tenant_memberships`** — **not** `users.tenant_id` ([`data-model.md`](database/data-model.md)) |
 | Login / register tenant scope | Tenant from subdomain | **Partial** | No hostname tenant; login picks **owner** membership; register creates tenant + membership |
 | Session `tenantId` | Embedded in session | **Yes** | HS256 JWT in `session` cookie; same claims verified in Edge ([`middlewareSession.ts`](../src/lib/auth/middlewareSession.ts)) |
 | Branding per tenant | Theme from tenant record | **Partial** | DB: `primaryColor`, `secondaryColor`, `logoUrl`; UI via `ThemeProvider` after auth response |
 | `x-tenant-id` header fallback | Optional explicit tenant | **No** | Not used |
-| React `TenantContext` / `[tenant]` route | Global tenant provider | **No** | Flat `src/app/` routes; tenant from `/api/me` and auth JSON |
+| React `TenantContext` / `[tenant]` route | Global tenant provider | **No** | Route groups `(public)` \| `(auth)` \| `(app)` under [`src/app/`](../src/app/); tenant from session/API |
 | Tenant lookup cache (Redis) | Per-request cache | **No** | Direct Prisma on auth flows |
 | Custom domains / white-label | DNS + domain table | **No** | Spec only (§1) |
 | Disabled / unknown tenant pages | 404 / billing expired | **No** | Not in middleware |
@@ -65,7 +65,7 @@ sequenceDiagram
 
 **Login:** [`POST /api/auth/login`](../src/app/api/auth/login/route.ts) → `UserAuthenticator` + `OwnerMembershipFinder` (first `tenant_memberships` row with `role = owner` for that user). No subdomain or slug in request.
 
-**Middleware:** [`src/middleware.ts`](../src/middleware.ts) does **not** read `Host` or `tenants.slug`. It redirects unauthenticated users away from `/home` and authenticated users away from `/login`, `/register`, `/`.
+**Middleware:** [`src/middleware.ts`](../src/middleware.ts) calls [`resolveTenantFromRequest`](../src/lib/tenant/resolveTenant.ts) (no-op in Fase 0), protects `/home` and `/profile`, redirects auth pages when logged in, and applies CORS on `/api/*`. It does **not** read `Host` or `tenants.slug` yet.
 
 ---
 
@@ -162,7 +162,7 @@ function resolveTenant(request: Request) {
 }
 ```
 
-**Implemented middleware** ([`src/middleware.ts`](../src/middleware.ts)): session presence for selected pages; CORS for `/api/*`. No `resolveTenant`.
+**Implemented middleware** ([`src/middleware.ts`](../src/middleware.ts)): `resolveTenantFromRequest` stub (issue #4), session guards on app routes, CORS for `/api/*`. Full `resolveTenant` from subdomain is target.
 
 ---
 
@@ -271,7 +271,7 @@ app/
     rewards/
 ```
 
-**Implemented:** flat [`src/app/`](../src/app/) (`/`, `/login`, `/register`, `/home`); tenant from session/API, not from route param.
+**Implemented:** route groups [`src/app/`](../src/app/) — `(public)` `/`, `(auth)` login/register, `(app)` home/profile; tenant from session/API, not route param.
 
 ---
 

@@ -2,6 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getSessionCookieFromHeader, verifySessionTokenEdge } from "./lib/auth/middlewareSession";
+import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
+import { resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
 
 const allowedOrigins = new Set([
 	"capacitor://localhost",
@@ -35,8 +37,18 @@ async function getSession(request: NextRequest): Promise<boolean> {
 	return session !== null;
 }
 
+function nextWithTenantContext(request: NextRequest): NextResponse {
+	const tenant = resolveTenantFromRequest(request);
+
+	return attachResolvedTenantHeaders(
+		NextResponse.next({ request: { headers: request.headers } }),
+		tenant,
+	);
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const { pathname } = request.nextUrl;
+	const resolvedTenant = resolveTenantFromRequest(request);
 
 	if (pathname === "/home" || pathname === "/profile") {
 		if (!(await getSession(request))) {
@@ -51,7 +63,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	}
 
 	if (!pathname.startsWith("/api/")) {
-		return NextResponse.next();
+		return attachResolvedTenantHeaders(NextResponse.next(), resolvedTenant);
 	}
 
 	const origin = request.headers.get("origin");
@@ -60,7 +72,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
 	}
 
-	const response = NextResponse.next({ request: { headers: request.headers } });
+	const response = nextWithTenantContext(request);
 	const headers = corsHeaders(origin);
 
 	Object.entries(headers).forEach(([key, value]) => {

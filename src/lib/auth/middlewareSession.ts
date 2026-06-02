@@ -1,16 +1,16 @@
 import { jwtVerify } from "jose";
 
+import { env } from "../env";
 import type { SessionClaims } from "./session";
 
 const COOKIE_NAME = "session";
 
 function getSecret(): Uint8Array | null {
-	const secret = process.env.AUTH_SECRET;
-	if (!secret || secret.length < 16) {
+	try {
+		return new TextEncoder().encode(env.authSecret);
+	} catch {
 		return null;
 	}
-
-	return new TextEncoder().encode(secret);
 }
 
 export async function verifySessionTokenEdge(token: string): Promise<SessionClaims | null> {

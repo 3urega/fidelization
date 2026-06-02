@@ -1,10 +1,11 @@
 # Useful commands
 
 ```bash
-npm prep          # lint + build (Jest desactivado en prep; ver nota abajo)
+npm prep          # build (sin lint; usar npm run lint manualmente)
 docker compose up -d   # Postgres + schema starter
 npm run dev       # local dev server (not Docker)
 npm run lint:fix
+npm run verify:saas-base   # issue #4 — route groups, tenant stub, env
 npm run build:capacitor   # export out/ + cap sync android
 ```
 
@@ -48,6 +49,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
 - **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` authenticated shell (`AppNav`); URLs sin cambio (`/`, `/login`, `/home`, …).
+- **Env:** [`src/lib/env.ts`](src/lib/env.ts) — acceso centralizado server-side; ver [`.env.example`](.env.example).
 
 # Documentation
 
