@@ -6,9 +6,11 @@ import { env } from "../env";
 import { parseSessionPayload, SESSION_COOKIE_NAME, type SessionClaims } from "./sessionClaims";
 
 export {
+	isOnboardingSession,
 	isPlatformSession,
 	isTenantSession,
 	parseSessionPayload,
+	type OnboardingSessionClaims,
 	type PlatformSessionClaims,
 	SESSION_COOKIE_NAME,
 	type SessionClaims,
@@ -26,12 +28,14 @@ export async function createSessionToken(claims: SessionClaims): Promise<string>
 	const payload =
 		claims.kind === "platform"
 			? { kind: "platform" as const, sub: claims.userId, role: claims.role }
-			: {
-					kind: "tenant" as const,
-					sub: claims.userId,
-					tenantId: claims.tenantId,
-					role: claims.role,
-				};
+			: claims.kind === "onboarding"
+				? { kind: "onboarding" as const, sub: claims.userId }
+				: {
+						kind: "tenant" as const,
+						sub: claims.userId,
+						tenantId: claims.tenantId,
+						role: claims.role,
+					};
 
 	return new SignJWT(payload)
 		.setProtectedHeader({ alg: "HS256" })

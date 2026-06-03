@@ -16,7 +16,7 @@ export default function LandingPage(): React.ReactElement {
 					hostelería pequeña.
 				</p>
 				<div className="flex flex-col gap-3 sm:flex-row">
-					<Link href="/register">
+					<Link href="/register/business">
 						<Button className="w-full sm:w-auto">Crear cuenta</Button>
 					</Link>
 					<Link href="/login">

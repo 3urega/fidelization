@@ -13,6 +13,9 @@ npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_V
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
 npm run verify:platform-tenants    # issue #9 — list tenants + PATCH status (OWNER_VERIFY_* opcional)
+npm run verify:business-register   # issues #11–#12 — owner user step 1 (onboarding cookie, hash, no membership)
+npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /home
+npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -36,7 +39,7 @@ SaaS de fidelización y retención de clientes para cafés y pequeños negocios 
 
 **Prioridades MVP (en orden):** multi-tenant → auth → perfiles de cliente → QR → sellos → puntos → recompensas → promociones → cupones → push → planes → analítica básica. Integraciones futuras (POS, wallets, CRM) no condicionan la arquitectura inicial.
 
-Documentación de producto y negocio: [`docs/saas-architecture.md`](docs/saas-architecture.md) (arquitectura, roles, MVP técnico), [`docs/business-model.md`](docs/business-model.md) (planes, ingresos), [`docs/business-rules.md`](docs/business-rules.md) (reglas de dominio). Resumen ejecutivo en la sección **Product** de este archivo.
+Documentación de producto y negocio: [`docs/domain/saas-architecture.md`](docs/domain/saas-architecture.md) (arquitectura, roles, MVP técnico), [`docs/domain/business-model.md`](docs/domain/business-model.md) (planes, ingresos), [`docs/domain/business-onboarding.md`](docs/domain/business-onboarding.md) (alta self-service del negocio), [`docs/business-rules.md`](docs/business-rules.md) (reglas de dominio). Resumen ejecutivo en la sección **Product** de este archivo.
 
 # Business Rules
 
@@ -55,6 +58,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Superadmin (issue #8):** solo `http://localhost:3000/platform/login` (apex) → `/platform`; no usar `/login` ni subdominios de negocio. Verifies: `verify:platform-login`, `verify:platform-isolation`.
 - **Superadmin dashboard (issue #9):** en `/platform` — lista de negocios y activar/suspender. `verify:platform-tenants`.
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
+- **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
+- **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
 
 # Architecture
 
@@ -75,9 +80,11 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
 ```
 docs/
-├── saas-architecture.md         # arquitectura SaaS objetivo + estado implementado vs spec
+├── domain/                      # spec de dominio de producto (target + estado vs código)
+│   ├── saas-architecture.md     # arquitectura SaaS, roles, isolation, feature flags
+│   ├── business-model.md        # planes comerciales, add-ons, ingresos
+│   └── business-onboarding.md   # flujo B2B self-service: registro → tenant → plan → checkout → dashboard
 ├── teenant-resolution.md        # resolución de tenant (subdomain target; JWT/membership hoy) — nombre con typo teenant
-├── business-model.md            # planes comerciales, add-ons, ingresos + estado vs código
 ├── business-rules.md            # reglas de dominio: puntos, sellos, QR, planes
 ├── code-style.md
 ├── documentation-format.md
@@ -102,11 +109,12 @@ docs/
 
 | Tarea | Leer primero |
 |-------|----------------|
-| Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/saas-architecture.md`, `docs/business-rules.md` |
-| Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/business-model.md` (sección *Implementation status*) |
-| Superadmin foundation (issue #8), tenant isolation | `docs/saas-architecture.md` + `npm run verify:platform-isolation` |
-| Superadmin dashboard (issue #9) | `docs/saas-architecture.md` + `npm run verify:platform-tenants` |
-| Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/saas-architecture.md` (sección *Implementation status*) |
+| Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/domain/saas-architecture.md`, `docs/business-rules.md` |
+| Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/domain/business-model.md` (sección *Implementation status*) |
+| Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
+| Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
+| Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
+| Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |
 | Resolución de tenant (subdominio, JWT `tenantId`, middleware, login) | `docs/teenant-resolution.md` (sección *Implementation status*) + `src/middleware.ts`, `src/lib/auth/session.ts` |
 | Login dev atascado / cookie / superadmin vs owner | `docs/backend/session-cookies-localhost-dev.md` + `npm run verify:platform-login` / `verify:owner-login` |
 | Billing / Google Play / `UserPlan` FREE-PREMIUM (starter) | `src/contexts/billing/`, `UserPlan` — no confundir con planes tenant del business-model |

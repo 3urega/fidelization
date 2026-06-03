@@ -1,47 +1,35 @@
 import { randomUUID } from "crypto";
 import { Service } from "diod";
 
-import { hashPassword } from "../../../../lib/auth/password";
 import { prisma } from "../../../../lib/prisma";
 import { User } from "../../../identity/users/domain/User";
 import { UserPlan } from "../../../identity/users/domain/UserPlan";
 import { TenantRole } from "../../memberships/domain/TenantRole";
 import { tenantFromPrismaRow } from "../../tenants/infrastructure/tenantFromPrismaRow";
 import {
-	OwnerOnboardingRepository,
-	RegisterOwnerParams,
-	RegisterOwnerResult,
-} from "../domain/OwnerOnboardingRepository";
-import { slugFromBusinessName, resolveUniqueTenantSlug } from "./resolveUniqueTenantSlug";
+	CreateOwnerBusinessParams,
+	CreateOwnerBusinessResult,
+	OwnerBusinessRepository,
+} from "../domain/OwnerBusinessRepository";
+import { resolveUniqueTenantSlug, slugFromBusinessName } from "./resolveUniqueTenantSlug";
 
 @Service()
-export class PrismaOwnerOnboardingRepository extends OwnerOnboardingRepository {
-	async register(params: RegisterOwnerParams): Promise<RegisterOwnerResult> {
-		const userId = randomUUID();
+export class PrismaOwnerBusinessRepository extends OwnerBusinessRepository {
+	async createForUser(params: CreateOwnerBusinessParams): Promise<CreateOwnerBusinessResult> {
 		const tenantId = randomUUID();
 		const membershipId = randomUUID();
-		const email = params.email.toLowerCase().trim();
-		const passwordHash = await hashPassword(params.password);
 		const baseSlug = slugFromBusinessName(params.businessName);
 		const slug = await resolveUniqueTenantSlug(baseSlug);
 
 		const result = await prisma.$transaction(async (tx) => {
-			const userRow = await tx.user.create({
-				data: {
-					id: userId,
-					name: params.name.trim(),
-					email,
-					profilePicture: params.profilePicture?.trim() ?? "",
-					passwordHash,
-					subscriptionPlan: UserPlan.Free,
-				},
-			});
+			const userRow = await tx.user.findUniqueOrThrow({ where: { id: params.userId } });
 
 			const tenantRow = await tx.tenant.create({
 				data: {
 					id: tenantId,
 					name: params.businessName.trim(),
 					slug,
+					businessType: params.businessType,
 				},
 			});
 
@@ -49,7 +37,7 @@ export class PrismaOwnerOnboardingRepository extends OwnerOnboardingRepository {
 				data: {
 					id: membershipId,
 					tenantId,
-					userId,
+					userId: params.userId,
 					role: "owner",
 				},
 			});

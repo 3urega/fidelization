@@ -39,7 +39,11 @@ import { TenantSessionVerifier } from "../../../tenants/memberships/application/
 import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
 import { PrismaTenantMembershipRepository } from "../../../tenants/memberships/infrastructure/PrismaTenantMembershipRepository";
 import { OwnerRegistrar } from "../../../tenants/owners/application/register/OwnerRegistrar";
+import { RegisterBusinessOwnerUser } from "../../../tenants/owners/application/register/RegisterBusinessOwnerUser";
+import { CreateOwnerBusiness } from "../../../tenants/owners/application/create/CreateOwnerBusiness";
+import { OwnerBusinessRepository } from "../../../tenants/owners/domain/OwnerBusinessRepository";
 import { OwnerOnboardingRepository } from "../../../tenants/owners/domain/OwnerOnboardingRepository";
+import { PrismaOwnerBusinessRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerBusinessRepository";
 import { PrismaOwnerOnboardingRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerOnboardingRepository";
 import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
 import { TenantRepository } from "../../../tenants/tenants/domain/TenantRepository";
@@ -72,7 +76,12 @@ builder.registerAndUse(PrismaTenantMembershipRepository);
 builder.register(OwnerOnboardingRepository).use(PrismaOwnerOnboardingRepository);
 builder.registerAndUse(PrismaOwnerOnboardingRepository);
 
+builder.register(OwnerBusinessRepository).use(PrismaOwnerBusinessRepository);
+builder.registerAndUse(PrismaOwnerBusinessRepository);
+
 builder.registerAndUse(UserRegistrar);
+builder.registerAndUse(RegisterBusinessOwnerUser);
+builder.registerAndUse(CreateOwnerBusiness);
 builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(UserAuthenticator);

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactElement, useState } from "react";
 
+import { formatTenantHost } from "../../lib/tenant/formatTenantHost";
 import { themePresetIds, themePresetLabels } from "./theme/themePresets";
 import { useTheme } from "./theme/ThemeProvider";
 import { Button } from "./ui/Button";
@@ -117,9 +118,13 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 
 		// Cookies are host-only on localhost; redirecting apex → subdomain drops the session.
 		if (appDomain && tenant.slug && !isApexDevHost(hostname)) {
-			const tenantHost = port
-				? `${tenant.slug}.${appDomain}:${port}`
-				: `${tenant.slug}.${appDomain}`;
+			const tenantHost = formatTenantHost({ slug: tenant.slug, appDomain, port: port || undefined });
+			if (!tenantHost) {
+				window.location.assign("/home");
+
+				return;
+			}
+
 			const alreadyOnTenantHost = hostname === `${tenant.slug}.${appDomain}`;
 
 			if (!alreadyOnTenantHost) {
@@ -193,7 +198,7 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 			) : null}
 			<p className="text-center text-sm text-muted">
 				¿Sin cuenta?{" "}
-				<Link href="/register" className="text-primary underline-offset-2 hover:underline">
+				<Link href="/register/business" className="text-primary underline-offset-2 hover:underline">
 					Regístrate
 				</Link>
 			</p>

@@ -82,5 +82,5 @@ Staging on `app.staging.example.com` and tenants on `{slug}.app.staging.example.
 ## 🔗 Related agreements
 
 - [Tenant resolution (subdomain, JWT, login scope)](../teenant-resolution.md).
-- [SaaS architecture (roles, route groups, issue #8 superadmin foundation)](../saas-architecture.md).
+- [SaaS architecture (roles, route groups, issue #8 superadmin foundation)](../domain/saas-architecture.md).
 - [API routes reflect-metadata](./api-routes-reflect-metadata.md).

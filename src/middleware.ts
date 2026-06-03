@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getSessionCookieFromHeader, verifySessionTokenEdge } from "./lib/auth/middlewareSession";
-import { isPlatformSession, isTenantSession } from "./lib/auth/sessionClaims";
+import { isOnboardingSession, isPlatformSession, isTenantSession } from "./lib/auth/sessionClaims";
 import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
 import { forwardResolvedTenantHeaders } from "./lib/tenant/forwardResolvedTenantHeaders";
 import { getAppDomain, resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
@@ -67,6 +67,14 @@ function isPlatformPath(pathname: string): boolean {
 	return pathname === "/platform" || pathname.startsWith("/platform/");
 }
 
+function isRegisterPath(pathname: string): boolean {
+	return pathname === "/register" || pathname.startsWith("/register/");
+}
+
+function isAuthPublicPath(pathname: string): boolean {
+	return pathname === "/login" || isRegisterPath(pathname) || pathname === "/";
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const resolution = await resolveTenantFromRequest(request);
 
@@ -75,6 +83,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const session = await getSession(request);
 	const hasPlatformSession = session !== null && isPlatformSession(session);
 	const hasTenantSession = session !== null && isTenantSession(session);
+	const hasOnboardingSession = session !== null && isOnboardingSession(session);
 
 	if (resolution.status === "not_found" && pathname !== "/tenant-not-found") {
 		return NextResponse.rewrite(new URL("/tenant-not-found", request.url), { status: 404 });
@@ -105,17 +114,33 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		}
 	} else if (hasPlatformSession && (pathname === "/home" || pathname === "/profile")) {
 		return NextResponse.redirect(new URL("/platform", request.url));
-	} else if (hasPlatformSession && (pathname === "/login" || pathname === "/register")) {
+	} else if (hasPlatformSession && (pathname === "/login" || isRegisterPath(pathname))) {
 		return NextResponse.redirect(new URL("/platform", request.url));
+	} else if (hasOnboardingSession && isPlatformPath(pathname)) {
+		return NextResponse.redirect(new URL("/register/business/tenant", request.url));
+	}
+
+	if (pathname === "/register/business/tenant") {
+		if (hasTenantSession) {
+			return NextResponse.redirect(new URL("/home", request.url));
+		}
+		if (!hasOnboardingSession) {
+			return NextResponse.redirect(new URL("/register/business", request.url));
+		}
+	} else if (pathname === "/register/business" && hasOnboardingSession) {
+		return NextResponse.redirect(new URL("/register/business/tenant", request.url));
 	}
 
 	if (pathname === "/home" || pathname === "/profile") {
+		if (hasOnboardingSession) {
+			return NextResponse.redirect(new URL("/register/business/tenant", request.url));
+		}
 		if (!hasTenantSession) {
 			return NextResponse.redirect(new URL("/login", request.url));
 		}
 	}
 
-	if (pathname === "/login" || pathname === "/register" || pathname === "/") {
+	if (isAuthPublicPath(pathname)) {
 		if (hasTenantSession) {
 			return NextResponse.redirect(new URL("/home", request.url));
 		}

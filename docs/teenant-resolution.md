@@ -18,7 +18,7 @@ Tenant resolution is critical because it underpins:
 * **[Implementation status](#implementation-status-current-repo)** — what runs in the repo now (JWT session, memberships, middleware).
 * **Sections 1–13 below** — mostly **target specification** (subdomain routing, middleware tenant load, caching, white-label). Do not assume they are live until listed as implemented in the status table.
 
-**Related docs:** [`saas-architecture.md`](saas-architecture.md), [`database/data-model.md`](database/data-model.md) (no `users.tenant_id`; use `tenant_memberships`), [`AGENTS.md`](../AGENTS.md). **Code:** [`src/middleware.ts`](../src/middleware.ts), [`src/lib/auth/session.ts`](../src/lib/auth/session.ts), [`src/lib/auth/middlewareSession.ts`](../src/lib/auth/middlewareSession.ts).
+**Related docs:** [`saas-architecture.md`](domain/saas-architecture.md), [`database/data-model.md`](database/data-model.md) (no `users.tenant_id`; use `tenant_memberships`), [`AGENTS.md`](../AGENTS.md). **Code:** [`src/middleware.ts`](../src/middleware.ts), [`src/lib/auth/session.ts`](../src/lib/auth/session.ts), [`src/lib/auth/middlewareSession.ts`](../src/lib/auth/middlewareSession.ts).
 
 ---
 
@@ -241,7 +241,7 @@ Cross-tenant auth is blocked: [`TenantSessionVerifier`](../src/contexts/tenants/
 * Every **business** query must filter by `tenant_id` (or equivalent tenant context).
 * Do not rely on a missing tenant filter.
 * **Target:** middleware enforces tenant presence on each request; **today:** enforce in API handlers via session + membership checks.
-* **Target:** optional PostgreSQL RLS ([`saas-architecture.md`](saas-architecture.md)).
+* **Target:** optional PostgreSQL RLS ([`saas-architecture.md`](domain/saas-architecture.md)).
 
 ## Forbidden
 

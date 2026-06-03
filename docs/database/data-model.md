@@ -12,7 +12,7 @@ The system is built around strict tenant isolation and (target) event-driven loy
 - **[Implemented schema (Fase 0)](#implemented-schema-fase-0)** — source of truth for current tables and fields.
 - **[Target entities](#target-entities)** — loyalty, billing, and platform tables to add in later migrations.
 
-**Related docs:** [`saas-architecture.md`](../saas-architecture.md), [`teenant-resolution.md`](../teenant-resolution.md) (how `tenant_id` reaches requests — JWT, not `users.tenant_id`), [`business-model.md`](../business-model.md), [`business-rules.md`](../business-rules.md). **Conventions:** [`not-null-fields.md`](not-null-fields.md), [`table-naming-singular-plural-convention.md`](table-naming-singular-plural-convention.md), [`text-over-varchar-char-convention.md`](text-over-varchar-char-convention.md). **Prisma:** [`prisma/schema.prisma`](../../prisma/schema.prisma), [`.agents/skills/prisma/`](../../.agents/skills/prisma/SKILL.md).
+**Related docs:** [`saas-architecture.md`](../domain/saas-architecture.md), [`teenant-resolution.md`](../teenant-resolution.md) (how `tenant_id` reaches requests — JWT, not `users.tenant_id`), [`business-model.md`](../domain/business-model.md), [`business-rules.md`](../business-rules.md). **Conventions:** [`not-null-fields.md`](not-null-fields.md), [`table-naming-singular-plural-convention.md`](table-naming-singular-plural-convention.md), [`text-over-varchar-char-convention.md`](text-over-varchar-char-convention.md). **Prisma:** [`prisma/schema.prisma`](../../prisma/schema.prisma), [`.agents/skills/prisma/`](../../.agents/skills/prisma/SKILL.md).
 
 ---
 
@@ -273,7 +273,7 @@ Example: buy 10 coffees → 1 free.
 
 ## 2.12 Subscription plan (target)
 
-Global catalog (no `tenant_id`). See [`business-model.md`](../business-model.md).
+Global catalog (no `tenant_id`). See [`business-model.md`](../domain/business-model.md).
 
 | Field | Notes |
 |-------|-------|
@@ -353,7 +353,7 @@ Suggested events: `customer.created`, `qr.scanned`, `points.earned`, `reward.red
 
 # 7. Future enhancements
 
-* Row Level Security (PostgreSQL) — see [`saas-architecture.md`](../saas-architecture.md)
+* Row Level Security (PostgreSQL) — see [`saas-architecture.md`](../domain/saas-architecture.md)
 * Event sourcing for loyalty actions
 * Real-time analytics pipeline
 * Segmentation engine (customer groups)

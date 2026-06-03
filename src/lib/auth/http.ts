@@ -100,6 +100,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "TenantAccessSuspended") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "OwnerBusinessAlreadyExists") {
+		return HttpNextResponse.domainError(error, 409);
+	}
 
 	return undefined;
 }

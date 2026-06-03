@@ -12,7 +12,7 @@ export function PublicNav(): ReactElement {
 			<Link href="/login" className="text-sm text-muted hover:text-foreground">
 				Iniciar sesión
 			</Link>
-			<Link href="/register">
+			<Link href="/register/business">
 				<Button type="button" className="text-sm">
 					Crear cuenta
 				</Button>

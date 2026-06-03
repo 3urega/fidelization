@@ -74,6 +74,7 @@ model Tenant {
   id                 String             @id @default(uuid())
   name               String
   slug               String             @unique
+  businessType       String             @default("") @map("business_type")
   logoUrl            String             @default("") @map("logo_url")
   primaryColor       String             @default("#7C3AED") @map("primary_color")
   secondaryColor     String             @default("#4F46E5") @map("secondary_color")

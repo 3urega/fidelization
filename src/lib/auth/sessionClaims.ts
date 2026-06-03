@@ -13,7 +13,12 @@ export type PlatformSessionClaims = {
 	role: "superadmin";
 };
 
-export type SessionClaims = TenantSessionClaims | PlatformSessionClaims;
+export type OnboardingSessionClaims = {
+	kind: "onboarding";
+	userId: string;
+};
+
+export type SessionClaims = TenantSessionClaims | PlatformSessionClaims | OnboardingSessionClaims;
 
 export function isTenantSession(session: SessionClaims): session is TenantSessionClaims {
 	return session.kind === "tenant";
@@ -21,6 +26,10 @@ export function isTenantSession(session: SessionClaims): session is TenantSessio
 
 export function isPlatformSession(session: SessionClaims): session is PlatformSessionClaims {
 	return session.kind === "platform";
+}
+
+export function isOnboardingSession(session: SessionClaims): session is OnboardingSessionClaims {
+	return session.kind === "onboarding";
 }
 
 export function parseSessionPayload(payload: Record<string, unknown>): SessionClaims | null {
@@ -35,6 +44,10 @@ export function parseSessionPayload(payload: Record<string, unknown>): SessionCl
 		}
 
 		return null;
+	}
+
+	if (payload.kind === "onboarding") {
+		return { kind: "onboarding", userId };
 	}
 
 	const tenantId = payload.tenantId;

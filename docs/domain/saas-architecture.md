@@ -6,7 +6,7 @@ This system is a multi-tenant SaaS platform for customer loyalty, promotions, an
 
 The architecture is built around strict tenant isolation, feature-flag-driven functionality, and a centralized superadmin control layer.
 
-**How to read this document:** it describes the **target platform architecture** (roles, isolation, billing model, feature flags, subdomains). Product vision and MVP priorities are summarized in [`AGENTS.md`](../AGENTS.md) (section Product); domain rules in [`business-rules.md`](business-rules.md); commercial plans in [`business-model.md`](business-model.md); **tables and fields (implemented vs target):** [`database/data-model.md`](database/data-model.md); **tenant resolution (subdomain target, JWT session today):** [`teenant-resolution.md`](teenant-resolution.md). For what is **already in the repo**, see [Implementation status](#implementation-status-current-repo) below before planning new work.
+**How to read this document:** it describes the **target platform architecture** (roles, isolation, billing model, feature flags, subdomains). Product vision and MVP priorities are summarized in [`AGENTS.md`](../../AGENTS.md) (section Product); domain rules in [`business-rules.md`](../business-rules.md); commercial plans in [`business-model.md`](business-model.md); business onboarding in [`business-onboarding.md`](business-onboarding.md); **tables and fields (implemented vs target):** [`database/data-model.md`](../database/data-model.md); **tenant resolution (subdomain target, JWT session today):** [`teenant-resolution.md`](../teenant-resolution.md). For what is **already in the repo**, see [Implementation status](#implementation-status-current-repo) below before planning new work.
 
 ---
 
@@ -24,7 +24,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Superadmin dashboard (CRUD tenants, plans) | Platform-wide control UI | **Yes** | [`PlatformTenantsTable`](../src/app/_components/platform/PlatformTenantsTable.tsx), `GET/PATCH /api/platform/tenants`, toggle `active`/`suspended`, `npm run verify:platform-tenants` |
 | Feature flags (global + tenant) | Plan-driven modules | **Partial** | `tenants.features` JSON migrated; no runtime enforcement |
 | Billing (this doc) | Stripe, subscription per tenant | **Partial** | `subscription_plans` / `subscriptions` migrated; starter Google Play **per user** still in [`src/contexts/billing/`](../src/contexts/billing/) |
-| Subdomains per tenant | `tenant.app.com` | **Partial (mock)** | `APP_DOMAIN` + middleware; see [`teenant-resolution.md`](teenant-resolution.md) |
+| Subdomains per tenant | `tenant.app.com` | **Partial (mock)** | `APP_DOMAIN` + middleware; see [`teenant-resolution.md`](../teenant-resolution.md) |
 | Branding | Per tenant | **Partial** | `primaryColor`, `secondaryColor`, `logoUrl` on tenant; runtime via `ThemeProvider` |
 | Postgres RLS | Recommended future | **No** | Prisma Postgres; isolation in application layer |
 
@@ -211,7 +211,7 @@ Billing is subscription-based per tenant.
 
 # 5. Subdomain Strategy
 
-**Implementation detail:** [`teenant-resolution.md`](teenant-resolution.md) (subdomain and middleware are target; Fase 0 uses JWT + `tenant_memberships`).
+**Implementation detail:** [`teenant-resolution.md`](../teenant-resolution.md) (subdomain and middleware are target; Fase 0 uses JWT + `tenant_memberships`).
 
 Each tenant is accessible via subdomain:
 

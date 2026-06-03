@@ -6,7 +6,7 @@ The platform is a SaaS product that provides customer loyalty, engagement, and m
 
 Revenue is based on recurring subscriptions plus optional add-ons.
 
-**How to read this document:** it describes the **commercial model** (plans, add-ons, pricing strategy, segments, growth). Product capabilities and MVP scope: [`AGENTS.md`](../AGENTS.md) (section Product); technical enforcement (feature flags, billing integration): [`saas-architecture.md`](saas-architecture.md); domain rules: [`business-rules.md`](business-rules.md); **persistence (subscription_plans, subscriptions):** [`database/data-model.md`](database/data-model.md). For what is **billable or enforced in code today**, see [Implementation status](#implementation-status-current-repo).
+**How to read this document:** it describes the **commercial model** (plans, add-ons, pricing strategy, segments, growth). Product capabilities and MVP scope: [`AGENTS.md`](../../AGENTS.md) (section Product); technical enforcement (feature flags, billing integration): [`saas-architecture.md`](saas-architecture.md); domain rules: [`business-rules.md`](../business-rules.md); **persistence (subscription_plans, subscriptions):** [`database/data-model.md`](../database/data-model.md). For what is **billable or enforced in code today**, see [Implementation status](#implementation-status-current-repo).
 
 ---
 
