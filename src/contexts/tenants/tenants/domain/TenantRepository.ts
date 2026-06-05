@@ -1,4 +1,5 @@
 import { Tenant } from "./Tenant";
+import { TenantBrandingUpdate } from "./TenantBrandingUpdate";
 import { TenantStatus } from "./TenantStatus";
 
 export abstract class TenantRepository {
@@ -7,4 +8,6 @@ export abstract class TenantRepository {
 	abstract findById(tenantId: string): Promise<Tenant | null>;
 
 	abstract updateStatus(tenantId: string, status: TenantStatus): Promise<Tenant | null>;
+
+	abstract updateBranding(tenantId: string, branding: TenantBrandingUpdate): Promise<Tenant | null>;
 }

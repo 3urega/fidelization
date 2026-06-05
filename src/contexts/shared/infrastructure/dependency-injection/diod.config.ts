@@ -46,6 +46,7 @@ import { OwnerOnboardingRepository } from "../../../tenants/owners/domain/OwnerO
 import { PrismaOwnerBusinessRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerBusinessRepository";
 import { PrismaOwnerOnboardingRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerOnboardingRepository";
 import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
+import { UpdateTenantBranding } from "../../../tenants/tenants/application/update/UpdateTenantBranding";
 import { TenantRepository } from "../../../tenants/tenants/domain/TenantRepository";
 import { PrismaTenantRepository } from "../../../tenants/tenants/infrastructure/PrismaTenantRepository";
 import { PostgresConnection } from "../postgres/PostgresConnection";
@@ -95,6 +96,7 @@ builder.registerAndUse(SetTenantPlatformStatus);
 builder.registerAndUse(TenantStaffLogin);
 builder.registerAndUse(TenantSessionVerifier);
 builder.registerAndUse(TenantFinder);
+builder.registerAndUse(UpdateTenantBranding);
 
 builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);
 builder.registerAndUse(PostgresGooglePlaySubscriptionRepository);

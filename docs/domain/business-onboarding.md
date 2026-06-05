@@ -135,6 +135,12 @@ coffee-house.platform.com
 
 ---
 
+## Steps 3–4 — Deferred
+
+Plan selection and Stripe checkout are **intentionally deferred** until the owner has a working loyalty entry point (customer QR on `/app`). See [`post-onboarding-mvp-roadmap.md`](post-onboarding-mvp-roadmap.md) (Phase A branding → Phase B customer `/app` → then Steps 3–4).
+
+---
+
 ## Step 3 - Plan Selection
 
 The business selects a subscription plan.

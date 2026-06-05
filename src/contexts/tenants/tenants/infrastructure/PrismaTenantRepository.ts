@@ -2,6 +2,7 @@ import { Service } from "diod";
 
 import { prisma } from "../../../../lib/prisma";
 import { Tenant } from "../domain/Tenant";
+import { TenantBrandingUpdate } from "../domain/TenantBrandingUpdate";
 import { TenantRepository } from "../domain/TenantRepository";
 import { TenantStatus } from "../domain/TenantStatus";
 import { tenantFromPrismaRow } from "./tenantFromPrismaRow";
@@ -31,6 +32,25 @@ export class PrismaTenantRepository extends TenantRepository {
 			const row = await prisma.tenant.update({
 				where: { id: tenantId },
 				data: { status },
+			});
+
+			return tenantFromPrismaRow(row);
+		} catch {
+			return null;
+		}
+	}
+
+	async updateBranding(tenantId: string, branding: TenantBrandingUpdate): Promise<Tenant | null> {
+		try {
+			const row = await prisma.tenant.update({
+				where: { id: tenantId },
+				data: {
+					...(branding.logoUrl !== undefined ? { logoUrl: branding.logoUrl } : {}),
+					...(branding.primaryColor !== undefined ? { primaryColor: branding.primaryColor } : {}),
+					...(branding.secondaryColor !== undefined
+						? { secondaryColor: branding.secondaryColor }
+						: {}),
+				},
 			});
 
 			return tenantFromPrismaRow(row);

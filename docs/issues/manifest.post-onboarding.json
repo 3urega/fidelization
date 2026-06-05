@@ -1,0 +1,34 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/post-onboarding-mvp-roadmap.md",
+  "label": "post-onboarding-mvp",
+  "published": {
+    "16": "https://github.com/3urega/fidelization/issues/16",
+    "17": "https://github.com/3urega/fidelization/issues/17",
+    "18": "https://github.com/3urega/fidelization/issues/18",
+    "19": "https://github.com/3urega/fidelization/issues/19",
+    "20": "https://github.com/3urega/fidelization/issues/20"
+  },
+  "issues": [
+    {
+      "title": "Tenant branding: domain + API (PATCH /api/tenant/branding)",
+      "bodyFile": "docs/issues/16-tenant-branding-api.md"
+    },
+    {
+      "title": "Tenant branding: settings UI + home checklist",
+      "bodyFile": "docs/issues/17-tenant-branding-ui.md"
+    },
+    {
+      "title": "Customer session: register + loyalty APIs (kind: customer)",
+      "bodyFile": "docs/issues/18-customer-session-api.md"
+    },
+    {
+      "title": "Customer loyalty app: /app UI + middleware",
+      "bodyFile": "docs/issues/19-customer-app-ui.md"
+    },
+    {
+      "title": "Customer QR: verify E2E + docs (close Phase B)",
+      "bodyFile": "docs/issues/20-customer-qr-verify-docs.md"
+    }
+  ]
+}

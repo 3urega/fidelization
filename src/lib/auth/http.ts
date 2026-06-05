@@ -103,6 +103,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "OwnerBusinessAlreadyExists") {
 		return HttpNextResponse.domainError(error, 409);
 	}
+	if (error.type === "TenantBrandingForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidTenantBranding") {
+		return HttpNextResponse.domainError(error, 400);
+	}
 
 	return undefined;
 }

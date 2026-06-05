@@ -40,7 +40,7 @@ SaaS de fidelización y retención de clientes para cafés y pequeños negocios 
 
 **Prioridades MVP (en orden):** multi-tenant → auth → perfiles de cliente → QR → sellos → puntos → recompensas → promociones → cupones → push → planes → analítica básica. Integraciones futuras (POS, wallets, CRM) no condicionan la arquitectura inicial.
 
-Documentación de producto y negocio: [`docs/domain/saas-architecture.md`](docs/domain/saas-architecture.md) (arquitectura, roles, MVP técnico), [`docs/domain/business-model.md`](docs/domain/business-model.md) (planes, ingresos), [`docs/domain/business-onboarding.md`](docs/domain/business-onboarding.md) (alta self-service del negocio), [`docs/business-rules.md`](docs/business-rules.md) (reglas de dominio). Resumen ejecutivo en la sección **Product** de este archivo.
+Documentación de producto y negocio: [`docs/domain/saas-architecture.md`](docs/domain/saas-architecture.md) (arquitectura, roles, MVP técnico), [`docs/domain/business-model.md`](docs/domain/business-model.md) (planes, ingresos), [`docs/domain/business-onboarding.md`](docs/domain/business-onboarding.md) (alta self-service del negocio), [`docs/domain/post-onboarding-mvp-roadmap.md`](docs/domain/post-onboarding-mvp-roadmap.md) (siguiente fase: branding → customer QR; planes/Stripe después), [`docs/business-rules.md`](docs/business-rules.md) (reglas de dominio). Resumen ejecutivo en la sección **Product** de este archivo.
 
 # Business Rules
 
@@ -113,6 +113,7 @@ docs/
 | Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/domain/saas-architecture.md`, `docs/business-rules.md` |
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/domain/business-model.md` (sección *Implementation status*) |
 | Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
+| Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `docs/issues/customer-qr-session-web-first.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |
@@ -126,5 +127,9 @@ docs/
 
 .agents/skills/
 ├── prisma/                      # Prisma Postgres, migraciones, seed, src/lib/prisma.ts
-└── kanban-board/                # issues GitHub 3urega/fidelization
+├── plan-to-issues/              # paso 1: plan .md → docs/issues/*.md + manifest
+├── publish-github-issues/       # paso 2: manifest → GitHub (gh issue create)
+└── kanban-board/                # paso 3: list, plan, implement, close + borrar drafts en docs/issues
 ```
+
+**Flujo issues:** `docs/issues/README.md` — plan-to-issues → publish-github-issues → kanban-board (al cerrar, eliminar body/manifest en docs).
