@@ -2,7 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getSessionCookieFromHeader, verifySessionTokenEdge } from "./lib/auth/middlewareSession";
-import { isOnboardingSession, isPlatformSession, isTenantSession } from "./lib/auth/sessionClaims";
+import {
+	isCustomerSession,
+	isOnboardingSession,
+	isPlatformSession,
+	isTenantSession,
+} from "./lib/auth/sessionClaims";
 import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
 import { forwardResolvedTenantHeaders } from "./lib/tenant/forwardResolvedTenantHeaders";
 import { getAppDomain, resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
@@ -79,6 +84,10 @@ function isTenantAppPath(pathname: string): boolean {
 	return pathname === "/home" || pathname === "/profile" || pathname.startsWith("/settings/");
 }
 
+function isCustomerAppPath(pathname: string): boolean {
+	return pathname === "/app" || pathname.startsWith("/app/");
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const resolution = await resolveTenantFromRequest(request);
 
@@ -88,6 +97,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const hasPlatformSession = session !== null && isPlatformSession(session);
 	const hasTenantSession = session !== null && isTenantSession(session);
 	const hasOnboardingSession = session !== null && isOnboardingSession(session);
+	const hasCustomerSession = session !== null && isCustomerSession(session);
 
 	if (resolution.status === "not_found" && pathname !== "/tenant-not-found") {
 		return NextResponse.rewrite(new URL("/tenant-not-found", request.url), { status: 404 });
@@ -133,6 +143,38 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		}
 	} else if (pathname === "/register/business" && hasOnboardingSession) {
 		return NextResponse.redirect(new URL("/register/business/tenant", request.url));
+	}
+
+	if (isCustomerAppPath(pathname)) {
+		if (resolution.status === "inactive" && pathname !== "/app/unavailable") {
+			return NextResponse.redirect(new URL("/app/unavailable", request.url));
+		}
+
+		if (hasPlatformSession) {
+			return NextResponse.redirect(new URL("/platform", request.url));
+		}
+
+		if (hasTenantSession) {
+			return NextResponse.redirect(new URL("/home", request.url));
+		}
+
+		if (hasOnboardingSession) {
+			return NextResponse.redirect(new URL("/register/business/tenant", request.url));
+		}
+
+		if (pathname === "/app/card" && !hasCustomerSession) {
+			return NextResponse.redirect(new URL("/app/welcome", request.url));
+		}
+
+		if ((pathname === "/app" || pathname === "/app/welcome") && hasCustomerSession) {
+			return NextResponse.redirect(new URL("/app/card", request.url));
+		}
+
+		if (pathname === "/app") {
+			return NextResponse.redirect(
+				new URL(hasCustomerSession ? "/app/card" : "/app/welcome", request.url),
+			);
+		}
 	}
 
 	if (isTenantAppPath(pathname)) {

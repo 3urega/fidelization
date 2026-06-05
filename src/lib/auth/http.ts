@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
-import { TenantSessionClaims } from "./session";
+import { CustomerSessionClaims, TenantSessionClaims } from "./session";
 
 export function userToJson(user: {
 	id: { value: string };
@@ -58,6 +59,31 @@ export function authResponseToJson(
 	};
 }
 
+export function customerToJson(customer: Customer): Record<string, string | number> {
+	const primitives = customer.toPrimitives();
+
+	return {
+		id: primitives.id,
+		name: primitives.name,
+		email: primitives.email ?? "",
+		phone: primitives.phone ?? "",
+		qrValue: primitives.qrValue,
+		pointsBalance: primitives.pointsBalance,
+		visitsCount: primitives.visitsCount,
+	};
+}
+
+export function customerAuthResponseToJson(
+	customer: Customer,
+	session: CustomerSessionClaims,
+): Record<string, unknown> {
+	return {
+		customer: customerToJson(customer),
+		kind: session.kind,
+		tenantId: session.tenantId,
+	};
+}
+
 export function platformAuthResponseToJson(
 	user: Parameters<typeof userToJson>[0],
 	session: { role: string; kind: string },
@@ -108,6 +134,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "InvalidTenantBranding") {
 		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "CustomerNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "InvalidCustomerSession") {
+		return HttpNextResponse.domainError(error, 401);
 	}
 
 	return undefined;
