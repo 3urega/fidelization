@@ -16,6 +16,7 @@ npm run verify:platform-tenants    # issue #9 — list tenants + PATCH status (O
 npm run verify:business-register   # issues #11–#12 — owner user step 1 (onboarding cookie, hash, no membership)
 npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /home
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
+npm run verify:session-cookie-prod # production cookie Domain + resolveTenantHomeUrl
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -54,7 +55,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
 # Local auth / tenants (dev)
 
-- **Owner/staff login:** `/login` en `http://localhost:3000` → `/home` en el mismo host (cookie host-only). Subdominio: `http://{slug}.localhost:3000/login` → `/home` en ese host. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
+- **Owner/staff login:** `/login` en `http://localhost:3000` → `/home` en el mismo host (cookie host-only). Subdominio: `http://{slug}.localhost:3000/login` → `/home` en ese host. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. **Producción:** cookie `Domain=.${APP_DOMAIN}` + redirect apex → `{slug}.${APP_DOMAIN}/home` (`verify:session-cookie-prod`). Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
 - **Superadmin (issue #8):** solo `http://localhost:3000/platform/login` (apex) → `/platform`; no usar `/login` ni subdominios de negocio. Verifies: `verify:platform-login`, `verify:platform-isolation`.
 - **Superadmin dashboard (issue #9):** en `/platform` — lista de negocios y activar/suspender. `verify:platform-tenants`.
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.

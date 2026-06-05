@@ -79,6 +79,18 @@ The cookie was set for `localhost`; `la-chismosa.localhost` does not receive it 
 
 Staging on `app.staging.example.com` and tenants on `{slug}.app.staging.example.com` may use a shared registrable domain cookie policy designed for that environment — not the localhost host-only rule.
 
+## Production (apex + tenant subdomains)
+
+When `NODE_ENV=production` and `APP_DOMAIN` is set (e.g. `platform.example.com`):
+
+1. **Session cookie** — `Set-Cookie` includes `Domain=.platform.example.com` and `Secure` (auto from `APP_DOMAIN`, or override with `SESSION_COOKIE_DOMAIN`).
+2. **Post-login redirect** — [`resolveTenantHomeUrl`](../../src/lib/tenant/resolveTenantHomeUrl.ts): login on apex → `{slug}.platform.example.com/home` (session survives on shared domain).
+3. **Required env** — `APP_DOMAIN`, `NEXT_PUBLIC_APP_DOMAIN` (same value), `AUTH_SECRET`, `DATABASE_URL`. Boot warns via [`instrumentation.ts`](../../src/instrumentation.ts) if missing.
+
+Verify: `npm run verify:session-cookie-prod`.
+
+Localhost behavior unchanged: no `Domain` on cookie; apex stays on `/home` after login.
+
 ## 🔗 Related agreements
 
 - [Tenant resolution (subdomain, JWT, login scope)](../teenant-resolution.md).

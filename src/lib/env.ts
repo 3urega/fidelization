@@ -47,6 +47,28 @@ export const env = {
 		return optionalEnv("APP_DOMAIN");
 	},
 
+	/**
+	 * Shared session cookie domain for apex + tenant subdomains (production only).
+	 * Defaults to `.${APP_DOMAIN}` when APP_DOMAIN is set; override with SESSION_COOKIE_DOMAIN.
+	 */
+	get sessionCookieDomain(): string | undefined {
+		if (!env.isProduction) {
+			return undefined;
+		}
+
+		const explicit = optionalEnv("SESSION_COOKIE_DOMAIN");
+		if (explicit) {
+			return explicit.startsWith(".") ? explicit : `.${explicit}`;
+		}
+
+		const appDomain = optionalEnv("APP_DOMAIN");
+		if (!appDomain) {
+			return undefined;
+		}
+
+		return `.${appDomain.replace(/^\./, "")}`;
+	},
+
 	get allowDemoBilling(): boolean {
 		return process.env.ALLOW_DEMO_BILLING === "1";
 	},
@@ -63,6 +85,14 @@ export const env = {
 
 		if (!optionalEnv("DATABASE_URL")) {
 			missing.push("DATABASE_URL");
+		}
+
+		if (!optionalEnv("APP_DOMAIN")) {
+			missing.push("APP_DOMAIN (tenant subdomain resolution)");
+		}
+
+		if (optionalEnv("APP_DOMAIN") && !optionalEnv("NEXT_PUBLIC_APP_DOMAIN")) {
+			missing.push("NEXT_PUBLIC_APP_DOMAIN (must match APP_DOMAIN for post-login redirect)");
 		}
 
 		return missing;

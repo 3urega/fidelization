@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { type ReactElement, useState } from "react";
 
-import { formatTenantHost } from "../../lib/tenant/formatTenantHost";
+import { resolveTenantHomeUrl } from "../../lib/tenant/resolveTenantHomeUrl";
 import { themePresetIds, themePresetLabels } from "./theme/themePresets";
 import { useTheme } from "./theme/ThemeProvider";
 import { Button } from "./ui/Button";
@@ -108,33 +108,8 @@ export function LoginForm({ hostTenantMissing = false }: LoginFormProps): ReactE
 		}
 	}
 
-	function isApexDevHost(hostname: string): boolean {
-		return hostname === "localhost" || hostname === "127.0.0.1";
-	}
-
 	function navigateAfterAuth(tenant: TenantAuthPayload): void {
-		const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN?.trim();
-		const { protocol, port, hostname } = window.location;
-
-		// Cookies are host-only on localhost; redirecting apex → subdomain drops the session.
-		if (appDomain && tenant.slug && !isApexDevHost(hostname)) {
-			const tenantHost = formatTenantHost({ slug: tenant.slug, appDomain, port: port || undefined });
-			if (!tenantHost) {
-				window.location.assign("/home");
-
-				return;
-			}
-
-			const alreadyOnTenantHost = hostname === `${tenant.slug}.${appDomain}`;
-
-			if (!alreadyOnTenantHost) {
-				window.location.assign(`${protocol}//${tenantHost}/home`);
-
-				return;
-			}
-		}
-
-		window.location.assign("/home");
+		window.location.assign(resolveTenantHomeUrl(tenant.slug));
 	}
 
 	return (

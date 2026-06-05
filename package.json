@@ -19,6 +19,7 @@
     "verify:business-register": "tsx scripts/verify-business-register.ts",
     "verify:business-onboarding": "tsx scripts/verify-business-onboarding.ts",
     "verify:format-tenant-host": "tsx scripts/verify-format-tenant-host.ts",
+    "verify:session-cookie-prod": "tsx scripts/verify-session-cookie-prod.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

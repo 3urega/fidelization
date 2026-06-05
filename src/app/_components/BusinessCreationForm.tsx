@@ -4,6 +4,7 @@ import { type ReactElement, useEffect, useMemo, useState } from "react";
 
 import { BUSINESS_TYPE_OPTIONS } from "../../contexts/tenants/owners/domain/BusinessType";
 import { formatTenantHost } from "../../lib/tenant/formatTenantHost";
+import { resolveTenantHomeUrl } from "../../lib/tenant/resolveTenantHomeUrl";
 import { slugifyBusinessName } from "../../lib/tenant/slugifyBusinessName";
 import { useTheme } from "./theme/ThemeProvider";
 import { Button } from "./ui/Button";
@@ -122,13 +123,13 @@ export function BusinessCreationForm(): ReactElement {
 		if (finalHost) {
 			setCreatedHost(finalHost);
 			window.setTimeout(() => {
-				window.location.assign("/home");
+				window.location.assign(resolveTenantHomeUrl(data.tenant.slug));
 			}, REDIRECT_DELAY_MS);
 
 			return;
 		}
 
-		window.location.assign("/home");
+		window.location.assign(resolveTenantHomeUrl(data.tenant.slug));
 	}
 
 	return (

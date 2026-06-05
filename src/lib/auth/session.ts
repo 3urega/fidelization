@@ -60,13 +60,17 @@ export function sessionCookieOptions(): {
 	secure: boolean;
 	path: string;
 	maxAge: number;
+	domain?: string;
 } {
+	const domain = env.sessionCookieDomain;
+
 	return {
 		httpOnly: true,
 		sameSite: "lax",
 		secure: env.isProduction,
 		path: "/",
 		maxAge: MAX_AGE_SECONDS,
+		...(domain ? { domain } : {}),
 	};
 }
 
@@ -79,6 +83,9 @@ export function buildSessionCookie(token: string): string {
 		`Max-Age=${opts.maxAge}`,
 		`SameSite=${opts.sameSite}`,
 	];
+	if (opts.domain) {
+		parts.push(`Domain=${opts.domain}`);
+	}
 	if (opts.secure) {
 		parts.push("Secure");
 	}
@@ -87,7 +94,22 @@ export function buildSessionCookie(token: string): string {
 }
 
 export function clearSessionCookie(): string {
-	return `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=lax`;
+	const opts = sessionCookieOptions();
+	const parts = [
+		`${COOKIE_NAME}=`,
+		"HttpOnly",
+		`Path=${opts.path}`,
+		"Max-Age=0",
+		`SameSite=${opts.sameSite}`,
+	];
+	if (opts.domain) {
+		parts.push(`Domain=${opts.domain}`);
+	}
+	if (opts.secure) {
+		parts.push("Secure");
+	}
+
+	return parts.join("; ");
 }
 
 /** Preferred in App Router route handlers (reliable Set-Cookie). */
@@ -99,6 +121,7 @@ export function setSessionCookie(token: string): void {
 		secure: opts.secure,
 		path: opts.path,
 		maxAge: opts.maxAge,
+		...(opts.domain ? { domain: opts.domain } : {}),
 	});
 }
 
