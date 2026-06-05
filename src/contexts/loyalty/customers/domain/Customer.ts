@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 export type CustomerPrimitives = {
 	id: string;
 	tenantId: string;
@@ -7,6 +9,13 @@ export type CustomerPrimitives = {
 	qrValue: string;
 	pointsBalance: number;
 	visitsCount: number;
+};
+
+export type RegisterCustomerParams = {
+	tenantId: string;
+	name: string;
+	email?: string | null;
+	phone?: string | null;
 };
 
 export class Customer {
@@ -20,6 +29,23 @@ export class Customer {
 		public readonly pointsBalance: number,
 		public readonly visitsCount: number,
 	) {}
+
+	static register(params: RegisterCustomerParams): Customer {
+		const name = params.name.trim();
+		const email = params.email?.trim() ?? "";
+		const phone = params.phone?.trim() ?? "";
+
+		return Customer.fromPrimitives({
+			id: randomUUID(),
+			tenantId: params.tenantId,
+			name,
+			email: email === "" ? null : email,
+			phone: phone === "" ? null : phone,
+			qrValue: randomUUID(),
+			pointsBalance: 0,
+			visitsCount: 0,
+		});
+	}
 
 	static fromPrimitives(primitives: CustomerPrimitives): Customer {
 		return new Customer(

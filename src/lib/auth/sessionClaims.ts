@@ -18,7 +18,17 @@ export type OnboardingSessionClaims = {
 	userId: string;
 };
 
-export type SessionClaims = TenantSessionClaims | PlatformSessionClaims | OnboardingSessionClaims;
+export type CustomerSessionClaims = {
+	kind: "customer";
+	customerId: string;
+	tenantId: string;
+};
+
+export type SessionClaims =
+	| TenantSessionClaims
+	| PlatformSessionClaims
+	| OnboardingSessionClaims
+	| CustomerSessionClaims;
 
 export function isTenantSession(session: SessionClaims): session is TenantSessionClaims {
 	return session.kind === "tenant";
@@ -32,28 +42,41 @@ export function isOnboardingSession(session: SessionClaims): session is Onboardi
 	return session.kind === "onboarding";
 }
 
+export function isCustomerSession(session: SessionClaims): session is CustomerSessionClaims {
+	return session.kind === "customer";
+}
+
 export function parseSessionPayload(payload: Record<string, unknown>): SessionClaims | null {
-	const userId = payload.sub;
-	if (typeof userId !== "string") {
+	const subjectId = payload.sub;
+	if (typeof subjectId !== "string") {
 		return null;
 	}
 
 	if (payload.kind === "platform") {
 		if (payload.role === "superadmin") {
-			return { kind: "platform", userId, role: "superadmin" };
+			return { kind: "platform", userId: subjectId, role: "superadmin" };
 		}
 
 		return null;
 	}
 
 	if (payload.kind === "onboarding") {
-		return { kind: "onboarding", userId };
+		return { kind: "onboarding", userId: subjectId };
+	}
+
+	if (payload.kind === "customer") {
+		const tenantId = payload.tenantId;
+		if (typeof tenantId === "string") {
+			return { kind: "customer", customerId: subjectId, tenantId };
+		}
+
+		return null;
 	}
 
 	const tenantId = payload.tenantId;
 	const role = payload.role;
 	if (typeof tenantId === "string" && typeof role === "string") {
-		return { kind: "tenant", userId, tenantId, role };
+		return { kind: "tenant", userId: subjectId, tenantId, role };
 	}
 
 	return null;

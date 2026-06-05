@@ -75,6 +75,10 @@ function isAuthPublicPath(pathname: string): boolean {
 	return pathname === "/login" || isRegisterPath(pathname) || pathname === "/";
 }
 
+function isTenantAppPath(pathname: string): boolean {
+	return pathname === "/home" || pathname === "/profile" || pathname.startsWith("/settings/");
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const resolution = await resolveTenantFromRequest(request);
 
@@ -112,7 +116,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		} else if (!hasPlatformSession) {
 			return NextResponse.redirect(new URL("/platform/login", request.url));
 		}
-	} else if (hasPlatformSession && (pathname === "/home" || pathname === "/profile")) {
+	} else if (hasPlatformSession && isTenantAppPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasPlatformSession && (pathname === "/login" || isRegisterPath(pathname))) {
 		return NextResponse.redirect(new URL("/platform", request.url));
@@ -131,7 +135,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		return NextResponse.redirect(new URL("/register/business/tenant", request.url));
 	}
 
-	if (pathname === "/home" || pathname === "/profile") {
+	if (isTenantAppPath(pathname)) {
 		if (hasOnboardingSession) {
 			return NextResponse.redirect(new URL("/register/business/tenant", request.url));
 		}

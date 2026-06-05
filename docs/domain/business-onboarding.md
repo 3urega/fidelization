@@ -188,6 +188,8 @@ The platform guides the user through essential configuration.
 * Primary Color
 * Secondary Color
 
+**Implementation status (partial, #16–#17):** owner edits branding at `/settings/branding` (logo URL + hex colors); `PATCH /api/tenant/branding`; live theme via `TenantSessionProvider` + checklist on `/home`. Image upload / S3 and loyalty model picker below remain **out of scope**.
+
 ### Loyalty Program
 
 Choose initial loyalty model:

@@ -17,6 +17,7 @@ npm run verify:business-register   # issues #11–#12 — owner user step 1 (onb
 npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /home
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
 npm run verify:session-cookie-prod # production cookie Domain + resolveTenantHomeUrl
+npm run verify:tenant-branding     # issue #17 — PATCH branding + GET /api/me + Prisma (dev server + DATABASE_URL)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -61,6 +62,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
 - **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
+- **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/home`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
 
 # Architecture
 
@@ -113,7 +115,7 @@ docs/
 | Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/domain/saas-architecture.md`, `docs/business-rules.md` |
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/domain/business-model.md` (sección *Implementation status*) |
 | Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
-| Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `docs/issues/customer-qr-session-web-first.md` |
+| Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `npm run verify:tenant-branding` + `docs/issues/customer-qr-session-web-first.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

@@ -52,7 +52,9 @@ export function Sidebar({ mobileOpen, onNavigate }: SidebarProps): ReactElement 
 			</div>
 
 			<nav className="flex flex-1 flex-col gap-1 p-3">
-				{tenantAdminNav.map((item) => {
+				{tenantAdminNav
+					.filter((item) => !item.ownerOnly || session?.role === "owner")
+					.map((item) => {
 					const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
 					return (
@@ -72,7 +74,7 @@ export function Sidebar({ mobileOpen, onNavigate }: SidebarProps): ReactElement 
 							{item.label}
 						</Link>
 					);
-				})}
+					})}
 			</nav>
 		</aside>
 	);

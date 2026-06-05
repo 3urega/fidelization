@@ -25,7 +25,7 @@ Monetization and feature-flag enforcement remain documented in [`business-model.
 | Subdomain preview + prod cookie `Domain` | Done — `verify:format-tenant-host`, `verify:session-cookie-prod` |
 | Owner `/home` | Shell only — placeholders in [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) |
 | Tenant branding in DB | `logoUrl`, `primaryColor`, `secondaryColor` on `tenants`; defaults on create |
-| Branding edit API | **No** — owner cannot persist branding after onboarding |
+| Branding edit API + UI | Done (#16–#17, 2026-06-01) — `/settings/branding`, checklist `/home`, `verify:tenant-branding` |
 | Customer loyalty | Prisma + [`CustomerRepository`](../../src/contexts/loyalty/customers/domain/CustomerRepository.ts); **no UI/API/session** |
 | Session kinds | `platform`, `tenant`, `onboarding` — **no `customer`** |
 | Plan / Stripe (Steps 3–4) | Not implemented — intentional deferral |
@@ -74,23 +74,23 @@ flowchart LR
 
 | Slice | Value for the user | Layers / files |
 |-------|-------------------|----------------|
-| **A1** | Owner can save brand colors | Domain: `UpdateTenantBranding` (or extend tenant use case); `PATCH /api/tenant/branding`; `requireTenantSession` + owner check |
-| **A2** | UI: form on `/home` or `/settings/branding` | `(app)/settings/branding/page.tsx`, form reusing `Field`/`Input`, color inputs, logo URL |
-| **A3** | Dashboard reflects progress | Replace one “Próximamente” card in [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) with checklist + link; sidebar logo from session after save |
-| **A4** | Regression + docs | `npm run verify:tenant-branding`; note in `business-onboarding.md` Step 5 branding **partial**; `AGENTS.md` row |
+| **A1** ✅ | Owner can save brand colors | **Implemented #16** (2026-06-01) — `UpdateTenantBranding`, `PATCH /api/tenant/branding`, owner-only |
+| **A2** ✅ | UI: form on `/settings/branding` | **Implemented #17** (2026-06-01) — `TenantBrandingForm`, nav owner-only |
+| **A3** ✅ | Dashboard reflects progress | **Implemented #17** — checklist en [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) |
+| **A4** ✅ | Regression + docs | **Implemented #17** — `verify:tenant-branding`, `business-onboarding.md`, `AGENTS.md` |
 
 ### Acceptance criteria (Phase A)
 
-- [ ] Owner with tenant session can `PATCH` branding fields; persisted in Prisma.
-- [ ] `GET /api/me` (or branding GET) returns updated `tenant.logoUrl` / colors.
-- [ ] `ThemeProvider` / `TenantSessionProvider` reflect changes without full re-login.
-- [ ] `/home` shows branding as done or prompts to complete.
-- [ ] `verify:tenant-branding` passes (API + optional Prisma assertion).
+- [x] Owner with tenant session can `PATCH` branding fields; persisted in Prisma. (#16)
+- [x] `GET /api/me` (or branding GET) returns updated `tenant.logoUrl` / colors. (#16)
+- [x] `ThemeProvider` / `TenantSessionProvider` reflect changes without full re-login. (#17)
+- [x] `/home` shows branding as done or prompts to complete. (#17)
+- [x] `verify:tenant-branding` passes (API + Prisma assertion). (#17)
 
 ### Suggested GitHub issues
 
-- **#16** — Update tenant branding (domain + API)
-- **#17** — Branding settings UI + home checklist
+- ~~**#16** — Update tenant branding (domain + API)~~ **Closed** (2026-06-01)
+- ~~**#17** — Branding settings UI + home checklist~~ **Closed** (2026-06-01)
 
 ---
 
@@ -215,8 +215,8 @@ A business owner who completed Steps 1–2 can:
 
 | # | Título | Body file |
 |---|--------|-----------|
-| 16 | Tenant branding — domain + API | [`docs/issues/16-tenant-branding-api.md`](../issues/16-tenant-branding-api.md) |
-| 17 | Tenant branding — settings UI + home checklist | [`docs/issues/17-tenant-branding-ui.md`](../issues/17-tenant-branding-ui.md) |
+| 16 | Tenant branding — domain + API | **Closed** (2026-06-01) — [issue #16](https://github.com/3urega/fidelization/issues/16) |
+| 17 | Tenant branding — settings UI + home checklist | **Closed** (2026-06-01) — [issue #17](https://github.com/3urega/fidelization/issues/17) |
 | 18 | Customer session — register + loyalty APIs | [`docs/issues/18-customer-session-api.md`](../issues/18-customer-session-api.md) |
 | 19 | Customer loyalty app — `/app` UI + middleware | [`docs/issues/19-customer-app-ui.md`](../issues/19-customer-app-ui.md) |
 | 20 | Customer QR — verify E2E + docs | [`docs/issues/20-customer-qr-verify-docs.md`](../issues/20-customer-qr-verify-docs.md) |

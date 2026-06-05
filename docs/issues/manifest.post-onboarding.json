@@ -11,14 +11,6 @@
   },
   "issues": [
     {
-      "title": "Tenant branding: domain + API (PATCH /api/tenant/branding)",
-      "bodyFile": "docs/issues/16-tenant-branding-api.md"
-    },
-    {
-      "title": "Tenant branding: settings UI + home checklist",
-      "bodyFile": "docs/issues/17-tenant-branding-ui.md"
-    },
-    {
       "title": "Customer session: register + loyalty APIs (kind: customer)",
       "bodyFile": "docs/issues/18-customer-session-api.md"
     },

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { type ReactElement } from "react";
 
+import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
 import { PageHeader } from "../../_components/shell/PageHeader";
 import { useTenantSession } from "../../_components/shell/TenantSessionProvider";
 import { Button } from "../../_components/ui/Button";
@@ -18,10 +20,12 @@ export function HomeDashboard(): ReactElement {
 		return <p className="text-sm text-muted">Cargando…</p>;
 	}
 
+	const brandingDone = isTenantBrandingCustomized(session.tenant);
+	const isOwner = session.role === "owner";
+
 	const placeholders = [
 		{ title: "Clientes", description: "Próximamente" },
 		{ title: "Promociones", description: "Próximamente" },
-		{ title: "Estadísticas", description: "Próximamente" },
 	];
 
 	return (
@@ -31,7 +35,49 @@ export function HomeDashboard(): ReactElement {
 				description={`Panel del negocio · ${session.tenant.name}`}
 			/>
 
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			<Card>
+				<h2 className="font-medium text-foreground">Configuración inicial</h2>
+				<p className="mt-1 text-sm text-muted">Completa estos pasos para dejar tu negocio listo.</p>
+				<ul className="mt-4 flex flex-col gap-3">
+					<li className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex items-start gap-2">
+							<span
+								className={[
+									"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+									brandingDone
+										? "bg-primary text-primary-foreground"
+										: "border border-border text-muted",
+								].join(" ")}
+								aria-hidden
+							>
+								{brandingDone ? "✓" : "·"}
+							</span>
+							<div>
+								<p className="text-sm font-medium text-foreground">Completa tu branding</p>
+								<p className="text-sm text-muted">
+									{brandingDone
+										? "Logo y colores personalizados."
+										: "Añade logo y colores de tu negocio."}
+								</p>
+							</div>
+						</div>
+						{isOwner ? (
+							<Link
+								href="/settings/branding"
+								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
+							>
+								{brandingDone ? "Editar" : "Configurar"}
+							</Link>
+						) : (
+							<span className="text-sm text-muted sm:shrink-0">
+								{brandingDone ? "Completado" : "Pendiente (owner)"}
+							</span>
+						)}
+					</li>
+				</ul>
+			</Card>
+
+			<div className="grid gap-4 sm:grid-cols-2">
 				{placeholders.map((item) => (
 					<Card key={item.title} className="opacity-70">
 						<h2 className="font-medium text-foreground">{item.title}</h2>

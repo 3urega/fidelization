@@ -6,10 +6,12 @@ import { env } from "../env";
 import { parseSessionPayload, SESSION_COOKIE_NAME, type SessionClaims } from "./sessionClaims";
 
 export {
+	isCustomerSession,
 	isOnboardingSession,
 	isPlatformSession,
 	isTenantSession,
 	parseSessionPayload,
+	type CustomerSessionClaims,
 	type OnboardingSessionClaims,
 	type PlatformSessionClaims,
 	SESSION_COOKIE_NAME,
@@ -30,12 +32,18 @@ export async function createSessionToken(claims: SessionClaims): Promise<string>
 			? { kind: "platform" as const, sub: claims.userId, role: claims.role }
 			: claims.kind === "onboarding"
 				? { kind: "onboarding" as const, sub: claims.userId }
-				: {
-						kind: "tenant" as const,
-						sub: claims.userId,
-						tenantId: claims.tenantId,
-						role: claims.role,
-					};
+				: claims.kind === "customer"
+					? {
+							kind: "customer" as const,
+							sub: claims.customerId,
+							tenantId: claims.tenantId,
+						}
+					: {
+							kind: "tenant" as const,
+							sub: claims.userId,
+							tenantId: claims.tenantId,
+							role: claims.role,
+						};
 
 	return new SignJWT(payload)
 		.setProtectedHeader({ alg: "HS256" })
@@ -158,7 +166,11 @@ export async function getAuthenticatedSession(request: Request): Promise<Session
 export async function getAuthenticatedUserId(request: Request): Promise<string | null> {
 	const session = await getAuthenticatedSession(request);
 
-	return session?.userId ?? null;
+	if (!session || !("userId" in session)) {
+		return null;
+	}
+
+	return session.userId;
 }
 
 export function jsonWithSessionCookie<T>(body: T, token: string, status = 200): NextResponse {
