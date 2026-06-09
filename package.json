@@ -41,6 +41,8 @@
     "verify:customer-reward-redeem": "tsx scripts/verify-customer-reward-redeem.ts",
     "verify:tenant-employees-use-case": "tsx scripts/verify-tenant-employees-use-case.ts",
     "verify:tenant-employees": "tsx scripts/verify-tenant-employees.ts",
+    "verify:subscription-plans-use-case": "tsx scripts/verify-subscription-plans-use-case.ts",
+    "verify:subscription-plans": "tsx scripts/verify-subscription-plans.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

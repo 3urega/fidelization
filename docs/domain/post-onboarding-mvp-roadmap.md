@@ -214,7 +214,7 @@ flowchart LR
 
 ## Phase E — Steps 3–4: planes + Stripe + feature flags
 
-**Status:** **Open** — [#30–#34](https://github.com/3urega/fidelization/issues/30) (2026-06-09).
+**Status:** **In progress** — E1 [#30](https://github.com/3urega/fidelization/issues/30) **Implemented** (2026-06-09); [#31–#34](https://github.com/3urega/fidelization/issues/31) open.
 
 **Goal:** Monetización tenant tras loyalty MVP operativo (Phase A–D). Ver [`business-onboarding.md`](business-onboarding.md) Steps 3–4.
 
@@ -230,7 +230,7 @@ flowchart LR
 
 | Slice | Valor para el usuario | Body file |
 |-------|----------------------|-----------|
-| **E1** | Owner ve planes y asigna uno al negocio | [#30](https://github.com/3urega/fidelization/issues/30) — [`subscription-plans-catalog-api.md`](../issues/subscription-plans-catalog-api.md) |
+| **E1** | Owner ve planes y asigna uno al negocio | **Implemented** [#30](https://github.com/3urega/fidelization/issues/30) (2026-06-09) — `GET/PATCH /api/billing/*`, `verify:subscription-plans*` |
 | **E2** | Wizard/checklist «Elige tu plan» | [#31](https://github.com/3urega/fidelization/issues/31) — [`onboarding-plan-selection-ui.md`](../issues/onboarding-plan-selection-ui.md) |
 | **E3** | Owner paga con Stripe Checkout | [#32](https://github.com/3urega/fidelization/issues/32) — [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) |
 | **E4** | Impago suspende el negocio; pago lo reactiva | [#33](https://github.com/3urega/fidelization/issues/33) — [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) |
@@ -238,7 +238,7 @@ flowchart LR
 
 ### Acceptance criteria (Phase E — target)
 
-- [ ] Catálogo Basic/Pro/Premium + `verify:subscription-plans` (#30)
+- [x] Catálogo Basic/Pro/Premium + `verify:subscription-plans` (#30 — 2026-06-09)
 - [ ] UI Step 3 + `verify:onboarding-plan-selection` (#31)
 - [ ] Stripe Checkout test + subscription row (#32)
 - [ ] Webhooks suspend/reactivate + verify (#33)
@@ -334,7 +334,7 @@ A business owner who completed Steps 1–2 can:
 
 | # | Título | Body file |
 |---|--------|-----------|
-| 30 | Subscription plans: catalog + tenant plan API + verify | [`subscription-plans-catalog-api.md`](../issues/subscription-plans-catalog-api.md) — [issue #30](https://github.com/3urega/fidelization/issues/30) |
+| 30 | Subscription plans: catalog + tenant plan API + verify | **Closed** (2026-06-09) — [issue #30](https://github.com/3urega/fidelization/issues/30) |
 | 31 | Onboarding Step 3: plan selection UI + verify E2E | [`onboarding-plan-selection-ui.md`](../issues/onboarding-plan-selection-ui.md) — [issue #31](https://github.com/3urega/fidelization/issues/31) |
 | 32 | Stripe Checkout: tenant subscription (Step 4) | [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) — [issue #32](https://github.com/3urega/fidelization/issues/32) |
 | 33 | Stripe webhooks: subscription lifecycle + tenant suspend | [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) — [issue #33](https://github.com/3urega/fidelization/issues/33) |
