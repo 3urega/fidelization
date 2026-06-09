@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { PlatformUserLoginForm } from "../../../_components/platform-app/PlatformUserLoginForm";
+import { PlatformGoogleOAuthEnabledMarker } from "../../../_components/platform-app/PlatformGoogleOAuthEnabledMarker";
 import { AppShell } from "../../../_components/ui/AppShell";
 import { safeRedirectPath } from "../../../../lib/auth/safeRedirectPath";
 
@@ -19,6 +20,7 @@ export default function PlatformUserLoginPage({
 
 	return (
 		<AppShell title="Iniciar sesión" description="Accede con tu cuenta de la app de fidelización.">
+			<PlatformGoogleOAuthEnabledMarker />
 			<PlatformUserLoginForm redirectTo={redirectTo} />
 		</AppShell>
 	);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { PlatformUserRegisterForm } from "../../../_components/platform-app/PlatformUserRegisterForm";
+import { PlatformGoogleOAuthEnabledMarker } from "../../../_components/platform-app/PlatformGoogleOAuthEnabledMarker";
 import { AppShell } from "../../../_components/ui/AppShell";
 import { safeRedirectPath } from "../../../../lib/auth/safeRedirectPath";
 
@@ -22,6 +23,7 @@ export default function PlatformUserRegisterPage({
 			title="Crear cuenta"
 			description="Regístrate una vez para acumular puntos en locales y gestionar tus negocios."
 		>
+			<PlatformGoogleOAuthEnabledMarker />
 			<PlatformUserRegisterForm redirectTo={redirectTo} />
 		</AppShell>
 	);

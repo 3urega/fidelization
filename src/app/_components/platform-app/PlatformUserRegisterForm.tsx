@@ -7,6 +7,8 @@ import { type ReactElement, useState } from "react";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
+import { PlatformAuthDivider } from "./PlatformAuthDivider";
+import { PlatformGoogleSignInButton } from "./PlatformGoogleSignInButton";
 
 type UserAuthResponse = {
 	user: { id: string; name: string; email: string };
@@ -91,7 +93,10 @@ export function PlatformUserRegisterForm({
 	}
 
 	return (
-		<form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
+		<div className="flex flex-col gap-4">
+			<PlatformGoogleSignInButton redirectTo={redirectTo} text="signup_with" />
+			<PlatformAuthDivider />
+			<form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
 			<Field label="Tu nombre">
 				<Input
 					value={name}
@@ -139,6 +144,7 @@ export function PlatformUserRegisterForm({
 					Inicia sesión
 				</Link>
 			</p>
-		</form>
+			</form>
+		</div>
 	);
 }
