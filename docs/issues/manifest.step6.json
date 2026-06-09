@@ -10,14 +10,6 @@
   },
   "issues": [
     {
-      "title": "Customer rewards: list + redeem + verify E2E",
-      "bodyFile": "docs/issues/customer-reward-redeem.md"
-    },
-    {
-      "title": "Tenant team: invite employee + API",
-      "bodyFile": "docs/issues/tenant-employees-api.md"
-    },
-    {
       "title": "Tenant team: settings UI + verify E2E",
       "bodyFile": "docs/issues/tenant-employees-ui.md"
     }

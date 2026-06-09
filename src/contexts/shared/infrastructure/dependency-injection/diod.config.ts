@@ -19,7 +19,9 @@ import { PrismaUserRepository } from "../../../identity/users/infrastructure/Pri
 import { CouponRepository } from "../../../loyalty/coupons/domain/CouponRepository";
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
 import { AuthenticateCustomerByQr } from "../../../loyalty/customers/application/authenticate/AuthenticateCustomerByQr";
+import { GetCustomerActiveRewards } from "../../../loyalty/customers/application/profile/GetCustomerActiveRewards";
 import { GetCustomerStampProgress } from "../../../loyalty/customers/application/profile/GetCustomerStampProgress";
+import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
 import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
 import { CustomerSessionVerifier } from "../../../loyalty/customers/application/verify/CustomerSessionVerifier";
@@ -45,6 +47,8 @@ import { PlatformAuthenticator } from "../../../platform/application/authenticat
 import { ListPlatformTenants } from "../../../platform/application/tenants/ListPlatformTenants";
 import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
 import { TenantStaffLogin } from "../../../tenants/memberships/application/authenticate/TenantStaffLogin";
+import { InviteTenantEmployee } from "../../../tenants/memberships/application/invite/InviteTenantEmployee";
+import { ListTenantEmployees } from "../../../tenants/memberships/application/invite/ListTenantEmployees";
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
 import { TenantSessionVerifier } from "../../../tenants/memberships/application/verify/TenantSessionVerifier";
 import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
@@ -106,6 +110,8 @@ builder.registerAndUse(ListPlatformTenants);
 builder.registerAndUse(SetTenantPlatformStatus);
 builder.registerAndUse(TenantStaffLogin);
 builder.registerAndUse(TenantSessionVerifier);
+builder.registerAndUse(InviteTenantEmployee);
+builder.registerAndUse(ListTenantEmployees);
 builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
 
@@ -120,6 +126,8 @@ builder.register(CustomerRepository).use(PrismaCustomerRepository);
 builder.registerAndUse(PrismaCustomerRepository);
 builder.registerAndUse(RegisterCustomer);
 builder.registerAndUse(GetCustomerStampProgress);
+builder.registerAndUse(GetCustomerActiveRewards);
+builder.registerAndUse(RedeemCustomerReward);
 builder.registerAndUse(RecordCustomerVisitByQr);
 builder.registerAndUse(AuthenticateCustomerByQr);
 builder.registerAndUse(CustomerSessionVerifier);

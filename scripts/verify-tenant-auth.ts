@@ -47,6 +47,14 @@ class StubMembershipRepository extends TenantMembershipRepository {
 	async findById(): Promise<Tenant | null> {
 		return null;
 	}
+
+	async createStaffMembership(): Promise<{ membershipId: string }> {
+		throw new Error("not implemented in stub");
+	}
+
+	async listEmployeesByTenant(): Promise<never[]> {
+		return [];
+	}
 }
 
 if (!STAFF_TENANT_ROLES.includes(TenantRole.Admin)) {

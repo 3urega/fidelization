@@ -6,4 +6,6 @@ export abstract class RewardRepository {
 	abstract searchById(tenantId: string, id: string): Promise<Reward | null>;
 
 	abstract listByTenant(tenantId: string): Promise<Reward[]>;
+
+	abstract listActiveByTenant(tenantId: string): Promise<Reward[]>;
 }

@@ -1,4 +1,5 @@
 import { Tenant } from "../../tenants/domain/Tenant";
+import { CreateStaffMembershipParams, TenantEmployee } from "./TenantEmployee";
 import { TenantRole } from "./TenantRole";
 
 export type StaffMembership = {
@@ -17,4 +18,10 @@ export abstract class TenantMembershipRepository {
 	abstract findOwnerMembershipByUserId(userId: string): Promise<StaffMembership | null>;
 
 	abstract findById(tenantId: string): Promise<Tenant | null>;
+
+	abstract createStaffMembership(
+		params: CreateStaffMembershipParams,
+	): Promise<{ membershipId: string }>;
+
+	abstract listEmployeesByTenant(tenantId: string): Promise<TenantEmployee[]>;
 }

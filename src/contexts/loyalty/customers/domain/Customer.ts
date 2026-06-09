@@ -1,5 +1,7 @@
 import { randomUUID } from "crypto";
 
+import { InsufficientCustomerPoints } from "./InsufficientCustomerPoints";
+
 export type CustomerPrimitives = {
 	id: string;
 	tenantId: string;
@@ -69,6 +71,21 @@ export class Customer {
 			...this.toPrimitives(),
 			pointsBalance: this.pointsBalance + pointsEarned,
 			visitsCount: this.visitsCount + 1,
+		});
+	}
+
+	redeemPoints(costPoints: number): Customer {
+		if (!Number.isInteger(costPoints) || costPoints <= 0) {
+			throw new Error("costPoints must be a positive integer");
+		}
+
+		if (costPoints > this.pointsBalance) {
+			throw new InsufficientCustomerPoints(costPoints, this.pointsBalance);
+		}
+
+		return Customer.fromPrimitives({
+			...this.toPrimitives(),
+			pointsBalance: this.pointsBalance - costPoints,
 		});
 	}
 

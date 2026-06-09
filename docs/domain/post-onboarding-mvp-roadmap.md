@@ -196,16 +196,17 @@ flowchart LR
 | Slice | Valor para el usuario | Body file |
 |-------|----------------------|-----------|
 | **D1** | Owner crea catálogo de recompensas | ✅ #24 (2026-06-09) — `GET/POST/PATCH /api/loyalty/rewards`, `verify:rewards` |
-| **D2** | Cliente canjea con puntos en `/app/card` | [`customer-reward-redeem.md`](../issues/customer-reward-redeem.md) |
-| **D3** | Owner da de alta empleado (API) | [`tenant-employees-api.md`](../issues/tenant-employees-api.md) |
-| **D4** | UI equipo + empleado escanea QR | [`tenant-employees-ui.md`](../issues/tenant-employees-ui.md) |
+| **D2** | Cliente canjea con puntos en `/app/card` | ✅ #25 (2026-06-09) — `GET me` `rewards[]`, `POST /api/loyalty/rewards/redeem`, `verify:customer-reward-redeem` |
+| **D3** | Owner da de alta empleado (API) | ✅ #26 (2026-06-09) — `GET/POST /api/tenant/employees`, `verify:tenant-employees-use-case` |
+| **D4** | UI equipo + empleado escanea QR | ✅ #27 (2026-06-09) — `/settings/team`, checklist `/home`, `verify:tenant-employees` |
 
 ### Acceptance criteria (Phase D — target)
 
 - [x] Owner CRUD rewards + `verify:rewards` (#24, 2026-06-09)
-- [ ] Customer redeem + `verify:customer-reward-redeem` (#25 draft)
-- [ ] Owner invite employee + employee login/scan (#26–#27 draft)
-- [ ] `verify:tenant-employees` E2E
+- [x] Customer redeem + `verify:customer-reward-redeem` (#25, 2026-06-09)
+- [x] Owner invite employee API + `verify:tenant-employees-use-case` (#26, 2026-06-09)
+- [x] Owner invite employee UI + employee login/scan (#27, 2026-06-09)
+- [x] `verify:tenant-employees` E2E (#27, 2026-06-09)
 
 ---
 
@@ -294,9 +295,9 @@ A business owner who completed Steps 1–2 can:
 | # | Título | Body file |
 |---|--------|-----------|
 | 24 | Rewards: owner CRUD + API | **Closed** (2026-06-09) — [issue #24](https://github.com/3urega/fidelization/issues/24) |
-| 25 | Customer rewards: list + redeem + verify E2E | [`customer-reward-redeem.md`](../issues/customer-reward-redeem.md) — [issue #25](https://github.com/3urega/fidelization/issues/25) |
-| 26 | Tenant team: invite employee + API | [`tenant-employees-api.md`](../issues/tenant-employees-api.md) — [issue #26](https://github.com/3urega/fidelization/issues/26) |
-| 27 | Tenant team: settings UI + verify E2E | [`tenant-employees-ui.md`](../issues/tenant-employees-ui.md) — [issue #27](https://github.com/3urega/fidelization/issues/27) |
+| 25 | Customer rewards: list + redeem + verify E2E | **Closed** (2026-06-09) — [issue #25](https://github.com/3urega/fidelization/issues/25) |
+| 26 | Tenant team: invite employee + API | **Closed** (2026-06-09) — [issue #26](https://github.com/3urega/fidelization/issues/26) |
+| 27 | Tenant team: settings UI + verify E2E | **Closed** (2026-06-09) — [issue #27](https://github.com/3urega/fidelization/issues/27) |
 
 ```bash
 gh auth login

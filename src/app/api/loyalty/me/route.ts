@@ -2,6 +2,7 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
+import { GetCustomerActiveRewards } from "../../../../contexts/loyalty/customers/application/profile/GetCustomerActiveRewards";
 import { GetCustomerStampProgress } from "../../../../contexts/loyalty/customers/application/profile/GetCustomerStampProgress";
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
@@ -10,6 +11,7 @@ import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/htt
 import {
 	customerToJson,
 	handleAuthDomainError,
+	rewardToJson,
 	stampProgressToJson,
 } from "../../../../lib/auth/http";
 import { requireCustomerSession } from "../../../../lib/auth/requireCustomerSession";
@@ -23,14 +25,20 @@ export async function GET(request: Request): Promise<Response> {
 	}
 
 	try {
-		const stampProgress = await container.get(GetCustomerStampProgress).execute({
-			tenantId: auth.session.tenantId,
-			customerId: auth.customer.id,
-		});
+		const [stampProgress, rewards] = await Promise.all([
+			container.get(GetCustomerStampProgress).execute({
+				tenantId: auth.session.tenantId,
+				customerId: auth.customer.id,
+			}),
+			container.get(GetCustomerActiveRewards).execute({
+				tenantId: auth.session.tenantId,
+			}),
+		]);
 
 		return NextResponse.json({
 			customer: customerToJson(auth.customer),
 			stampProgress: stampProgress.map((summary) => stampProgressToJson(summary)),
+			rewards: rewards.map((reward) => rewardToJson(reward)),
 			kind: auth.session.kind,
 			tenantId: auth.session.tenantId,
 		});

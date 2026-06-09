@@ -7,6 +7,7 @@ import { StampAddedSummary } from "../../contexts/loyalty/customers/application/
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
+import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
 
 export function userToJson(user: {
@@ -106,6 +107,18 @@ export function rewardToJson(
 	};
 }
 
+export function tenantEmployeeToJson(
+	employee: TenantEmployee,
+): Record<string, string> {
+	return {
+		id: employee.membershipId,
+		userId: employee.userId,
+		name: employee.name,
+		email: employee.email,
+		role: employee.role,
+	};
+}
+
 export function stampAddedSummaryToJson(
 	summary: StampAddedSummary,
 ): Record<string, string | number | boolean> {
@@ -183,6 +196,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "TenantBrandingForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "TenantEmployeesForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
 	if (error.type === "InvalidTenantBranding") {
 		return HttpNextResponse.domainError(error, 400);
 	}
@@ -209,6 +225,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "RewardNotFound") {
 		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "InsufficientCustomerPoints") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "RewardInactive") {
+		return HttpNextResponse.domainError(error, 400);
 	}
 
 	return undefined;

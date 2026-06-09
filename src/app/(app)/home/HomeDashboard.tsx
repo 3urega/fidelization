@@ -14,10 +14,16 @@ type StampCampaignsResponse = {
 	campaigns?: { isActive: boolean }[];
 };
 
+type EmployeesResponse = {
+	employees?: { id: string }[];
+};
+
 export function HomeDashboard(): ReactElement {
 	const { session, loading, error } = useTenantSession();
 	const [stampsDone, setStampsDone] = useState(false);
 	const [stampsLoading, setStampsLoading] = useState(true);
+	const [teamDone, setTeamDone] = useState(false);
+	const [teamLoading, setTeamLoading] = useState(true);
 
 	useEffect(() => {
 		if (!session || session.role !== "owner") {
@@ -60,6 +66,47 @@ export function HomeDashboard(): ReactElement {
 		};
 	}, [session]);
 
+	useEffect(() => {
+		if (!session || session.role !== "owner") {
+			setTeamLoading(false);
+
+			return;
+		}
+
+		let cancelled = false;
+
+		async function loadEmployees(): Promise<void> {
+			try {
+				const response = await fetch("/api/tenant/employees", {
+					credentials: "include",
+				});
+				const body = (await response.json()) as EmployeesResponse;
+
+				if (cancelled) {
+					return;
+				}
+
+				if (response.ok) {
+					setTeamDone((body.employees ?? []).length >= 1);
+				}
+			} catch {
+				if (!cancelled) {
+					setTeamDone(false);
+				}
+			} finally {
+				if (!cancelled) {
+					setTeamLoading(false);
+				}
+			}
+		}
+
+		void loadEmployees();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [session]);
+
 	if (error) {
 		return <p className="text-sm text-error">{error}</p>;
 	}
@@ -71,6 +118,7 @@ export function HomeDashboard(): ReactElement {
 	const brandingDone = isTenantBrandingCustomized(session.tenant);
 	const isOwner = session.role === "owner";
 	const stampsComplete = isOwner ? stampsDone : false;
+	const teamComplete = isOwner ? teamDone : false;
 
 	const placeholders = [
 		{ title: "Clientes", description: "Próximamente" },
@@ -159,6 +207,43 @@ export function HomeDashboard(): ReactElement {
 						) : (
 							<span className="text-sm text-muted sm:shrink-0">
 								{stampsComplete ? "Completado" : "Pendiente (owner)"}
+							</span>
+						)}
+					</li>
+					<li className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex items-start gap-2">
+							<span
+								className={[
+									"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+									teamComplete
+										? "bg-primary text-primary-foreground"
+										: "border border-border text-muted",
+								].join(" ")}
+								aria-hidden
+							>
+								{teamComplete ? "✓" : "·"}
+							</span>
+							<div>
+								<p className="text-sm font-medium text-foreground">Invita a tu empleado</p>
+								<p className="text-sm text-muted">
+									{teamLoading && isOwner
+										? "Comprobando equipo…"
+										: teamComplete
+											? "Tienes al menos un empleado en el equipo."
+											: "Añade un empleado para que escanee QR en el mostrador."}
+								</p>
+							</div>
+						</div>
+						{isOwner ? (
+							<Link
+								href="/settings/team"
+								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
+							>
+								{teamComplete ? "Ver equipo" : "Invitar"}
+							</Link>
+						) : (
+							<span className="text-sm text-muted sm:shrink-0">
+								{teamComplete ? "Completado" : "Pendiente (owner)"}
 							</span>
 						)}
 					</li>

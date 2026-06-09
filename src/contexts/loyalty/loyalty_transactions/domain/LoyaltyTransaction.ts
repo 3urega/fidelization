@@ -63,6 +63,23 @@ export class LoyaltyTransaction {
 		});
 	}
 
+	static recordRewardRedeemed(params: {
+		tenantId: string;
+		customerId: string;
+		points: number;
+		metadata?: Record<string, unknown> | null;
+	}): LoyaltyTransaction {
+		return LoyaltyTransaction.fromPrimitives({
+			id: randomUUID(),
+			tenantId: params.tenantId,
+			customerId: params.customerId,
+			type: "reward_redeemed",
+			points: params.points,
+			metadata: params.metadata ?? null,
+			createdByUserId: null,
+		});
+	}
+
 	static fromPrimitives(primitives: LoyaltyTransactionPrimitives): LoyaltyTransaction {
 		return new LoyaltyTransaction(
 			primitives.id,

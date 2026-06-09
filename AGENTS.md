@@ -31,6 +31,10 @@ npm run verify:stamp-campaigns-use-case  # issue #21 — Create/List/Update stam
 npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campaigns + Prisma (dev + DATABASE_URL)
 npm run verify:rewards-use-case      # issue #24 — Create/List/Update rewards (domain stub)
 npm run verify:rewards               # issue #24 — POST/GET/PATCH rewards + Prisma (dev + DATABASE_URL)
+npm run verify:customer-reward-redeem-use-case  # issue #25 — list active + redeem (domain stub)
+npm run verify:customer-reward-redeem   # issue #25 — rewards[] in GET me + POST redeem E2E (dev + DATABASE_URL)
+npm run verify:tenant-employees-use-case  # issue #26 — invite/list employees (domain stub)
+npm run verify:tenant-employees   # issue #27 — owner invite → employee login → scan E2E (dev + DATABASE_URL)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -76,11 +80,13 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
 - **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/home`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
-- **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me` (incl. `stampProgress[]` desde #23). `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
+- **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me` (incl. `stampProgress[]` desde #23, `rewards[]` desde #25). `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
 - **Customer stamp progress (#23):** en `/app/card`, sección «Sellos» con progreso por campaña activa (`0/N`, «Completada»). `verify:customer-stamp-progress-use-case`, `verify:customer-stamp-progress`.
 - **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto, +1 sello por campaña activa, filas en `loyalty_transactions` (`points_earned`, `stamp_added`). Enlace para clientes en checklist `/home`. `verify:customer-scan`, `verify:customer-stamp-scan`.
 - **Stamp campaigns (#21):** owner en `/settings/stamps` → crear/listar/desactivar campañas (`GET/POST /api/loyalty/stamp-campaigns`, `PATCH …/[id]`). Checklist en `/home`. `verify:stamp-campaigns-use-case`, `verify:stamp-campaigns` (dev + `DATABASE_URL`).
 - **Rewards (#24):** owner API `GET/POST /api/loyalty/rewards`, `PATCH …/[id]` (owner-only; sin UI aún). `verify:rewards-use-case`, `verify:rewards`.
+- **Customer reward redeem (#25):** en `/app/card`, sección «Recompensas» con catálogo activo; `POST /api/loyalty/rewards/redeem` descuenta puntos y crea `reward_redeemed`. `verify:customer-reward-redeem-use-case`, `verify:customer-reward-redeem`.
+- **Tenant employees (#26–#27):** owner en `/settings/team` invita empleados (`GET/POST /api/tenant/employees`); empleado inicia sesión en subdominio tenant y usa `/scan`. Checklist «Invita a tu empleado» en `/home`. `verify:tenant-employees-use-case`, `verify:tenant-employees`.
 
 # Architecture
 
@@ -138,6 +144,8 @@ docs/
 | Staff scan + stamps (#22) | `verify:customer-stamp-scan-use-case` + `verify:customer-stamp-scan` + `/scan` |
 | Customer stamp progress (#23) | `verify:customer-stamp-progress-use-case` + `verify:customer-stamp-progress` + `/app/card` |
 | Rewards owner CRUD (#24) | `verify:rewards-use-case` + `verify:rewards` + `/api/loyalty/rewards` |
+| Customer reward redeem (#25) | `verify:customer-reward-redeem-use-case` + `verify:customer-reward-redeem` + `/app/card` |
+| Tenant employees (#26–#27) | `verify:tenant-employees-use-case` + `verify:tenant-employees` + `/settings/team` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

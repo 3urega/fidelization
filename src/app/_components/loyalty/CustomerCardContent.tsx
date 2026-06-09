@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
-import { LoyaltyCard, type StampProgressRow } from "./LoyaltyCard";
+import { LoyaltyCard, type RewardRow, type StampProgressRow } from "./LoyaltyCard";
 
 type CustomerPayload = {
 	id: string;
@@ -21,6 +21,15 @@ type CustomerPayload = {
 type MeResponse = {
 	customer?: CustomerPayload;
 	stampProgress?: StampProgressRow[];
+	rewards?: RewardRow[];
+	error?: {
+		description?: string;
+	};
+};
+
+type RedeemResponse = {
+	customer?: CustomerPayload;
+	rewardId?: string;
 	error?: {
 		description?: string;
 	};
@@ -34,39 +43,45 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 	const router = useRouter();
 	const [customer, setCustomer] = useState<CustomerPayload | null>(null);
 	const [stampProgress, setStampProgress] = useState<StampProgressRow[]>([]);
+	const [rewards, setRewards] = useState<RewardRow[]>([]);
 	const [error, setError] = useState<string | null>(null);
+	const [redeemError, setRedeemError] = useState<string | null>(null);
+	const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
+
+	const loadCard = useCallback(async (): Promise<boolean> => {
+		const response = await fetch("/api/loyalty/me", {
+			credentials: "include",
+		});
+		const body = (await response.json()) as MeResponse;
+
+		if (!response.ok) {
+			if (response.status === 401 || response.status === 403) {
+				router.replace("/app/welcome");
+
+				return false;
+			}
+
+			setError(body.error?.description ?? "No se pudo cargar tu tarjeta.");
+
+			return false;
+		}
+
+		if (body.customer) {
+			setCustomer(body.customer);
+			setStampProgress(body.stampProgress ?? []);
+			setRewards(body.rewards ?? []);
+		}
+
+		return true;
+	}, [router]);
 
 	useEffect(() => {
 		let cancelled = false;
 
 		async function load(): Promise<void> {
 			try {
-				const response = await fetch("/api/loyalty/me", {
-					credentials: "include",
-				});
-				const body = (await response.json()) as MeResponse;
-
-				if (cancelled) {
-					return;
-				}
-
-				if (!response.ok) {
-					if (response.status === 401 || response.status === 403) {
-						router.replace("/app/welcome");
-
-						return;
-					}
-
-					setError(body.error?.description ?? "No se pudo cargar tu tarjeta.");
-
-					return;
-				}
-
-				if (body.customer) {
-					setCustomer(body.customer);
-					setStampProgress(body.stampProgress ?? []);
-				}
+				await loadCard();
 			} catch {
 				if (!cancelled) {
 					setError("Error de red al cargar tu tarjeta.");
@@ -83,7 +98,38 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 		return () => {
 			cancelled = true;
 		};
-	}, [router]);
+	}, [loadCard]);
+
+	async function handleRedeemReward(rewardId: string): Promise<void> {
+		setRedeemError(null);
+		setRedeemingRewardId(rewardId);
+
+		try {
+			const response = await fetch("/api/loyalty/rewards/redeem", {
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ rewardId }),
+			});
+			const body = (await response.json()) as RedeemResponse;
+
+			if (!response.ok) {
+				setRedeemError(body.error?.description ?? "No se pudo canjear la recompensa.");
+
+				return;
+			}
+
+			if (body.customer) {
+				setCustomer(body.customer);
+			}
+
+			await loadCard();
+		} catch {
+			setRedeemError("Error de red al canjear la recompensa.");
+		} finally {
+			setRedeemingRewardId(null);
+		}
+	}
 
 	if (loading) {
 		return (
@@ -122,6 +168,12 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 				qrValue={customer.qrValue}
 				businessName={businessName}
 				stampProgress={stampProgress}
+				rewards={rewards}
+				redeemingRewardId={redeemingRewardId}
+				redeemError={redeemError}
+				onRedeemReward={(rewardId) => {
+					void handleRedeemReward(rewardId);
+				}}
 			/>
 		</Card>
 	);

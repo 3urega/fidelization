@@ -49,6 +49,15 @@ export class PrismaRewardRepository extends RewardRepository {
 		return rows.map((row) => this.toAggregate(row));
 	}
 
+	async listActiveByTenant(tenantId: string): Promise<Reward[]> {
+		const rows = await prisma.reward.findMany({
+			where: { tenantId, isActive: true },
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => this.toAggregate(row));
+	}
+
 	private toAggregate(row: {
 		id: string;
 		tenantId: string;
