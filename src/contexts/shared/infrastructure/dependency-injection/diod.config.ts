@@ -10,6 +10,9 @@ import { GooglePlaySubscriptionRepository } from "../../../billing/google_play_s
 import { PostgresGooglePlaySubscriptionRepository } from "../../../billing/google_play_subscription/infrastructure/PostgresGooglePlaySubscriptionRepository";
 import { TenantBillingRepository } from "../../../billing/subscriptions/domain/TenantBillingRepository";
 import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/application/assign/AssignTenantSubscriptionPlan";
+import { AssertTenantEmployeeLimit } from "../../../billing/subscriptions/application/guard/AssertTenantEmployeeLimit";
+import { AssertTenantPlanFeature } from "../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantSubscriptionPlan } from "../../../billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { CreateStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CreateStripeCheckoutSession";
 import { CompleteStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
 import { SyncTenantSubscriptionFromStripe } from "../../../billing/subscriptions/application/sync/SyncTenantSubscriptionFromStripe";
@@ -48,6 +51,7 @@ import { PrismaPromotionRepository } from "../../../loyalty/promotions/infrastru
 import { CreateReward } from "../../../loyalty/rewards/application/create/CreateReward";
 import { ListRewards } from "../../../loyalty/rewards/application/list/ListRewards";
 import { UpdateReward } from "../../../loyalty/rewards/application/update/UpdateReward";
+import { ListPromotions } from "../../../loyalty/promotions/application/list/ListPromotions";
 import { RewardRepository } from "../../../loyalty/rewards/domain/RewardRepository";
 import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -161,6 +165,8 @@ builder.registerAndUse(CreateReward);
 builder.registerAndUse(ListRewards);
 builder.registerAndUse(UpdateReward);
 
+builder.registerAndUse(ListPromotions);
+
 builder.register(PromotionRepository).use(PrismaPromotionRepository);
 builder.registerAndUse(PrismaPromotionRepository);
 
@@ -184,5 +190,8 @@ builder.registerAndUse(CreateStripeCheckoutSession);
 builder.registerAndUse(CompleteStripeCheckoutSession);
 builder.registerAndUse(SyncTenantSubscriptionFromStripe);
 builder.registerAndUse(ProcessStripeWebhook);
+builder.registerAndUse(ResolveTenantSubscriptionPlan);
+builder.registerAndUse(AssertTenantPlanFeature);
+builder.registerAndUse(AssertTenantEmployeeLimit);
 
 export const container = builder.build();

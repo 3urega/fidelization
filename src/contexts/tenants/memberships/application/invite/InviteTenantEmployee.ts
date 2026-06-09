@@ -1,6 +1,7 @@
 import { Service } from "diod";
 
 import { UserRegistrar } from "../../../../identity/users/application/register/UserRegistrar";
+import { AssertTenantEmployeeLimit } from "../../../../billing/subscriptions/application/guard/AssertTenantEmployeeLimit";
 import { TenantAccessSuspended } from "../../../tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../../../tenants/domain/TenantNotFound";
 import { TenantRepository } from "../../../tenants/domain/TenantRepository";
@@ -26,6 +27,7 @@ export class InviteTenantEmployee {
 		private readonly tenantRepository: TenantRepository,
 		private readonly membershipRepository: TenantMembershipRepository,
 		private readonly userRegistrar: UserRegistrar,
+		private readonly assertTenantEmployeeLimit: AssertTenantEmployeeLimit,
 	) {}
 
 	async execute(params: InviteTenantEmployeeParams): Promise<TenantEmployee> {
@@ -34,6 +36,7 @@ export class InviteTenantEmployee {
 		}
 
 		await this.assertTenantActive(params.tenantId);
+		await this.assertTenantEmployeeLimit.execute(params.tenantId);
 
 		const name = params.input.name?.trim();
 		const email = params.input.email?.trim();

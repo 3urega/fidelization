@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 
 import { UserFinder } from "../../../contexts/identity/users/application/find/UserFinder";
 import { UserProfileUpdater } from "../../../contexts/identity/users/application/update_profile/UserProfileUpdater";
+import { ResolveTenantSubscriptionPlan } from "../../../contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { enabledFeatures } from "../../../contexts/billing/subscriptions/domain/TenantPlanFeature";
 import { UserDoesNotExist } from "../../../contexts/identity/users/domain/UserDoesNotExist";
 import { container } from "../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { handleAuthDomainError, tenantToJson, userToJson } from "../../../lib/auth/http";
@@ -19,11 +21,13 @@ export async function GET(request: Request): Promise<Response> {
 
 	try {
 		const user = await container.get(UserFinder).find(auth.session.userId);
+		const plan = await container.get(ResolveTenantSubscriptionPlan).execute(auth.session.tenantId);
 
 		return NextResponse.json({
 			user: userToJson(user),
 			tenant: tenantToJson(auth.membership.tenant),
 			role: auth.session.role,
+			planFeatures: enabledFeatures(plan.features),
 		});
 	} catch (error) {
 		if (error instanceof UserDoesNotExist) {

@@ -274,6 +274,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "StripeSubscriptionNotFound") {
 		return HttpNextResponse.domainError(error, 404);
 	}
+	if (error.type === "PlanFeatureNotAvailable") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "TenantPlanLimitExceeded") {
+		return HttpNextResponse.domainError(error, 403);
+	}
 
 	return undefined;
 }
