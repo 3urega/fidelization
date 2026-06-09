@@ -76,6 +76,10 @@ class InMemoryCustomerRepository extends CustomerRepository {
 	async searchByQrValue(): Promise<null> {
 		return null;
 	}
+
+	async listWithInteractionByUserId(): Promise<never[]> {
+		return [];
+	}
 }
 
 class InMemoryRewardRepository extends RewardRepository {

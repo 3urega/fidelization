@@ -76,6 +76,10 @@ class InMemoryCustomerRepository extends CustomerRepository {
 			) ?? null
 		);
 	}
+
+	async listWithInteractionByUserId(): Promise<never[]> {
+		return [];
+	}
 }
 
 class InMemoryLoyaltyTransactionRepository extends LoyaltyTransactionRepository {

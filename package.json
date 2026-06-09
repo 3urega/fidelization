@@ -16,6 +16,7 @@
     "verify:platform-app-public-home": "tsx scripts/verify-platform-app-public-home.ts",
     "verify:platform-app-register-business": "tsx scripts/verify-platform-app-register-business.ts",
     "verify:platform-app-dashboard-use-case": "tsx scripts/verify-platform-app-dashboard-use-case.ts",
+    "verify:platform-app-dashboard": "tsx scripts/verify-platform-app-dashboard.ts",
     "verify:owner-login": "tsx scripts/verify-owner-login-flow.ts",
     "verify:platform-login": "tsx scripts/verify-platform-login-flow.ts",
     "verify:platform-isolation": "tsx scripts/verify-platform-isolation.ts",

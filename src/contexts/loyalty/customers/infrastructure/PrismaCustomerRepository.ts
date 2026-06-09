@@ -2,6 +2,7 @@ import { Service } from "diod";
 
 import { prisma } from "../../../../lib/prisma";
 import { Customer } from "../domain/Customer";
+import { CustomerEstablishmentSummary } from "../domain/CustomerEstablishmentSummary";
 import { CustomerRepository } from "../domain/CustomerRepository";
 
 @Service()
@@ -47,6 +48,27 @@ export class PrismaCustomerRepository extends CustomerRepository {
 		});
 
 		return row ? this.toAggregate(row) : null;
+	}
+
+	async listWithInteractionByUserId(userId: string): Promise<CustomerEstablishmentSummary[]> {
+		const rows = await prisma.customer.findMany({
+			where: {
+				userId,
+				OR: [{ visitsCount: { gt: 0 } }, { pointsBalance: { gt: 0 } }],
+			},
+			include: { tenant: true },
+			orderBy: { tenant: { name: "asc" } },
+		});
+
+		return rows.map((row) => ({
+			customerId: row.id,
+			tenantId: row.tenantId,
+			name: row.tenant.name,
+			slug: row.tenant.slug,
+			logoUrl: row.tenant.logoUrl || null,
+			pointsBalance: row.pointsBalance,
+			visitsCount: row.visitsCount,
+		}));
 	}
 
 	private toAggregate(row: {

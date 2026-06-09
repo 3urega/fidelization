@@ -291,7 +291,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 |-------|-------|-------|
 | **G1** | Home pública + registro/login unificado (email) | **Implemented** [#38](https://github.com/3urega/fidelization/issues/38) backend + [#39](https://github.com/3urega/fidelization/issues/39) UI `/u/*` (2026-06-09) |
 | **G2** | «Registrar negocio» auth + crear tenant | **Implemented** [#40](https://github.com/3urega/fidelization/issues/40) (2026-06-09) — `/u/register/business`, `POST /api/user/businesses`, `ListUserRelationships` |
-| **G3** | Dashboard unificado (mis negocios / mis locales) | `GET /api/me/relationships`, UI home |
+| **G3** | Dashboard unificado (mis negocios / mis locales) | **Implemented** [#41](https://github.com/3urega/fidelization/issues/41) (2026-06-09) — `/u/home`, `relationships` API, `/u/home/business/[slug]` |
 | **G4** | Detalle local con interacción (tarjeta + promos) | Loyalty read APIs por user+tenant |
 | **G5** | Detalle local sin interacción (solo promos) | Promotions list pública por slug |
 | **G6** | «Otras promos activas» en detalle | Agregador cross-tenant filtrado por user |
@@ -366,7 +366,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | 38 | Platform app: unified user auth + session kind user (domain + API) | **Closed** (2026-06-09) — [issue #38](https://github.com/3urega/fidelization/issues/38) |
 | 39 | Platform app: public home UI (Registrarse / Registrar negocio / Login) | **Closed** (2026-06-09) — [issue #39](https://github.com/3urega/fidelization/issues/39) |
 | 40 | Platform app: register business flow (auth + create tenant) | **Closed** (2026-06-09) — [issue #40](https://github.com/3urega/fidelization/issues/40) |
-| 41 | Platform app: unified dashboard (mis negocios + mis locales) | [issue #41](https://github.com/3urega/fidelization/issues/41) |
+| 41 | Platform app: unified dashboard (mis negocios + mis locales) | **Closed** (2026-06-09) — [issue #41](https://github.com/3urega/fidelization/issues/41) |
 | 42 | Platform app: join establishment + customer user_id link | [issue #42](https://github.com/3urega/fidelization/issues/42) |
 | 43 | Platform app: establishment detail (tarjeta, promos, descubrimiento) | [issue #43](https://github.com/3urega/fidelization/issues/43) — tras [#37](https://github.com/3urega/fidelization/issues/37) |
 | 44 | Platform app: global QR + staff scan lookup | [issue #44](https://github.com/3urega/fidelization/issues/44) |

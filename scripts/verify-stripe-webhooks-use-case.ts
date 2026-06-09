@@ -165,6 +165,10 @@ class StubCustomerRepository extends CustomerRepository {
 	async searchByQrValue(): Promise<null> {
 		return null;
 	}
+
+	async listWithInteractionByUserId(): Promise<never[]> {
+		return [];
+	}
 }
 
 class InMemoryStripeWebhookEventRepository extends StripeWebhookEventRepository {

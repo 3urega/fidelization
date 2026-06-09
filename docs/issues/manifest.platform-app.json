@@ -14,10 +14,6 @@
   },
   "issues": [
     {
-      "title": "Platform app: unified dashboard (mis negocios + mis locales)",
-      "bodyFile": "docs/issues/platform-app-unified-dashboard.md"
-    },
-    {
       "title": "Platform app: join establishment + customer user_id link",
       "bodyFile": "docs/issues/platform-app-customer-join.md"
     },
