@@ -13,7 +13,7 @@ Este documento define la **app móvil de plataforma** (Capacitor → App Store /
 
 **Relacionado:** [`business-onboarding.md`](business-onboarding.md) (wizard web owner actual), [`saas-architecture.md`](saas-architecture.md), [`post-onboarding-mvp-roadmap.md`](post-onboarding-mvp-roadmap.md), [`database/data-model.md`](../database/data-model.md), [`AGENTS.md`](../../AGENTS.md).
 
-**Estado:** **In progress** — G1 backend [#38](https://github.com/3urega/fidelization/issues/38) **Implemented** (2026-06-09): auth unificado API + `kind: user` + migración. UI app (#39+) pendiente. Web legacy sin cambios.
+**Estado:** **In progress** — G1 [#38](https://github.com/3urega/fidelization/issues/38) backend + [#39](https://github.com/3urega/fidelization/issues/39) UI home/registro/login **Implemented** (2026-06-09) en `/u/*`. Dashboard (#41+) pendiente. Web legacy sin cambios.
 
 ---
 
@@ -289,7 +289,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 
 | Slice | Valor | Capas |
 |-------|-------|-------|
-| **G1** | Home pública + registro/login unificado (email) | Backend **Implemented** [#38](https://github.com/3urega/fidelization/issues/38) (2026-06-09) — `RegisterPlatformUser`, `LoginPlatformUser`, `kind: user`, `/api/auth/*/user`, `/api/user/me`. UI en #39 |
+| **G1** | Home pública + registro/login unificado (email) | **Implemented** [#38](https://github.com/3urega/fidelization/issues/38) backend + [#39](https://github.com/3urega/fidelization/issues/39) UI `/u/*` (2026-06-09) |
 | **G2** | «Registrar negocio» auth + crear tenant | Reutilizar onboarding #13 con sesión user |
 | **G3** | Dashboard unificado (mis negocios / mis locales) | `GET /api/me/relationships`, UI home |
 | **G4** | Detalle local con interacción (tarjeta + promos) | Loyalty read APIs por user+tenant |
@@ -364,7 +364,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | # | Título | Body file |
 |---|--------|-----------|
 | 38 | Platform app: unified user auth + session kind user (domain + API) | **Closed** (2026-06-09) — [issue #38](https://github.com/3urega/fidelization/issues/38) |
-| 39 | Platform app: public home UI (Registrarse / Registrar negocio / Login) | [issue #39](https://github.com/3urega/fidelization/issues/39) |
+| 39 | Platform app: public home UI (Registrarse / Registrar negocio / Login) | **Closed** (2026-06-09) — [issue #39](https://github.com/3urega/fidelization/issues/39) |
 | 40 | Platform app: register business flow (auth + create tenant) | [issue #40](https://github.com/3urega/fidelization/issues/40) |
 | 41 | Platform app: unified dashboard (mis negocios + mis locales) | [issue #41](https://github.com/3urega/fidelization/issues/41) |
 | 42 | Platform app: join establishment + customer user_id link | [issue #42](https://github.com/3urega/fidelization/issues/42) |
