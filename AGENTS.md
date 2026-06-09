@@ -11,7 +11,9 @@ npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross
 npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, PlatformAuthenticator
 npm run verify:platform-app-auth-use-case  # issue #38 — RegisterPlatformUser + LoginPlatformUser + kind user (domain stub)
 npm run verify:platform-app-public-home  # issue #39 — /u home + register/login UI + middleware (dev server)
-npm run verify:platform-app-register-business  # issue #40 — /u/register/business + POST /api/user/businesses (dev + DATABASE_URL)
+npm run verify:platform-app-register-business  # issue #40 — /u/register/business + POST /api/user/businesses + enter panel (dev + DATABASE_URL)
+npm run verify:platform-app-enter-tenant-use-case  # EnterTenantStaffFromUserSession (domain stub)
+npm run verify:platform-app-enter-user-use-case  # EnterPlatformUserFromTenantSession (domain stub)
 npm run verify:platform-app-dashboard-use-case  # issue #41 — ListUserRelationships (domain stub)
 npm run verify:platform-app-dashboard  # issue #41 — /u/home dashboard + business shell E2E (dev + DATABASE_URL)
 npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAsCustomer (domain stub)
@@ -123,7 +125,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Customer promotions (#37):** cliente en `/app/card` ve promos activas; `GET /api/loyalty/me` incluye `promotions[]`; Basic → `[]` sin error. `verify:customer-promotions-use-case`, `verify:customer-promotions` (dev + `DATABASE_URL`).
 - **Platform app auth (#38):** registro/login unificado persona en apex (`POST /api/auth/register/user`, `POST /api/auth/login/user`); sesión JWT `kind: user`; `GET /api/user/me`; `users.qr_value` + `customers.user_id` migrados. `verify:platform-app-auth-use-case`.
 - **Platform app home UI (#39):** home pública `/u` (Registrarse · Registrar negocio · Login); formularios `/u/register`, `/u/login` → `/u/home` placeholder; guards middleware `kind: user`. `verify:platform-app-public-home`.
-- **Platform app register business (#40):** `/u/register/business` (auth gate) → `/u/register/business/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/u/home`. `verify:platform-app-register-business`.
+- **Platform app register business (#40):** `/u/register/business` (auth gate) → `/u/register/business/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/u/home`; `POST /api/user/businesses/[slug]/enter` emite sesión `kind: tenant` y abre `/home` sin re-login; desde el panel del negocio, «App personal» → `POST /api/user/enter` vuelve a sesión `kind: user` en `/u/home`. `verify:platform-app-register-business`, `verify:platform-app-enter-tenant-use-case`, `verify:platform-app-enter-user-use-case`.
 - **Platform app dashboard (#41):** `/u/home` unificado (Mis negocios + Mis locales), `/u/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 - **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/u/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/u/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.

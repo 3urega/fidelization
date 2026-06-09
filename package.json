@@ -15,6 +15,8 @@
     "verify:platform-app-auth-use-case": "tsx scripts/verify-platform-app-auth-use-case.ts",
     "verify:platform-app-public-home": "tsx scripts/verify-platform-app-public-home.ts",
     "verify:platform-app-register-business": "tsx scripts/verify-platform-app-register-business.ts",
+    "verify:platform-app-enter-tenant-use-case": "tsx scripts/verify-platform-app-enter-tenant-use-case.ts",
+    "verify:platform-app-enter-user-use-case": "tsx scripts/verify-platform-app-enter-user-use-case.ts",
     "verify:platform-app-dashboard-use-case": "tsx scripts/verify-platform-app-dashboard-use-case.ts",
     "verify:platform-app-dashboard": "tsx scripts/verify-platform-app-dashboard.ts",
     "verify:platform-app-customer-join-use-case": "tsx scripts/verify-platform-app-customer-join-use-case.ts",

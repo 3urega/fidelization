@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
 import { platformFetch } from "../../../../../../lib/platform/apiUrl";
-import { resolveTenantHomeUrl } from "../../../../../../lib/tenant/resolveTenantHomeUrl";
 import { Button } from "../../../../../_components/ui/Button";
 import { Card } from "../../../../../_components/ui/Card";
 
@@ -28,6 +27,7 @@ export function PlatformBusinessAdminEntry(): ReactElement {
 	const slug = typeof params.slug === "string" ? params.slug : "";
 	const [business, setBusiness] = useState<UserBusiness | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [entering, setEntering] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -102,11 +102,33 @@ export function PlatformBusinessAdminEntry(): ReactElement {
 			<Button
 				type="button"
 				className="w-full"
+				disabled={entering}
 				onClick={() => {
-					window.location.assign(resolveTenantHomeUrl(business.slug));
+					void (async () => {
+						setEntering(true);
+						setError(null);
+
+						const response = await platformFetch(
+							`/api/user/businesses/${business.slug}/enter`,
+							{ method: "POST" },
+						);
+						const data = (await response.json()) as {
+							redirectUrl?: string;
+							error?: { description?: string };
+						};
+
+						if (!response.ok || !data.redirectUrl) {
+							setError(data.error?.description ?? "No se pudo abrir el panel del negocio");
+							setEntering(false);
+
+							return;
+						}
+
+						window.location.assign(data.redirectUrl);
+					})();
 				}}
 			>
-				Abrir panel del negocio
+				{entering ? "Abriendo panel…" : "Abrir panel del negocio"}
 			</Button>
 		</main>
 	);

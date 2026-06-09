@@ -222,6 +222,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "UserDoesNotExist") {
 		return HttpNextResponse.domainError(error, 404);
 	}
+	if (error.type === "TenantNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
 	if (error.type === "OwnerMembershipNotFound") {
 		return HttpNextResponse.domainError(error, 403);
 	}

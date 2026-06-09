@@ -170,6 +170,93 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET /api/user/me/relationships lists business");
 
+	const enter = await fetch(`${baseUrl}/api/user/businesses/${createBody.tenant.slug}/enter`, {
+		method: "POST",
+		headers: sessionHeaders(userCookie),
+	});
+	const enterBody = (await enter.json()) as {
+		kind?: string;
+		redirectUrl?: string;
+		tenant?: { slug: string };
+		role?: string;
+	};
+	const tenantCookie = parseSessionCookie(enter.headers.get("set-cookie"));
+
+	if (
+		enter.status !== 200 ||
+		enterBody.kind !== "tenant" ||
+		enterBody.role !== "owner" ||
+		!enterBody.redirectUrl ||
+		!tenantCookie
+	) {
+		console.error("❌ POST /api/user/businesses/[slug]/enter:", enter.status, enterBody);
+		process.exit(1);
+	}
+
+	if (!enterBody.redirectUrl.includes("/home")) {
+		console.error("❌ enter redirectUrl missing /home:", enterBody.redirectUrl);
+		process.exit(1);
+	}
+
+	console.log("✅ POST enter → tenant session + redirectUrl");
+
+	const tenantMeAfterEnter = await fetch(`${baseUrl}/api/me`, {
+		headers: sessionHeaders(tenantCookie),
+	});
+	const tenantMeAfterEnterBody = (await tenantMeAfterEnter.json()) as {
+		kind?: string;
+		tenant?: { slug: string };
+	};
+
+	if (
+		!tenantMeAfterEnter.ok ||
+		tenantMeAfterEnterBody.kind !== "tenant" ||
+		tenantMeAfterEnterBody.tenant?.slug !== createBody.tenant.slug
+	) {
+		console.error(
+			"❌ GET /api/me with tenant session:",
+			tenantMeAfterEnter.status,
+			tenantMeAfterEnterBody,
+		);
+		process.exit(1);
+	}
+
+	console.log("✅ GET /api/me with tenant session after enter");
+
+	const backToUser = await fetch(`${baseUrl}/api/user/enter`, {
+		method: "POST",
+		headers: sessionHeaders(tenantCookie),
+	});
+	const backBody = (await backToUser.json()) as {
+		kind?: string;
+		redirectUrl?: string;
+	};
+	const restoredUserCookie = parseSessionCookie(backToUser.headers.get("set-cookie"));
+
+	if (
+		backToUser.status !== 200 ||
+		backBody.kind !== "user" ||
+		!backBody.redirectUrl?.includes("/u/home") ||
+		!restoredUserCookie
+	) {
+		console.error("❌ POST /api/user/enter:", backToUser.status, backBody);
+		process.exit(1);
+	}
+
+	console.log("✅ POST /api/user/enter → user session + redirectUrl");
+
+	const userMeAfterRestore = await fetch(`${baseUrl}/api/user/me`, {
+		headers: sessionHeaders(restoredUserCookie),
+	});
+	const userMeAfterRestoreBody = (await userMeAfterRestore.json()) as { kind?: string };
+
+	if (!userMeAfterRestore.ok || userMeAfterRestoreBody.kind !== "user") {
+		console.error("❌ GET /api/user/me after restore:", userMeAfterRestore.status, userMeAfterRestoreBody);
+		process.exit(1);
+	}
+
+	console.log("✅ GET /api/user/me after returning to platform app");
+
 	const userRow = await prisma.user.findUnique({
 		where: { email },
 		select: {

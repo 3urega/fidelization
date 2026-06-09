@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { type ReactElement } from "react";
 
 import { NavIcon } from "./NavIcon";
+import { OpenPlatformUserAppButton } from "./OpenPlatformUserAppButton";
 import { tenantAdminNav } from "./navItems";
 import { useTenantSession } from "./TenantSessionProvider";
 
@@ -76,6 +77,10 @@ export function Sidebar({ mobileOpen, onNavigate }: SidebarProps): ReactElement 
 					);
 					})}
 			</nav>
+
+			<div className="border-t border-border p-3">
+				<OpenPlatformUserAppButton />
+			</div>
 		</aside>
 	);
 }
