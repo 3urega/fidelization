@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-import { RewardType } from "./Reward";
+export type RewardType = "free_item" | "discount" | "custom";
 
 export type RewardPrimitives = {
 	id: string;

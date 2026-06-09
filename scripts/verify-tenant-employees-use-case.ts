@@ -2,6 +2,7 @@
 import "dotenv/config";
 
 import { EmailAlreadyRegistered } from "../src/contexts/identity/users/domain/EmailAlreadyRegistered";
+import { UserRegistrar } from "../src/contexts/identity/users/application/register/UserRegistrar";
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserPlan } from "../src/contexts/identity/users/domain/UserPlan";
 import { CreateStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/application/create/CreateStampCampaign";
@@ -101,7 +102,7 @@ class InMemoryMembershipRepository extends TenantMembershipRepository {
 	async createStaffMembership(
 		params: CreateStaffMembershipParams,
 	): Promise<{ membershipId: string }> {
-		const user = [...this.users.values()].find((row) => row.id.value === params.userId);
+		const user = Array.from(this.users.values()).find((row) => row.id.value === params.userId);
 		if (!user) {
 			throw new Error("user not found for membership");
 		}
@@ -135,7 +136,7 @@ class InMemoryMembershipRepository extends TenantMembershipRepository {
 			name: params.name.trim(),
 			email: normalizedEmail,
 			profilePicture: "",
-			plan: UserPlan.FREE,
+			plan: UserPlan.Free,
 		});
 		this.users.set(normalizedEmail, user);
 
@@ -158,7 +159,7 @@ class StubUserRegistrar {
 class EmptyStampCampaignRepository extends StampCampaignRepository {
 	async saveCampaign(): Promise<void> {}
 
-	async searchById(): Promise<null> {
+	async searchCampaignById(): Promise<null> {
 		return null;
 	}
 
@@ -169,13 +170,23 @@ class EmptyStampCampaignRepository extends StampCampaignRepository {
 	async listActiveByTenant(): Promise<never[]> {
 		return [];
 	}
+
+	async saveProgress(): Promise<void> {}
+
+	async searchProgress(): Promise<null> {
+		return null;
+	}
 }
 
 async function main(): Promise<void> {
 	const tenantRepository = new StubTenantRepository(baseTenant);
 	const membershipRepository = new InMemoryMembershipRepository();
 	const userRegistrar = new StubUserRegistrar(membershipRepository);
-	const invite = new InviteTenantEmployee(tenantRepository, membershipRepository, userRegistrar);
+	const invite = new InviteTenantEmployee(
+		tenantRepository,
+		membershipRepository,
+		userRegistrar as unknown as UserRegistrar,
+	);
 	const list = new ListTenantEmployees(tenantRepository, membershipRepository);
 
 	const employee = await invite.execute({
