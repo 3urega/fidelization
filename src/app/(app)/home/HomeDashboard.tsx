@@ -8,6 +8,7 @@ import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard
 import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
 import { hasTenantChosenPlan } from "../../../lib/tenant/hasTenantChosenPlan";
 import { PageHeader } from "../../_components/shell/PageHeader";
+import { tenantHasFeature } from "../../_components/shell/planFeatures";
 import { useTenantSession } from "../../_components/shell/TenantSessionProvider";
 import { Button } from "../../_components/ui/Button";
 import { Card } from "../../_components/ui/Card";
@@ -20,6 +21,10 @@ type EmployeesResponse = {
 	employees?: { id: string }[];
 };
 
+type PromotionsResponse = {
+	promotions?: { isActive: boolean }[];
+};
+
 export function HomeDashboard(): ReactElement {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -29,6 +34,8 @@ export function HomeDashboard(): ReactElement {
 	const [stampsLoading, setStampsLoading] = useState(true);
 	const [teamDone, setTeamDone] = useState(false);
 	const [teamLoading, setTeamLoading] = useState(true);
+	const [promotionsDone, setPromotionsDone] = useState(false);
+	const [promotionsLoading, setPromotionsLoading] = useState(true);
 
 	useEffect(() => {
 		if (searchParams.get("checkout") !== "success") {
@@ -122,6 +129,47 @@ export function HomeDashboard(): ReactElement {
 		};
 	}, [session]);
 
+	useEffect(() => {
+		if (!session || session.role !== "owner" || !tenantHasFeature(session, "promotions")) {
+			setPromotionsLoading(false);
+
+			return;
+		}
+
+		let cancelled = false;
+
+		async function loadPromotions(): Promise<void> {
+			try {
+				const response = await fetch("/api/loyalty/promotions", {
+					credentials: "include",
+				});
+				const body = (await response.json()) as PromotionsResponse;
+
+				if (cancelled) {
+					return;
+				}
+
+				if (response.ok) {
+					setPromotionsDone((body.promotions ?? []).some((promotion) => promotion.isActive));
+				}
+			} catch {
+				if (!cancelled) {
+					setPromotionsDone(false);
+				}
+			} finally {
+				if (!cancelled) {
+					setPromotionsLoading(false);
+				}
+			}
+		}
+
+		void loadPromotions();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [session]);
+
 	if (error) {
 		return <p className="text-sm text-error">{error}</p>;
 	}
@@ -135,11 +183,10 @@ export function HomeDashboard(): ReactElement {
 	const planDone = isOwner ? hasTenantChosenPlan(session.tenant) : false;
 	const stampsComplete = isOwner ? stampsDone : false;
 	const teamComplete = isOwner ? teamDone : false;
+	const promotionsComplete = isOwner ? promotionsDone : false;
+	const showPromotionsChecklist = isOwner && tenantHasFeature(session, "promotions");
 
-	const placeholders = [
-		{ title: "Clientes", description: "Próximamente" },
-		{ title: "Promociones", description: "Próximamente" },
-	];
+	const placeholders = [{ title: "Clientes", description: "Próximamente" }];
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -308,6 +355,39 @@ export function HomeDashboard(): ReactElement {
 							</span>
 						)}
 					</li>
+					{showPromotionsChecklist ? (
+						<li className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+							<div className="flex items-start gap-2">
+								<span
+									className={[
+										"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+										promotionsComplete
+											? "bg-primary text-primary-foreground"
+											: "border border-border text-muted",
+									].join(" ")}
+									aria-hidden
+								>
+									{promotionsComplete ? "✓" : "·"}
+								</span>
+								<div>
+									<p className="text-sm font-medium text-foreground">Crea tu primera promoción</p>
+									<p className="text-sm text-muted">
+										{promotionsLoading
+											? "Comprobando promociones…"
+											: promotionsComplete
+												? "Tienes al menos una promoción activa."
+												: "Publica una oferta para tus clientes fidelizados."}
+									</p>
+								</div>
+							</div>
+							<Link
+								href="/settings/promotions"
+								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
+							>
+								{promotionsComplete ? "Editar" : "Configurar"}
+							</Link>
+						</li>
+					) : null}
 					<li className="flex flex-col gap-3 border-t border-border pt-3">
 						<div className="flex items-start gap-2">
 							<span

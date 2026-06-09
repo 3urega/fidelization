@@ -37,6 +37,7 @@ export type TenantSessionData = {
 	user: TenantSessionUser;
 	tenant: TenantSessionTenant;
 	role: string;
+	planFeatures: string[];
 };
 
 type TenantSessionContextValue = {
@@ -72,7 +73,10 @@ export function TenantSessionProvider({ children }: { children: ReactNode }): Re
 		}
 
 		const data = (await response.json()) as TenantSessionData;
-		setSession(data);
+		setSession({
+			...data,
+			planFeatures: data.planFeatures ?? [],
+		});
 		setError(null);
 		applyTheme({
 			primaryColor: data.tenant.primaryColor,

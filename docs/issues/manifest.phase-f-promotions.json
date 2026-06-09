@@ -9,10 +9,6 @@
   },
   "issues": [
     {
-      "title": "Promotions: owner settings UI + home checklist",
-      "bodyFile": "docs/issues/promotions-owner-settings-ui.md"
-    },
-    {
       "title": "Promotions: customer active list on /app/card + verify E2E",
       "bodyFile": "docs/issues/promotions-customer-card.md"
     }

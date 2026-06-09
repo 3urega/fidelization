@@ -102,6 +102,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Stripe webhooks lifecycle (#33):** `POST /api/webhooks/stripe` procesa `invoice.payment_failed`, `invoice.paid`, `customer.subscription.updated/deleted` → `SyncTenantSubscriptionFromStripe` (impago → tenant `suspended`; pago recuperado reactiva solo si suscripción estaba `past_due`). Idempotencia en `stripe_webhook_events`. Migración: `20260609150000_stripe_webhook_events`. Dev triggers: `stripe trigger invoice.payment_failed`, `stripe trigger invoice.paid`. `verify:stripe-webhooks-use-case`.
 - **Plan feature flags (#34):** guards `AssertTenantPlanFeature` / `AssertTenantEmployeeLimit` leen `subscription_plans.features`/`limits`. Basic: sellos+puntos; Pro+: `GET /api/loyalty/promotions`; límite empleados en invite. `GET /api/me` incluye `planFeatures[]`. `verify:tenant-feature-flags-use-case`.
 - **Promotions owner API (#35):** owner Pro+ `GET/POST /api/loyalty/promotions`, `PATCH …/[id]`; employee GET only. `verify:promotions-use-case`, `verify:promotions` (dev + `DATABASE_URL`).
+- **Promotions owner UI (#36):** owner en `/settings/promotions` → crear/listar/desactivar promos; nav owner-only; checklist «Crea tu primera promoción» en `/home` (Pro+); Basic → upsell `/onboarding/plan`. `planFeatures` en sesión tenant.
 
 # Architecture
 
@@ -167,7 +168,7 @@ docs/
 | Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` |
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
-| Promociones owner + cliente (#35–#37) | `verify:promotions-use-case` + `verify:promotions` + `/settings/promotions` (UI #36) |
+| Promociones owner + cliente (#35–#37) | `verify:promotions-use-case` + `verify:promotions` + `/settings/promotions` (#36 UI + checklist `/home`) |
 | Platform mobile app Phase G (#38–#45) | `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
