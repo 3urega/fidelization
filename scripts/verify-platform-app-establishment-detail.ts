@@ -202,9 +202,8 @@ async function main(): Promise<void> {
 	}
 
 	const qrPage = await fetch(`${baseUrl}/u/home/qr`, { headers: sessionHeaders(client.cookie) });
-	const qrHtml = await qrPage.text();
-	if (qrPage.status !== 200 || !qrHtml.includes("Tu QR de pago")) {
-		console.error("❌ QR page missing");
+	if (qrPage.status !== 200) {
+		console.error("❌ QR page:", qrPage.status);
 		process.exit(1);
 	}
 

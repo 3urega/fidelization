@@ -21,6 +21,8 @@
     "verify:platform-app-customer-join": "tsx scripts/verify-platform-app-customer-join.ts",
     "verify:platform-app-establishment-detail-use-case": "tsx scripts/verify-platform-app-establishment-detail-use-case.ts",
     "verify:platform-app-establishment-detail": "tsx scripts/verify-platform-app-establishment-detail.ts",
+    "verify:platform-app-global-qr-scan-use-case": "tsx scripts/verify-platform-app-global-qr-scan-use-case.ts",
+    "verify:platform-app-global-qr-scan": "tsx scripts/verify-platform-app-global-qr-scan.ts",
     "verify:owner-login": "tsx scripts/verify-owner-login-flow.ts",
     "verify:platform-login": "tsx scripts/verify-platform-login-flow.ts",
     "verify:platform-isolation": "tsx scripts/verify-platform-isolation.ts",

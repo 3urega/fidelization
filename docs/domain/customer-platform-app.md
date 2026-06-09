@@ -13,7 +13,7 @@ Este documento define la **app móvil de plataforma** (Capacitor → App Store /
 
 **Relacionado:** [`business-onboarding.md`](business-onboarding.md) (wizard web owner actual), [`saas-architecture.md`](saas-architecture.md), [`post-onboarding-mvp-roadmap.md`](post-onboarding-mvp-roadmap.md), [`database/data-model.md`](../database/data-model.md), [`AGENTS.md`](../../AGENTS.md).
 
-**Estado:** **In progress** — G1–G3 [#38–#41](https://github.com/3urega/fidelization/issues/38) auth, register business, dashboard; join [#42](https://github.com/3urega/fidelization/issues/42); detalle local [#43](https://github.com/3urega/fidelization/issues/43) **Implemented** (2026-06-09). QR global (#44+) pendiente. Web legacy sin cambios.
+**Estado:** **In progress** — G1–G4 [#38–#43](https://github.com/3urega/fidelization/issues/38) **Implemented** (2026-06-09); G7 QR global + scan [#44](https://github.com/3urega/fidelization/issues/44) **Implemented** (2026-06-09). G8 OAuth (#45) pendiente. Web legacy sin cambios.
 
 ---
 
@@ -198,7 +198,7 @@ No se muestran puntos, sellos ni tarjetas propias hasta la primera interacción 
 
 - **Un QR por usuario** (en `users` o derivado), no por local.
 - El empleado escanea en `{slug}.domain/scan`; el backend resuelve tenant desde la sesión staff + `userId`/`qrValue` del cliente.
-- Si no hay perfil cliente en ese tenant: error claro o flujo «primera visita» según política (recomendación: crear perfil en primer scan con cuenta app ya logueada vía deep link).
+- Si no hay perfil cliente en ese tenant: **404 `CustomerNotRegisteredInTenant`** — el usuario debe unirse desde la app (`POST /api/user/establishments/join`); no hay auto-join en scan (MVP).
 
 ---
 
@@ -296,7 +296,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | **G4** | Detalle local con interacción (tarjeta + promos) | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `/u/home/establishments/[slug]`, cross-promos, `/u/home/qr` |
 | **G5** | Detalle local sin interacción (solo promos) | Promotions list pública por slug |
 | **G6** | «Otras promos activas» en detalle | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `ListUserCrossTenantPromotions` |
-| **G7** | QR global + scan staff | `users.qr_value`, update scan lookup |
+| **G7** | QR global + scan staff | **Implemented** [#44](https://github.com/3urega/fidelization/issues/44) (2026-06-09) — `users.qr_value`, `RecordCustomerVisitByQr` dual lookup |
 | **G8** | Google OAuth + Capacitor | OAuth, deep links, stores |
 
 **Dependencias:** Phase F (promociones owner CRUD) alimenta G5–G6 con datos reales.
@@ -323,7 +323,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 - [ ] Dashboard owner lista sus negocios; dashboard cliente lista locales con interacción.
 - [ ] Detalle local **con** interacción: tarjeta, promos del local, otras promos activas en otros locales.
 - [ ] Detalle local **sin** interacción: solo promos activas de ese negocio.
-- [ ] Un QR de pago por usuario; scan staff atribuye al tenant correcto.
+- [x] Un QR de pago por usuario; scan staff atribuye al tenant correcto.
 - [ ] Web legacy sigue operativa durante migración.
 
 ---
@@ -370,7 +370,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | 41 | Platform app: unified dashboard (mis negocios + mis locales) | **Closed** (2026-06-09) — [issue #41](https://github.com/3urega/fidelization/issues/41) |
 | 42 | Platform app: join establishment + customer user_id link | **Closed** (2026-06-09) — [issue #42](https://github.com/3urega/fidelization/issues/42) |
 | 43 | Platform app: establishment detail (tarjeta, promos, descubrimiento) | **Closed** (2026-06-09) — [issue #43](https://github.com/3urega/fidelization/issues/43) |
-| 44 | Platform app: global QR + staff scan lookup | [issue #44](https://github.com/3urega/fidelization/issues/44) |
+| 44 | Platform app: global QR + staff scan lookup | **Closed** (2026-06-09) — [issue #44](https://github.com/3urega/fidelization/issues/44) |
 | 45 | Platform app: Google OAuth + Capacitor + verify E2E | [issue #45](https://github.com/3urega/fidelization/issues/45) |
 
 Manifest: [`docs/issues/manifest.platform-app.json`](../issues/manifest.platform-app.json)

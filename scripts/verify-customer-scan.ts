@@ -25,6 +25,7 @@ function tenantHeaders(extra: Record<string, string> = {}): Record<string, strin
 
 /**
  * E2E: staff session → POST /api/loyalty/scan → customer points + loyalty_transactions row.
+ * Legacy path: customers.qr_value (tenant subdomain / headers). User global QR: verify:platform-app-global-qr-scan.
  */
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) {

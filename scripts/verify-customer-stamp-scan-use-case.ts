@@ -2,6 +2,7 @@
 import "dotenv/config";
 
 import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { LoyaltyTransaction } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransaction";
@@ -152,6 +153,28 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 	}
 }
 
+class StubUserRepository extends UserRepository {
+	async save(): Promise<void> {}
+
+	async search(): Promise<null> {
+		return null;
+	}
+
+	async searchByEmail(): Promise<null> {
+		return null;
+	}
+
+	async searchByQrValue(): Promise<null> {
+		return null;
+	}
+
+	async updatePasswordHash(): Promise<void> {}
+
+	async isPlatformSuperadmin(): Promise<boolean> {
+		return false;
+	}
+}
+
 async function main(): Promise<void> {
 	const customer = Customer.register({
 		tenantId,
@@ -177,6 +200,7 @@ async function main(): Promise<void> {
 	const useCase = new RecordCustomerVisitByQr(
 		tenantRepository,
 		customerRepository,
+		new StubUserRepository(),
 		loyaltyRepository,
 		stampRepository,
 	);

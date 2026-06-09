@@ -18,6 +18,8 @@ npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAs
 npm run verify:platform-app-customer-join  # issue #42 — join by slug + deep link E2E (dev + DATABASE_URL)
 npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEstablishmentDetailForUser (domain stub)
 npm run verify:platform-app-establishment-detail  # issue #43 — establishment detail + cross-promos E2E (dev + DATABASE_URL)
+npm run verify:platform-app-global-qr-scan-use-case  # issue #44 — RecordCustomerVisitByQr user QR lookup (domain stub)
+npm run verify:platform-app-global-qr-scan  # issue #44 — user QR staff scan E2E (dev + DATABASE_URL)
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
@@ -121,6 +123,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Platform app dashboard (#41):** `/u/home` unificado (Mis negocios + Mis locales), `/u/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 - **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/u/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/u/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
+- **Platform app global QR scan (#44):** `RecordCustomerVisitByQr` resuelve `customers.qr_value` (legacy) luego `users.qr_value` → `customers(user_id, tenant_id)`; sin auto-join → `CustomerNotRegisteredInTenant`. `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.
 
 # Architecture
 
@@ -187,7 +190,7 @@ docs/
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
 | Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
-| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43) + `docs/domain/customer-platform-app.md` |
+| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43), `verify:platform-app-global-qr-scan` (#44) + `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

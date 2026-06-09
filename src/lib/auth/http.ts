@@ -255,6 +255,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "CustomerNotFound") {
 		return HttpNextResponse.domainError(error, 404);
 	}
+	if (error.type === "CustomerNotRegisteredInTenant") {
+		return HttpNextResponse.domainError(error, 404);
+	}
 	if (error.type === "InvalidCustomerSession") {
 		return HttpNextResponse.domainError(error, 401);
 	}

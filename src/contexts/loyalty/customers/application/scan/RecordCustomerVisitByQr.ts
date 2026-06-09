@@ -1,5 +1,6 @@
 import { Service } from "diod";
 
+import { UserRepository } from "../../../../identity/users/domain/UserRepository";
 import { LoyaltyTransaction } from "../../../loyalty_transactions/domain/LoyaltyTransaction";
 import { LoyaltyTransactionRepository } from "../../../loyalty_transactions/domain/LoyaltyTransactionRepository";
 import { CustomerStampProgress } from "../../../stamp_campaigns/domain/CustomerStampProgress";
@@ -10,6 +11,7 @@ import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepos
 import { TenantStatus } from "../../../../tenants/tenants/domain/TenantStatus";
 import { Customer } from "../../domain/Customer";
 import { CustomerNotFound } from "../../domain/CustomerNotFound";
+import { CustomerNotRegisteredInTenant } from "../../domain/CustomerNotRegisteredInTenant";
 import { CustomerRepository } from "../../domain/CustomerRepository";
 
 /** MVP: fixed points per staff scan until tenant-configurable rules exist. */
@@ -40,6 +42,7 @@ export class RecordCustomerVisitByQr {
 	constructor(
 		private readonly tenantRepository: TenantRepository,
 		private readonly customerRepository: CustomerRepository,
+		private readonly userRepository: UserRepository,
 		private readonly loyaltyTransactionRepository: LoyaltyTransactionRepository,
 		private readonly stampCampaignRepository: StampCampaignRepository,
 	) {}
@@ -49,11 +52,7 @@ export class RecordCustomerVisitByQr {
 
 		const points = params.points ?? DEFAULT_POINTS_PER_VISIT;
 		const trimmedQr = params.qrValue.trim();
-		const customer = await this.customerRepository.searchByQrValue(params.tenantId, trimmedQr);
-
-		if (!customer) {
-			throw new CustomerNotFound(params.tenantId);
-		}
+		const customer = await this.resolveCustomerByQr(params.tenantId, trimmedQr);
 
 		const updated = customer.recordVisit(points);
 		const pointsTransaction = LoyaltyTransaction.recordPointsEarned({
@@ -131,6 +130,32 @@ export class RecordCustomerVisitByQr {
 		}
 
 		return summaries;
+	}
+
+	/**
+	 * 1) Legacy: customers.qr_value in tenant.
+	 * 2) Platform app: users.qr_value → customers(user_id, tenant_id). No auto-join on scan.
+	 */
+	private async resolveCustomerByQr(tenantId: string, qrValue: string): Promise<Customer> {
+		const byCustomerQr = await this.customerRepository.searchByQrValue(tenantId, qrValue);
+		if (byCustomerQr) {
+			return byCustomerQr;
+		}
+
+		const user = await this.userRepository.searchByQrValue(qrValue);
+		if (!user) {
+			throw new CustomerNotFound(tenantId);
+		}
+
+		const linked = await this.customerRepository.searchByUserIdAndTenantId(
+			user.id.value,
+			tenantId,
+		);
+		if (!linked) {
+			throw new CustomerNotRegisteredInTenant(tenantId);
+		}
+
+		return linked;
 	}
 
 	private async assertTenantAllowsLoyalty(tenantId: string): Promise<void> {
