@@ -1,5 +1,6 @@
 import { Service } from "diod";
 
+import { Prisma } from "../../../../../generated/prisma/client";
 import { prisma } from "../../../../lib/prisma";
 import { SubscriptionPlan } from "../domain/SubscriptionPlan";
 import { TenantBillingRepository } from "../domain/TenantBillingRepository";
@@ -9,6 +10,8 @@ import { SubscriptionStatus, TenantSubscription } from "../domain/TenantSubscrip
 export class PrismaTenantBillingRepository extends TenantBillingRepository {
 	async savePlan(plan: SubscriptionPlan): Promise<void> {
 		const p = plan.toPrimitives();
+		const limits =
+			p.limits === null ? Prisma.JsonNull : (p.limits as Prisma.InputJsonValue);
 
 		await prisma.subscriptionPlan.upsert({
 			where: { id: p.id },
@@ -18,7 +21,7 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 				priceMonthly: p.priceMonthly,
 				priceYearly: p.priceYearly,
 				features: p.features,
-				limits: p.limits,
+				limits,
 				isActive: p.isActive,
 			},
 			update: {
@@ -26,7 +29,7 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 				priceMonthly: p.priceMonthly,
 				priceYearly: p.priceYearly,
 				features: p.features,
-				limits: p.limits,
+				limits,
 				isActive: p.isActive,
 			},
 		});

@@ -67,6 +67,12 @@ class InMemoryRewardRepository extends RewardRepository {
 	async listByTenant(tenantId: string): Promise<Reward[]> {
 		return Array.from(this.rewards.values()).filter((reward) => reward.tenantId === tenantId);
 	}
+
+	async listActiveByTenant(tenantId: string): Promise<Reward[]> {
+		return Array.from(this.rewards.values()).filter(
+			(reward) => reward.tenantId === tenantId && reward.isActive,
+		);
+	}
 }
 
 async function expectForbidden(

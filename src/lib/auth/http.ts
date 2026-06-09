@@ -6,6 +6,7 @@ import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
+import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
@@ -116,6 +117,22 @@ export function tenantEmployeeToJson(
 		name: employee.name,
 		email: employee.email,
 		role: employee.role,
+	};
+}
+
+export function subscriptionPlanToJson(
+	plan: SubscriptionPlan,
+): Record<string, string | number | boolean | null | Record<string, boolean | number>> {
+	const primitives = plan.toPrimitives();
+
+	return {
+		id: primitives.id,
+		name: primitives.name,
+		priceMonthly: primitives.priceMonthly,
+		priceYearly: primitives.priceYearly,
+		features: primitives.features,
+		limits: primitives.limits,
+		isActive: primitives.isActive,
 	};
 }
 
@@ -231,6 +248,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "RewardInactive") {
 		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "TenantBillingForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "SubscriptionPlanNotFound") {
+		return HttpNextResponse.domainError(error, 404);
 	}
 
 	return undefined;

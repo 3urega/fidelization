@@ -9,6 +9,8 @@ import { VerifyGooglePlayPurchase } from "../../../billing/google_play_subscript
 import { GooglePlaySubscriptionRepository } from "../../../billing/google_play_subscription/domain/GooglePlaySubscriptionRepository";
 import { PostgresGooglePlaySubscriptionRepository } from "../../../billing/google_play_subscription/infrastructure/PostgresGooglePlaySubscriptionRepository";
 import { TenantBillingRepository } from "../../../billing/subscriptions/domain/TenantBillingRepository";
+import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/application/assign/AssignTenantSubscriptionPlan";
+import { ListSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListSubscriptionPlans";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
@@ -158,5 +160,7 @@ builder.registerAndUse(PrismaNotificationRepository);
 
 builder.register(TenantBillingRepository).use(PrismaTenantBillingRepository);
 builder.registerAndUse(PrismaTenantBillingRepository);
+builder.registerAndUse(ListSubscriptionPlans);
+builder.registerAndUse(AssignTenantSubscriptionPlan);
 
 export const container = builder.build();
