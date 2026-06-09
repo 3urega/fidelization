@@ -4,6 +4,7 @@ import Link from "next/link";
 import { type ReactElement, useEffect, useState } from "react";
 
 import { platformFetch } from "../../../../lib/platform/apiUrl";
+import { PlatformUserQrModal } from "../../../_components/platform-app/PlatformUserQrModal";
 import {
 	BusinessSummaryCard,
 	DualEmptyRelationshipsCard,
@@ -13,7 +14,7 @@ import { Button } from "../../../_components/ui/Button";
 import { Card } from "../../../_components/ui/Card";
 
 type UserMeResponse = {
-	user: { id: string; name: string; email: string };
+	user: { id: string; name: string; email: string; qrValue: string | null };
 	kind: "user";
 };
 
@@ -46,6 +47,7 @@ export function PlatformUserDashboard(): ReactElement {
 	const [establishments, setEstablishments] = useState<UserEstablishment[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [qrModalOpen, setQrModalOpen] = useState(false);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -104,6 +106,26 @@ export function PlatformUserDashboard(): ReactElement {
 				<h1 className="text-2xl font-semibold text-foreground">Hola, {user.name}</h1>
 				<p className="text-sm text-muted">{user.email}</p>
 			</header>
+
+			<Button
+				type="button"
+				className="w-full"
+				disabled={!user.qrValue}
+				onClick={() => {
+					setQrModalOpen(true);
+				}}
+			>
+				Mostrar mi QR
+			</Button>
+
+			<PlatformUserQrModal
+				open={qrModalOpen}
+				onClose={() => {
+					setQrModalOpen(false);
+				}}
+				name={user.name}
+				qrValue={user.qrValue}
+			/>
 
 			{hasNoRelationships ? <DualEmptyRelationshipsCard /> : null}
 

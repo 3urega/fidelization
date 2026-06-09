@@ -198,7 +198,7 @@ No se muestran puntos, sellos ni tarjetas propias hasta la primera interacción 
 
 - **Un QR por usuario** (en `users` o derivado), no por local.
 - El empleado escanea en `{slug}.domain/scan`; el backend resuelve tenant desde la sesión staff + `userId`/`qrValue` del cliente.
-- Si no hay perfil cliente en ese tenant: **404 `CustomerNotRegisteredInTenant`** — el usuario debe unirse desde la app (`POST /api/user/establishments/join`); no hay auto-join en scan (MVP).
+- Si no hay perfil cliente en ese tenant: el **primer escaneo** crea la fila `customers` (auto-join) y registra la visita (+1 punto por defecto). El local aparece en «Mis locales» del dashboard. Join explícito (`POST /api/user/establishments/join`) sigue disponible para descubrir locales antes de visitar.
 
 ---
 

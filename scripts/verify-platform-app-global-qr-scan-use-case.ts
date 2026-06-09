@@ -5,7 +5,6 @@ import { User } from "../src/contexts/identity/users/domain/User";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
 import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
-import { CustomerNotRegisteredInTenant } from "../src/contexts/loyalty/customers/domain/CustomerNotRegisteredInTenant";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { LoyaltyTransactionRepository } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransactionRepository";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -96,6 +95,8 @@ class InMemoryCustomerRepository extends CustomerRepository {
 		const index = this.customers.findIndex((row) => row.id === customer.id);
 		if (index >= 0) {
 			this.customers[index] = customer;
+		} else {
+			this.customers.push(customer);
 		}
 	}
 
@@ -209,8 +210,9 @@ async function main(): Promise<void> {
 	console.log("✅ users.qr_value resolves linked customer in tenant");
 
 	const orphanUserQr = "orphan-user-qr-verify";
+	const orphanUserId = "00000000-0000-4000-8000-0000000000e4";
 	const orphanUser = User.create(
-		"00000000-0000-4000-8000-0000000000e4",
+		orphanUserId,
 		"Orphan User",
 		"orphan@example.local",
 		"",
@@ -218,22 +220,31 @@ async function main(): Promise<void> {
 	);
 	usersByQr.set(orphanUserQr, orphanUser);
 
-	try {
-		await useCase.execute({
-			tenantId,
-			qrValue: orphanUserQr,
-			createdByUserId: staffUserId,
-		});
-		console.error("❌ expected CustomerNotRegisteredInTenant");
+	const orphanResult = await useCase.execute({
+		tenantId,
+		qrValue: orphanUserQr,
+		createdByUserId: staffUserId,
+	});
+
+	if (
+		orphanResult.customer.userId !== orphanUserId ||
+		orphanResult.customer.pointsBalance !== 1 ||
+		orphanResult.customer.visitsCount !== 1
+	) {
+		console.error("❌ auto-join on first scan failed", orphanResult.customer.toPrimitives());
 		process.exit(1);
-	} catch (error) {
-		if (!(error instanceof CustomerNotRegisteredInTenant)) {
-			console.error("❌ unexpected error for orphan user scan", error);
-			process.exit(1);
-		}
 	}
 
-	console.log("✅ user without customer profile → CustomerNotRegisteredInTenant");
+	const persistedOrphan = await customerRepository.searchByUserIdAndTenantId(
+		orphanUserId,
+		tenantId,
+	);
+	if (!persistedOrphan || persistedOrphan.id !== orphanResult.customer.id) {
+		console.error("❌ auto-join customer not persisted");
+		process.exit(1);
+	}
+
+	console.log("✅ first scan auto-joins platform user as customer in tenant");
 
 	console.log("✅ verify:platform-app-global-qr-scan-use-case passed");
 }

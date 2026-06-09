@@ -2,14 +2,14 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { EnterPlatformUserFromTenantSession } from "../../../../../contexts/identity/users/application/authenticate/EnterPlatformUserFromTenantSession";
-import { PlatformUserCannotUseUserLogin } from "../../../../../contexts/identity/users/domain/PlatformUserCannotUseUserLogin";
-import { UserDoesNotExist } from "../../../../../contexts/identity/users/domain/UserDoesNotExist";
-import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { handleAuthDomainError, userAuthResponseToJson } from "../../../../../lib/auth/http";
-import { createSessionToken, jsonWithSessionCookie } from "../../../../../lib/auth/session";
-import { requireTenantSession } from "../../../../../lib/auth/requireTenantSession";
-import { resolvePlatformHomeUrlFromRequest } from "../../../../../lib/platform/resolvePlatformHomeUrl";
+import { EnterPlatformUserFromTenantSession } from "../../../../contexts/identity/users/application/authenticate/EnterPlatformUserFromTenantSession";
+import { PlatformUserCannotUseUserLogin } from "../../../../contexts/identity/users/domain/PlatformUserCannotUseUserLogin";
+import { UserDoesNotExist } from "../../../../contexts/identity/users/domain/UserDoesNotExist";
+import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { handleAuthDomainError, userAuthResponseToJson } from "../../../../lib/auth/http";
+import { createSessionToken, jsonWithSessionCookie } from "../../../../lib/auth/session";
+import { requireTenantSession } from "../../../../lib/auth/requireTenantSession";
+import { resolvePlatformHomeUrlFromRequest } from "../../../../lib/platform/resolvePlatformHomeUrl";
 
 export async function POST(request: Request): Promise<Response> {
 	try {

@@ -11,7 +11,6 @@ import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepos
 import { TenantStatus } from "../../../../tenants/tenants/domain/TenantStatus";
 import { Customer } from "../../domain/Customer";
 import { CustomerNotFound } from "../../domain/CustomerNotFound";
-import { CustomerNotRegisteredInTenant } from "../../domain/CustomerNotRegisteredInTenant";
 import { CustomerRepository } from "../../domain/CustomerRepository";
 
 /** MVP: fixed points per staff scan until tenant-configurable rules exist. */
@@ -134,7 +133,7 @@ export class RecordCustomerVisitByQr {
 
 	/**
 	 * 1) Legacy: customers.qr_value in tenant.
-	 * 2) Platform app: users.qr_value → customers(user_id, tenant_id). No auto-join on scan.
+	 * 2) Platform app: users.qr_value → customers(user_id, tenant_id); auto-join on first scan.
 	 */
 	private async resolveCustomerByQr(tenantId: string, qrValue: string): Promise<Customer> {
 		const byCustomerQr = await this.customerRepository.searchByQrValue(tenantId, qrValue);
@@ -151,11 +150,19 @@ export class RecordCustomerVisitByQr {
 			user.id.value,
 			tenantId,
 		);
-		if (!linked) {
-			throw new CustomerNotRegisteredInTenant(tenantId);
+		if (linked) {
+			return linked;
 		}
 
-		return linked;
+		const customer = Customer.joinForPlatformUser({
+			tenantId,
+			userId: user.id.value,
+			name: user.name.value,
+			email: user.email.value,
+		});
+		await this.customerRepository.save(customer);
+
+		return customer;
 	}
 
 	private async assertTenantAllowsLoyalty(tenantId: string): Promise<void> {

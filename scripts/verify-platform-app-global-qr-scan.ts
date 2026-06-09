@@ -143,9 +143,11 @@ async function main(): Promise<void> {
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ name: "Orphan QR User", email: orphanEmail, password }),
 	});
-	const orphanBody = (await orphanRegister.json()) as { user?: { qrValue: string | null } };
+	const orphanBody = (await orphanRegister.json()) as {
+		user?: { id: string; qrValue: string | null };
+	};
 
-	if (orphanRegister.status !== 201 || !orphanBody.user?.qrValue) {
+	if (orphanRegister.status !== 201 || !orphanBody.user?.id || !orphanBody.user.qrValue) {
 		console.error("❌ orphan user register", orphanRegister.status, orphanBody);
 		process.exit(1);
 	}
@@ -159,21 +161,34 @@ async function main(): Promise<void> {
 		body: JSON.stringify({ qrValue: orphanBody.user.qrValue }),
 	});
 	const orphanScanBody = (await orphanScan.json()) as {
-		error?: { type?: string; description?: string };
+		customer?: { id: string; pointsBalance: number; visitsCount: number };
 	};
 
 	if (
-		orphanScan.status !== 404 ||
-		orphanScanBody.error?.type !== "CustomerNotRegisteredInTenant"
+		!orphanScan.ok ||
+		orphanScanBody.customer?.pointsBalance !== 1 ||
+		orphanScanBody.customer.visitsCount !== 1
 	) {
-		console.error("❌ orphan user scan expected 404 CustomerNotRegisteredInTenant:", orphanScan.status, orphanScanBody);
+		console.error("❌ orphan user first scan expected auto-join + point:", orphanScan.status, orphanScanBody);
 		process.exit(1);
 	}
 
-	console.log("✅ scan without join → CustomerNotRegisteredInTenant 404");
+	const orphanCustomer = await prisma.customer.findFirst({
+		where: { userId: orphanBody.user.id, tenantId: DEMO_TENANT_ID },
+	});
+	if (!orphanCustomer || orphanCustomer.id !== orphanScanBody.customer?.id) {
+		console.error("❌ auto-join customer row missing in Prisma");
+		process.exit(1);
+	}
+
+	console.log("✅ first scan without join → auto-join + 1 point in tenant");
 
 	await prisma.loyaltyTransaction.deleteMany({ where: { customerId } });
 	await prisma.customer.deleteMany({ where: { id: customerId } });
+	await prisma.loyaltyTransaction.deleteMany({
+		where: { customerId: orphanCustomer.id },
+	});
+	await prisma.customer.deleteMany({ where: { id: orphanCustomer.id } });
 	await prisma.user.deleteMany({
 		where: { email: { in: [clientEmail, orphanEmail] } },
 	});
