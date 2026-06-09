@@ -71,7 +71,7 @@
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",
     "prep": "npm run build",
-    "build:capacitor": "bash scripts/build-capacitor.sh",
+    "build:capacitor": "node scripts/build-capacitor.mjs",
     "cap:sync": "npx cap sync android"
   },
   "dependencies": {

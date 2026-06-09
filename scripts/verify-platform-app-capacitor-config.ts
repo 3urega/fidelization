@@ -60,10 +60,10 @@ async function main(): Promise<void> {
 	}
 
 	const { spawnSync } = await import("node:child_process");
-	const bash = process.platform === "win32" ? "bash" : "bash";
-	const result = spawnSync(bash, ["scripts/build-capacitor.sh"], {
+	const result = spawnSync("npm", ["run", "build:capacitor"], {
 		cwd: process.cwd(),
 		stdio: "inherit",
+		shell: process.platform === "win32",
 		env: process.env,
 	});
 

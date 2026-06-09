@@ -62,7 +62,7 @@ npm run verify:stripe-webhook-checkout-use-case  # issue #32 — CompleteStripeC
 npm run verify:stripe-webhooks-use-case  # issue #33 — SyncTenantSubscriptionFromStripe + ProcessStripeWebhook (domain stub)
 npm run verify:tenant-feature-flags-use-case  # issue #34 — plan feature guards + employee limits (domain stub)
 npm run db:users               # list users, platform_role y memberships
-npm run build:capacitor   # export out/ + cap sync android
+npm run build:capacitor   # export out/ + cap sync android (node script; stop dev server on Windows)
 ```
 
 **Tests:** la suite Jest actual apunta sobre todo a contextos legacy y puede colgar o fallar. No forma parte del flujo del starter activo hasta reescribir tests para `identity`/`billing`.

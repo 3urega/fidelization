@@ -140,7 +140,6 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const customerId = detailBody.customer.id;
 	console.log("✅ establishment detail interaction mode");
 
 	const me = await fetch(`${baseUrl}/api/user/me`, { headers: sessionHeaders(client.cookie) });
