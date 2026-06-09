@@ -24,6 +24,7 @@
     "verify:platform-app-global-qr-scan-use-case": "tsx scripts/verify-platform-app-global-qr-scan-use-case.ts",
     "verify:platform-app-global-qr-scan": "tsx scripts/verify-platform-app-global-qr-scan.ts",
     "verify:platform-app-google-oauth-use-case": "tsx scripts/verify-platform-app-google-oauth-use-case.ts",
+    "verify:platform-app-google-oauth": "tsx scripts/verify-platform-app-google-oauth.ts",
     "verify:owner-login": "tsx scripts/verify-owner-login-flow.ts",
     "verify:platform-login": "tsx scripts/verify-platform-login-flow.ts",
     "verify:platform-isolation": "tsx scripts/verify-platform-isolation.ts",
