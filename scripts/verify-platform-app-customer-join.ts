@@ -154,7 +154,7 @@ async function main(): Promise<void> {
 		where: { email: clientEmail },
 		select: {
 			id: true,
-			customers: { select: { id: true, userId: true, tenant: { select: { slug: true } } } } },
+			customers: { select: { id: true, userId: true, tenant: { select: { slug: true } } } },
 		},
 	});
 
@@ -171,7 +171,7 @@ async function main(): Promise<void> {
 
 	const ownerRow = await prisma.user.findUnique({
 		where: { email: ownerEmail },
-		select: { id: true, memberships: { select: { tenant: { select: { slug: true } } } } } },
+		select: { id: true, memberships: { select: { tenant: { select: { slug: true } } } } },
 	});
 
 	if (!ownerRow?.memberships[0]) {
