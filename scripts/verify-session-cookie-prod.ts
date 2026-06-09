@@ -79,7 +79,7 @@ async function runRedirectChecks(): Promise<void> {
 		},
 	} as Window & typeof globalThis;
 
-	if (resolveTenantHomeUrl("cafe-joan") !== "https://cafe-joan.platform.example.com/home") {
+	if (resolveTenantHomeUrl("cafe-joan") !== "https://cafe-joan.platform.example.com/panel") {
 		console.error("❌ resolveTenantHomeUrl production apex");
 		process.exit(1);
 	}

@@ -137,7 +137,7 @@ Visible si tiene `tenant_memberships` con rol owner (o employee con permisos ope
 | Elemento | Contenido |
 |----------|-----------|
 | Lista | Negocios que posee o gestiona (logo, nombre, plan, estado) |
-| Tap | Panel admin del negocio (equivalente a `/home` owner hoy) |
+| Tap | Panel admin del negocio (`/panel` en web owner) |
 | CTA | «Añadir negocio» → flujo B paso 2 |
 
 Un owner con **varios** negocios ve todos en esta sección.
@@ -275,11 +275,14 @@ Registrar negocio (tras auth):
 | `/` | Público | Home: Registrarse · Registrar negocio · Login |
 | `/register` | Público | Email/Google (flujo A) |
 | `/login` | Público | Sesión existente |
-| `/register/business` | Auth opcional | Paso 1 auth → paso 2 tenant |
-| `/home` | Auth | Dashboard unificado (negocios + locales) |
-| `/home/business/[slug]` | Owner | Admin del negocio |
+| `/register/business` | Auth opcional | Paso 1 auth → paso 2 tenant (`/business/register/tenant`) |
+| `/home` | Auth (`kind: user`) | Dashboard unificado (negocios + locales) |
+| `/home/business/[slug]` | Owner | Entrada al panel del negocio |
 | `/home/establishments/[slug]` | Cliente | Detalle local (interacción vs descubrimiento) |
 | `/home/qr` | Cliente | QR de pago pantalla completa |
+| `/join/[slug]` | Auth opcional | Deep link join a local |
+| `/panel` | Auth (`kind: tenant`) | Panel del negocio (owner/employee web) |
+| `/u/*` | — | Redirect 308 a rutas canónicas anteriores |
 
 Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell principal nuevo.
 
@@ -289,11 +292,11 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 
 | Slice | Valor | Capas |
 |-------|-------|-------|
-| **G1** | Home pública + registro/login unificado (email) | **Implemented** [#38](https://github.com/3urega/fidelization/issues/38) backend + [#39](https://github.com/3urega/fidelization/issues/39) UI `/u/*` (2026-06-09) |
-| **G2** | «Registrar negocio» auth + crear tenant | **Implemented** [#40](https://github.com/3urega/fidelization/issues/40) (2026-06-09) — `/u/register/business`, `POST /api/user/businesses`, `ListUserRelationships` |
-| **G3** | Dashboard unificado (mis negocios / mis locales) | **Implemented** [#41](https://github.com/3urega/fidelization/issues/41) (2026-06-09) — `/u/home`, `relationships` API, `/u/home/business/[slug]` |
-| **Join** | Unirse a local (slug + deep link) | **Implemented** [#42](https://github.com/3urega/fidelization/issues/42) (2026-06-09) — `POST /api/user/establishments/join`, `/u/home/discover`, `/u/join/[slug]` |
-| **G4** | Detalle local con interacción (tarjeta + promos) | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `/u/home/establishments/[slug]`, cross-promos, `/u/home/qr` |
+| **G1** | Home pública + registro/login unificado (email) | **Implemented** [#38](https://github.com/3urega/fidelization/issues/38) backend + [#39](https://github.com/3urega/fidelization/issues/39) UI apex sin `/u` (2026-06-09) |
+| **G2** | «Registrar negocio» auth + crear tenant | **Implemented** [#40](https://github.com/3urega/fidelization/issues/40) (2026-06-09) — `/business/register`, `POST /api/user/businesses`, `ListUserRelationships` |
+| **G3** | Dashboard unificado (mis negocios / mis locales) | **Implemented** [#41](https://github.com/3urega/fidelization/issues/41) (2026-06-09) — `/home`, `relationships` API, `/home/business/[slug]` |
+| **Join** | Unirse a local (slug + deep link) | **Implemented** [#42](https://github.com/3urega/fidelization/issues/42) (2026-06-09) — `POST /api/user/establishments/join`, `/home/discover`, `/join/[slug]` |
+| **G4** | Detalle local con interacción (tarjeta + promos) | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `/home/establishments/[slug]`, cross-promos, `/home/qr` |
 | **G5** | Detalle local sin interacción (solo promos) | Promotions list pública por slug |
 | **G6** | «Otras promos activas» en detalle | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `ListUserCrossTenantPromotions` |
 | **G7** | QR global + scan staff | **Implemented** [#44](https://github.com/3urega/fidelization/issues/44) (2026-06-09) — `users.qr_value`, `RecordCustomerVisitByQr` dual lookup |

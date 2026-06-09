@@ -10,12 +10,12 @@ npm run verify:tenant-resolution   # issue #5 — extractSubdomain + mock slug m
 npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross-tenant session
 npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, PlatformAuthenticator
 npm run verify:platform-app-auth-use-case  # issue #38 — RegisterPlatformUser + LoginPlatformUser + kind user (domain stub)
-npm run verify:platform-app-public-home  # issue #39 — /u home + register/login UI + middleware (dev server)
-npm run verify:platform-app-register-business  # issue #40 — /u/register/business + POST /api/user/businesses + enter panel (dev + DATABASE_URL)
+npm run verify:platform-app-public-home  # issue #39 — / home + register/login UI + middleware (dev server)
+npm run verify:platform-app-register-business  # issue #40 — /business/register + POST /api/user/businesses + enter panel (dev + DATABASE_URL)
 npm run verify:platform-app-enter-tenant-use-case  # EnterTenantStaffFromUserSession (domain stub)
 npm run verify:platform-app-enter-user-use-case  # EnterPlatformUserFromTenantSession (domain stub)
 npm run verify:platform-app-dashboard-use-case  # issue #41 — ListUserRelationships (domain stub)
-npm run verify:platform-app-dashboard  # issue #41 — /u/home dashboard + business shell E2E (dev + DATABASE_URL)
+npm run verify:platform-app-dashboard  # issue #41 — /home dashboard + business shell E2E (dev + DATABASE_URL)
 npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAsCustomer (domain stub)
 npm run verify:platform-app-customer-join  # issue #42 — join by slug + deep link E2E (dev + DATABASE_URL)
 npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEstablishmentDetailForUser (domain stub)
@@ -26,12 +26,12 @@ npm run verify:platform-app-google-oauth-use-case  # issue #45 — AuthenticateG
 npm run verify:platform-app-google-oauth  # issue #45 — Google UI + OAuth API E2E (dev server)
 npm run verify:platform-app-capacitor-config  # issue #45 — deep links + build:capacitor (SKIP_CAPACITOR_BUILD=1 to skip build)
 npm run verify:platform-app-e2e  # issue #45 — full platform app flow E2E (dev + DATABASE_URL)
-npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
+npm run verify:owner-login     # tenant login cookie + GET /panel (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
 npm run verify:platform-tenants    # issue #9 — list tenants + PATCH status (OWNER_VERIFY_* opcional)
 npm run verify:business-register   # issues #11–#12 — owner user step 1 (onboarding cookie, hash, no membership)
-npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /home
+npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /panel
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
 npm run verify:session-cookie-prod # production cookie Domain + resolveTenantHomeUrl
 npm run verify:tenant-branding     # issue #17 — PATCH branding + GET /api/me + Prisma (dev server + DATABASE_URL)
@@ -101,7 +101,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
 # Local auth / tenants (dev)
 
-- **Owner/staff login:** `/login` en `http://localhost:3000` → `/home` en el mismo host (cookie host-only). Subdominio: `http://{slug}.localhost:3000/login` → `/home` en ese host. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. **Producción:** cookie `Domain=.${APP_DOMAIN}` + redirect apex → `{slug}.${APP_DOMAIN}/home` (`verify:session-cookie-prod`). Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
+- **Owner/staff login:** `/login` en subdominio tenant → `/panel` en ese host (cookie host-only). Apex `localhost:3000/login` = login app personal (`kind: user`) → `/home`. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. **Producción:** cookie `Domain=.${APP_DOMAIN}` + redirect tenant → `{slug}.${APP_DOMAIN}/panel` (`verify:session-cookie-prod`). Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
 - **Superadmin (issue #8):** solo `http://localhost:3000/platform/login` (apex) → `/platform`; no usar `/login` ni subdominios de negocio. Verifies: `verify:platform-login`, `verify:platform-isolation`.
 - **Superadmin dashboard (issue #9):** en `/platform` — lista de negocios y activar/suspender. `verify:platform-tenants`.
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
@@ -124,13 +124,13 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Promotions owner UI (#36):** owner en `/settings/promotions` → crear/listar/desactivar promos; nav owner-only; checklist «Crea tu primera promoción» en `/home` (Pro+); Basic → upsell `/onboarding/plan`. `planFeatures` en sesión tenant.
 - **Customer promotions (#37):** cliente en `/app/card` ve promos activas; `GET /api/loyalty/me` incluye `promotions[]`; Basic → `[]` sin error. `verify:customer-promotions-use-case`, `verify:customer-promotions` (dev + `DATABASE_URL`).
 - **Platform app auth (#38):** registro/login unificado persona en apex (`POST /api/auth/register/user`, `POST /api/auth/login/user`); sesión JWT `kind: user`; `GET /api/user/me`; `users.qr_value` + `customers.user_id` migrados. `verify:platform-app-auth-use-case`.
-- **Platform app home UI (#39):** home pública `/u` (Registrarse · Registrar negocio · Login); formularios `/u/register`, `/u/login` → `/u/home` placeholder; guards middleware `kind: user`. `verify:platform-app-public-home`.
-- **Platform app register business (#40):** `/u/register/business` (auth gate) → `/u/register/business/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/u/home`; `POST /api/user/businesses/[slug]/enter` emite sesión `kind: tenant` y abre `/home` sin re-login; desde el panel del negocio, «App personal» → `POST /api/user/enter` vuelve a sesión `kind: user` en `/u/home`. `verify:platform-app-register-business`, `verify:platform-app-enter-tenant-use-case`, `verify:platform-app-enter-user-use-case`.
-- **Platform app dashboard (#41):** `/u/home` unificado (Mis negocios + Mis locales), botón «Mostrar mi QR» (modal), `/u/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
-- **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
-- **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/u/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/u/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
+- **Platform app home UI (#39):** home pública `/` (Registrarse · Registrar negocio · Login); formularios `/register`, `/login` host-aware → `/home`; guards middleware `kind: user`; legacy `/u/*` → 308. `verify:platform-app-public-home`.
+- **Platform app register business (#40):** `/business/register` (auth gate) → `/business/register/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/home`; `POST /api/user/businesses/[slug]/enter` emite sesión `kind: tenant` y abre `/panel` sin re-login; desde el panel del negocio, «App personal» → `POST /api/user/enter` vuelve a sesión `kind: user` en `/home`. `verify:platform-app-register-business`, `verify:platform-app-enter-tenant-use-case`, `verify:platform-app-enter-user-use-case`.
+- **Platform app dashboard (#41):** `/home` unificado (Mis negocios + Mis locales), botón «Mostrar mi QR» (modal), `/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
+- **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/home/discover`, deep link `/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
+- **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
 - **Platform app global QR scan (#44):** `RecordCustomerVisitByQr` resuelve `customers.qr_value` (legacy) luego `users.qr_value` → `customers(user_id, tenant_id)`; **auto-join en primer escaneo** si no hay fila customer. Dashboard: botón «Mostrar mi QR» (modal). `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.
-- **Platform app Google OAuth (#45):** `POST /api/auth/oauth/google` + botones GIS en `/u`, `/u/register`, `/u/login`. Capacitor: `fidelization://join/{slug}` → `/u/join/[slug]`, `platformFetch` + `NEXT_PUBLIC_API_URL`. Env: `GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `CAPACITOR_SERVER_URL` (dev). `verify:platform-app-google-oauth`, `verify:platform-app-google-oauth-use-case`, `verify:platform-app-capacitor-config`, `verify:platform-app-e2e`, `npm run build:capacitor`.
+- **Platform app Google OAuth (#45):** `POST /api/auth/oauth/google` + botones GIS en `/`, `/register`, `/login`. Capacitor: `fidelization://join/{slug}` → `/join/[slug]`, `platformFetch` + `NEXT_PUBLIC_API_URL`. Env: `GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `CAPACITOR_SERVER_URL` (dev). `verify:platform-app-google-oauth`, `verify:platform-app-google-oauth-use-case`, `verify:platform-app-capacitor-config`, `verify:platform-app-e2e`, `npm run build:capacitor`.
 
 # Architecture
 
