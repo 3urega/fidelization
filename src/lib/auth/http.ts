@@ -18,13 +18,15 @@ export function userToJson(user: {
 	email: { value: string };
 	profilePicture: { value: string };
 	plan: string;
-}): Record<string, string> {
+	qrValue?: string | null;
+}): Record<string, string | null> {
 	return {
 		id: user.id.value,
 		name: user.name.value,
 		email: user.email.value,
 		profilePicture: user.profilePicture.value,
 		plan: user.plan,
+		qrValue: user.qrValue ?? null,
 	};
 }
 

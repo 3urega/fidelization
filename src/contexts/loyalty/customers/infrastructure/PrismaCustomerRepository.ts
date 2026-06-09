@@ -14,6 +14,7 @@ export class PrismaCustomerRepository extends CustomerRepository {
 			create: {
 				id: p.id,
 				tenantId: p.tenantId,
+				userId: p.userId,
 				name: p.name,
 				email: p.email,
 				phone: p.phone,
@@ -22,6 +23,7 @@ export class PrismaCustomerRepository extends CustomerRepository {
 				visitsCount: p.visitsCount,
 			},
 			update: {
+				userId: p.userId,
 				name: p.name,
 				email: p.email,
 				phone: p.phone,
@@ -50,6 +52,7 @@ export class PrismaCustomerRepository extends CustomerRepository {
 	private toAggregate(row: {
 		id: string;
 		tenantId: string;
+		userId: string | null;
 		name: string;
 		email: string | null;
 		phone: string | null;
@@ -60,6 +63,7 @@ export class PrismaCustomerRepository extends CustomerRepository {
 		return Customer.fromPrimitives({
 			id: row.id,
 			tenantId: row.tenantId,
+			userId: row.userId,
 			name: row.name,
 			email: row.email,
 			phone: row.phone,

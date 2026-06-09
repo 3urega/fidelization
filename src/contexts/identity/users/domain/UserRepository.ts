@@ -13,6 +13,8 @@ export abstract class UserRepository {
 
 	abstract searchByEmail(email: string): Promise<UserWithPasswordHash | null>;
 
+	abstract searchByQrValue(qrValue: string): Promise<User | null>;
+
 	abstract updatePasswordHash(userId: UserId, passwordHash: string): Promise<void>;
 
 	abstract isPlatformSuperadmin(userId: string): Promise<boolean>;

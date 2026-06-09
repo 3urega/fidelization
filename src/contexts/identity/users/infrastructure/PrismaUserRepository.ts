@@ -20,6 +20,9 @@ export class PrismaUserRepository extends UserRepository {
 				profilePicture: primitives.profilePicture,
 				passwordHash,
 				subscriptionPlan: primitives.plan,
+				qrValue: primitives.qrValue,
+				oauthProvider: primitives.oauthProvider,
+				oauthSubject: primitives.oauthSubject,
 			},
 			update: {
 				name: primitives.name,
@@ -27,6 +30,9 @@ export class PrismaUserRepository extends UserRepository {
 				profilePicture: primitives.profilePicture,
 				passwordHash,
 				subscriptionPlan: primitives.plan,
+				qrValue: primitives.qrValue,
+				oauthProvider: primitives.oauthProvider,
+				oauthSubject: primitives.oauthSubject,
 			},
 		});
 	}
@@ -54,6 +60,16 @@ export class PrismaUserRepository extends UserRepository {
 		};
 	}
 
+	async searchByQrValue(qrValue: string): Promise<User | null> {
+		const row = await prisma.user.findUnique({ where: { qrValue } });
+
+		if (!row) {
+			return null;
+		}
+
+		return this.toAggregate(row);
+	}
+
 	async updatePasswordHash(userId: UserId, passwordHash: string): Promise<void> {
 		await prisma.user.update({
 			where: { id: userId.value },
@@ -76,6 +92,9 @@ export class PrismaUserRepository extends UserRepository {
 		email: string;
 		profilePicture: string;
 		subscriptionPlan: string;
+		qrValue: string | null;
+		oauthProvider: string | null;
+		oauthSubject: string | null;
 	}): User {
 		return User.fromPrimitives({
 			id: row.id,
@@ -83,6 +102,9 @@ export class PrismaUserRepository extends UserRepository {
 			email: row.email,
 			profilePicture: row.profilePicture,
 			plan: row.subscriptionPlan as UserPlan,
+			qrValue: row.qrValue,
+			oauthProvider: row.oauthProvider,
+			oauthSubject: row.oauthSubject,
 		});
 	}
 }

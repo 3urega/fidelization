@@ -63,8 +63,12 @@ model User {
   passwordHash     String             @map("password_hash")
   subscriptionPlan String             @default("FREE") @map("subscription_plan")
   platformRole     PlatformRole?      @map("platform_role")
+  qrValue          String?            @unique @map("qr_value")
+  oauthProvider    String?            @map("oauth_provider")
+  oauthSubject     String?            @unique @map("oauth_subject")
   createdAt        DateTime           @default(now()) @map("created_at")
   memberships      TenantMembership[]
+  customers        Customer[]
   loyaltyTransactionsCreated LoyaltyTransaction[] @relation("LoyaltyTransactionCreatedBy")
 
   @@map("users")
@@ -114,6 +118,7 @@ model TenantMembership {
 model Customer {
   id            String   @id @default(uuid())
   tenantId      String   @map("tenant_id")
+  userId        String?  @map("user_id")
   name          String
   email         String?
   phone         String?
@@ -123,9 +128,11 @@ model Customer {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   loyaltyTransactions LoyaltyTransaction[]
   stampProgress CustomerStampProgress[]
 
+  @@unique([userId, tenantId])
   @@index([tenantId])
   @@map("customers")
 }

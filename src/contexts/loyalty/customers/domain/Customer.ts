@@ -5,6 +5,7 @@ import { InsufficientCustomerPoints } from "./InsufficientCustomerPoints";
 export type CustomerPrimitives = {
 	id: string;
 	tenantId: string;
+	userId: string | null;
 	name: string;
 	email: string | null;
 	phone: string | null;
@@ -24,6 +25,7 @@ export class Customer {
 	private constructor(
 		public readonly id: string,
 		public readonly tenantId: string,
+		public readonly userId: string | null,
 		public readonly name: string,
 		public readonly email: string | null,
 		public readonly phone: string | null,
@@ -40,6 +42,7 @@ export class Customer {
 		return Customer.fromPrimitives({
 			id: randomUUID(),
 			tenantId: params.tenantId,
+			userId: null,
 			name,
 			email: email === "" ? null : email,
 			phone: phone === "" ? null : phone,
@@ -53,6 +56,7 @@ export class Customer {
 		return new Customer(
 			primitives.id,
 			primitives.tenantId,
+			primitives.userId,
 			primitives.name,
 			primitives.email,
 			primitives.phone,
@@ -93,6 +97,7 @@ export class Customer {
 		return {
 			id: this.id,
 			tenantId: this.tenantId,
+			userId: this.userId,
 			name: this.name,
 			email: this.email,
 			phone: this.phone,
