@@ -9,6 +9,7 @@ npm run verify:saas-base   # issue #4 — route groups, tenant stub, env
 npm run verify:tenant-resolution   # issue #5 — extractSubdomain + mock slug map
 npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross-tenant session
 npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, PlatformAuthenticator
+npm run verify:platform-app-auth-use-case  # issue #38 — RegisterPlatformUser + LoginPlatformUser + kind user (domain stub)
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
@@ -106,6 +107,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Promotions owner API (#35):** owner Pro+ `GET/POST /api/loyalty/promotions`, `PATCH …/[id]`; employee GET only. `verify:promotions-use-case`, `verify:promotions` (dev + `DATABASE_URL`).
 - **Promotions owner UI (#36):** owner en `/settings/promotions` → crear/listar/desactivar promos; nav owner-only; checklist «Crea tu primera promoción» en `/home` (Pro+); Basic → upsell `/onboarding/plan`. `planFeatures` en sesión tenant.
 - **Customer promotions (#37):** cliente en `/app/card` ve promos activas; `GET /api/loyalty/me` incluye `promotions[]`; Basic → `[]` sin error. `verify:customer-promotions-use-case`, `verify:customer-promotions` (dev + `DATABASE_URL`).
+- **Platform app auth (#38):** registro/login unificado persona en apex (`POST /api/auth/register/user`, `POST /api/auth/login/user`); sesión JWT `kind: user`; `GET /api/user/me`; `users.qr_value` + `customers.user_id` migrados. `verify:platform-app-auth-use-case`. UI app en #39+.
 
 # Architecture
 
@@ -172,7 +174,7 @@ docs/
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
 | Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
-| Platform mobile app Phase G (#38–#45) | `docs/domain/customer-platform-app.md` |
+| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38) + `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |
