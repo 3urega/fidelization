@@ -10,6 +10,7 @@ import {
 	type RewardRow,
 	type StampProgressRow,
 } from "../../../../../_components/loyalty/LoyaltyCard";
+import { platformFetch } from "../../../../../lib/platform/apiUrl";
 import { Button } from "../../../../../_components/ui/Button";
 import { Card } from "../../../../../_components/ui/Card";
 
@@ -169,9 +170,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 			return;
 		}
 
-		const response = await fetch(`/api/user/establishments/${encodeURIComponent(slug)}`, {
-			credentials: "include",
-		});
+		const response = await platformFetch(`/api/user/establishments/${encodeURIComponent(slug)}`);
 		const body = (await response.json()) as EstablishmentDetailResponse;
 
 		if (!response.ok) {
@@ -195,7 +194,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		setJoining(true);
 		setError(null);
 
-		const response = await fetch("/api/user/establishments/join", {
+		const response = await platformFetch("/api/user/establishments/join", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
@@ -220,12 +219,11 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		setRedeemError(null);
 		setRedeemingRewardId(rewardId);
 
-		const response = await fetch(
+		const response = await platformFetch(
 			`/api/user/establishments/${encodeURIComponent(slug)}/rewards/redeem`,
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				credentials: "include",
 				body: JSON.stringify({ rewardId }),
 			},
 		);

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
+import { platformFetch } from "../../../../../../lib/platform/apiUrl";
+
 type JoinState = "loading" | "error";
 
 export function PlatformJoinDeepLink(): ReactElement {
@@ -24,10 +26,9 @@ export function PlatformJoinDeepLink(): ReactElement {
 				return;
 			}
 
-			const response = await fetch("/api/user/establishments/join", {
+			const response = await platformFetch("/api/user/establishments/join", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				credentials: "include",
 				body: JSON.stringify({ slug }),
 			});
 

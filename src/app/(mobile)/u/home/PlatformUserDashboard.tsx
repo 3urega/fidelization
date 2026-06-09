@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactElement, useEffect, useState } from "react";
 
+import { platformFetch } from "../../../../lib/platform/apiUrl";
 import {
 	BusinessSummaryCard,
 	DualEmptyRelationshipsCard,
@@ -51,8 +52,8 @@ export function PlatformUserDashboard(): ReactElement {
 
 		async function load(): Promise<void> {
 			const [meResponse, relationshipsResponse] = await Promise.all([
-				fetch("/api/user/me", { credentials: "include" }),
-				fetch("/api/user/me/relationships", { credentials: "include" }),
+				platformFetch("/api/user/me"),
+				platformFetch("/api/user/me/relationships"),
 			]);
 
 			if (cancelled) {
@@ -82,7 +83,7 @@ export function PlatformUserDashboard(): ReactElement {
 	}, []);
 
 	async function logout(): Promise<void> {
-		await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+		await platformFetch("/api/auth/logout", { method: "POST" });
 		window.location.assign("/u");
 	}
 

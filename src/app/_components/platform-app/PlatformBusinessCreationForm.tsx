@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useMemo, useState } from "react";
 
+import { platformFetch } from "../../../lib/platform/apiUrl";
 import { BUSINESS_TYPE_OPTIONS } from "../../../contexts/tenants/owners/domain/BusinessType";
 import { formatTenantHost } from "../../../lib/tenant/formatTenantHost";
 import { slugifyBusinessName } from "../../../lib/tenant/slugifyBusinessName";
@@ -87,7 +88,7 @@ export function PlatformBusinessCreationForm(): ReactElement {
 		setError(null);
 		setLoading(true);
 
-		const response = await fetch("/api/user/businesses", {
+		const response = await platformFetch("/api/user/businesses", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

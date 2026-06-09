@@ -4,6 +4,7 @@ import Link from "next/link";
 import QRCode from "react-qr-code";
 import { type ReactElement, useEffect, useState } from "react";
 
+import { platformFetch } from "../../../../../lib/platform/apiUrl";
 import { Card } from "../../../../_components/ui/Card";
 
 type UserMeResponse = {
@@ -21,7 +22,7 @@ export function PlatformUserQrScreen(): ReactElement {
 		let cancelled = false;
 
 		async function load(): Promise<void> {
-			const response = await fetch("/api/user/me", { credentials: "include" });
+			const response = await platformFetch("/api/user/me");
 			const body = (await response.json()) as UserMeResponse;
 
 			if (cancelled) {

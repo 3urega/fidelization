@@ -4,6 +4,7 @@ import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
+import { platformFetch } from "../../../lib/platform/apiUrl";
 import {
 	getGoogleOAuthClientId,
 	mapGoogleOAuthApiError,
@@ -45,7 +46,7 @@ export function PlatformGoogleSignInButton({
 
 		setLoading(true);
 
-		const apiResponse = await fetch("/api/auth/oauth/google", {
+		const apiResponse = await platformFetch("/api/auth/oauth/google", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

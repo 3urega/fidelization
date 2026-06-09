@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactElement, useState } from "react";
 
+import { platformFetch } from "../../../../../lib/platform/apiUrl";
 import { Button } from "../../../../_components/ui/Button";
 import { Card } from "../../../../_components/ui/Card";
 
@@ -17,7 +18,7 @@ export function PlatformDiscoverJoinForm(): ReactElement {
 		setError(null);
 		setLoading(true);
 
-		const response = await fetch("/api/user/establishments/join", {
+		const response = await platformFetch("/api/user/establishments/join", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",

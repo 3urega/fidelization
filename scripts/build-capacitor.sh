@@ -25,6 +25,7 @@ cleanup() {
 trap cleanup EXIT
 
 export CAPACITOR_STATIC=1
+export NEXT_PUBLIC_CAPACITOR_STATIC=1
 npm run build
 
 echo "Sincronizando Capacitor (android)..."

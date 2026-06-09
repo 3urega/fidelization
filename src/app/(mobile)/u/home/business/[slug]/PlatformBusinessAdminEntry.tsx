@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
+import { platformFetch } from "../../../../../../lib/platform/apiUrl";
 import { resolveTenantHomeUrl } from "../../../../../../lib/tenant/resolveTenantHomeUrl";
 import { Button } from "../../../../../_components/ui/Button";
 import { Card } from "../../../../../_components/ui/Card";
@@ -33,7 +34,7 @@ export function PlatformBusinessAdminEntry(): ReactElement {
 		let cancelled = false;
 
 		async function load(): Promise<void> {
-			const response = await fetch("/api/user/me/relationships", { credentials: "include" });
+			const response = await platformFetch("/api/user/me/relationships");
 			if (cancelled) {
 				return;
 			}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
+import { platformFetch } from "../../../lib/platform/apiUrl";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
@@ -45,7 +46,7 @@ export function PlatformUserLoginForm({
 		setError(null);
 		setLoading(true);
 
-		const response = await fetch("/api/auth/login/user", {
+		const response = await platformFetch("/api/auth/login/user", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			credentials: "include",
