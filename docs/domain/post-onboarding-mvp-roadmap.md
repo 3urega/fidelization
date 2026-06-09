@@ -150,6 +150,26 @@ flowchart LR
 
 ---
 
+## Phase C — Stamp campaigns (owner CRUD)
+
+**Status:** **Implemented** (#21, 2026-06-09).
+
+**Goal:** Owner configures at least one stamp campaign before staff scan adds stamps (#22).
+
+| In | Out |
+|----|-----|
+| Owner CRUD API (`GET/POST/PATCH`) | Stamp on staff scan (#22) |
+| `/settings/stamps` + nav + `/home` checklist | Customer stamp progress UI (#23) |
+| `rewardId` null (premio en `name`) | Plan feature flags |
+
+### Acceptance criteria (Phase C)
+
+- [x] Owner creates campaign with `name` + `requiredStamps` (#21)
+- [x] Owner lists and deactivates campaigns without delete (#21)
+- [x] `verify:stamp-campaigns-use-case` + `verify:stamp-campaigns` (#21)
+
+---
+
 ## Deferred — Steps 3–4 (plan + payment)
 
 Trigger to start this work:
@@ -185,6 +205,7 @@ Then implement (separate plan / issues):
 | `verify:business-onboarding` | Baseline (existing) |
 | `verify:tenant-branding` | A |
 | `verify:customer-qr-session` | B |
+| `verify:stamp-campaigns` | C (#21) |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |
 
 ---
@@ -220,6 +241,7 @@ A business owner who completed Steps 1–2 can:
 | 18 | Customer session — register + loyalty APIs | **Closed** (2026-06-05) — [issue #18](https://github.com/3urega/fidelization/issues/18) |
 | 19 | Customer loyalty app — `/app` UI + middleware | **Closed** (2026-06-05) — [issue #19](https://github.com/3urega/fidelization/issues/19) |
 | 20 | Customer QR — verify E2E + docs | **Closed** (2026-06-05) — [issue #20](https://github.com/3urega/fidelization/issues/20) |
+| 21 | Stamp campaigns — owner CRUD + API | **Closed** (2026-06-09) — [issue #21](https://github.com/3urega/fidelization/issues/21) |
 
 ```bash
 gh auth login

@@ -6,6 +6,10 @@ export abstract class StampCampaignRepository {
 
 	abstract searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null>;
 
+	abstract listByTenant(tenantId: string): Promise<StampCampaign[]>;
+
+	abstract listActiveByTenant(tenantId: string): Promise<StampCampaign[]>;
+
 	abstract saveProgress(progress: CustomerStampProgress): Promise<void>;
 
 	abstract searchProgress(

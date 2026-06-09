@@ -37,6 +37,24 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 		return row ? this.toCampaign(row) : null;
 	}
 
+	async listByTenant(tenantId: string): Promise<StampCampaign[]> {
+		const rows = await prisma.stampCampaign.findMany({
+			where: { tenantId },
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => this.toCampaign(row));
+	}
+
+	async listActiveByTenant(tenantId: string): Promise<StampCampaign[]> {
+		const rows = await prisma.stampCampaign.findMany({
+			where: { tenantId, isActive: true },
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => this.toCampaign(row));
+	}
+
 	async saveProgress(progress: CustomerStampProgress): Promise<void> {
 		const p = progress.toPrimitives();
 

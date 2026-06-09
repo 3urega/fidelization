@@ -29,6 +29,8 @@
     "verify:customer-loyalty-api": "tsx scripts/verify-customer-loyalty-api.ts",
     "verify:customer-qr-session": "tsx scripts/verify-customer-qr-session.ts",
     "verify:customer-scan": "tsx scripts/verify-customer-scan.ts",
+    "verify:stamp-campaigns-use-case": "tsx scripts/verify-stamp-campaigns-use-case.ts",
+    "verify:stamp-campaigns": "tsx scripts/verify-stamp-campaigns.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

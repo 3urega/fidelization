@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactElement } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 
 import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard";
 import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
@@ -10,8 +10,55 @@ import { useTenantSession } from "../../_components/shell/TenantSessionProvider"
 import { Button } from "../../_components/ui/Button";
 import { Card } from "../../_components/ui/Card";
 
+type StampCampaignsResponse = {
+	campaigns?: { isActive: boolean }[];
+};
+
 export function HomeDashboard(): ReactElement {
 	const { session, loading, error } = useTenantSession();
+	const [stampsDone, setStampsDone] = useState(false);
+	const [stampsLoading, setStampsLoading] = useState(true);
+
+	useEffect(() => {
+		if (!session || session.role !== "owner") {
+			setStampsLoading(false);
+
+			return;
+		}
+
+		let cancelled = false;
+
+		async function loadStampCampaigns(): Promise<void> {
+			try {
+				const response = await fetch("/api/loyalty/stamp-campaigns", {
+					credentials: "include",
+				});
+				const body = (await response.json()) as StampCampaignsResponse;
+
+				if (cancelled) {
+					return;
+				}
+
+				if (response.ok) {
+					setStampsDone((body.campaigns ?? []).some((campaign) => campaign.isActive));
+				}
+			} catch {
+				if (!cancelled) {
+					setStampsDone(false);
+				}
+			} finally {
+				if (!cancelled) {
+					setStampsLoading(false);
+				}
+			}
+		}
+
+		void loadStampCampaigns();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [session]);
 
 	if (error) {
 		return <p className="text-sm text-error">{error}</p>;
@@ -23,6 +70,7 @@ export function HomeDashboard(): ReactElement {
 
 	const brandingDone = isTenantBrandingCustomized(session.tenant);
 	const isOwner = session.role === "owner";
+	const stampsComplete = isOwner ? stampsDone : false;
 
 	const placeholders = [
 		{ title: "Clientes", description: "Próximamente" },
@@ -72,6 +120,45 @@ export function HomeDashboard(): ReactElement {
 						) : (
 							<span className="text-sm text-muted sm:shrink-0">
 								{brandingDone ? "Completado" : "Pendiente (owner)"}
+							</span>
+						)}
+					</li>
+					<li className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex items-start gap-2">
+							<span
+								className={[
+									"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+									stampsComplete
+										? "bg-primary text-primary-foreground"
+										: "border border-border text-muted",
+								].join(" ")}
+								aria-hidden
+							>
+								{stampsComplete ? "✓" : "·"}
+							</span>
+							<div>
+								<p className="text-sm font-medium text-foreground">
+									Configura tu tarjeta de sellos
+								</p>
+								<p className="text-sm text-muted">
+									{stampsLoading && isOwner
+										? "Comprobando campañas…"
+										: stampsComplete
+											? "Tienes al menos una campaña activa."
+											: "Crea una campaña para que los clientes acumulen sellos."}
+								</p>
+							</div>
+						</div>
+						{isOwner ? (
+							<Link
+								href="/settings/stamps"
+								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
+							>
+								{stampsComplete ? "Editar" : "Configurar"}
+							</Link>
+						) : (
+							<span className="text-sm text-muted sm:shrink-0">
+								{stampsComplete ? "Completado" : "Pendiente (owner)"}
 							</span>
 						)}
 					</li>

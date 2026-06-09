@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 export type StampCampaignPrimitives = {
 	id: string;
 	tenantId: string;
@@ -5,6 +7,12 @@ export type StampCampaignPrimitives = {
 	requiredStamps: number;
 	rewardId: string | null;
 	isActive: boolean;
+};
+
+export type StampCampaignCreateParams = {
+	tenantId: string;
+	name: string;
+	requiredStamps: number;
 };
 
 export class StampCampaign {
@@ -16,6 +24,17 @@ export class StampCampaign {
 		public readonly rewardId: string | null,
 		public readonly isActive: boolean,
 	) {}
+
+	static create(params: StampCampaignCreateParams): StampCampaign {
+		return new StampCampaign(
+			randomUUID(),
+			params.tenantId,
+			params.name,
+			params.requiredStamps,
+			null,
+			true,
+		);
+	}
 
 	static fromPrimitives(primitives: StampCampaignPrimitives): StampCampaign {
 		return new StampCampaign(
@@ -37,5 +56,20 @@ export class StampCampaign {
 			rewardId: this.rewardId,
 			isActive: this.isActive,
 		};
+	}
+
+	deactivate(): StampCampaign {
+		if (!this.isActive) {
+			return this;
+		}
+
+		return new StampCampaign(
+			this.id,
+			this.tenantId,
+			this.name,
+			this.requiredStamps,
+			this.rewardId,
+			false,
+		);
 	}
 }

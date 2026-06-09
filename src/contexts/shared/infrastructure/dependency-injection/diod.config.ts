@@ -33,6 +33,9 @@ import { PrismaPromotionRepository } from "../../../loyalty/promotions/infrastru
 import { RewardRepository } from "../../../loyalty/rewards/domain/RewardRepository";
 import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { CreateStampCampaign } from "../../../loyalty/stamp_campaigns/application/create/CreateStampCampaign";
+import { ListStampCampaigns } from "../../../loyalty/stamp_campaigns/application/list/ListStampCampaigns";
+import { UpdateStampCampaign } from "../../../loyalty/stamp_campaigns/application/update/UpdateStampCampaign";
 import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
 import { PlatformAuthenticator } from "../../../platform/application/authenticate/PlatformAuthenticator";
 import { ListPlatformTenants } from "../../../platform/application/tenants/ListPlatformTenants";
@@ -121,6 +124,9 @@ builder.registerAndUse(PrismaLoyaltyTransactionRepository);
 
 builder.register(StampCampaignRepository).use(PrismaStampCampaignRepository);
 builder.registerAndUse(PrismaStampCampaignRepository);
+builder.registerAndUse(CreateStampCampaign);
+builder.registerAndUse(ListStampCampaigns);
+builder.registerAndUse(UpdateStampCampaign);
 
 builder.register(RewardRepository).use(PrismaRewardRepository);
 builder.registerAndUse(PrismaRewardRepository);

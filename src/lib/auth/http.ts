@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
+import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
 
@@ -73,6 +74,20 @@ export function customerToJson(customer: Customer): Record<string, string | numb
 	};
 }
 
+export function stampCampaignToJson(
+	campaign: StampCampaign,
+): Record<string, string | number | boolean | null> {
+	const primitives = campaign.toPrimitives();
+
+	return {
+		id: primitives.id,
+		name: primitives.name,
+		requiredStamps: primitives.requiredStamps,
+		isActive: primitives.isActive,
+		rewardId: primitives.rewardId,
+	};
+}
+
 export function customerAuthResponseToJson(
 	customer: Customer,
 	session: CustomerSessionClaims,
@@ -140,6 +155,15 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "InvalidCustomerSession") {
 		return HttpNextResponse.domainError(error, 401);
+	}
+	if (error.type === "StampCampaignForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidStampCampaign") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "StampCampaignNotFound") {
+		return HttpNextResponse.domainError(error, 404);
 	}
 
 	return undefined;
