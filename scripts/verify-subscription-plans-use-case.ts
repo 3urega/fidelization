@@ -78,7 +78,7 @@ class MutableStubTenantRepository extends TenantRepository {
 		return null;
 	}
 
-	assignPlan(planName: string): void {
+	assignPlan(planName: string, planId: string): void {
 		if (!this.tenant) {
 			return;
 		}
@@ -87,6 +87,7 @@ class MutableStubTenantRepository extends TenantRepository {
 		this.tenant = Tenant.fromPrimitives({
 			...primitives,
 			subscriptionPlan: planName,
+			subscriptionPlanId: planId,
 		});
 	}
 }
@@ -138,6 +139,7 @@ function baseTenant(status: TenantStatus = TenantStatus.Active): Tenant {
 		primaryColor: "#7C3AED",
 		secondaryColor: "#4F46E5",
 		subscriptionPlan: "basic",
+		subscriptionPlanId: null,
 		status,
 		createdAt: new Date().toISOString(),
 	});
@@ -213,7 +215,7 @@ async function verifyAssignPlanStub(): Promise<void> {
 		[planBasic, planPro, planInactive],
 		(linkedTenantId, plan) => {
 			if (linkedTenantId === tenantId) {
-				tenantRepository.assignPlan(plan.name);
+				tenantRepository.assignPlan(plan.name, plan.id);
 			}
 		},
 	);

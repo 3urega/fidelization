@@ -43,6 +43,7 @@
     "verify:tenant-employees": "tsx scripts/verify-tenant-employees.ts",
     "verify:subscription-plans-use-case": "tsx scripts/verify-subscription-plans-use-case.ts",
     "verify:subscription-plans": "tsx scripts/verify-subscription-plans.ts",
+    "verify:onboarding-plan-selection": "tsx scripts/verify-onboarding-plan-selection.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

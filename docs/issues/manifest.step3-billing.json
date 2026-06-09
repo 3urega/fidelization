@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Onboarding Step 3: plan selection UI + verify E2E",
-      "bodyFile": "docs/issues/onboarding-plan-selection-ui.md"
-    },
-    {
       "title": "Stripe Checkout: tenant subscription (Step 4)",
       "bodyFile": "docs/issues/stripe-checkout-subscription.md"
     },

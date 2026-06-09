@@ -172,6 +172,17 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET /home OK with tenant session");
 
+	const planPage = await fetch(`${baseUrl}/onboarding/plan`, {
+		headers: { cookie: `session=${tenantCookie}` },
+	});
+
+	if (planPage.status !== 200) {
+		console.error("❌ GET /onboarding/plan:", planPage.status);
+		process.exit(1);
+	}
+
+	console.log("✅ GET /onboarding/plan OK for new tenant");
+
 	await prisma.tenantMembership.deleteMany({ where: { userId: userRow.id } });
 	await prisma.tenant.deleteMany({ where: { slug: membership.tenant.slug } });
 	await prisma.user.delete({ where: { id: userRow.id } });

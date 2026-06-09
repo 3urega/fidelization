@@ -27,7 +27,7 @@ export function userToJson(user: {
 	};
 }
 
-export function tenantToJson(tenant: Tenant): Record<string, string> {
+export function tenantToJson(tenant: Tenant): Record<string, string | null> {
 	const primitives = tenant.toPrimitives();
 
 	return {
@@ -38,6 +38,7 @@ export function tenantToJson(tenant: Tenant): Record<string, string> {
 		primaryColor: primitives.primaryColor,
 		secondaryColor: primitives.secondaryColor,
 		subscriptionPlan: primitives.subscriptionPlan,
+		subscriptionPlanId: primitives.subscriptionPlanId,
 		status: primitives.status,
 	};
 }

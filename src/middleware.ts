@@ -85,6 +85,7 @@ function isTenantAppPath(pathname: string): boolean {
 		pathname === "/home" ||
 		pathname === "/profile" ||
 		pathname === "/scan" ||
+		pathname.startsWith("/onboarding/") ||
 		pathname.startsWith("/settings/")
 	);
 }

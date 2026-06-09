@@ -19,6 +19,7 @@ const demoTenant = Tenant.fromPrimitives({
 	primaryColor: "#7C3AED",
 	secondaryColor: "#4F46E5",
 	subscriptionPlan: "FREE",
+	subscriptionPlanId: null,
 	status: TenantStatus.Active,
 	createdAt: new Date().toISOString(),
 });

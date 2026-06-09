@@ -8,6 +8,7 @@ export type TenantPrimitives = {
 	primaryColor: string;
 	secondaryColor: string;
 	subscriptionPlan: string;
+	subscriptionPlanId: string | null;
 	status: TenantStatus;
 	createdAt: string;
 };
@@ -21,6 +22,7 @@ export class Tenant {
 		public readonly primaryColor: string,
 		public readonly secondaryColor: string,
 		public readonly subscriptionPlan: string,
+		public readonly subscriptionPlanId: string | null,
 		public readonly status: TenantStatus,
 		public readonly createdAt: string,
 	) {}
@@ -34,6 +36,7 @@ export class Tenant {
 			primitives.primaryColor,
 			primitives.secondaryColor,
 			primitives.subscriptionPlan,
+			primitives.subscriptionPlanId,
 			primitives.status,
 			primitives.createdAt,
 		);
@@ -48,6 +51,7 @@ export class Tenant {
 			primaryColor: this.primaryColor,
 			secondaryColor: this.secondaryColor,
 			subscriptionPlan: this.subscriptionPlan,
+			subscriptionPlanId: this.subscriptionPlanId,
 			status: this.status,
 			createdAt: this.createdAt,
 		};

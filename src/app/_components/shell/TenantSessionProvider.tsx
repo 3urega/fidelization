@@ -30,6 +30,7 @@ export type TenantSessionTenant = {
 	primaryColor: string;
 	secondaryColor: string;
 	subscriptionPlan: string;
+	subscriptionPlanId: string | null;
 };
 
 export type TenantSessionData = {

@@ -9,6 +9,7 @@ export type PrismaTenantRow = {
 	primaryColor: string;
 	secondaryColor: string;
 	subscriptionPlan: string;
+	subscriptionPlanId: string | null;
 	status: string;
 	createdAt: Date;
 };
@@ -22,6 +23,7 @@ export function tenantFromPrismaRow(row: PrismaTenantRow): Tenant {
 		primaryColor: row.primaryColor,
 		secondaryColor: row.secondaryColor,
 		subscriptionPlan: row.subscriptionPlan,
+		subscriptionPlanId: row.subscriptionPlanId,
 		status: parseTenantStatus(row.status),
 		createdAt: row.createdAt.toISOString(),
 	});

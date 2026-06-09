@@ -4,7 +4,7 @@ import { type ReactElement, useEffect, useMemo, useState } from "react";
 
 import { BUSINESS_TYPE_OPTIONS } from "../../contexts/tenants/owners/domain/BusinessType";
 import { formatTenantHost } from "../../lib/tenant/formatTenantHost";
-import { resolveTenantHomeUrl } from "../../lib/tenant/resolveTenantHomeUrl";
+import { resolveTenantOnboardingPlanUrl } from "../../lib/tenant/resolveTenantHomeUrl";
 import { slugifyBusinessName } from "../../lib/tenant/slugifyBusinessName";
 import { useTheme } from "./theme/ThemeProvider";
 import { Button } from "./ui/Button";
@@ -123,13 +123,13 @@ export function BusinessCreationForm(): ReactElement {
 		if (finalHost) {
 			setCreatedHost(finalHost);
 			window.setTimeout(() => {
-				window.location.assign(resolveTenantHomeUrl(data.tenant.slug));
+				window.location.assign(resolveTenantOnboardingPlanUrl(data.tenant.slug));
 			}, REDIRECT_DELAY_MS);
 
 			return;
 		}
 
-		window.location.assign(resolveTenantHomeUrl(data.tenant.slug));
+		window.location.assign(resolveTenantOnboardingPlanUrl(data.tenant.slug));
 	}
 
 	return (
@@ -182,12 +182,12 @@ export function BusinessCreationForm(): ReactElement {
 			{createdHost ? (
 				<p className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
 					Negocio creado. Tu enlace: <code className="text-xs">{createdHost}</code>. Redirigiendo al
-					panel…
+					selector de plan…
 				</p>
 			) : null}
 			{error ? <p className="text-sm text-error">{error}</p> : null}
 			<Button type="submit" disabled={loading || createdHost !== null} className="w-full">
-				{loading ? "Creando negocio..." : "Crear negocio e ir al panel"}
+				{loading ? "Creando negocio..." : "Crear negocio y elegir plan"}
 			</Button>
 		</form>
 	);

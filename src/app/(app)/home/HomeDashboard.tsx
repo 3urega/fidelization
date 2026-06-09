@@ -5,6 +5,7 @@ import { type ReactElement, useEffect, useState } from "react";
 
 import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard";
 import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
+import { hasTenantChosenPlan } from "../../../lib/tenant/hasTenantChosenPlan";
 import { PageHeader } from "../../_components/shell/PageHeader";
 import { useTenantSession } from "../../_components/shell/TenantSessionProvider";
 import { Button } from "../../_components/ui/Button";
@@ -115,8 +116,9 @@ export function HomeDashboard(): ReactElement {
 		return <p className="text-sm text-muted">Cargando…</p>;
 	}
 
-	const brandingDone = isTenantBrandingCustomized(session.tenant);
 	const isOwner = session.role === "owner";
+	const brandingDone = isTenantBrandingCustomized(session.tenant);
+	const planDone = isOwner ? hasTenantChosenPlan(session.tenant) : false;
 	const stampsComplete = isOwner ? stampsDone : false;
 	const teamComplete = isOwner ? teamDone : false;
 
@@ -137,6 +139,41 @@ export function HomeDashboard(): ReactElement {
 				<p className="mt-1 text-sm text-muted">Completa estos pasos para dejar tu negocio listo.</p>
 				<ul className="mt-4 flex flex-col gap-3">
 					<li className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex items-start gap-2">
+							<span
+								className={[
+									"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+									planDone
+										? "bg-primary text-primary-foreground"
+										: "border border-border text-muted",
+								].join(" ")}
+								aria-hidden
+							>
+								{planDone ? "✓" : "·"}
+							</span>
+							<div>
+								<p className="text-sm font-medium text-foreground">Elige tu plan</p>
+								<p className="text-sm text-muted">
+									{planDone
+										? `Plan ${session.tenant.subscriptionPlan} activo.`
+										: "Selecciona Basic, Pro o Premium para tu negocio."}
+								</p>
+							</div>
+						</div>
+						{isOwner ? (
+							<Link
+								href="/onboarding/plan"
+								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
+							>
+								{planDone ? "Ver planes" : "Elegir plan"}
+							</Link>
+						) : (
+							<span className="text-sm text-muted sm:shrink-0">
+								{planDone ? "Completado" : "Pendiente (owner)"}
+							</span>
+						)}
+					</li>
+					<li className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
 						<div className="flex items-start gap-2">
 							<span
 								className={[

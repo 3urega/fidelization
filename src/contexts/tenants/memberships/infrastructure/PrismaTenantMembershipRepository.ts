@@ -110,6 +110,7 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 			primaryColor: string;
 			secondaryColor: string;
 			subscriptionPlan: string;
+			subscriptionPlanId: string | null;
 			status: string;
 			createdAt: Date;
 		};

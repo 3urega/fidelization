@@ -231,7 +231,7 @@ flowchart LR
 | Slice | Valor para el usuario | Body file |
 |-------|----------------------|-----------|
 | **E1** | Owner ve planes y asigna uno al negocio | **Implemented** [#30](https://github.com/3urega/fidelization/issues/30) (2026-06-09) — `GET/PATCH /api/billing/*`, `verify:subscription-plans*` |
-| **E2** | Wizard/checklist «Elige tu plan» | [#31](https://github.com/3urega/fidelization/issues/31) — [`onboarding-plan-selection-ui.md`](../issues/onboarding-plan-selection-ui.md) |
+| **E2** | Wizard/checklist «Elige tu plan» | **Implemented** [#31](https://github.com/3urega/fidelization/issues/31) (2026-06-09) — `/onboarding/plan`, checklist `/home`, `verify:onboarding-plan-selection` |
 | **E3** | Owner paga con Stripe Checkout | [#32](https://github.com/3urega/fidelization/issues/32) — [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) |
 | **E4** | Impago suspende el negocio; pago lo reactiva | [#33](https://github.com/3urega/fidelization/issues/33) — [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) |
 | **E5** | Funciones fuera del plan bloqueadas | [#34](https://github.com/3urega/fidelization/issues/34) — [`tenant-feature-flags.md`](../issues/tenant-feature-flags.md) |
@@ -239,7 +239,7 @@ flowchart LR
 ### Acceptance criteria (Phase E — target)
 
 - [x] Catálogo Basic/Pro/Premium + `verify:subscription-plans` (#30 — 2026-06-09)
-- [ ] UI Step 3 + `verify:onboarding-plan-selection` (#31)
+- [x] UI Step 3 + `verify:onboarding-plan-selection` (#31 — 2026-06-09)
 - [ ] Stripe Checkout test + subscription row (#32)
 - [ ] Webhooks suspend/reactivate + verify (#33)
 - [ ] Plan feature gating + verify (#34)
@@ -335,7 +335,7 @@ A business owner who completed Steps 1–2 can:
 | # | Título | Body file |
 |---|--------|-----------|
 | 30 | Subscription plans: catalog + tenant plan API + verify | **Closed** (2026-06-09) — [issue #30](https://github.com/3urega/fidelization/issues/30) |
-| 31 | Onboarding Step 3: plan selection UI + verify E2E | [`onboarding-plan-selection-ui.md`](../issues/onboarding-plan-selection-ui.md) — [issue #31](https://github.com/3urega/fidelization/issues/31) |
+| 31 | Onboarding Step 3: plan selection UI + verify E2E | **Closed** (2026-06-09) — [issue #31](https://github.com/3urega/fidelization/issues/31) |
 | 32 | Stripe Checkout: tenant subscription (Step 4) | [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) — [issue #32](https://github.com/3urega/fidelization/issues/32) |
 | 33 | Stripe webhooks: subscription lifecycle + tenant suspend | [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) — [issue #33](https://github.com/3urega/fidelization/issues/33) |
 | 34 | Feature flags: enforce tenant plan limits | [`tenant-feature-flags.md`](../issues/tenant-feature-flags.md) — [issue #34](https://github.com/3urega/fidelization/issues/34) |
