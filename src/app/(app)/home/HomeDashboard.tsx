@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
 import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard";
@@ -20,11 +21,24 @@ type EmployeesResponse = {
 };
 
 export function HomeDashboard(): ReactElement {
-	const { session, loading, error } = useTenantSession();
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const { session, loading, error, refresh } = useTenantSession();
+	const [checkoutNotice, setCheckoutNotice] = useState(false);
 	const [stampsDone, setStampsDone] = useState(false);
 	const [stampsLoading, setStampsLoading] = useState(true);
 	const [teamDone, setTeamDone] = useState(false);
 	const [teamLoading, setTeamLoading] = useState(true);
+
+	useEffect(() => {
+		if (searchParams.get("checkout") !== "success") {
+			return;
+		}
+
+		setCheckoutNotice(true);
+		void refresh();
+		router.replace("/home");
+	}, [searchParams, refresh, router]);
 
 	useEffect(() => {
 		if (!session || session.role !== "owner") {
@@ -133,6 +147,16 @@ export function HomeDashboard(): ReactElement {
 				title={`Hola, ${session.user.name}`}
 				description={`Panel del negocio · ${session.tenant.name}`}
 			/>
+
+			{checkoutNotice ? (
+				<Card className="border-border bg-muted/30">
+					<p className="text-sm text-foreground">
+						{planDone
+							? `Tu plan ${session.tenant.subscriptionPlan} ya está activo.`
+							: "Pago recibido. Estamos activando tu suscripción; puede tardar unos segundos."}
+					</p>
+				</Card>
+			) : null}
 
 			<Card>
 				<h2 className="font-medium text-foreground">Configuración inicial</h2>

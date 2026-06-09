@@ -232,7 +232,7 @@ flowchart LR
 |-------|----------------------|-----------|
 | **E1** | Owner ve planes y asigna uno al negocio | **Implemented** [#30](https://github.com/3urega/fidelization/issues/30) (2026-06-09) — `GET/PATCH /api/billing/*`, `verify:subscription-plans*` |
 | **E2** | Wizard/checklist «Elige tu plan» | **Implemented** [#31](https://github.com/3urega/fidelization/issues/31) (2026-06-09) — `/onboarding/plan`, checklist `/home`, `verify:onboarding-plan-selection` |
-| **E3** | Owner paga con Stripe Checkout | [#32](https://github.com/3urega/fidelization/issues/32) — [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) |
+| **E3** | Owner paga con Stripe Checkout | **Implemented** [#32](https://github.com/3urega/fidelization/issues/32) (2026-06-09) — `POST /api/billing/checkout`, webhook `checkout.session.completed`, `verify:stripe-checkout-use-case`, `verify:stripe-webhook-checkout-use-case` |
 | **E4** | Impago suspende el negocio; pago lo reactiva | [#33](https://github.com/3urega/fidelization/issues/33) — [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) |
 | **E5** | Funciones fuera del plan bloqueadas | [#34](https://github.com/3urega/fidelization/issues/34) — [`tenant-feature-flags.md`](../issues/tenant-feature-flags.md) |
 
@@ -240,7 +240,7 @@ flowchart LR
 
 - [x] Catálogo Basic/Pro/Premium + `verify:subscription-plans` (#30 — 2026-06-09)
 - [x] UI Step 3 + `verify:onboarding-plan-selection` (#31 — 2026-06-09)
-- [ ] Stripe Checkout test + subscription row (#32)
+- [x] Stripe Checkout test + subscription row (#32 — 2026-06-09)
 - [ ] Webhooks suspend/reactivate + verify (#33)
 - [ ] Plan feature gating + verify (#34)
 
@@ -280,6 +280,7 @@ flowchart LR
 | `verify:subscription-plans` | E (#30) |
 | `verify:onboarding-plan-selection` | E (#31) |
 | `verify:stripe-checkout-use-case` | E (#32) |
+| `verify:stripe-webhook-checkout-use-case` | E (#32) |
 | `verify:stripe-webhooks-use-case` | E (#33) |
 | `verify:tenant-feature-flags-use-case` | E (#34) |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |

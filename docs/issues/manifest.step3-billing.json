@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Stripe Checkout: tenant subscription (Step 4)",
-      "bodyFile": "docs/issues/stripe-checkout-subscription.md"
-    },
-    {
       "title": "Stripe webhooks: subscription lifecycle + tenant suspend",
       "bodyFile": "docs/issues/stripe-webhooks-lifecycle.md"
     },

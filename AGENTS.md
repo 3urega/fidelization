@@ -38,6 +38,8 @@ npm run verify:tenant-employees   # issue #27 — owner invite → employee logi
 npm run verify:subscription-plans-use-case  # issue #30 — list/assign tenant plan (domain stub)
 npm run verify:subscription-plans   # issue #30 — GET/PATCH billing plans + Prisma (dev + DATABASE_URL)
 npm run verify:onboarding-plan-selection  # issue #31 — wizard → /onboarding/plan → assign plan E2E (dev + DATABASE_URL)
+npm run verify:stripe-checkout-use-case  # issue #32 — CreateStripeCheckoutSession (domain stub)
+npm run verify:stripe-webhook-checkout-use-case  # issue #32 — CompleteStripeCheckoutSession + webhook payload (domain stub)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -90,8 +92,9 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Rewards (#24):** owner API `GET/POST /api/loyalty/rewards`, `PATCH …/[id]` (owner-only; sin UI aún). `verify:rewards-use-case`, `verify:rewards`.
 - **Customer reward redeem (#25):** en `/app/card`, sección «Recompensas» con catálogo activo; `POST /api/loyalty/rewards/redeem` descuenta puntos y crea `reward_redeemed`. `verify:customer-reward-redeem-use-case`, `verify:customer-reward-redeem`.
 - **Tenant employees (#26–#27):** owner en `/settings/team` invita empleados (`GET/POST /api/tenant/employees`); empleado inicia sesión en subdominio tenant y usa `/scan`. Checklist «Invita a tu empleado» en `/home`. `verify:tenant-employees-use-case`, `verify:tenant-employees`.
-- **Subscription plans (#30):** owner lista catálogo Basic/Pro/Premium (`GET /api/billing/plans`) y asigna plan al tenant (`PATCH /api/billing/tenant-plan` con `{ planId }`); empleado solo lectura en GET. Sin Stripe aún. `verify:subscription-plans-use-case`, `verify:subscription-plans`.
+- **Subscription plans (#30):** owner lista catálogo Basic/Pro/Premium (`GET /api/billing/plans`) y asigna plan al tenant (`PATCH /api/billing/tenant-plan` con `{ planId }`); empleado solo lectura en GET. `verify:subscription-plans-use-case`, `verify:subscription-plans`.
 - **Onboarding plan UI (#31):** tras Step 2, owner en `/onboarding/plan` elige plan; checklist «Elige tu plan» en `/home` hasta `subscriptionPlanId` asignado. `verify:onboarding-plan-selection`.
+- **Stripe Checkout (#32):** Basic sigue con `PATCH`; Pro/Premium → `POST /api/billing/checkout` → redirect Stripe; webhook `checkout.session.completed` en `POST /api/webhooks/stripe` crea fila `subscriptions` y vincula plan. Env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PREMIUM_MONTHLY`. Dev: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. `verify:stripe-checkout-use-case`, `verify:stripe-webhook-checkout-use-case`.
 
 # Architecture
 
@@ -153,6 +156,7 @@ docs/
 | Tenant employees (#26–#27) | `verify:tenant-employees-use-case` + `verify:tenant-employees` + `/settings/team` |
 | Subscription plans (#30) | `verify:subscription-plans-use-case` + `verify:subscription-plans` + `/api/billing/plans` |
 | Onboarding plan UI (#31) | `verify:onboarding-plan-selection` + `/onboarding/plan` + checklist `/home` |
+| Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |
