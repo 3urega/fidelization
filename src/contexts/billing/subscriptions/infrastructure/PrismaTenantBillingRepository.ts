@@ -65,6 +65,7 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 				tenantId: p.tenantId,
 				planId: p.planId,
 				status: p.status,
+				stripeSubscriptionId: p.stripeSubscriptionId,
 			},
 		});
 	}
@@ -75,14 +76,17 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 			orderBy: { startedAt: "desc" },
 		});
 
-		return row
-			? TenantSubscription.fromPrimitives({
-					id: row.id,
-					tenantId: row.tenantId,
-					planId: row.planId,
-					status: row.status as SubscriptionStatus,
-				})
-			: null;
+		return row ? this.toDomainSubscription(row) : null;
+	}
+
+	async searchSubscriptionByStripeId(
+		stripeSubscriptionId: string,
+	): Promise<TenantSubscription | null> {
+		const row = await prisma.subscription.findFirst({
+			where: { stripeSubscriptionId },
+		});
+
+		return row ? this.toDomainSubscription(row) : null;
 	}
 
 	async linkTenantPlan(tenantId: string, planId: string): Promise<void> {
@@ -97,6 +101,22 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 				subscriptionPlanId: planId,
 				subscriptionPlan: plan.name,
 			},
+		});
+	}
+
+	private toDomainSubscription(row: {
+		id: string;
+		tenantId: string;
+		planId: string;
+		status: string;
+		stripeSubscriptionId: string | null;
+	}): TenantSubscription {
+		return TenantSubscription.fromPrimitives({
+			id: row.id,
+			tenantId: row.tenantId,
+			planId: row.planId,
+			status: row.status as SubscriptionStatus,
+			stripeSubscriptionId: row.stripeSubscriptionId,
 		});
 	}
 }

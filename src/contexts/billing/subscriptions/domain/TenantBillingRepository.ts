@@ -14,5 +14,9 @@ export abstract class TenantBillingRepository {
 
 	abstract searchActiveSubscription(tenantId: string): Promise<TenantSubscription | null>;
 
+	abstract searchSubscriptionByStripeId(
+		stripeSubscriptionId: string,
+	): Promise<TenantSubscription | null>;
+
 	abstract linkTenantPlan(tenantId: string, planId: string): Promise<void>;
 }

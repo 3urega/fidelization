@@ -11,9 +11,12 @@ import { PostgresGooglePlaySubscriptionRepository } from "../../../billing/googl
 import { TenantBillingRepository } from "../../../billing/subscriptions/domain/TenantBillingRepository";
 import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/application/assign/AssignTenantSubscriptionPlan";
 import { CreateStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CreateStripeCheckoutSession";
+import { CompleteStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
 import { ListSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListSubscriptionPlans";
 import { StripeCheckoutGateway } from "../../../billing/stripe/domain/StripeCheckoutGateway";
+import { StripeWebhookGateway } from "../../../billing/stripe/domain/StripeWebhookGateway";
 import { StripeCheckoutGatewayStripe } from "../../../billing/stripe/infrastructure/StripeCheckoutGatewayStripe";
+import { StripeWebhookGatewayStripe } from "../../../billing/stripe/infrastructure/StripeWebhookGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
@@ -165,8 +168,11 @@ builder.register(TenantBillingRepository).use(PrismaTenantBillingRepository);
 builder.registerAndUse(PrismaTenantBillingRepository);
 builder.register(StripeCheckoutGateway).use(StripeCheckoutGatewayStripe);
 builder.registerAndUse(StripeCheckoutGatewayStripe);
+builder.register(StripeWebhookGateway).use(StripeWebhookGatewayStripe);
+builder.registerAndUse(StripeWebhookGatewayStripe);
 builder.registerAndUse(ListSubscriptionPlans);
 builder.registerAndUse(AssignTenantSubscriptionPlan);
 builder.registerAndUse(CreateStripeCheckoutSession);
+builder.registerAndUse(CompleteStripeCheckoutSession);
 
 export const container = builder.build();

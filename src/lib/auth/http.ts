@@ -265,6 +265,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "StripeCheckoutNotConfigured") {
 		return HttpNextResponse.domainError(error, 503);
 	}
+	if (error.type === "InvalidStripeWebhookSignature") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "StripeCheckoutSessionIncomplete") {
+		return HttpNextResponse.domainError(error, 400);
+	}
 
 	return undefined;
 }

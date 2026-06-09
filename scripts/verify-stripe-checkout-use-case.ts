@@ -99,6 +99,10 @@ class InMemoryTenantBillingRepository extends TenantBillingRepository {
 		return this.activeSubscription;
 	}
 
+	async searchSubscriptionByStripeId(): Promise<TenantSubscription | null> {
+		return null;
+	}
+
 	async linkTenantPlan(): Promise<void> {}
 }
 
@@ -199,6 +203,7 @@ async function verifyCheckoutStub(): Promise<void> {
 		tenantId,
 		planId: planProId,
 		status: "active",
+		stripeSubscriptionId: "sub_existing",
 	});
 	const billingWithSubscription = new InMemoryTenantBillingRepository(
 		[planBasic, planPro],
