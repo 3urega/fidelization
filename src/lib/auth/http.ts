@@ -92,6 +92,12 @@ export function stampCampaignToJson(
 export function stampAddedSummaryToJson(
 	summary: StampAddedSummary,
 ): Record<string, string | number | boolean> {
+	return stampProgressToJson(summary);
+}
+
+export function stampProgressToJson(
+	summary: StampAddedSummary,
+): Record<string, string | number | boolean> {
 	return {
 		campaignId: summary.campaignId,
 		campaignName: summary.campaignName,

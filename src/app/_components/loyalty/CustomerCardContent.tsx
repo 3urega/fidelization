@@ -6,7 +6,7 @@ import { type ReactElement, useEffect, useState } from "react";
 
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
-import { LoyaltyCard } from "./LoyaltyCard";
+import { LoyaltyCard, type StampProgressRow } from "./LoyaltyCard";
 
 type CustomerPayload = {
 	id: string;
@@ -20,6 +20,7 @@ type CustomerPayload = {
 
 type MeResponse = {
 	customer?: CustomerPayload;
+	stampProgress?: StampProgressRow[];
 	error?: {
 		description?: string;
 	};
@@ -32,6 +33,7 @@ type CustomerCardContentProps = {
 export function CustomerCardContent({ businessName }: CustomerCardContentProps): ReactElement {
 	const router = useRouter();
 	const [customer, setCustomer] = useState<CustomerPayload | null>(null);
+	const [stampProgress, setStampProgress] = useState<StampProgressRow[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -63,6 +65,7 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 
 				if (body.customer) {
 					setCustomer(body.customer);
+					setStampProgress(body.stampProgress ?? []);
 				}
 			} catch {
 				if (!cancelled) {
@@ -118,6 +121,7 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 				pointsBalance={customer.pointsBalance}
 				qrValue={customer.qrValue}
 				businessName={businessName}
+				stampProgress={stampProgress}
 			/>
 		</Card>
 	);

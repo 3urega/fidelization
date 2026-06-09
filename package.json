@@ -33,6 +33,8 @@
     "verify:stamp-campaigns": "tsx scripts/verify-stamp-campaigns.ts",
     "verify:customer-stamp-scan-use-case": "tsx scripts/verify-customer-stamp-scan-use-case.ts",
     "verify:customer-stamp-scan": "tsx scripts/verify-customer-stamp-scan.ts",
+    "verify:customer-stamp-progress-use-case": "tsx scripts/verify-customer-stamp-progress-use-case.ts",
+    "verify:customer-stamp-progress": "tsx scripts/verify-customer-stamp-progress.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

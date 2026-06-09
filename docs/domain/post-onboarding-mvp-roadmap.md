@@ -148,26 +148,32 @@ flowchart LR
 | **Owner link to `/app`** | ✅ Checklist en [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) + [`LoyaltyAppLinkCard`](../../src/app/_components/loyalty/LoyaltyAppLinkCard.tsx) |
 | **Employee QR scan** | ✅ `POST /api/loyalty/scan`, [`/scan`](../../src/app/(app)/scan/page.tsx), `RecordCustomerVisitByQr`, `verify:customer-scan` |
 | **Staff scan + stamps** | ✅ #22 (2026-06-09) — +1 sello por campaña activa, `stamp_added`, `verify:customer-stamp-scan` |
+| **Customer stamp progress** | ✅ #23 (2026-06-09) — `GET /api/loyalty/me` + `stampProgress[]`, UI `/app/card`, `verify:customer-stamp-progress` |
 
 ---
 
-## Phase C — Stamp campaigns (owner CRUD)
+## Phase C — Stamp campaigns (owner CRUD + customer progress)
 
-**Status:** **Implemented** (#21, 2026-06-09).
+**Status:** **Implemented** (#21–#23, 2026-06-09).
 
-**Goal:** Owner configures at least one stamp campaign before staff scan adds stamps (#22).
+**Goal:** Owner configures stamp campaigns; staff scan adds stamps; customer sees progress on loyalty card.
 
 | In | Out |
 |----|-----|
-| Owner CRUD API (`GET/POST/PATCH`) | Stamp on staff scan (#22) |
-| `/settings/stamps` + nav + `/home` checklist | Customer stamp progress UI (#23) |
-| `rewardId` null (premio en `name`) | Plan feature flags |
+| Owner CRUD API (`GET/POST/PATCH`) | Canje de recompensa |
+| `/settings/stamps` + nav + `/home` checklist | Plan feature flags |
+| Staff scan → +1 sello (#22) | Push al completar |
+| Customer `stampProgress[]` + UI `/app/card` (#23) | Animaciones tarjeta física |
+| `rewardId` null (premio en `name`) | |
 
 ### Acceptance criteria (Phase C)
 
 - [x] Owner creates campaign with `name` + `requiredStamps` (#21)
 - [x] Owner lists and deactivates campaigns without delete (#21)
 - [x] `verify:stamp-campaigns-use-case` + `verify:stamp-campaigns` (#21)
+- [x] Staff scan adds stamp per active campaign (#22)
+- [x] Customer sees stamp progress on `/app/card` (#23)
+- [x] `verify:customer-stamp-progress-use-case` + `verify:customer-stamp-progress` (#23)
 
 ---
 
@@ -208,6 +214,7 @@ Then implement (separate plan / issues):
 | `verify:customer-qr-session` | B |
 | `verify:stamp-campaigns` | C (#21) |
 | `verify:customer-stamp-scan` | C (#22) |
+| `verify:customer-stamp-progress` | C (#23) |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |
 
 ---
@@ -245,6 +252,7 @@ A business owner who completed Steps 1–2 can:
 | 20 | Customer QR — verify E2E + docs | **Closed** (2026-06-05) — [issue #20](https://github.com/3urega/fidelization/issues/20) |
 | 21 | Stamp campaigns — owner CRUD + API | **Closed** (2026-06-09) — [issue #21](https://github.com/3urega/fidelization/issues/21) |
 | 22 | Staff scan — add stamp on active campaigns | **Closed** (2026-06-09) — [issue #22](https://github.com/3urega/fidelization/issues/22) |
+| 23 | Customer card — stamp progress + verify E2E | **Closed** (2026-06-09) — [issue #23](https://github.com/3urega/fidelization/issues/23) |
 
 ```bash
 gh auth login

@@ -3,11 +3,20 @@
 import QRCode from "react-qr-code";
 import type { ReactElement } from "react";
 
+export type StampProgressRow = {
+	campaignId: string;
+	campaignName: string;
+	current: number;
+	required: number;
+	completed: boolean;
+};
+
 type LoyaltyCardProps = {
 	name: string;
 	pointsBalance: number;
 	qrValue: string;
 	businessName?: string;
+	stampProgress?: StampProgressRow[];
 };
 
 export function LoyaltyCard({
@@ -15,6 +24,7 @@ export function LoyaltyCard({
 	pointsBalance,
 	qrValue,
 	businessName,
+	stampProgress = [],
 }: LoyaltyCardProps): ReactElement {
 	return (
 		<div className="flex flex-col gap-6">
@@ -29,6 +39,29 @@ export function LoyaltyCard({
 				<p className="text-4xl font-bold text-primary">{pointsBalance}</p>
 				<p className="text-sm text-muted">puntos</p>
 			</div>
+
+			{stampProgress.length > 0 ? (
+				<div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
+					<h2 className="text-sm font-medium text-foreground">Sellos</h2>
+					<ul className="flex flex-col gap-2">
+						{stampProgress.map((row) => (
+							<li
+								key={row.campaignId}
+								className="flex items-center justify-between gap-3 text-sm"
+							>
+								<span className="text-foreground">{row.campaignName}</span>
+								{row.completed ? (
+									<span className="font-medium text-primary">Completada</span>
+								) : (
+									<span className="text-muted">
+										{row.current} / {row.required}
+									</span>
+								)}
+							</li>
+						))}
+					</ul>
+				</div>
+			) : null}
 
 			<div className="mx-auto rounded-xl border border-border bg-white p-4 shadow-sm">
 				<QRCode value={qrValue} size={200} level="M" />

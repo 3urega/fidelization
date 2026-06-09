@@ -34,6 +34,11 @@ async function main(): Promise<void> {
 
 	await ensureDemoTenantActive();
 
+	await prisma.stampCampaign.updateMany({
+		where: { tenantId: DEMO_TENANT_ID, name: { startsWith: "Verify stamp scan" } },
+		data: { isActive: false },
+	});
+
 	const ownerLogin = await fetch(`${apexBaseUrl}/api/auth/demo`, { method: "POST" });
 	const ownerCookie = parseSetCookieSession(ownerLogin.headers.get("set-cookie"));
 	if (!ownerLogin.ok || !ownerCookie) {
@@ -89,16 +94,27 @@ async function main(): Promise<void> {
 	});
 	const scanBody = (await scan.json()) as {
 		customer?: { pointsBalance: number; visitsCount: number };
-		stampsAdded?: { current: number; required: number; completed: boolean }[];
+		stampsAdded?: {
+			campaignId: string;
+			current: number;
+			required: number;
+			completed: boolean;
+		}[];
 	};
 
 	if (
 		!scan.ok ||
-		scanBody.stampsAdded?.length !== 1 ||
-		scanBody.stampsAdded[0]?.current !== 1 ||
-		scanBody.stampsAdded[0]?.required !== 10
+		!scanBody.stampsAdded?.some(
+			(stamp) => stamp.current === 1 && stamp.required === 10,
+		)
 	) {
 		console.error("❌ POST /api/loyalty/scan:", scan.status, scanBody);
+		process.exit(1);
+	}
+
+	const scanStamp = scanBody.stampsAdded?.find((stamp) => stamp.required === 10);
+	if (!scanStamp) {
+		console.error("❌ expected stamp progress for created campaign in response");
 		process.exit(1);
 	}
 
@@ -114,7 +130,12 @@ async function main(): Promise<void> {
 	}
 
 	const stampTxCount = await prisma.loyaltyTransaction.count({
-		where: { tenantId: DEMO_TENANT_ID, customerId, type: "stamp_added" },
+		where: {
+			tenantId: DEMO_TENANT_ID,
+			customerId,
+			type: "stamp_added",
+			metadata: { path: ["campaignId"], equals: campaignId },
+		},
 	});
 
 	if (stampTxCount !== 1) {
@@ -131,10 +152,12 @@ async function main(): Promise<void> {
 			body: JSON.stringify({ qrValue }),
 		});
 		const nextBody = (await nextScan.json()) as {
-			stampsAdded?: { current: number; completed: boolean }[];
+			stampsAdded?: { campaignId?: string; current: number; completed: boolean }[];
 		};
 
-		if (!nextScan.ok || nextBody.stampsAdded?.[0]?.current !== i) {
+		const campaignStamp = nextBody.stampsAdded?.find((stamp) => stamp.campaignId === campaignId);
+
+		if (!nextScan.ok || campaignStamp?.current !== i) {
 			console.error(`❌ scan ${i}/10:`, nextScan.status, nextBody);
 			process.exit(1);
 		}
@@ -157,16 +180,25 @@ async function main(): Promise<void> {
 		body: JSON.stringify({ qrValue }),
 	});
 	const afterCompletedBody = (await afterCompleted.json()) as {
-		stampsAdded?: unknown[];
+		stampsAdded?: { campaignId?: string }[];
 	};
 
-	if (!afterCompleted.ok || (afterCompletedBody.stampsAdded?.length ?? 0) !== 0) {
+	const afterCompletedStamp = afterCompletedBody.stampsAdded?.find(
+		(stamp) => stamp.campaignId === campaignId,
+	);
+
+	if (!afterCompleted.ok || afterCompletedStamp) {
 		console.error("❌ scan after completed should not add stamps:", afterCompleted.status, afterCompletedBody);
 		process.exit(1);
 	}
 
 	const finalStampTxCount = await prisma.loyaltyTransaction.count({
-		where: { tenantId: DEMO_TENANT_ID, customerId, type: "stamp_added" },
+		where: {
+			tenantId: DEMO_TENANT_ID,
+			customerId,
+			type: "stamp_added",
+			metadata: { path: ["campaignId"], equals: campaignId },
+		},
 	});
 
 	if (finalStampTxCount !== 10) {
@@ -209,10 +241,21 @@ async function main(): Promise<void> {
 		headers: ownerHeaders,
 		body: JSON.stringify({ qrValue: inactiveQr }),
 	});
-	const inactiveScanBody = (await inactiveScan.json()) as { stampsAdded?: unknown[] };
+	const inactiveScanBody = (await inactiveScan.json()) as {
+		stampsAdded?: { campaignId?: string }[];
+	};
 
-	if (!inactiveScan.ok || (inactiveScanBody.stampsAdded?.length ?? 0) !== 0) {
+	if (!inactiveScan.ok) {
 		console.error("❌ inactive campaign scan:", inactiveScan.status, inactiveScanBody);
+		process.exit(1);
+	}
+
+	const inactiveCampaignStamp = inactiveScanBody.stampsAdded?.find(
+		(stamp) => stamp.campaignId === campaignId,
+	);
+
+	if (inactiveCampaignStamp) {
+		console.error("❌ inactive campaign should not add stamps:", inactiveScanBody);
 		process.exit(1);
 	}
 

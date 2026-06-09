@@ -6,7 +6,7 @@ import { RecordCustomerVisitByQr } from "../../../../contexts/loyalty/customers/
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";
+import { TenantNotFound } from "../../../../contexts/tenants/tenants/domain/TenantNotFound";
 import {
 	customerToJson,
 	handleAuthDomainError,
