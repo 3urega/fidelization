@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 /**
- * E2E check: tenant session cookie is set and /home is reachable (not redirected to /login).
+ * E2E check: tenant session cookie is set and /panel is reachable (not redirected to /login).
  * Uses demo login by default; set OWNER_VERIFY_EMAIL + OWNER_VERIFY_PASSWORD for password login.
  */
 const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -64,7 +64,7 @@ async function main(): Promise<void> {
 		console.log(`   tenant slug: ${body.tenant.slug}`);
 	}
 
-	const home = await fetch(`${baseUrl}/home`, {
+	const home = await fetch(`${baseUrl}/panel`, {
 		headers: { cookie: `session=${cookie}` },
 		redirect: "manual",
 	});
@@ -72,17 +72,17 @@ async function main(): Promise<void> {
 	if (home.status === 307 || home.status === 308) {
 		const location = home.headers.get("location") ?? "";
 		if (location.includes("/login")) {
-			console.error("❌ GET /home redirected to login — middleware did not accept session");
+			console.error("❌ GET /panel redirected to login — middleware did not accept session");
 			process.exit(1);
 		}
 	}
 
 	if (home.status !== 200) {
-		console.error("❌ GET /home:", home.status);
+		console.error("❌ GET /panel:", home.status);
 		process.exit(1);
 	}
 
-	console.log("✅ GET /home 200 with session (no redirect to /login)");
+	console.log("✅ GET /panel 200 with session (no redirect to /login)");
 
 	const me = await fetch(`${baseUrl}/api/me`, { headers: { cookie: `session=${cookie}` } });
 	if (!me.ok) {

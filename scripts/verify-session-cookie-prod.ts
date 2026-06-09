@@ -92,8 +92,8 @@ async function runRedirectChecks(): Promise<void> {
 		},
 	} as Window & typeof globalThis;
 
-	if (resolveTenantHomeUrl("cafe-joan") !== "/home") {
-		console.error("❌ resolveTenantHomeUrl local apex must stay on /home");
+	if (resolveTenantHomeUrl("cafe-joan") !== "/panel") {
+		console.error("❌ resolveTenantHomeUrl local apex must stay on /panel");
 		process.exit(1);
 	}
 

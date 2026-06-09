@@ -188,16 +188,16 @@ async function main(): Promise<void> {
 
 	console.log("✅ staff scan at cafe-demo → +1 point via users.qr_value");
 
-	const joinPage = await fetch(`${baseUrl}/u/join/${slugB}`, {
+	const joinPage = await fetch(`${baseUrl}/join/${slugB}`, {
 		headers: sessionHeaders(client.cookie),
 	});
 	const joinHtml = await joinPage.text();
 	if (joinPage.status !== 200 || !joinHtml.includes("Uniéndote")) {
-		console.error("❌ GET /u/join/[slug] deep link page");
+		console.error("❌ GET /join/[slug] deep link page");
 		process.exit(1);
 	}
 
-	console.log("✅ /u/join/[slug] route OK");
+	console.log("✅ /join/[slug] route OK");
 
 	await prisma.loyaltyTransaction.deleteMany({
 		where: {

@@ -193,7 +193,7 @@ async function main(): Promise<void> {
 
 	console.log("✅ otherPromotions lists linked tenant promo");
 
-	const detailPage = await fetch(`${baseUrl}/u/home/establishments/${slugA}`, {
+	const detailPage = await fetch(`${baseUrl}/home/establishments/${slugA}`, {
 		headers: sessionHeaders(client.cookie),
 	});
 	if (detailPage.status !== 200) {
@@ -201,13 +201,13 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const qrPage = await fetch(`${baseUrl}/u/home/qr`, { headers: sessionHeaders(client.cookie) });
+	const qrPage = await fetch(`${baseUrl}/home/qr`, { headers: sessionHeaders(client.cookie) });
 	if (qrPage.status !== 200) {
 		console.error("❌ QR page:", qrPage.status);
 		process.exit(1);
 	}
 
-	console.log("✅ pages /u/home/establishments + /u/home/qr OK");
+	console.log("✅ pages /home/establishments + /home/qr OK");
 
 	const clientRow = await prisma.user.findUnique({
 		where: { email: client.email },

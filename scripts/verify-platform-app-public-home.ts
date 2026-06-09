@@ -28,48 +28,48 @@ async function main(): Promise<void> {
 	const password = "password123";
 	const name = "Verify Platform User";
 
-	const homePublic = await fetch(`${baseUrl}/u`);
+	const homePublic = await fetch(`${baseUrl}/`);
 	if (homePublic.status !== 200) {
-		console.error("❌ GET /u:", homePublic.status);
+		console.error("❌ GET /:", homePublic.status);
 		process.exit(1);
 	}
 
 	const homeHtml = await homePublic.text();
 	for (const text of ["Registrarse", "Registrar negocio", "Iniciar sesión"]) {
 		if (!homeHtml.includes(text)) {
-			console.error(`❌ GET /u: expected "${text}" in HTML`);
+			console.error(`❌ GET /: expected "${text}" in HTML`);
 			process.exit(1);
 		}
 	}
 
-	if (!homeHtml.includes("/u/register/business")) {
-		console.error("❌ GET /u: expected link to /u/register/business");
+	if (!homeHtml.includes("/business/register")) {
+		console.error("❌ GET /: expected link to /business/register");
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u OK — CTAs presentes");
+	console.log("✅ GET / OK — CTAs presentes");
 
-	const registerPage = await fetch(`${baseUrl}/u/register`);
+	const registerPage = await fetch(`${baseUrl}/register`);
 	if (registerPage.status !== 200) {
-		console.error("❌ GET /u/register:", registerPage.status);
+		console.error("❌ GET /register:", registerPage.status);
 		process.exit(1);
 	}
 
 	const registerHtml = await registerPage.text();
 	if (!registerHtml.includes("Confirmar contraseña")) {
-		console.error("❌ GET /u/register: expected registration form");
+		console.error("❌ GET /register: expected registration form");
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u/register OK");
+	console.log("✅ GET /register OK");
 
-	const loginPage = await fetch(`${baseUrl}/u/login`);
+	const loginPage = await fetch(`${baseUrl}/login`);
 	if (loginPage.status !== 200) {
-		console.error("❌ GET /u/login:", loginPage.status);
+		console.error("❌ GET /login:", loginPage.status);
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u/login OK");
+	console.log("✅ GET /login OK");
 
 	const register = await fetch(`${baseUrl}/api/auth/register/user`, {
 		method: "POST",
@@ -96,25 +96,25 @@ async function main(): Promise<void> {
 
 	console.log("✅ POST /api/auth/register/user → 201, kind user");
 
-	const userHome = await fetch(`${baseUrl}/u/home`, {
+	const userHome = await fetch(`${baseUrl}/home`, {
 		headers: sessionHeader(registerCookie),
 		redirect: "manual",
 	});
 
 	if (userHome.status === 307 || userHome.status === 308) {
 		const location = userHome.headers.get("location") ?? "";
-		if (location.includes("/u/login")) {
-			console.error("❌ GET /u/home redirected to login with user session");
+		if (location.includes("/login")) {
+			console.error("❌ GET /home redirected to login with user session");
 			process.exit(1);
 		}
 	}
 
 	if (userHome.status !== 200) {
-		console.error("❌ GET /u/home:", userHome.status);
+		console.error("❌ GET /home:", userHome.status);
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u/home 200 with user session");
+	console.log("✅ GET /home 200 with user session");
 
 	const me = await fetch(`${baseUrl}/api/user/me`, { headers: sessionHeader(registerCookie) });
 	const meBody = (await me.json()) as { kind?: string; user?: { email: string } };
@@ -144,19 +144,19 @@ async function main(): Promise<void> {
 		headers: sessionHeader(registerCookie),
 	});
 
-	const unauthHome = await fetch(`${baseUrl}/u/home`, { redirect: "manual" });
+	const unauthHome = await fetch(`${baseUrl}/home`, { redirect: "manual" });
 	if (unauthHome.status !== 307 && unauthHome.status !== 308) {
-		console.error("❌ GET /u/home without session expected redirect, got:", unauthHome.status);
+		console.error("❌ GET /home without session expected redirect, got:", unauthHome.status);
 		process.exit(1);
 	}
 
 	const unauthLocation = unauthHome.headers.get("location") ?? "";
-	if (!unauthLocation.includes("/u/login")) {
-		console.error("❌ GET /u/home without session should redirect to /u/login:", unauthLocation);
+	if (!unauthLocation.includes("/login")) {
+		console.error("❌ GET /home without session should redirect to /login:", unauthLocation);
 		process.exit(1);
 	}
 
-	console.log("✅ unauthenticated /u/home → /u/login");
+	console.log("✅ unauthenticated /home → /login");
 
 	const login = await fetch(`${baseUrl}/api/auth/login/user`, {
 		method: "POST",
@@ -178,35 +178,49 @@ async function main(): Promise<void> {
 
 	console.log("✅ POST /api/auth/login/user OK");
 
-	const homeAfterLogin = await fetch(`${baseUrl}/u/home`, {
+	const homeAfterLogin = await fetch(`${baseUrl}/home`, {
 		headers: sessionHeader(loginCookie),
 		redirect: "manual",
 	});
 
 	if (homeAfterLogin.status !== 200) {
-		console.error("❌ GET /u/home after login:", homeAfterLogin.status);
+		console.error("❌ GET /home after login:", homeAfterLogin.status);
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u/home after login OK");
+	console.log("✅ GET /home after login OK");
 
-	const authedPublic = await fetch(`${baseUrl}/u`, {
+	const authedPublic = await fetch(`${baseUrl}/`, {
 		headers: sessionHeader(loginCookie),
 		redirect: "manual",
 	});
 
 	if (authedPublic.status !== 307 && authedPublic.status !== 308) {
-		console.error("❌ GET /u with user session expected redirect, got:", authedPublic.status);
+		console.error("❌ GET / with user session expected redirect, got:", authedPublic.status);
 		process.exit(1);
 	}
 
 	const authedPublicLocation = authedPublic.headers.get("location") ?? "";
-	if (!authedPublicLocation.includes("/u/home")) {
-		console.error("❌ GET /u with user session should redirect to /u/home:", authedPublicLocation);
+	if (!authedPublicLocation.includes("/home")) {
+		console.error("❌ GET / with user session should redirect to /home:", authedPublicLocation);
 		process.exit(1);
 	}
 
-	console.log("✅ authenticated /u → /u/home");
+	console.log("✅ authenticated / → /home");
+
+	const legacyHome = await fetch(`${baseUrl}/u/home`, { redirect: "manual" });
+	if (legacyHome.status !== 308) {
+		console.error("❌ GET /u/home expected 308 legacy redirect, got:", legacyHome.status);
+		process.exit(1);
+	}
+
+	const legacyLocation = legacyHome.headers.get("location") ?? "";
+	if (!legacyLocation.includes("/home")) {
+		console.error("❌ GET /u/home should 308 to /home:", legacyLocation);
+		process.exit(1);
+	}
+
+	console.log("✅ legacy /u/home → 308 /home");
 
 	const badLogin = await fetch(`${baseUrl}/api/auth/login/user`, {
 		method: "POST",

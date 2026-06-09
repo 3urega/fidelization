@@ -36,19 +36,19 @@ async function main(): Promise<void> {
 	const password = "password123";
 	const businessName = "Verify App Cafe";
 
-	const authGate = await fetch(`${baseUrl}/u/register/business`);
+	const authGate = await fetch(`${baseUrl}/business/register`);
 	if (authGate.status !== 200) {
-		console.error("❌ GET /u/register/business:", authGate.status);
+		console.error("❌ GET /business/register:", authGate.status);
 		process.exit(1);
 	}
 
 	const authHtml = await authGate.text();
 	if (!authHtml.includes("Paso 1 de 2")) {
-		console.error("❌ GET /u/register/business: expected auth gate");
+		console.error("❌ GET /business/register: expected auth gate");
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u/register/business auth gate OK");
+	console.log("✅ GET /business/register auth gate OK");
 
 	const register = await fetch(`${baseUrl}/api/auth/register/user`, {
 		method: "POST",
@@ -66,7 +66,7 @@ async function main(): Promise<void> {
 
 	console.log("✅ user registered with kind user session");
 
-	const skipAuth = await fetch(`${baseUrl}/u/register/business`, {
+	const skipAuth = await fetch(`${baseUrl}/business/register`, {
 		headers: sessionHeaders(userCookie),
 		redirect: "manual",
 	});
@@ -77,14 +77,14 @@ async function main(): Promise<void> {
 	}
 
 	const skipLocation = skipAuth.headers.get("location") ?? "";
-	if (!skipLocation.includes("/u/register/business/tenant")) {
+	if (!skipLocation.includes("/business/register/tenant")) {
 		console.error("❌ auth skip redirect:", skipLocation);
 		process.exit(1);
 	}
 
 	console.log("✅ authenticated user skips auth gate → tenant step");
 
-	const tenantPage = await fetch(`${baseUrl}/u/register/business/tenant`, {
+	const tenantPage = await fetch(`${baseUrl}/business/register/tenant`, {
 		headers: sessionHeaders(userCookie),
 	});
 
@@ -99,7 +99,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ GET /u/register/business/tenant OK");
+	console.log("✅ GET /business/register/tenant OK");
 
 	const create = await fetch(`${baseUrl}/api/user/businesses`, {
 		method: "POST",
@@ -193,8 +193,8 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	if (!enterBody.redirectUrl.includes("/home")) {
-		console.error("❌ enter redirectUrl missing /home:", enterBody.redirectUrl);
+	if (!enterBody.redirectUrl.includes("/panel")) {
+		console.error("❌ enter redirectUrl missing /panel:", enterBody.redirectUrl);
 		process.exit(1);
 	}
 
@@ -236,7 +236,7 @@ async function main(): Promise<void> {
 	if (
 		backToUser.status !== 200 ||
 		backBody.kind !== "user" ||
-		!backBody.redirectUrl?.includes("/u/home") ||
+		!backBody.redirectUrl?.includes("/home") ||
 		!restoredUserCookie
 	) {
 		console.error("❌ POST /api/user/enter:", backToUser.status, backBody);

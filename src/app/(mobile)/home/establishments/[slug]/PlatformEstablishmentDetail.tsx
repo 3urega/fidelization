@@ -9,10 +9,11 @@ import {
 	type PromotionRow,
 	type RewardRow,
 	type StampProgressRow,
-} from "../../../../../_components/loyalty/LoyaltyCard";
-import { platformFetch } from "../../../../../../lib/platform/apiUrl";
-import { Button } from "../../../../../_components/ui/Button";
-import { Card } from "../../../../../_components/ui/Card";
+} from "../../../../_components/loyalty/LoyaltyCard";
+import { platformFetch } from "../../../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../../../lib/platform/routes";
+import { Button } from "../../../../_components/ui/Button";
+import { Card } from "../../../../_components/ui/Card";
 
 type EstablishmentTenant = {
 	id: string;
@@ -249,7 +250,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		return (
 			<div className="flex flex-col gap-4">
 				<p className="text-sm text-error">{error ?? "Local no disponible"}</p>
-				<Link href="/u/home" className="text-sm font-medium text-primary hover:opacity-80">
+				<Link href={platformRoutes.home} className="text-sm font-medium text-primary hover:opacity-80">
 					← Volver al inicio
 				</Link>
 			</div>
@@ -260,7 +261,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
-			<Link href="/u/home" className="text-sm font-medium text-primary hover:opacity-80">
+			<Link href={platformRoutes.home} className="text-sm font-medium text-primary hover:opacity-80">
 				← Volver al inicio
 			</Link>
 
@@ -315,7 +316,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 						</Card>
 					)}
 
-					<Link href="/u/home/qr" className="text-center text-sm font-medium text-primary hover:opacity-80">
+					<Link href={platformRoutes.homeQr} className="text-center text-sm font-medium text-primary hover:opacity-80">
 						Ver QR en pantalla completa
 					</Link>
 

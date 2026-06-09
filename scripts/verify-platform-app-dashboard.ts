@@ -89,16 +89,16 @@ async function main(): Promise<void> {
 
 	console.log("✅ relationships API lists business with plan");
 
-	const home = await fetch(`${baseUrl}/u/home`, { headers: sessionHeaders(userCookie) });
+	const home = await fetch(`${baseUrl}/home`, { headers: sessionHeaders(userCookie) });
 
 	if (home.status !== 200) {
-		console.error("❌ /u/home:", home.status);
+		console.error("❌ /home:", home.status);
 		process.exit(1);
 	}
 
-	console.log("✅ /u/home accessible with user session");
+	console.log("✅ /home accessible with user session");
 
-	const businessPage = await fetch(`${baseUrl}/u/home/business/${slug}`, {
+	const businessPage = await fetch(`${baseUrl}/home/business/${slug}`, {
 		headers: sessionHeaders(userCookie),
 	});
 
@@ -107,9 +107,9 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ /u/home/business/[slug] shell OK");
+	console.log("✅ /home/business/[slug] shell OK");
 
-	const discover = await fetch(`${baseUrl}/u/home/discover`, { headers: sessionHeaders(userCookie) });
+	const discover = await fetch(`${baseUrl}/home/discover`, { headers: sessionHeaders(userCookie) });
 	const discoverHtml = await discover.text();
 
 	if (discover.status !== 200 || !discoverHtml.includes("Descubrir locales")) {
@@ -117,7 +117,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ /u/home/discover OK");
+	console.log("✅ /home/discover OK");
 
 	const userRow = await prisma.user.findUnique({
 		where: { email },

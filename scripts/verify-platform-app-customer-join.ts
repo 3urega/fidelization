@@ -131,7 +131,7 @@ async function main(): Promise<void> {
 
 	console.log("✅ relationships lists joined local at 0 pts");
 
-	const discover = await fetch(`${baseUrl}/u/home/discover`, { headers: sessionHeaders(clientCookie) });
+	const discover = await fetch(`${baseUrl}/home/discover`, { headers: sessionHeaders(clientCookie) });
 	const discoverHtml = await discover.text();
 	if (discover.status !== 200 || !discoverHtml.includes("Unirme al local")) {
 		console.error("❌ discover join form missing");
@@ -140,7 +140,7 @@ async function main(): Promise<void> {
 
 	console.log("✅ discover page has join form");
 
-	const deepLink = await fetch(`${baseUrl}/u/join/${targetSlug}`, {
+	const deepLink = await fetch(`${baseUrl}/join/${targetSlug}`, {
 		headers: sessionHeaders(clientCookie),
 	});
 	if (deepLink.status !== 200) {
@@ -148,7 +148,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ /u/join/[slug] accessible");
+	console.log("✅ /join/[slug] accessible");
 
 	const clientRow = await prisma.user.findUnique({
 		where: { email: clientEmail },

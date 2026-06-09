@@ -44,14 +44,14 @@ async function main(): Promise<void> {
 			"⏭️ skip UI marker checks — set GOOGLE_CLIENT_ID and NEXT_PUBLIC_GOOGLE_CLIENT_ID",
 		);
 	} else {
-		await assertGoogleOAuthMarker("/u");
-		console.log("✅ GET /u — Google OAuth marker");
+		await assertGoogleOAuthMarker("/");
+		console.log("✅ GET / — Google OAuth marker");
 
-		await assertGoogleOAuthMarker("/u/register");
-		console.log("✅ GET /u/register — Google OAuth marker");
+		await assertGoogleOAuthMarker("/register");
+		console.log("✅ GET /register — Google OAuth marker");
 
-		await assertGoogleOAuthMarker("/u/login");
-		console.log("✅ GET /u/login — Google OAuth marker");
+		await assertGoogleOAuthMarker("/login");
+		console.log("✅ GET /login — Google OAuth marker");
 	}
 
 	const missingToken = await fetch(`${baseUrl}/api/auth/oauth/google`, {

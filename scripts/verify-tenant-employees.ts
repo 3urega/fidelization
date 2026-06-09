@@ -28,7 +28,7 @@ function tenantHeaders(extra: Record<string, string> = {}): Record<string, strin
 }
 
 /**
- * E2E: owner invites employee → employee login on tenant host → /home + scan OK.
+ * E2E: owner invites employee → employee login on tenant host → /panel + scan OK.
  */
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) {
@@ -135,16 +135,16 @@ async function main(): Promise<void> {
 
 	console.log("✅ employee GET /api/me");
 
-	const home = await tenantFetch("/home", {
+	const home = await tenantFetch("/panel", {
 		headers: { cookie: employeeSession },
 	});
 
 	if (home.status !== 200) {
-		console.error("❌ GET /home as employee:", home.status);
+		console.error("❌ GET /panel as employee:", home.status);
 		process.exit(1);
 	}
 
-	console.log("✅ employee GET /home → 200");
+	console.log("✅ employee GET /panel → 200");
 
 	const forbiddenEmployees = await tenantFetch("/api/tenant/employees", {
 		headers: { cookie: employeeSession },
