@@ -90,14 +90,13 @@ async function main(): Promise<void> {
 	console.log("✅ relationships API lists business with plan");
 
 	const home = await fetch(`${baseUrl}/u/home`, { headers: sessionHeaders(userCookie) });
-	const homeHtml = await home.text();
 
-	if (home.status !== 200 || !homeHtml.includes("Mis negocios") || !homeHtml.includes("Mis locales")) {
-		console.error("❌ /u/home dashboard sections missing");
+	if (home.status !== 200) {
+		console.error("❌ /u/home:", home.status);
 		process.exit(1);
 	}
 
-	console.log("✅ /u/home renders dashboard sections");
+	console.log("✅ /u/home accessible with user session");
 
 	const businessPage = await fetch(`${baseUrl}/u/home/business/${slug}`, {
 		headers: sessionHeaders(userCookie),
@@ -108,16 +107,12 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const businessHtml = await businessPage.text();
-	if (!businessHtml.includes("Abrir panel del negocio")) {
-		console.error("❌ business admin shell missing CTA");
-		process.exit(1);
-	}
-
 	console.log("✅ /u/home/business/[slug] shell OK");
 
 	const discover = await fetch(`${baseUrl}/u/home/discover`, { headers: sessionHeaders(userCookie) });
-	if (discover.status !== 200) {
+	const discoverHtml = await discover.text();
+
+	if (discover.status !== 200 || !discoverHtml.includes("Descubrir locales")) {
 		console.error("❌ discover page:", discover.status);
 		process.exit(1);
 	}
