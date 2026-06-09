@@ -166,6 +166,10 @@ class StubCustomerRepository extends CustomerRepository {
 		return null;
 	}
 
+	async searchByUserIdAndTenantId(): Promise<null> {
+		return null;
+	}
+
 	async listWithInteractionByUserId(): Promise<never[]> {
 		return [];
 	}

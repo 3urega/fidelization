@@ -27,6 +27,18 @@ export class PrismaTenantRepository extends TenantRepository {
 		return tenantFromPrismaRow(row);
 	}
 
+	async findBySlug(slug: string): Promise<Tenant | null> {
+		const row = await prisma.tenant.findUnique({
+			where: { slug: slug.trim().toLowerCase() },
+		});
+
+		if (!row) {
+			return null;
+		}
+
+		return tenantFromPrismaRow(row);
+	}
+
 	async updateStatus(tenantId: string, status: TenantStatus): Promise<Tenant | null> {
 		try {
 			const row = await prisma.tenant.update({

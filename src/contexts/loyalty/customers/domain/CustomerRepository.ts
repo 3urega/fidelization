@@ -8,5 +8,7 @@ export abstract class CustomerRepository {
 
 	abstract searchByQrValue(tenantId: string, qrValue: string): Promise<Customer | null>;
 
+	abstract searchByUserIdAndTenantId(userId: string, tenantId: string): Promise<Customer | null>;
+
 	abstract listWithInteractionByUserId(userId: string): Promise<CustomerEstablishmentSummary[]>;
 }

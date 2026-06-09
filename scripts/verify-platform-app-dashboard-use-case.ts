@@ -62,6 +62,10 @@ class InMemoryCustomerRepository extends CustomerRepository {
 		return null;
 	}
 
+	async searchByUserIdAndTenantId(): Promise<Customer | null> {
+		return null;
+	}
+
 	async listWithInteractionByUserId(userId: string): Promise<CustomerEstablishmentSummary[]> {
 		return this.byUserId.get(userId) ?? [];
 	}

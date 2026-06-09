@@ -77,6 +77,14 @@ class InMemoryCustomerRepository extends CustomerRepository {
 		);
 	}
 
+	async searchByUserIdAndTenantId(userId: string, tenantId: string): Promise<Customer | null> {
+		return (
+			Array.from(this.customers.values()).find(
+				(customer) => customer.userId === userId && customer.tenantId === tenantId,
+			) ?? null
+		);
+	}
+
 	async listWithInteractionByUserId(): Promise<never[]> {
 		return [];
 	}

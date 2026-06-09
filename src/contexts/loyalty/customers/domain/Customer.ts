@@ -21,6 +21,13 @@ export type RegisterCustomerParams = {
 	phone?: string | null;
 };
 
+export type JoinPlatformUserParams = {
+	tenantId: string;
+	userId: string;
+	name: string;
+	email?: string | null;
+};
+
 export class Customer {
 	private constructor(
 		public readonly id: string,
@@ -46,6 +53,24 @@ export class Customer {
 			name,
 			email: email === "" ? null : email,
 			phone: phone === "" ? null : phone,
+			qrValue: randomUUID(),
+			pointsBalance: 0,
+			visitsCount: 0,
+		});
+	}
+
+	/** Platform app join: explicit link user → customer profile (counts as interaction at 0 pts). */
+	static joinForPlatformUser(params: JoinPlatformUserParams): Customer {
+		const name = params.name.trim();
+		const email = params.email?.trim() ?? "";
+
+		return Customer.fromPrimitives({
+			id: randomUUID(),
+			tenantId: params.tenantId,
+			userId: params.userId,
+			name,
+			email: email === "" ? null : email,
+			phone: null,
 			qrValue: randomUUID(),
 			pointsBalance: 0,
 			visitsCount: 0,

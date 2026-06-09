@@ -50,12 +50,18 @@ export class PrismaCustomerRepository extends CustomerRepository {
 		return row ? this.toAggregate(row) : null;
 	}
 
+	async searchByUserIdAndTenantId(userId: string, tenantId: string): Promise<Customer | null> {
+		const row = await prisma.customer.findFirst({
+			where: { userId, tenantId },
+		});
+
+		return row ? this.toAggregate(row) : null;
+	}
+
 	async listWithInteractionByUserId(userId: string): Promise<CustomerEstablishmentSummary[]> {
+		// Explicit platform join creates a customers row with userId; that link counts as interaction.
 		const rows = await prisma.customer.findMany({
-			where: {
-				userId,
-				OR: [{ visitsCount: { gt: 0 } }, { pointsBalance: { gt: 0 } }],
-			},
+			where: { userId },
 			include: { tenant: true },
 			orderBy: { tenant: { name: "asc" } },
 		});

@@ -104,6 +104,14 @@ function isPlatformUserAppPath(pathname: string): boolean {
 	return pathname === "/u/home" || pathname.startsWith("/u/home/");
 }
 
+function isPlatformUserJoinPath(pathname: string): boolean {
+	return pathname.startsWith("/u/join/");
+}
+
+function isPlatformUserProtectedPath(pathname: string): boolean {
+	return isPlatformUserAppPath(pathname) || isPlatformUserJoinPath(pathname);
+}
+
 function isPlatformUserAuthEntryPath(pathname: string): boolean {
 	return pathname === "/u" || pathname === "/u/register" || pathname === "/u/login";
 }
@@ -159,6 +167,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasPlatformSession && isPlatformUserAppPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
+	} else if (hasPlatformSession && isPlatformUserJoinPath(pathname)) {
+		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasPlatformSession && isPlatformUserBusinessRegisterPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasOnboardingSession && isPlatformPath(pathname)) {
@@ -208,7 +218,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		}
 	}
 
-	if (isPlatformUserAppPath(pathname)) {
+	if (isPlatformUserProtectedPath(pathname)) {
 		if (hasOnboardingSession) {
 			return NextResponse.redirect(new URL("/register/business/tenant", request.url));
 		}
@@ -219,7 +229,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 			return NextResponse.redirect(new URL("/app/card", request.url));
 		}
 		if (!hasUserSession) {
-			return NextResponse.redirect(new URL("/u/login", request.url));
+			const login = new URL("/u/login", request.url);
+			login.searchParams.set("next", pathname);
+
+			return NextResponse.redirect(login);
 		}
 	} else if (pathname === "/u/register/business" && hasUserSession) {
 		return NextResponse.redirect(new URL("/u/register/business/tenant", request.url));

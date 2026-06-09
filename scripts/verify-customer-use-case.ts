@@ -102,6 +102,12 @@ class StubCustomerRepository extends CustomerRepository {
 		);
 	}
 
+	async searchByUserIdAndTenantId(userId: string, tenantId: string): Promise<Customer | null> {
+		return (
+			this.customers.find((row) => row.userId === userId && row.tenantId === tenantId) ?? null
+		);
+	}
+
 	async listWithInteractionByUserId(): Promise<never[]> {
 		return [];
 	}

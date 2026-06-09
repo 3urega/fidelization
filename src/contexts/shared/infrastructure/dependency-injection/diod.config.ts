@@ -41,6 +41,7 @@ import { GetCustomerStampProgress } from "../../../loyalty/customers/application
 import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
 import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
+import { JoinTenantAsCustomer } from "../../../loyalty/customers/application/join/JoinTenantAsCustomer";
 import { CustomerSessionVerifier } from "../../../loyalty/customers/application/verify/CustomerSessionVerifier";
 import { CustomerRepository } from "../../../loyalty/customers/domain/CustomerRepository";
 import { PrismaCustomerRepository } from "../../../loyalty/customers/infrastructure/PrismaCustomerRepository";
@@ -152,6 +153,7 @@ builder.registerAndUse(DemoPlanSetter);
 builder.register(CustomerRepository).use(PrismaCustomerRepository);
 builder.registerAndUse(PrismaCustomerRepository);
 builder.registerAndUse(RegisterCustomer);
+builder.registerAndUse(JoinTenantAsCustomer);
 builder.registerAndUse(GetCustomerStampProgress);
 builder.registerAndUse(GetCustomerActiveRewards);
 builder.registerAndUse(RedeemCustomerReward);
