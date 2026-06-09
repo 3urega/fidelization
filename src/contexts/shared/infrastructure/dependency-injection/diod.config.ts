@@ -19,6 +19,7 @@ import { PrismaUserRepository } from "../../../identity/users/infrastructure/Pri
 import { CouponRepository } from "../../../loyalty/coupons/domain/CouponRepository";
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
 import { AuthenticateCustomerByQr } from "../../../loyalty/customers/application/authenticate/AuthenticateCustomerByQr";
+import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
 import { CustomerSessionVerifier } from "../../../loyalty/customers/application/verify/CustomerSessionVerifier";
 import { CustomerRepository } from "../../../loyalty/customers/domain/CustomerRepository";
@@ -111,6 +112,7 @@ builder.registerAndUse(DemoPlanSetter);
 builder.register(CustomerRepository).use(PrismaCustomerRepository);
 builder.registerAndUse(PrismaCustomerRepository);
 builder.registerAndUse(RegisterCustomer);
+builder.registerAndUse(RecordCustomerVisitByQr);
 builder.registerAndUse(AuthenticateCustomerByQr);
 builder.registerAndUse(CustomerSessionVerifier);
 

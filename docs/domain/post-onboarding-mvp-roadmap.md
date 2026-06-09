@@ -13,7 +13,7 @@ This document defines the **next implementation phase** after business onboardin
 
 Monetization and feature-flag enforcement remain documented in [`business-model.md`](business-model.md) and [`saas-architecture.md`](saas-architecture.md) as **target**; they are explicitly **out of scope** for this roadmap.
 
-**Related:** [`docs/issues/customer-qr-session-web-first.md`](../issues/customer-qr-session-web-first.md) (issue draft), [`AGENTS.md`](../../AGENTS.md) (MVP priorities), [`teenant-resolution.md`](../teenant-resolution.md).
+**Related:** [`AGENTS.md`](../../AGENTS.md) (MVP priorities, verify commands), [`teenant-resolution.md`](../teenant-resolution.md).
 
 ---
 
@@ -26,8 +26,8 @@ Monetization and feature-flag enforcement remain documented in [`business-model.
 | Owner `/home` | Shell only — placeholders in [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) |
 | Tenant branding in DB | `logoUrl`, `primaryColor`, `secondaryColor` on `tenants`; defaults on create |
 | Branding edit API + UI | Done (#16–#17, 2026-06-01) — `/settings/branding`, checklist `/home`, `verify:tenant-branding` |
-| Customer loyalty | Prisma + [`CustomerRepository`](../../src/contexts/loyalty/customers/domain/CustomerRepository.ts); **no UI/API/session** |
-| Session kinds | `platform`, `tenant`, `onboarding` — **no `customer`** |
+| Customer loyalty | Done (#18–#20, 2026-06-05) — `/app`, APIs, `kind: customer`, `verify:customer-qr-session` |
+| Session kinds | `platform`, `tenant`, `onboarding`, **`customer`** |
 | Plan / Stripe (Steps 3–4) | Not implemented — intentional deferral |
 
 ---
@@ -51,7 +51,7 @@ flowchart LR
 | Phase | Doc reference | User-visible outcome |
 |-------|---------------|----------------------|
 | **A — Branding** | `business-onboarding.md` Step 5 (Branding) | Owner sets logo + colors; dashboard feels like their business |
-| **B — Customer QR** | `customer-qr-session-web-first.md` | Client opens `{slug}.domain/app`, gets loyalty card + QR |
+| **B — Customer QR** ✅ | issues #18–#20 | Client opens `{slug}.domain/app`, gets loyalty card + QR |
 | **Follow-up** | `AGENTS.md` MVP (QR scan) | Employee registers visit from scanned QR |
 | **Later** | Steps 3–4 | Plan picker + trial/Stripe when product justifies payment |
 
@@ -100,7 +100,7 @@ flowchart LR
 
 **Entry URL:** `https://{slug}.{APP_DOMAIN}/app` (local: `http://cafe-demo.localhost:3000/app`).
 
-Full draft: [`docs/issues/customer-qr-session-web-first.md`](../issues/customer-qr-session-web-first.md).
+**Status:** **Implemented** (issues #18–#20, 2026-06-05).
 
 ### Scope
 
@@ -116,37 +116,37 @@ Full draft: [`docs/issues/customer-qr-session-web-first.md`](../issues/customer-
 
 | Slice | Value for the user | Layers / files |
 |-------|-------------------|----------------|
-| **B1** | Domain + session | `CustomerSessionClaims` in [`sessionClaims.ts`](../../src/lib/auth/sessionClaims.ts); `createSessionToken` / middleware parse; `RegisterCustomer` + `qrValue` generation; reuse [`PrismaCustomerRepository`](../../src/contexts/loyalty/customers/infrastructure/PrismaCustomerRepository.ts) |
-| **B2** | APIs | `POST /api/loyalty/customers/register`, `POST /api/loyalty/auth/qr` (returning), `GET /api/loyalty/me`; `requireCustomerSession` |
-| **B3** | Routes + middleware | Route group `(loyalty)/app/`; middleware: `/app/*` needs resolved tenant; `/app/card` needs customer session; redirect staff/platform cookies appropriately |
-| **B4** | Card UI | Mobile-first `/app/card`: name, `pointsBalance`, QR render from `qrValue` (SVG/lib); `/app/welcome` minimal signup |
-| **B5** | Verify + docs | `npm run verify:customer-qr-session`; `saas-architecture.md` customer context **Yes**; `AGENTS.md` |
+| **B1** ✅ | Domain + session | **Implemented #18** (2026-06-05) — `CustomerSessionClaims`, `RegisterCustomer`, `qrValue` |
+| **B2** ✅ | APIs | **Implemented #18** — loyalty register/auth/me + `requireCustomerSession` |
+| **B3** ✅ | Routes + middleware | **Implemented #19** — `(loyalty)/app/`, middleware guards `/app/*` |
+| **B4** ✅ | Card UI | **Implemented #19** — `/app/welcome`, `/app/card` + QR (`react-qr-code`) |
+| **B5** ✅ | Verify + docs | **Implemented #20** (2026-06-05) — `verify:customer-qr-session`, `saas-architecture.md`, `AGENTS.md` |
 
 ### Acceptance criteria (Phase B)
 
-- [ ] New visitor on tenant host can register → `customers` row + unique `qrValue`.
-- [ ] Customer session cookie on **tenant subdomain** (host-only in dev; shared `Domain` in prod per [`session-cookies-localhost-dev.md`](../backend/session-cookies-localhost-dev.md)).
-- [ ] `/app/card` shows QR and points balance (0 for new customer).
-- [ ] Returning customer can re-auth (e.g. `qrValue` / stored session).
-- [ ] Suspended tenant cannot create customer session.
-- [ ] `verify:customer-qr-session` passes.
+- [x] New visitor on tenant host can register → `customers` row + unique `qrValue`. (#18)
+- [x] Customer session cookie on **tenant subdomain** (host-only in dev; shared `Domain` in prod per [`session-cookies-localhost-dev.md`](../backend/session-cookies-localhost-dev.md)). (#18)
+- [x] `/app/card` shows QR and points balance (0 for new customer). (#19)
+- [x] Returning customer can re-auth (e.g. `qrValue` / stored session). (#18)
+- [x] Suspended tenant cannot create customer session. (#18, #20 verify)
+- [x] `verify:customer-qr-session` passes. (#20)
 
 ### Suggested GitHub issues
 
-- **#18** — Customer session + register customer (B1–B2)
-- **#19** — `/app` UI + middleware (B3–B4)
-- **#20** — verify + docs (B5)
+- ~~**#18** — Customer session + register customer (B1–B2)~~ **Closed** (2026-06-05)
+- ~~**#19** — `/app` UI + middleware (B3–B4)~~ **Closed** (2026-06-05)
+- ~~**#20** — verify + docs (B5)~~ **Closed** (2026-06-05)
 
 ---
 
 ## Follow-up (after Phase B)
 
-Not part of this roadmap document’s implementation order, but the natural next tracer bullet:
+**Status:** **Implemented** (2026-06-05).
 
-| Item | Why next |
-|------|----------|
-| **Employee QR scan** | Closes loop: customer shows QR → staff records visit → points/stamps ([`business-rules.md`](../business-rules.md)) |
-| **Owner link to `/app`** | `/home` checklist: “Comparte tu enlace de fidelización” using [`formatTenantHost`](../../src/lib/tenant/formatTenantHost.ts) |
+| Item | Status |
+|------|--------|
+| **Owner link to `/app`** | ✅ Checklist en [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) + [`LoyaltyAppLinkCard`](../../src/app/_components/loyalty/LoyaltyAppLinkCard.tsx) |
+| **Employee QR scan** | ✅ `POST /api/loyalty/scan`, [`/scan`](../../src/app/(app)/scan/page.tsx), `RecordCustomerVisitByQr`, `verify:customer-scan` |
 
 ---
 
@@ -217,9 +217,9 @@ A business owner who completed Steps 1–2 can:
 |---|--------|-----------|
 | 16 | Tenant branding — domain + API | **Closed** (2026-06-01) — [issue #16](https://github.com/3urega/fidelization/issues/16) |
 | 17 | Tenant branding — settings UI + home checklist | **Closed** (2026-06-01) — [issue #17](https://github.com/3urega/fidelization/issues/17) |
-| 18 | Customer session — register + loyalty APIs | [`docs/issues/18-customer-session-api.md`](../issues/18-customer-session-api.md) |
-| 19 | Customer loyalty app — `/app` UI + middleware | [`docs/issues/19-customer-app-ui.md`](../issues/19-customer-app-ui.md) |
-| 20 | Customer QR — verify E2E + docs | [`docs/issues/20-customer-qr-verify-docs.md`](../issues/20-customer-qr-verify-docs.md) |
+| 18 | Customer session — register + loyalty APIs | **Closed** (2026-06-05) — [issue #18](https://github.com/3urega/fidelization/issues/18) |
+| 19 | Customer loyalty app — `/app` UI + middleware | **Closed** (2026-06-05) — [issue #19](https://github.com/3urega/fidelization/issues/19) |
+| 20 | Customer QR — verify E2E + docs | **Closed** (2026-06-05) — [issue #20](https://github.com/3urega/fidelization/issues/20) |
 
 ```bash
 gh auth login

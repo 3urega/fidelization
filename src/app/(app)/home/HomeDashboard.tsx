@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactElement } from "react";
 
+import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard";
 import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
 import { PageHeader } from "../../_components/shell/PageHeader";
 import { useTenantSession } from "../../_components/shell/TenantSessionProvider";
@@ -73,6 +74,33 @@ export function HomeDashboard(): ReactElement {
 								{brandingDone ? "Completado" : "Pendiente (owner)"}
 							</span>
 						)}
+					</li>
+					<li className="flex flex-col gap-3 border-t border-border pt-3">
+						<div className="flex items-start gap-2">
+							<span
+								className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-xs font-semibold text-muted"
+								aria-hidden
+							>
+								·
+							</span>
+							<div className="min-w-0 flex-1">
+								<p className="text-sm font-medium text-foreground">
+									Comparte tu enlace de fidelización
+								</p>
+								<p className="text-sm text-muted">
+									Tus clientes se registran y obtienen su tarjeta QR en este enlace.
+								</p>
+								<div className="mt-3">
+									<LoyaltyAppLinkCard tenantSlug={session.tenant.slug} />
+								</div>
+							</div>
+						</div>
+						<Link
+							href="/scan"
+							className="self-start text-sm font-medium text-primary hover:underline sm:ml-7"
+						>
+							Registrar visita de un cliente →
+						</Link>
 					</li>
 				</ul>
 			</Card>

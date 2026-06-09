@@ -18,6 +18,11 @@ npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + ow
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
 npm run verify:session-cookie-prod # production cookie Domain + resolveTenantHomeUrl
 npm run verify:tenant-branding     # issue #17 — PATCH branding + GET /api/me + Prisma (dev server + DATABASE_URL)
+npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.register (domain)
+npm run verify:customer-use-case   # issue #18 — RegisterCustomer + AuthenticateCustomerByQr + DI
+npm run verify:customer-loyalty-api  # issue #18 — loyalty APIs (x-tenant headers on apex)
+npm run verify:customer-qr-session   # issue #20 — E2E tenant host → register → /app/card + Prisma (dev + DATABASE_URL)
+npm run verify:customer-scan         # staff scan → points + loyalty_transactions (dev + DATABASE_URL)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -63,6 +68,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
 - **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/home`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
+- **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me`. `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
+- **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto y fila en `loyalty_transactions`. Enlace para clientes en checklist `/home`. `verify:customer-scan`.
 
 # Architecture
 
@@ -71,7 +78,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Tenant context (Fase 0):** JWT `tenantId` + `role` after login/register — not subdomain middleware yet. Spec: [`docs/teenant-resolution.md`](docs/teenant-resolution.md).
 - **Legacy reference**: `src/contexts/legacy/` (MOOC, Femturisme, RAG) — not wired in DI.
 - Frontend in `src/app/`, API routes in `src/app/api/`.
-- **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` owner shell, `(platform)/` superadmin (`/platform`, `/platform/login`); URLs sin cambio (`/`, `/login`, `/home`, …).
+- **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` owner shell (`/home` — no confundir con URL `/app`), `(loyalty)/` customer `/app`, `(platform)/` superadmin; URLs sin cambio (`/`, `/login`, `/home`, `/app`, …).
 - **Superadmin foundation (issue #8):** auth `kind: platform`, aislamiento de tenant APIs y middleware; dashboard operativo (CRUD) fuera de alcance.
 - **Env:** [`src/lib/env.ts`](src/lib/env.ts) — acceso centralizado server-side; ver [`.env.example`](.env.example).
 
@@ -115,7 +122,7 @@ docs/
 | Producto, MVP, tipos de usuario, visión fidelización | sección **Product** (este archivo), `docs/domain/saas-architecture.md`, `docs/business-rules.md` |
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/domain/business-model.md` (sección *Implementation status*) |
 | Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
-| Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `npm run verify:tenant-branding` + `docs/issues/customer-qr-session-web-first.md` |
+| Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `verify:tenant-branding` + `verify:customer-qr-session` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

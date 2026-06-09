@@ -81,7 +81,12 @@ function isAuthPublicPath(pathname: string): boolean {
 }
 
 function isTenantAppPath(pathname: string): boolean {
-	return pathname === "/home" || pathname === "/profile" || pathname.startsWith("/settings/");
+	return (
+		pathname === "/home" ||
+		pathname === "/profile" ||
+		pathname === "/scan" ||
+		pathname.startsWith("/settings/")
+	);
 }
 
 function isCustomerAppPath(pathname: string): boolean {

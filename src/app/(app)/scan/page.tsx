@@ -1,0 +1,19 @@
+import type { ReactElement } from "react";
+
+import { StaffScanForm } from "../../_components/loyalty/StaffScanForm";
+import { PageHeader } from "../../_components/shell/PageHeader";
+import { Card } from "../../_components/ui/Card";
+
+export default function StaffScanPage(): ReactElement {
+	return (
+		<div className="flex flex-col gap-6">
+			<PageHeader
+				title="Escanear cliente"
+				description="Registra una visita y suma puntos al cliente cuando muestra su QR."
+			/>
+			<Card>
+				<StaffScanForm />
+			</Card>
+		</div>
+	);
+}

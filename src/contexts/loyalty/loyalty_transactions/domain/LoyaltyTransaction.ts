@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 export type LoyaltyTransactionType =
 	| "points_earned"
 	| "points_redeemed"
@@ -25,6 +27,24 @@ export class LoyaltyTransaction {
 		public readonly metadata: Record<string, unknown> | null,
 		public readonly createdByUserId: string | null,
 	) {}
+
+	static recordPointsEarned(params: {
+		tenantId: string;
+		customerId: string;
+		points: number;
+		createdByUserId: string;
+		metadata?: Record<string, unknown> | null;
+	}): LoyaltyTransaction {
+		return LoyaltyTransaction.fromPrimitives({
+			id: randomUUID(),
+			tenantId: params.tenantId,
+			customerId: params.customerId,
+			type: "points_earned",
+			points: params.points,
+			metadata: params.metadata ?? null,
+			createdByUserId: params.createdByUserId,
+		});
+	}
 
 	static fromPrimitives(primitives: LoyaltyTransactionPrimitives): LoyaltyTransaction {
 		return new LoyaltyTransaction(

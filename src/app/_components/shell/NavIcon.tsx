@@ -21,6 +21,19 @@ export function NavIcon({ icon, className = "h-5 w-5" }: NavIconProps): ReactEle
 		);
 	}
 
+	if (icon === "scan") {
+		return (
+			<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+				<path
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth={2}
+					d="M12 4v1m6 2h-1M6 6H5m14 12v-1M6 18H5m12-8a4 4 0 11-8 0 4 4 0 018 0zM4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2m8-16h2a2 2 0 012 2v2m-4 12h2a2 2 0 002-2v-2"
+				/>
+			</svg>
+		);
+	}
+
 	if (icon === "palette") {
 		return (
 			<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>

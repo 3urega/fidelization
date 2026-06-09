@@ -60,6 +60,18 @@ export class Customer {
 		);
 	}
 
+	recordVisit(pointsEarned: number): Customer {
+		if (!Number.isInteger(pointsEarned) || pointsEarned <= 0) {
+			throw new Error("pointsEarned must be a positive integer");
+		}
+
+		return Customer.fromPrimitives({
+			...this.toPrimitives(),
+			pointsBalance: this.pointsBalance + pointsEarned,
+			visitsCount: this.visitsCount + 1,
+		});
+	}
+
 	toPrimitives(): CustomerPrimitives {
 		return {
 			id: this.id,
