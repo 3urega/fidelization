@@ -76,18 +76,19 @@ export function EstablishmentSummaryCard({
 	establishment: UserEstablishment;
 }): ReactElement {
 	return (
-		<Card>
-			<div className="flex items-start gap-3">
-				<BusinessAvatar name={establishment.name} logoUrl={establishment.logoUrl} />
-				<div className="flex min-w-0 flex-1 flex-col gap-1">
-					<p className="font-medium text-foreground">{establishment.name}</p>
-					<p className="text-xs text-muted">
-						{establishment.pointsBalance} pts · {establishment.visitsCount} visitas
-					</p>
-					<p className="text-xs text-muted">Detalle del local — próximamente</p>
+		<Link href={`/u/home/establishments/${establishment.slug}`} className="block">
+			<Card className="transition-opacity hover:opacity-90">
+				<div className="flex items-start gap-3">
+					<BusinessAvatar name={establishment.name} logoUrl={establishment.logoUrl} />
+					<div className="flex min-w-0 flex-1 flex-col gap-1">
+						<p className="font-medium text-foreground">{establishment.name}</p>
+						<p className="text-xs text-muted">
+							{establishment.pointsBalance} pts · {establishment.visitsCount} visitas
+						</p>
+					</div>
 				</div>
-			</div>
-		</Card>
+			</Card>
+		</Link>
 	);
 }
 

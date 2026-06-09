@@ -37,6 +37,7 @@ import { CouponRepository } from "../../../loyalty/coupons/domain/CouponReposito
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
 import { AuthenticateCustomerByQr } from "../../../loyalty/customers/application/authenticate/AuthenticateCustomerByQr";
 import { GetCustomerActiveRewards } from "../../../loyalty/customers/application/profile/GetCustomerActiveRewards";
+import { GetEstablishmentDetailForUser } from "../../../loyalty/customers/application/profile/GetEstablishmentDetailForUser";
 import { GetCustomerStampProgress } from "../../../loyalty/customers/application/profile/GetCustomerStampProgress";
 import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
 import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
@@ -154,6 +155,7 @@ builder.register(CustomerRepository).use(PrismaCustomerRepository);
 builder.registerAndUse(PrismaCustomerRepository);
 builder.registerAndUse(RegisterCustomer);
 builder.registerAndUse(JoinTenantAsCustomer);
+builder.registerAndUse(GetEstablishmentDetailForUser);
 builder.registerAndUse(GetCustomerStampProgress);
 builder.registerAndUse(GetCustomerActiveRewards);
 builder.registerAndUse(RedeemCustomerReward);

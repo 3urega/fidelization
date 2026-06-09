@@ -118,6 +118,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Platform app register business (#40):** `/u/register/business` (auth gate) → `/u/register/business/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/u/home`. `verify:platform-app-register-business`.
 - **Platform app dashboard (#41):** `/u/home` unificado (Mis negocios + Mis locales), `/u/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
+- **Platform app establishment detail (#43, VS1):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/u/home/establishments/[slug]`, CTA join en discovery. `verify:platform-app-establishment-detail-use-case`.
 
 # Architecture
 
