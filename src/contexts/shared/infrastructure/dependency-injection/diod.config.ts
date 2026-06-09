@@ -56,6 +56,7 @@ import { CreateReward } from "../../../loyalty/rewards/application/create/Create
 import { ListRewards } from "../../../loyalty/rewards/application/list/ListRewards";
 import { UpdateReward } from "../../../loyalty/rewards/application/update/UpdateReward";
 import { ListActivePromotionsForCustomer } from "../../../loyalty/promotions/application/list/ListActivePromotionsForCustomer";
+import { ListUserCrossTenantPromotions } from "../../../loyalty/promotions/application/list/ListUserCrossTenantPromotions";
 import { ListPromotions } from "../../../loyalty/promotions/application/list/ListPromotions";
 import { CreatePromotion } from "../../../loyalty/promotions/application/create/CreatePromotion";
 import { UpdatePromotion } from "../../../loyalty/promotions/application/update/UpdatePromotion";
@@ -180,6 +181,7 @@ builder.registerAndUse(UpdateReward);
 
 builder.registerAndUse(ListPromotions);
 builder.registerAndUse(ListActivePromotionsForCustomer);
+builder.registerAndUse(ListUserCrossTenantPromotions);
 builder.registerAndUse(CreatePromotion);
 builder.registerAndUse(UpdatePromotion);
 

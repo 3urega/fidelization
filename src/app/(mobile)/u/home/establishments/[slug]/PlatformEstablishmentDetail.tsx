@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { type CSSProperties, type ReactElement, useCallback, useEffect, useState } from "react";
 
-import { type PromotionRow } from "../../../../../_components/loyalty/LoyaltyCard";
+import {
+	LoyaltyCard,
+	type PromotionRow,
+	type RewardRow,
+	type StampProgressRow,
+} from "../../../../../_components/loyalty/LoyaltyCard";
 import { Button } from "../../../../../_components/ui/Button";
 import { Card } from "../../../../../_components/ui/Card";
 
@@ -26,11 +31,22 @@ type EstablishmentCustomer = {
 	visitsCount: number;
 };
 
+type OtherPromotionGroup = {
+	tenantId: string;
+	tenantName: string;
+	tenantSlug: string;
+	promotions: PromotionRow[];
+};
+
 type EstablishmentDetailResponse = {
 	mode: "discovery" | "interaction";
 	tenant: EstablishmentTenant;
 	promotions: PromotionRow[];
 	customer: EstablishmentCustomer | null;
+	stampProgress?: StampProgressRow[];
+	rewards?: RewardRow[];
+	userQrValue?: string | null;
+	otherPromotions?: OtherPromotionGroup[];
 	error?: { description?: string };
 };
 
@@ -70,20 +86,26 @@ function EstablishmentHeader({ tenant }: { tenant: EstablishmentTenant }): React
 	);
 }
 
-function PromotionsSection({ promotions }: { promotions: PromotionRow[] }): ReactElement {
+function PromotionsSection({
+	title,
+	promotions,
+	emptyMessage,
+}: {
+	title: string;
+	promotions: PromotionRow[];
+	emptyMessage: string;
+}): ReactElement {
 	if (promotions.length === 0) {
 		return (
 			<Card>
-				<p className="text-sm text-muted">Este local no tiene promociones activas ahora.</p>
+				<p className="text-sm text-muted">{emptyMessage}</p>
 			</Card>
 		);
 	}
 
 	return (
-		<section aria-labelledby="promos-heading" className="flex flex-col gap-3">
-			<h2 id="promos-heading" className="text-lg font-semibold text-foreground">
-				Promociones
-			</h2>
+		<section className="flex flex-col gap-3">
+			<h2 className="text-lg font-semibold text-foreground">{title}</h2>
 			<ul className="flex flex-col gap-3">
 				{promotions.map((promotion) => (
 					<li key={promotion.id}>
@@ -98,6 +120,37 @@ function PromotionsSection({ promotions }: { promotions: PromotionRow[] }): Reac
 	);
 }
 
+function OtherPromotionsSection({ groups }: { groups: OtherPromotionGroup[] }): ReactElement | null {
+	if (groups.length === 0) {
+		return null;
+	}
+
+	return (
+		<section aria-labelledby="other-promos-heading" className="flex flex-col gap-3">
+			<h2 id="other-promos-heading" className="text-lg font-semibold text-foreground">
+				Otras promos activas
+			</h2>
+			<ul className="flex flex-col gap-4">
+				{groups.map((group) => (
+					<li key={group.tenantId}>
+						<p className="mb-2 text-sm font-medium text-muted">{group.tenantName}</p>
+						<ul className="flex flex-col gap-2">
+							{group.promotions.map((promotion) => (
+								<li key={promotion.id}>
+									<Card>
+										<p className="font-medium text-foreground">{promotion.title}</p>
+										<p className="text-sm text-muted">{promotion.description}</p>
+									</Card>
+								</li>
+							))}
+						</ul>
+					</li>
+				))}
+			</ul>
+		</section>
+	);
+}
+
 export function PlatformEstablishmentDetail(): ReactElement {
 	const params = useParams();
 	const slug = typeof params.slug === "string" ? params.slug : "";
@@ -105,6 +158,8 @@ export function PlatformEstablishmentDetail(): ReactElement {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [joining, setJoining] = useState(false);
+	const [redeemError, setRedeemError] = useState<string | null>(null);
+	const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null);
 
 	const loadDetail = useCallback(async (): Promise<void> => {
 		if (!slug) {
@@ -161,6 +216,34 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		await loadDetail();
 	}
 
+	async function handleRedeemReward(rewardId: string): Promise<void> {
+		setRedeemError(null);
+		setRedeemingRewardId(rewardId);
+
+		const response = await fetch(
+			`/api/user/establishments/${encodeURIComponent(slug)}/rewards/redeem`,
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ rewardId }),
+			},
+		);
+
+		const body = (await response.json()) as { error?: { description?: string } };
+
+		if (!response.ok) {
+			setRedeemError(body.error?.description ?? "No se pudo canjear la recompensa");
+			setRedeemingRewardId(null);
+
+			return;
+		}
+
+		setRedeemingRewardId(null);
+		setLoading(true);
+		await loadDetail();
+	}
+
 	if (loading) {
 		return <p className="text-sm text-muted">Cargando local…</p>;
 	}
@@ -176,6 +259,8 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		);
 	}
 
+	const qrValue = detail.userQrValue ?? "";
+
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
 			<Link href="/u/home" className="text-sm font-medium text-primary hover:opacity-80">
@@ -185,37 +270,61 @@ export function PlatformEstablishmentDetail(): ReactElement {
 			<EstablishmentHeader tenant={detail.tenant} />
 
 			{detail.mode === "discovery" ? (
-				<Card>
-					<div className="flex flex-col gap-4">
-						<p className="text-sm text-muted">
-							Explora las promociones de este local. Cuando quieras acumular puntos, únete para
-							activar tu tarjeta de fidelización.
-						</p>
-						<Button
-							type="button"
-							className="w-full"
-							disabled={joining}
-							onClick={() => void handleJoin()}
-						>
-							{joining ? "Uniéndote…" : "Unirme al local"}
-						</Button>
-					</div>
-				</Card>
+				<>
+					<Card>
+						<div className="flex flex-col gap-4">
+							<p className="text-sm text-muted">
+								Explora las promociones de este local. Cuando quieras acumular puntos, únete para
+								activar tu tarjeta de fidelización.
+							</p>
+							<Button
+								type="button"
+								className="w-full"
+								disabled={joining}
+								onClick={() => void handleJoin()}
+							>
+								{joining ? "Uniéndote…" : "Unirme al local"}
+							</Button>
+						</div>
+					</Card>
+					<PromotionsSection
+						title="Promociones"
+						promotions={detail.promotions}
+						emptyMessage="Este local no tiene promociones activas ahora."
+					/>
+				</>
 			) : (
-				<Card>
-					<div className="flex flex-col gap-2">
-						<p className="text-sm font-medium text-primary">Ya estás unido</p>
-						<p className="text-3xl font-bold text-foreground">
-							{detail.customer?.pointsBalance ?? 0}
-						</p>
-						<p className="text-sm text-muted">
-							puntos · {detail.customer?.visitsCount ?? 0} visitas
-						</p>
-					</div>
-				</Card>
-			)}
+				<>
+					{detail.customer && qrValue ? (
+						<Card>
+							<LoyaltyCard
+								name={detail.customer.name}
+								pointsBalance={detail.customer.pointsBalance}
+								qrValue={qrValue}
+								businessName={detail.tenant.name}
+								stampProgress={detail.stampProgress ?? []}
+								rewards={detail.rewards ?? []}
+								promotions={detail.promotions}
+								redeemingRewardId={redeemingRewardId}
+								redeemError={redeemError}
+								onRedeemReward={(rewardId) => {
+									void handleRedeemReward(rewardId);
+								}}
+							/>
+						</Card>
+					) : (
+						<Card>
+							<p className="text-sm text-error">No se pudo cargar tu QR de usuario.</p>
+						</Card>
+					)}
 
-			<PromotionsSection promotions={detail.promotions} />
+					<Link href="/u/home/qr" className="text-center text-sm font-medium text-primary hover:opacity-80">
+						Ver QR en pantalla completa
+					</Link>
+
+					<OtherPromotionsSection groups={detail.otherPromotions ?? []} />
+				</>
+			)}
 		</main>
 	);
 }

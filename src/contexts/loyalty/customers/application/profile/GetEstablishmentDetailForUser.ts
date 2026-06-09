@@ -1,7 +1,16 @@
 import { Service } from "diod";
 
+import { UserFinder } from "../../../../identity/users/application/find/UserFinder";
+import {
+	CrossTenantPromotionGroup,
+	ListUserCrossTenantPromotions,
+} from "../../../promotions/application/list/ListUserCrossTenantPromotions";
 import { ListActivePromotionsForCustomer } from "../../../promotions/application/list/ListActivePromotionsForCustomer";
 import { Promotion } from "../../../promotions/domain/Promotion";
+import { Reward } from "../../../rewards/domain/Reward";
+import { GetCustomerActiveRewards } from "./GetCustomerActiveRewards";
+import { GetCustomerStampProgress } from "./GetCustomerStampProgress";
+import { StampAddedSummary } from "../scan/RecordCustomerVisitByQr";
 import { TenantAccessSuspended } from "../../../../tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";
 import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepository";
@@ -32,6 +41,10 @@ export type EstablishmentDetailResult = {
 	tenant: EstablishmentDetailTenant;
 	promotions: Promotion[];
 	customer: Customer | null;
+	stampProgress: StampAddedSummary[];
+	rewards: Reward[];
+	userQrValue: string | null;
+	otherPromotions: CrossTenantPromotionGroup[];
 };
 
 @Service()
@@ -40,6 +53,10 @@ export class GetEstablishmentDetailForUser {
 		private readonly tenantRepository: TenantRepository,
 		private readonly customerRepository: CustomerRepository,
 		private readonly listActivePromotionsForCustomer: ListActivePromotionsForCustomer,
+		private readonly getCustomerStampProgress: GetCustomerStampProgress,
+		private readonly getCustomerActiveRewards: GetCustomerActiveRewards,
+		private readonly listUserCrossTenantPromotions: ListUserCrossTenantPromotions,
+		private readonly userFinder: UserFinder,
 	) {}
 
 	async execute(params: GetEstablishmentDetailForUserParams): Promise<EstablishmentDetailResult> {
@@ -67,21 +84,53 @@ export class GetEstablishmentDetailForUser {
 		});
 
 		const primitives = tenant.toPrimitives();
+		const tenantSummary: EstablishmentDetailTenant = {
+			id: primitives.id,
+			name: primitives.name,
+			slug: primitives.slug,
+			logoUrl: primitives.logoUrl || null,
+			primaryColor: primitives.primaryColor || null,
+			secondaryColor: primitives.secondaryColor || null,
+			subscriptionPlan: primitives.subscriptionPlan,
+			status: primitives.status,
+		};
+
+		if (!customer) {
+			return {
+				mode: "discovery",
+				tenant: tenantSummary,
+				promotions,
+				customer: null,
+				stampProgress: [],
+				rewards: [],
+				userQrValue: null,
+				otherPromotions: [],
+			};
+		}
+
+		const user = await this.userFinder.find(params.userId);
+
+		const [stampProgress, rewards, otherPromotions] = await Promise.all([
+			this.getCustomerStampProgress.execute({
+				tenantId: tenant.id,
+				customerId: customer.id,
+			}),
+			this.getCustomerActiveRewards.execute({ tenantId: tenant.id }),
+			this.listUserCrossTenantPromotions.execute({
+				userId: params.userId,
+				excludeTenantSlug: slug,
+			}),
+		]);
 
 		return {
-			mode: customer ? "interaction" : "discovery",
-			tenant: {
-				id: primitives.id,
-				name: primitives.name,
-				slug: primitives.slug,
-				logoUrl: primitives.logoUrl || null,
-				primaryColor: primitives.primaryColor || null,
-				secondaryColor: primitives.secondaryColor || null,
-				subscriptionPlan: primitives.subscriptionPlan,
-				status: primitives.status,
-			},
+			mode: "interaction",
+			tenant: tenantSummary,
 			promotions,
 			customer,
+			stampProgress,
+			rewards,
+			userQrValue: user.qrValue,
+			otherPromotions,
 		};
 	}
 }

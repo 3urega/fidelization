@@ -11,6 +11,8 @@ import {
 	customerToJson,
 	handleAuthDomainError,
 	promotionToJson,
+	rewardToJson,
+	stampProgressToJson,
 } from "../../../../../lib/auth/http";
 import { requireUserSession } from "../../../../../lib/auth/requireUserSession";
 import { getResolvedTenantFromRequest } from "../../../../../lib/tenant/getResolvedTenant";
@@ -59,18 +61,18 @@ export async function GET(request: Request, context: RouteContext): Promise<Resp
 
 		return NextResponse.json({
 			mode: detail.mode,
-			tenant: {
-				id: detail.tenant.id,
-				name: detail.tenant.name,
-				slug: detail.tenant.slug,
-				logoUrl: detail.tenant.logoUrl,
-				primaryColor: detail.tenant.primaryColor,
-				secondaryColor: detail.tenant.secondaryColor,
-				subscriptionPlan: detail.tenant.subscriptionPlan,
-				status: detail.tenant.status,
-			},
+			tenant: detail.tenant,
 			promotions: detail.promotions.map((promotion) => promotionToJson(promotion)),
 			customer: detail.customer ? customerToJson(detail.customer) : null,
+			stampProgress: detail.stampProgress.map((row) => stampProgressToJson(row)),
+			rewards: detail.rewards.map((reward) => rewardToJson(reward)),
+			userQrValue: detail.userQrValue,
+			otherPromotions: detail.otherPromotions.map((group) => ({
+				tenantId: group.tenantId,
+				tenantName: group.tenantName,
+				tenantSlug: group.tenantSlug,
+				promotions: group.promotions.map((promotion) => promotionToJson(promotion)),
+			})),
 		});
 	} catch (error) {
 		if (error instanceof DomainError) {

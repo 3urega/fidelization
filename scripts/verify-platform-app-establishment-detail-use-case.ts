@@ -3,14 +3,51 @@ import "dotenv/config";
 
 import { GetEstablishmentDetailForUser } from "../src/contexts/loyalty/customers/application/profile/GetEstablishmentDetailForUser";
 import { ListActivePromotionsForCustomer } from "../src/contexts/loyalty/promotions/application/list/ListActivePromotionsForCustomer";
+import { ListUserCrossTenantPromotions } from "../src/contexts/loyalty/promotions/application/list/ListUserCrossTenantPromotions";
 import { Promotion } from "../src/contexts/loyalty/promotions/domain/Promotion";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
+import { UserFinder } from "../src/contexts/identity/users/application/find/UserFinder";
+import { User } from "../src/contexts/identity/users/domain/User";
+import { UserId } from "../src/contexts/identity/users/domain/UserId";
+import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
 import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../src/contexts/tenants/tenants/domain/TenantNotFound";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantRepository";
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
+
+class InMemoryUserRepository extends UserRepository {
+	constructor(private readonly users: Map<string, UserWithPasswordHash>) {
+		super();
+	}
+
+	async save(): Promise<void> {}
+
+	async search(id: UserId): Promise<User | null> {
+		for (const row of this.users.values()) {
+			if (row.user.id.value === id.value) {
+				return row.user;
+			}
+		}
+
+		return null;
+	}
+
+	async searchByEmail(): Promise<UserWithPasswordHash | null> {
+		return null;
+	}
+
+	async searchByQrValue(): Promise<User | null> {
+		return null;
+	}
+
+	async updatePasswordHash(): Promise<void> {}
+
+	async isPlatformSuperadmin(): Promise<boolean> {
+		return false;
+	}
+}
 
 class InMemoryTenantRepository extends TenantRepository {
 	constructor(private readonly bySlug: Map<string, Tenant>) {
@@ -72,13 +109,41 @@ class InMemoryCustomerRepository extends CustomerRepository {
 		return this.byKey.get(this.key(userId, tenantId)) ?? null;
 	}
 
-	async listWithInteractionByUserId(): Promise<never[]> {
+	async listWithInteractionByUserId(userId: string) {
+		return Array.from(this.byKey.values())
+			.filter((customer) => customer.userId === userId)
+			.map((customer) => ({
+				customerId: customer.id,
+				tenantId: customer.tenantId,
+				name: "Other Cafe",
+				slug: "other-cafe",
+				logoUrl: null,
+				pointsBalance: customer.pointsBalance,
+				visitsCount: customer.visitsCount,
+			}));
+	}
+}
+
+class StubListActivePromotions {
+	async execute(): Promise<Promotion[]> {
 		return [];
 	}
 }
 
-class StubListActivePromotionsForCustomer {
-	async execute(): Promise<Promotion[]> {
+class StubGetCustomerStampProgress {
+	async execute() {
+		return [];
+	}
+}
+
+class StubGetCustomerActiveRewards {
+	async execute() {
+		return [];
+	}
+}
+
+class StubListUserCrossTenantPromotions {
+	async execute() {
 		return [];
 	}
 }
@@ -104,6 +169,11 @@ const suspendedTenant = Tenant.fromPrimitives({
 });
 
 const userId = "user-detail-1";
+const user = User.create(userId, "Detail User", "detail@example.local", "", "user-qr-global");
+const users = new Map<string, UserWithPasswordHash>([
+	[user.email.value, { user, passwordHash: "hash" }],
+]);
+
 const linkedCustomer = Customer.joinForPlatformUser({
 	tenantId: activeTenant.id,
 	userId,
@@ -123,7 +193,11 @@ const customerRepo = new InMemoryCustomerRepository(
 const getDetail = new GetEstablishmentDetailForUser(
 	tenantRepo,
 	customerRepo,
-	new StubListActivePromotionsForCustomer() as unknown as ListActivePromotionsForCustomer,
+	new StubListActivePromotions() as unknown as ListActivePromotionsForCustomer,
+	new StubGetCustomerStampProgress() as never,
+	new StubGetCustomerActiveRewards() as never,
+	new StubListUserCrossTenantPromotions() as unknown as ListUserCrossTenantPromotions,
+	new UserFinder(new InMemoryUserRepository(users)),
 );
 
 async function expectError<T extends Error>(
@@ -156,9 +230,10 @@ async function main(): Promise<void> {
 	if (
 		interaction.mode !== "interaction" ||
 		!interaction.customer ||
-		interaction.customer.id !== linkedCustomer.id
+		interaction.customer.id !== linkedCustomer.id ||
+		interaction.userQrValue !== "user-qr-global"
 	) {
-		console.error("❌ expected interaction mode with customer");
+		console.error("❌ expected interaction mode with customer and user QR");
 		process.exit(1);
 	}
 
