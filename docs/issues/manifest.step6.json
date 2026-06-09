@@ -1,0 +1,25 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/post-onboarding-mvp-roadmap.md",
+  "label": "step6-team-rewards",
+  "published": {
+    "24": "https://github.com/3urega/fidelization/issues/24",
+    "25": "https://github.com/3urega/fidelization/issues/25",
+    "26": "https://github.com/3urega/fidelization/issues/26",
+    "27": "https://github.com/3urega/fidelization/issues/27"
+  },
+  "issues": [
+    {
+      "title": "Customer rewards: list + redeem + verify E2E",
+      "bodyFile": "docs/issues/customer-reward-redeem.md"
+    },
+    {
+      "title": "Tenant team: invite employee + API",
+      "bodyFile": "docs/issues/tenant-employees-api.md"
+    },
+    {
+      "title": "Tenant team: settings UI + verify E2E",
+      "bodyFile": "docs/issues/tenant-employees-ui.md"
+    }
+  ]
+}

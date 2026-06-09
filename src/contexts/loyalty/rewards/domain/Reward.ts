@@ -1,4 +1,6 @@
-export type RewardType = "free_item" | "discount" | "custom";
+import { randomUUID } from "crypto";
+
+import { RewardType } from "./Reward";
 
 export type RewardPrimitives = {
 	id: string;
@@ -9,6 +11,14 @@ export type RewardPrimitives = {
 	type: RewardType;
 	isActive: boolean;
 	stockLimit: number | null;
+};
+
+export type RewardCreateParams = {
+	tenantId: string;
+	name: string;
+	description: string;
+	costPoints: number;
+	type: RewardType;
 };
 
 export class Reward {
@@ -23,6 +33,19 @@ export class Reward {
 		public readonly stockLimit: number | null,
 	) {}
 
+	static create(params: RewardCreateParams): Reward {
+		return new Reward(
+			randomUUID(),
+			params.tenantId,
+			params.name,
+			params.description,
+			params.costPoints,
+			params.type,
+			true,
+			null,
+		);
+	}
+
 	static fromPrimitives(primitives: RewardPrimitives): Reward {
 		return new Reward(
 			primitives.id,
@@ -33,6 +56,23 @@ export class Reward {
 			primitives.type,
 			primitives.isActive,
 			primitives.stockLimit,
+		);
+	}
+
+	deactivate(): Reward {
+		if (!this.isActive) {
+			return this;
+		}
+
+		return new Reward(
+			this.id,
+			this.tenantId,
+			this.name,
+			this.description,
+			this.costPoints,
+			this.type,
+			false,
+			this.stockLimit,
 		);
 	}
 

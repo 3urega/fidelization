@@ -26,7 +26,10 @@ Plan .md  →  docs/issues  →  GitHub  →  implement  →  close  →  cleanu
 
 ```bash
 gh auth login
+# Phase A–C (ya publicado)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.post-onboarding.json
+# Phase D — Step 6 team + rewards (draft)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step6.json
 ```
 
 ## After close on GitHub

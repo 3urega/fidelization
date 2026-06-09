@@ -29,6 +29,8 @@ npm run verify:customer-stamp-progress-use-case  # issue #23 — GET me stampPro
 npm run verify:customer-stamp-progress   # issue #23 — register → scan → GET me stampProgress E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaigns-use-case  # issue #21 — Create/List/Update stamp campaigns (domain stub)
 npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campaigns + Prisma (dev + DATABASE_URL)
+npm run verify:rewards-use-case      # issue #24 — Create/List/Update rewards (domain stub)
+npm run verify:rewards               # issue #24 — POST/GET/PATCH rewards + Prisma (dev + DATABASE_URL)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -78,6 +80,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Customer stamp progress (#23):** en `/app/card`, sección «Sellos» con progreso por campaña activa (`0/N`, «Completada»). `verify:customer-stamp-progress-use-case`, `verify:customer-stamp-progress`.
 - **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto, +1 sello por campaña activa, filas en `loyalty_transactions` (`points_earned`, `stamp_added`). Enlace para clientes en checklist `/home`. `verify:customer-scan`, `verify:customer-stamp-scan`.
 - **Stamp campaigns (#21):** owner en `/settings/stamps` → crear/listar/desactivar campañas (`GET/POST /api/loyalty/stamp-campaigns`, `PATCH …/[id]`). Checklist en `/home`. `verify:stamp-campaigns-use-case`, `verify:stamp-campaigns` (dev + `DATABASE_URL`).
+- **Rewards (#24):** owner API `GET/POST /api/loyalty/rewards`, `PATCH …/[id]` (owner-only; sin UI aún). `verify:rewards-use-case`, `verify:rewards`.
 
 # Architecture
 
@@ -134,6 +137,7 @@ docs/
 | Stamp campaigns owner CRUD (#21) | `verify:stamp-campaigns-use-case` + `verify:stamp-campaigns` + `/settings/stamps` |
 | Staff scan + stamps (#22) | `verify:customer-stamp-scan-use-case` + `verify:customer-stamp-scan` + `/scan` |
 | Customer stamp progress (#23) | `verify:customer-stamp-progress-use-case` + `verify:customer-stamp-progress` + `/app/card` |
+| Rewards owner CRUD (#24) | `verify:rewards-use-case` + `verify:rewards` + `/api/loyalty/rewards` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

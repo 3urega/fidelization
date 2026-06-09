@@ -31,6 +31,9 @@ import { NotificationRepository } from "../../../loyalty/notifications/domain/No
 import { PrismaNotificationRepository } from "../../../loyalty/notifications/infrastructure/PrismaNotificationRepository";
 import { PromotionRepository } from "../../../loyalty/promotions/domain/PromotionRepository";
 import { PrismaPromotionRepository } from "../../../loyalty/promotions/infrastructure/PrismaPromotionRepository";
+import { CreateReward } from "../../../loyalty/rewards/application/create/CreateReward";
+import { ListRewards } from "../../../loyalty/rewards/application/list/ListRewards";
+import { UpdateReward } from "../../../loyalty/rewards/application/update/UpdateReward";
 import { RewardRepository } from "../../../loyalty/rewards/domain/RewardRepository";
 import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -132,6 +135,9 @@ builder.registerAndUse(UpdateStampCampaign);
 
 builder.register(RewardRepository).use(PrismaRewardRepository);
 builder.registerAndUse(PrismaRewardRepository);
+builder.registerAndUse(CreateReward);
+builder.registerAndUse(ListRewards);
+builder.registerAndUse(UpdateReward);
 
 builder.register(PromotionRepository).use(PrismaPromotionRepository);
 builder.registerAndUse(PrismaPromotionRepository);

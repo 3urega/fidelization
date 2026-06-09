@@ -177,6 +177,38 @@ flowchart LR
 
 ---
 
+## Phase D — Step 6: recompensas + equipo
+
+**Status:** **Open** — [#24–#27](https://github.com/3urega/fidelization/issues/24) (2026-06-09).
+
+**Goal:** Completar el checklist Step 6 de [`business-onboarding.md`](business-onboarding.md): *Create first reward* + *Invite employees*, alineado con prioridad MVP **recompensas** tras sellos (#21–#23).
+
+| In | Out |
+|----|-----|
+| Owner CRUD recompensas (`costPoints`, activar/desactivar) | Puntos configurables por tenant (issue futura) |
+| Cliente canjea recompensa en `/app/card` | Canje premio por sello completado |
+| Owner invita empleado (user + membership `employee`) | Email magic-link / SSO |
+| `/settings/team` + checklist «Invita empleado» | Plan feature flags |
+| Empleado usa `/scan`; 403 en settings owner-only | Stripe / planes (Steps 3–4) |
+
+### Vertical slices (draft issues)
+
+| Slice | Valor para el usuario | Body file |
+|-------|----------------------|-----------|
+| **D1** | Owner crea catálogo de recompensas | ✅ #24 (2026-06-09) — `GET/POST/PATCH /api/loyalty/rewards`, `verify:rewards` |
+| **D2** | Cliente canjea con puntos en `/app/card` | [`customer-reward-redeem.md`](../issues/customer-reward-redeem.md) |
+| **D3** | Owner da de alta empleado (API) | [`tenant-employees-api.md`](../issues/tenant-employees-api.md) |
+| **D4** | UI equipo + empleado escanea QR | [`tenant-employees-ui.md`](../issues/tenant-employees-ui.md) |
+
+### Acceptance criteria (Phase D — target)
+
+- [x] Owner CRUD rewards + `verify:rewards` (#24, 2026-06-09)
+- [ ] Customer redeem + `verify:customer-reward-redeem` (#25 draft)
+- [ ] Owner invite employee + employee login/scan (#26–#27 draft)
+- [ ] `verify:tenant-employees` E2E
+
+---
+
 ## Deferred — Steps 3–4 (plan + payment)
 
 Trigger to start this work:
@@ -215,6 +247,9 @@ Then implement (separate plan / issues):
 | `verify:stamp-campaigns` | C (#21) |
 | `verify:customer-stamp-scan` | C (#22) |
 | `verify:customer-stamp-progress` | C (#23) |
+| `verify:rewards` | D (#24) |
+| `verify:customer-reward-redeem` | D (#25) |
+| `verify:tenant-employees` | D (#26–#27) |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |
 
 ---
@@ -254,12 +289,21 @@ A business owner who completed Steps 1–2 can:
 | 22 | Staff scan — add stamp on active campaigns | **Closed** (2026-06-09) — [issue #22](https://github.com/3urega/fidelization/issues/22) |
 | 23 | Customer card — stamp progress + verify E2E | **Closed** (2026-06-09) — [issue #23](https://github.com/3urega/fidelization/issues/23) |
 
+## GitHub issues (Phase D)
+
+| # | Título | Body file |
+|---|--------|-----------|
+| 24 | Rewards: owner CRUD + API | **Closed** (2026-06-09) — [issue #24](https://github.com/3urega/fidelization/issues/24) |
+| 25 | Customer rewards: list + redeem + verify E2E | [`customer-reward-redeem.md`](../issues/customer-reward-redeem.md) — [issue #25](https://github.com/3urega/fidelization/issues/25) |
+| 26 | Tenant team: invite employee + API | [`tenant-employees-api.md`](../issues/tenant-employees-api.md) — [issue #26](https://github.com/3urega/fidelization/issues/26) |
+| 27 | Tenant team: settings UI + verify E2E | [`tenant-employees-ui.md`](../issues/tenant-employees-ui.md) — [issue #27](https://github.com/3urega/fidelization/issues/27) |
+
 ```bash
 gh auth login
-# Windows (manifest — preferred)
+# Phase A–C (publicado)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.post-onboarding.json
-# macOS/Linux
-bash scripts/publish-github-issues.sh docs/issues/manifest.post-onboarding.json
+# Phase D Step 6 (draft)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step6.json
 ```
 
 Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanban-board` (close + cleanup `docs/issues/`). Ver [`docs/issues/README.md`](../issues/README.md).

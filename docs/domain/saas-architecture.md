@@ -19,7 +19,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Next.js App Router base (issue #4) | Route groups + layouts + env | **Yes** | [`(public)`](../src/app/(public)/), [`(auth)`](../src/app/(auth)/), [`(app)`](../src/app/(app)/); [`src/lib/env.ts`](../src/lib/env.ts) |
 | Business owner onboarding | — | **Yes** | `OwnerRegistrar` + `POST /api/auth/register` with `businessName`; demo seed |
 | Owner UI shell | Sidebar + top bar + tenant branding | **Yes** | [`TenantAdminShell`](../src/app/_components/shell/TenantAdminShell.tsx), [`TenantSessionProvider`](../src/app/_components/shell/TenantSessionProvider.tsx), `/home`, `/profile`; auth card [`AppShell`](../src/app/_components/ui/AppShell.tsx); theme tokens ([`src/app/_components/theme/`](../src/app/_components/theme/)) |
-| Employee / customer flows | QR, purchases, app | **Partial (MVP)** | Customer `/app` + stamp progress on card (#18–#20, #23); staff scan → points + stamps (#22); owner stamp campaigns (#21) |
+| Employee / customer flows | QR, purchases, app | **Partial (MVP)** | Customer `/app` + stamp progress (#18–#23); staff scan (#22); owner rewards API (#24); stamp campaigns (#21) |
 | Superadmin foundation (issue #8) | Separate platform auth, protected routes, tenant isolation | **Yes** | `users.platform_role`, seed `SUPERADMIN_*`, `/platform/login` + `/platform` (apex), JWT `kind: platform`, `requirePlatformSession` / `requireTenantSession`, `npm run verify:platform-isolation` |
 | Superadmin dashboard (CRUD tenants, plans) | Platform-wide control UI | **Yes** | [`PlatformTenantsTable`](../src/app/_components/platform/PlatformTenantsTable.tsx), `GET/PATCH /api/platform/tenants`, toggle `active`/`suspended`, `npm run verify:platform-tenants` |
 | Feature flags (global + tenant) | Plan-driven modules | **Partial** | `tenants.features` JSON migrated; no runtime enforcement |
@@ -49,7 +49,7 @@ The architecture is built around strict tenant isolation, feature-flag-driven fu
 | Tenant staff | Owner / employee / admin (`tenant_memberships`) | `/login` (subdomain or apex) | `tenant` | Yes |
 | End customer | `customers` table | `/app` on tenant host (not `/login`) | `customer` | Yes |
 
-**Conclusion:** platform **foundation** (issue #4), Fase 0 tenant auth, **superadmin foundation** (issue #8), **minimal superadmin dashboard** (issue #9), **customer QR MVP** (#18–#20), **staff scan → points + stamps** (#22: `/scan`, `RecordCustomerVisitByQr`), **owner stamp campaigns** (#21: `/settings/stamps`), and **customer stamp progress on `/app/card`** (#23: `GET /api/loyalty/me` + `stampProgress[]`) are in place. Feature-flag enforcement, camera scan UI, tenant create/delete from UI, and Stripe tenant billing remain follow-ups.
+**Conclusion:** platform **foundation** (issue #4), Fase 0 tenant auth, **superadmin foundation** (issue #8), **minimal superadmin dashboard** (issue #9), **customer QR MVP** (#18–#20), **staff scan → points + stamps** (#22), **owner stamp campaigns** (#21), **customer stamp progress** (#23), and **owner rewards CRUD API** (#24) are in place. Customer reward redeem (#25), tenant team (#26–#27), feature-flag enforcement, camera scan UI, tenant create/delete from UI, and Stripe tenant billing remain follow-ups.
 
 ---
 

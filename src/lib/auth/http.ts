@@ -5,6 +5,7 @@ import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/Http
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
+import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
 
@@ -86,6 +87,22 @@ export function stampCampaignToJson(
 		requiredStamps: primitives.requiredStamps,
 		isActive: primitives.isActive,
 		rewardId: primitives.rewardId,
+	};
+}
+
+export function rewardToJson(
+	reward: Reward,
+): Record<string, string | number | boolean | null> {
+	const primitives = reward.toPrimitives();
+
+	return {
+		id: primitives.id,
+		name: primitives.name,
+		description: primitives.description,
+		costPoints: primitives.costPoints,
+		type: primitives.type,
+		isActive: primitives.isActive,
+		stockLimit: primitives.stockLimit,
 	};
 }
 
@@ -182,6 +199,15 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "StampCampaignNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "RewardForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidReward") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "RewardNotFound") {
 		return HttpNextResponse.domainError(error, 404);
 	}
 
