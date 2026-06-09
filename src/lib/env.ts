@@ -42,6 +42,11 @@ export const env = {
 		return optionalEnv("NEXT_PUBLIC_API_URL") ?? "http://localhost:3000";
 	},
 
+	/** Google OAuth client ID (Web) for platform app sign-in. */
+	get googleClientId(): string | undefined {
+		return optionalEnv("GOOGLE_CLIENT_ID");
+	},
+
 	/** Future subdomain routing: apex domain for tenant hosts (e.g. app.fidelizacion.com). */
 	get appDomain(): string | undefined {
 		return optionalEnv("APP_DOMAIN");

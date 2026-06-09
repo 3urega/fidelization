@@ -70,6 +70,21 @@ export class PrismaUserRepository extends UserRepository {
 		return this.toAggregate(row);
 	}
 
+	async searchByOAuthSubject(oauthProvider: string, oauthSubject: string): Promise<User | null> {
+		const row = await prisma.user.findFirst({
+			where: {
+				oauthProvider,
+				oauthSubject,
+			},
+		});
+
+		if (!row) {
+			return null;
+		}
+
+		return this.toAggregate(row);
+	}
+
 	async updatePasswordHash(userId: UserId, passwordHash: string): Promise<void> {
 		await prisma.user.update({
 			where: { id: userId.value },

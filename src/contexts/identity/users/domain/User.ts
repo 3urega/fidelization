@@ -49,6 +49,40 @@ export class User extends AggregateRoot {
 		);
 	}
 
+	static createFromGoogleOAuth(params: {
+		id: string;
+		name: string;
+		email: string;
+		profilePicture?: string;
+		oauthSubject: string;
+		qrValue: string;
+	}): User {
+		return new User(
+			new UserId(params.id),
+			new UserName(params.name.trim()),
+			new UserEmail(params.email.toLowerCase().trim()),
+			new UserProfilePicture(params.profilePicture?.trim() ?? ""),
+			UserPlan.Free,
+			params.qrValue,
+			"google",
+			params.oauthSubject,
+		);
+	}
+
+	/** Link Google OAuth to an existing email/password account. */
+	linkGoogleOAuth(oauthSubject: string, qrValue: string | null = this.qrValue): User {
+		return new User(
+			this.id,
+			this.name,
+			this.email,
+			this.profilePicture,
+			this.plan,
+			qrValue,
+			"google",
+			oauthSubject,
+		);
+	}
+
 	static fromPrimitives(primitives: UserPrimitives): User {
 		return new User(
 			new UserId(primitives.id),

@@ -15,6 +15,8 @@ export abstract class UserRepository {
 
 	abstract searchByQrValue(qrValue: string): Promise<User | null>;
 
+	abstract searchByOAuthSubject(oauthProvider: string, oauthSubject: string): Promise<User | null>;
+
 	abstract updatePasswordHash(userId: UserId, passwordHash: string): Promise<void>;
 
 	abstract isPlatformSuperadmin(userId: string): Promise<boolean>;

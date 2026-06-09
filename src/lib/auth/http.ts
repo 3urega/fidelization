@@ -213,6 +213,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "EmailAlreadyRegistered") {
 		return HttpNextResponse.domainError(error, 409);
 	}
+	if (error.type === "InvalidGoogleToken") {
+		return HttpNextResponse.domainError(error, 401);
+	}
+	if (error.type === "OAuthAccountAlreadyLinked") {
+		return HttpNextResponse.domainError(error, 409);
+	}
 	if (error.type === "UserDoesNotExist") {
 		return HttpNextResponse.domainError(error, 404);
 	}

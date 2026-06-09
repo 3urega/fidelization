@@ -26,12 +26,15 @@ import { StripeCheckoutGatewayStripe } from "../../../billing/stripe/infrastruct
 import { StripeWebhookGatewayStripe } from "../../../billing/stripe/infrastructure/StripeWebhookGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
+import { AuthenticateGoogleUser } from "../../../identity/users/application/authenticate/AuthenticateGoogleUser";
 import { LoginPlatformUser } from "../../../identity/users/application/authenticate/LoginPlatformUser";
 import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
 import { UserProfileUpdater } from "../../../identity/users/application/update_profile/UserProfileUpdater";
+import { GoogleIdTokenVerifier } from "../../../identity/users/domain/GoogleIdTokenVerifier";
 import { UserRepository } from "../../../identity/users/domain/UserRepository";
+import { GoogleIdTokenVerifierGoogle } from "../../../identity/users/infrastructure/GoogleIdTokenVerifierGoogle";
 import { PrismaUserRepository } from "../../../identity/users/infrastructure/PrismaUserRepository";
 import { CouponRepository } from "../../../loyalty/coupons/domain/CouponRepository";
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
@@ -112,6 +115,18 @@ builder
 builder.register(UserRepository).use(PrismaUserRepository);
 builder.registerAndUse(PrismaUserRepository);
 
+builder
+	.register(GoogleIdTokenVerifier)
+	.useFactory(() => {
+		const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+		if (!clientId) {
+			return new GoogleIdTokenVerifierGoogle("unconfigured-google-client-id");
+		}
+
+		return new GoogleIdTokenVerifierGoogle(clientId);
+	})
+	.asSingleton();
+
 builder.register(TenantMembershipRepository).use(PrismaTenantMembershipRepository);
 builder.registerAndUse(PrismaTenantMembershipRepository);
 
@@ -128,6 +143,7 @@ builder.registerAndUse(CreateOwnerBusiness);
 builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(UserAuthenticator);
+builder.registerAndUse(AuthenticateGoogleUser);
 builder.registerAndUse(LoginPlatformUser);
 builder.registerAndUse(UserProfileUpdater);
 builder.registerAndUse(OwnerMembershipFinder);
