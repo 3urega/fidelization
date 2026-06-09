@@ -49,6 +49,26 @@ export class PrismaPromotionRepository extends PromotionRepository {
 		return rows.map((row) => this.mapRow(row));
 	}
 
+	async listActiveByTenantAt(tenantId: string, at: Date): Promise<Promotion[]> {
+		const rows = await prisma.promotion.findMany({
+			where: {
+				tenantId,
+				isActive: true,
+				AND: [
+					{
+						OR: [{ startDate: null }, { startDate: { lte: at } }],
+					},
+					{
+						OR: [{ endDate: null }, { endDate: { gte: at } }],
+					},
+				],
+			},
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => this.mapRow(row));
+	}
+
 	private mapRow(row: {
 		id: string;
 		tenantId: string;

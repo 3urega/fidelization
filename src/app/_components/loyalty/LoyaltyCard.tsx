@@ -23,6 +23,40 @@ export type RewardRow = {
 	stockLimit: number | null;
 };
 
+export type PromotionRow = {
+	id: string;
+	title: string;
+	description: string;
+	type: string;
+	startDate: string | null;
+	endDate: string | null;
+	isActive: boolean;
+};
+
+const PROMOTION_TYPE_LABELS: Record<string, string> = {
+	discount: "Descuento",
+	bundle: "Pack / combo",
+	seasonal: "Temporada",
+};
+
+function formatPromotionType(type: string): string {
+	return PROMOTION_TYPE_LABELS[type] ?? type;
+}
+
+function formatPromotionDates(startDate: string | null, endDate: string | null): string | null {
+	if (!startDate && !endDate) {
+		return null;
+	}
+
+	const format = (value: string): string => value.slice(0, 10);
+
+	if (startDate && endDate) {
+		return `${format(startDate)} — ${format(endDate)}`;
+	}
+
+	return startDate ? `Desde ${format(startDate)}` : `Hasta ${format(endDate ?? "")}`;
+}
+
 type LoyaltyCardProps = {
 	name: string;
 	pointsBalance: number;
@@ -30,6 +64,7 @@ type LoyaltyCardProps = {
 	businessName?: string;
 	stampProgress?: StampProgressRow[];
 	rewards?: RewardRow[];
+	promotions?: PromotionRow[];
 	redeemingRewardId?: string | null;
 	redeemError?: string | null;
 	onRedeemReward?: (rewardId: string) => void;
@@ -42,6 +77,7 @@ export function LoyaltyCard({
 	businessName,
 	stampProgress = [],
 	rewards = [],
+	promotions = [],
 	redeemingRewardId = null,
 	redeemError = null,
 	onRedeemReward,
@@ -86,6 +122,28 @@ export function LoyaltyCard({
 									>
 										{isRedeeming ? "Canjeando…" : "Canjear"}
 									</Button>
+								</li>
+							);
+						})}
+					</ul>
+				</div>
+			) : null}
+
+			{promotions.length > 0 ? (
+				<div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
+					<h2 className="text-sm font-medium text-foreground">Promociones</h2>
+					<ul className="flex flex-col gap-3">
+						{promotions.map((promotion) => {
+							const dateRange = formatPromotionDates(promotion.startDate, promotion.endDate);
+
+							return (
+								<li key={promotion.id} className="flex flex-col gap-0.5 text-sm">
+									<span className="font-medium text-foreground">{promotion.title}</span>
+									<span className="text-muted">{promotion.description}</span>
+									<span className="text-xs text-muted">
+										{formatPromotionType(promotion.type)}
+										{dateRange ? ` · ${dateRange}` : null}
+									</span>
 								</li>
 							);
 						})}

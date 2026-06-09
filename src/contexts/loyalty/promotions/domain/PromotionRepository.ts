@@ -6,4 +6,6 @@ export abstract class PromotionRepository {
 	abstract searchById(tenantId: string, id: string): Promise<Promotion | null>;
 
 	abstract listByTenant(tenantId: string): Promise<Promotion[]>;
+
+	abstract listActiveByTenantAt(tenantId: string, at: Date): Promise<Promotion[]>;
 }

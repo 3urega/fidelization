@@ -69,6 +69,10 @@ class InMemoryPromotionRepository extends PromotionRepository {
 	async listByTenant(): Promise<Promotion[]> {
 		return [];
 	}
+
+	async listActiveByTenantAt(): Promise<Promotion[]> {
+		return [];
+	}
 }
 
 class MutableStubTenantRepository extends TenantRepository {

@@ -6,7 +6,7 @@ import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
-import { LoyaltyCard, type RewardRow, type StampProgressRow } from "./LoyaltyCard";
+import { LoyaltyCard, type PromotionRow, type RewardRow, type StampProgressRow } from "./LoyaltyCard";
 
 type CustomerPayload = {
 	id: string;
@@ -22,6 +22,7 @@ type MeResponse = {
 	customer?: CustomerPayload;
 	stampProgress?: StampProgressRow[];
 	rewards?: RewardRow[];
+	promotions?: PromotionRow[];
 	error?: {
 		description?: string;
 	};
@@ -44,6 +45,7 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 	const [customer, setCustomer] = useState<CustomerPayload | null>(null);
 	const [stampProgress, setStampProgress] = useState<StampProgressRow[]>([]);
 	const [rewards, setRewards] = useState<RewardRow[]>([]);
+	const [promotions, setPromotions] = useState<PromotionRow[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [redeemError, setRedeemError] = useState<string | null>(null);
 	const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null);
@@ -71,6 +73,7 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 			setCustomer(body.customer);
 			setStampProgress(body.stampProgress ?? []);
 			setRewards(body.rewards ?? []);
+			setPromotions(body.promotions ?? []);
 		}
 
 		return true;
@@ -169,6 +172,7 @@ export function CustomerCardContent({ businessName }: CustomerCardContentProps):
 				businessName={businessName}
 				stampProgress={stampProgress}
 				rewards={rewards}
+				promotions={promotions}
 				redeemingRewardId={redeemingRewardId}
 				redeemError={redeemError}
 				onRedeemReward={(rewardId) => {

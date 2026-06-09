@@ -134,6 +134,24 @@ class InMemoryPromotionRepository extends PromotionRepository {
 			(promotion) => promotion.tenantId === tenantId,
 		);
 	}
+
+	async listActiveByTenantAt(tenantId: string, at: Date): Promise<Promotion[]> {
+		return Array.from(this.promotions.values()).filter((promotion) => {
+			if (promotion.tenantId !== tenantId || !promotion.isActive) {
+				return false;
+			}
+
+			if (promotion.startDate && promotion.startDate > at) {
+				return false;
+			}
+
+			if (promotion.endDate && promotion.endDate < at) {
+				return false;
+			}
+
+			return true;
+		});
+	}
 }
 
 function baseTenant(planId: string, planName: string): Tenant {
