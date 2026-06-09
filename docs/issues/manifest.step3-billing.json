@@ -1,0 +1,34 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/post-onboarding-mvp-roadmap.md",
+  "label": "step3-billing",
+  "published": {
+    "30": "https://github.com/3urega/fidelization/issues/30",
+    "31": "https://github.com/3urega/fidelization/issues/31",
+    "32": "https://github.com/3urega/fidelization/issues/32",
+    "33": "https://github.com/3urega/fidelization/issues/33",
+    "34": "https://github.com/3urega/fidelization/issues/34"
+  },
+  "issues": [
+    {
+      "title": "Subscription plans: catalog + tenant plan API + verify",
+      "bodyFile": "docs/issues/subscription-plans-catalog-api.md"
+    },
+    {
+      "title": "Onboarding Step 3: plan selection UI + verify E2E",
+      "bodyFile": "docs/issues/onboarding-plan-selection-ui.md"
+    },
+    {
+      "title": "Stripe Checkout: tenant subscription (Step 4)",
+      "bodyFile": "docs/issues/stripe-checkout-subscription.md"
+    },
+    {
+      "title": "Stripe webhooks: subscription lifecycle + tenant suspend",
+      "bodyFile": "docs/issues/stripe-webhooks-lifecycle.md"
+    },
+    {
+      "title": "Feature flags: enforce tenant plan limits",
+      "bodyFile": "docs/issues/tenant-feature-flags.md"
+    }
+  ]
+}

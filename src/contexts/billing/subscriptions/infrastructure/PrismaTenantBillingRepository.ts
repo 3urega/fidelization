@@ -17,12 +17,16 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 				name: p.name,
 				priceMonthly: p.priceMonthly,
 				priceYearly: p.priceYearly,
+				features: p.features,
+				limits: p.limits,
 				isActive: p.isActive,
 			},
 			update: {
 				name: p.name,
 				priceMonthly: p.priceMonthly,
 				priceYearly: p.priceYearly,
+				features: p.features,
+				limits: p.limits,
 				isActive: p.isActive,
 			},
 		});
@@ -31,15 +35,22 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 	async searchPlanByName(name: string): Promise<SubscriptionPlan | null> {
 		const row = await prisma.subscriptionPlan.findUnique({ where: { name } });
 
-		return row
-			? SubscriptionPlan.fromPrimitives({
-					id: row.id,
-					name: row.name,
-					priceMonthly: row.priceMonthly,
-					priceYearly: row.priceYearly,
-					isActive: row.isActive,
-				})
-			: null;
+		return row ? SubscriptionPlan.fromPersistence(row) : null;
+	}
+
+	async searchPlanById(planId: string): Promise<SubscriptionPlan | null> {
+		const row = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
+
+		return row ? SubscriptionPlan.fromPersistence(row) : null;
+	}
+
+	async listActivePlans(): Promise<SubscriptionPlan[]> {
+		const rows = await prisma.subscriptionPlan.findMany({
+			where: { isActive: true },
+			orderBy: { priceMonthly: "asc" },
+		});
+
+		return rows.map((row) => SubscriptionPlan.fromPersistence(row));
 	}
 
 	async saveSubscription(subscription: TenantSubscription): Promise<void> {
@@ -72,9 +83,17 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 	}
 
 	async linkTenantPlan(tenantId: string, planId: string): Promise<void> {
+		const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
+		if (!plan) {
+			throw new Error(`Subscription plan ${planId} not found`);
+		}
+
 		await prisma.tenant.update({
 			where: { id: tenantId },
-			data: { subscriptionPlanId: planId },
+			data: {
+				subscriptionPlanId: planId,
+				subscriptionPlan: plan.name,
+			},
 		});
 	}
 }

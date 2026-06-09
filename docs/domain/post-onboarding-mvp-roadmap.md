@@ -179,7 +179,7 @@ flowchart LR
 
 ## Phase D — Step 6: recompensas + equipo
 
-**Status:** **Open** — [#24–#27](https://github.com/3urega/fidelization/issues/24) (2026-06-09).
+**Status:** **Implemented** (#24–#27, 2026-06-09).
 
 **Goal:** Completar el checklist Step 6 de [`business-onboarding.md`](business-onboarding.md): *Create first reward* + *Invite employees*, alineado con prioridad MVP **recompensas** tras sellos (#21–#23).
 
@@ -210,19 +210,45 @@ flowchart LR
 
 ---
 
+---
+
+## Phase E — Steps 3–4: planes + Stripe + feature flags
+
+**Status:** **Open** — [#30–#34](https://github.com/3urega/fidelization/issues/30) (2026-06-09).
+
+**Goal:** Monetización tenant tras loyalty MVP operativo (Phase A–D). Ver [`business-onboarding.md`](business-onboarding.md) Steps 3–4.
+
+| In | Out |
+|----|-----|
+| Catálogo `subscription_plans` + assign plan API | Add-ons modulares |
+| UI Step 3 plan picker | Stripe Customer Portal |
+| Stripe Checkout + `subscriptions` | Prorrateo upgrade |
+| Webhooks → suspend/reactivate tenant | Facturación PDF in-app |
+| Feature flags por plan | Usage metering |
+
+### Vertical slices (draft issues)
+
+| Slice | Valor para el usuario | Body file |
+|-------|----------------------|-----------|
+| **E1** | Owner ve planes y asigna uno al negocio | [#30](https://github.com/3urega/fidelization/issues/30) — [`subscription-plans-catalog-api.md`](../issues/subscription-plans-catalog-api.md) |
+| **E2** | Wizard/checklist «Elige tu plan» | [#31](https://github.com/3urega/fidelization/issues/31) — [`onboarding-plan-selection-ui.md`](../issues/onboarding-plan-selection-ui.md) |
+| **E3** | Owner paga con Stripe Checkout | [#32](https://github.com/3urega/fidelization/issues/32) — [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) |
+| **E4** | Impago suspende el negocio; pago lo reactiva | [#33](https://github.com/3urega/fidelization/issues/33) — [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) |
+| **E5** | Funciones fuera del plan bloqueadas | [#34](https://github.com/3urega/fidelization/issues/34) — [`tenant-feature-flags.md`](../issues/tenant-feature-flags.md) |
+
+### Acceptance criteria (Phase E — target)
+
+- [ ] Catálogo Basic/Pro/Premium + `verify:subscription-plans` (#30)
+- [ ] UI Step 3 + `verify:onboarding-plan-selection` (#31)
+- [ ] Stripe Checkout test + subscription row (#32)
+- [ ] Webhooks suspend/reactivate + verify (#33)
+- [ ] Plan feature gating + verify (#34)
+
+---
+
 ## Deferred — Steps 3–4 (plan + payment)
 
-Trigger to start this work:
-
-- Phase A + B shipped and verified.
-- Owner dashboard can point to a working `/app` for their slug.
-- At least one E2E path: owner branding → share link → customer card.
-
-Then implement (separate plan / issues):
-
-1. **Step 3** — Plan catalog (`subscription_plans`), wizard step or `/onboarding/plan`, `tenant.subscriptionPlan`, optional `status: trial`.
-2. **Step 4** — Stripe Checkout + webhooks → `subscriptions` table; suspend on `past_due`.
-3. **Feature flags** — Enforce plan limits per [`business-rules.md`](../business-rules.md).
+**Superseded by Phase E** (issues draft arriba). Trigger cumplido: Phase A–D shipped.
 
 ---
 
@@ -251,6 +277,11 @@ Then implement (separate plan / issues):
 | `verify:rewards` | D (#24) |
 | `verify:customer-reward-redeem` | D (#25) |
 | `verify:tenant-employees` | D (#26–#27) |
+| `verify:subscription-plans` | E (#30) |
+| `verify:onboarding-plan-selection` | E (#31) |
+| `verify:stripe-checkout-use-case` | E (#32) |
+| `verify:stripe-webhooks-use-case` | E (#33) |
+| `verify:tenant-feature-flags-use-case` | E (#34) |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |
 
 ---
@@ -299,12 +330,20 @@ A business owner who completed Steps 1–2 can:
 | 26 | Tenant team: invite employee + API | **Closed** (2026-06-09) — [issue #26](https://github.com/3urega/fidelization/issues/26) |
 | 27 | Tenant team: settings UI + verify E2E | **Closed** (2026-06-09) — [issue #27](https://github.com/3urega/fidelization/issues/27) |
 
+## GitHub issues (Phase E)
+
+| # | Título | Body file |
+|---|--------|-----------|
+| 30 | Subscription plans: catalog + tenant plan API + verify | [`subscription-plans-catalog-api.md`](../issues/subscription-plans-catalog-api.md) — [issue #30](https://github.com/3urega/fidelization/issues/30) |
+| 31 | Onboarding Step 3: plan selection UI + verify E2E | [`onboarding-plan-selection-ui.md`](../issues/onboarding-plan-selection-ui.md) — [issue #31](https://github.com/3urega/fidelization/issues/31) |
+| 32 | Stripe Checkout: tenant subscription (Step 4) | [`stripe-checkout-subscription.md`](../issues/stripe-checkout-subscription.md) — [issue #32](https://github.com/3urega/fidelization/issues/32) |
+| 33 | Stripe webhooks: subscription lifecycle + tenant suspend | [`stripe-webhooks-lifecycle.md`](../issues/stripe-webhooks-lifecycle.md) — [issue #33](https://github.com/3urega/fidelization/issues/33) |
+| 34 | Feature flags: enforce tenant plan limits | [`tenant-feature-flags.md`](../issues/tenant-feature-flags.md) — [issue #34](https://github.com/3urega/fidelization/issues/34) |
+
 ```bash
 gh auth login
-# Phase A–C (publicado)
-powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.post-onboarding.json
-# Phase D Step 6 (draft)
-powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step6.json
+# Phase E — billing (draft)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step3-billing.json
 ```
 
 Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanban-board` (close + cleanup `docs/issues/`). Ver [`docs/issues/README.md`](../issues/README.md).

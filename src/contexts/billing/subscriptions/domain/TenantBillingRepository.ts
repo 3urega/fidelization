@@ -6,6 +6,10 @@ export abstract class TenantBillingRepository {
 
 	abstract searchPlanByName(name: string): Promise<SubscriptionPlan | null>;
 
+	abstract searchPlanById(planId: string): Promise<SubscriptionPlan | null>;
+
+	abstract listActivePlans(): Promise<SubscriptionPlan[]>;
+
 	abstract saveSubscription(subscription: TenantSubscription): Promise<void>;
 
 	abstract searchActiveSubscription(tenantId: string): Promise<TenantSubscription | null>;

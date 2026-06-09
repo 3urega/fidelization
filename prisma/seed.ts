@@ -17,6 +17,8 @@ const DEMO_USER_ID = "00000000-0000-4000-8000-000000000001";
 const DEMO_TENANT_ID = "00000000-0000-4000-8000-000000000002";
 const DEMO_MEMBERSHIP_ID = "00000000-0000-4000-8000-000000000003";
 const DEMO_PLAN_BASIC_ID = "00000000-0000-4000-8000-000000000004";
+const DEMO_PLAN_PRO_ID = "00000000-0000-4000-8000-000000000006";
+const DEMO_PLAN_PREMIUM_ID = "00000000-0000-4000-8000-000000000007";
 const DEMO_CUSTOMER_ID = "00000000-0000-4000-8000-000000000005";
 const SUPERADMIN_USER_ID = "00000000-0000-4000-8000-000000000010";
 
@@ -82,19 +84,124 @@ async function main(): Promise<void> {
 
 	await prisma.subscriptionPlan.upsert({
 		where: { id: DEMO_PLAN_BASIC_ID },
-		update: {},
+		update: {
+			name: "basic",
+			priceMonthly: 0,
+			priceYearly: 0,
+			isActive: true,
+			features: {
+				stamps: true,
+				points: true,
+				promotions: false,
+				coupons: false,
+				push: false,
+				gamification: false,
+				referrals: false,
+				analytics: false,
+			},
+			limits: { employees: 3 },
+		},
 		create: {
 			id: DEMO_PLAN_BASIC_ID,
 			name: "basic",
 			priceMonthly: 0,
 			priceYearly: 0,
-			features: { loyalty: true, stamps: true },
+			features: {
+				stamps: true,
+				points: true,
+				promotions: false,
+				coupons: false,
+				push: false,
+				gamification: false,
+				referrals: false,
+				analytics: false,
+			},
+			limits: { employees: 3 },
+		},
+	});
+
+	await prisma.subscriptionPlan.upsert({
+		where: { id: DEMO_PLAN_PRO_ID },
+		update: {
+			name: "pro",
+			priceMonthly: 2900,
+			priceYearly: 29000,
+			isActive: true,
+			features: {
+				stamps: true,
+				points: true,
+				promotions: true,
+				coupons: true,
+				push: true,
+				gamification: false,
+				referrals: false,
+				analytics: true,
+			},
+			limits: { employees: 10 },
+		},
+		create: {
+			id: DEMO_PLAN_PRO_ID,
+			name: "pro",
+			priceMonthly: 2900,
+			priceYearly: 29000,
+			features: {
+				stamps: true,
+				points: true,
+				promotions: true,
+				coupons: true,
+				push: true,
+				gamification: false,
+				referrals: false,
+				analytics: true,
+			},
+			limits: { employees: 10 },
+		},
+	});
+
+	await prisma.subscriptionPlan.upsert({
+		where: { id: DEMO_PLAN_PREMIUM_ID },
+		update: {
+			name: "premium",
+			priceMonthly: 5900,
+			priceYearly: 59000,
+			isActive: true,
+			features: {
+				stamps: true,
+				points: true,
+				promotions: true,
+				coupons: true,
+				push: true,
+				gamification: true,
+				referrals: true,
+				analytics: true,
+			},
+			limits: { employees: 50 },
+		},
+		create: {
+			id: DEMO_PLAN_PREMIUM_ID,
+			name: "premium",
+			priceMonthly: 5900,
+			priceYearly: 59000,
+			features: {
+				stamps: true,
+				points: true,
+				promotions: true,
+				coupons: true,
+				push: true,
+				gamification: true,
+				referrals: true,
+				analytics: true,
+			},
+			limits: { employees: 50 },
 		},
 	});
 
 	await prisma.tenant.update({
 		where: { id: DEMO_TENANT_ID },
-		data: { subscriptionPlanId: DEMO_PLAN_BASIC_ID },
+		data: {
+			subscriptionPlanId: DEMO_PLAN_BASIC_ID,
+			subscriptionPlan: "basic",
+		},
 	});
 
 	await prisma.customer.upsert({
@@ -109,7 +216,7 @@ async function main(): Promise<void> {
 		},
 	});
 
-	console.log("Seed: demo owner + plan basic + customer QR (demo-qr-cafe-demo)");
+	console.log("Seed: demo owner + plans basic/pro/premium + customer QR (demo-qr-cafe-demo)");
 	console.log(`Seed: superadmin ${superadminEmail} (no tenant membership)`);
 }
 
