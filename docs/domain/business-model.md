@@ -14,17 +14,27 @@ Revenue is based on recurring subscriptions plus optional add-ons.
 
 | Area in this doc | Target | Implemented now | Notes |
 |------------------|--------|-------------------|-------|
-| Value proposition (retention, QR, promos, loyalty) | Core product | **No product features yet** | Fase 0: auth, tenant, owner `/home` placeholders («Próximamente») |
-| Plans Basic / Pro / Premium (tenant) | Three SaaS tiers with feature sets | **No** | `Tenant.subscriptionPlan` is a free string (default `"basic"` in [`prisma/schema.prisma`](../prisma/schema.prisma)); no catalog, no UI, no feature gating |
-| Add-ons (Gamification, Marketing, CRM, white-label) | Modular upsell | **No** | Not in schema or billing |
-| Pricing strategy (amounts, tiers) | Commercial decisions | **No** | Document only; no prices in repo |
-| Revenue: monthly subscriptions per tenant | Stripe (see saas-architecture) | **No** | No tenant checkout or subscription lifecycle |
+| Value proposition (retention, QR, promos, loyalty) | Core product | **Partial** | Loyalty MVP (QR, sellos, puntos, rewards, employees); promociones API placeholder gated |
+| Plans Basic / Pro / Premium (tenant) | Three SaaS tiers with feature sets | **Partial** | Catálogo + checkout (#30–#32); **feature gating enforced** (#34): `AssertTenantPlanFeature`, employee limits, `GET /api/loyalty/promotions` Pro+ |
+| Add-ons (Gamification, Marketing, CRM, white-label) | Modular upsell | **No** | Premium flags exist in JSON; no add-on SKUs or separate billing |
+| Pricing strategy (amounts, tiers) | Commercial decisions | **Partial** | Seed prices (0 / 29€ / 59€); Stripe Checkout for paid plans |
+| Revenue: monthly subscriptions per tenant | Stripe (see saas-architecture) | **Partial** | Checkout + webhooks lifecycle (#32–#33); no Customer Portal |
 | Revenue: add-ons per tenant | — | **No** | — |
-| User-level plan (starter) | — | **Partial** | `User.subscriptionPlan`: `FREE` \| `PREMIUM` ([`UserPlan`](../src/contexts/identity/users/domain/UserPlan.ts)); Google Play demo in `billing` context — **not** the Basic/Pro/Premium tenant model below |
-| Customer segments (cafés, bakeries, …) | GTM focus | **N/A (business)** | Aligns with product vision; no code impact |
+| User-level plan (starter) | — | **Partial** | `User.subscriptionPlan`: `FREE` \| `PREMIUM` — **not** tenant Basic/Pro/Premium |
+| Customer segments (cafés, bakeries, …) | GTM focus | **N/A (business)** | Aligns with product vision |
 | Growth / long-term vision | Strategy | **N/A (business)** | Roadmap text only |
 
-**Conclusion:** sections 2–5 describe the **target monetization**. Do not implement plan limits or add-on SKUs from this file alone without a billing/feature-flag issue; today only `subscription_plan` columns exist without semantics.
+### Plan feature matrix (enforced in code — #34)
+
+| Feature key | Basic | Pro | Premium | Enforced on |
+|-------------|-------|-----|---------|-------------|
+| stamps, points | yes | yes | yes | Not gated (Basic regression) |
+| promotions | no | yes | yes | `GET /api/loyalty/promotions` |
+| coupons, push, analytics | no | yes | yes | Flags in plan JSON; APIs TBD |
+| gamification, referrals | no | no | yes | Flags in plan JSON; APIs TBD |
+| `limits.employees` | 3 | 10 | 50 | `InviteTenantEmployee` |
+
+**Conclusion:** tenant plan **features and employee limits** are enforced via `ResolveTenantSubscriptionPlan` + guards. Remaining commercial items (add-ons, usage metering) are still target-only.
 
 ---
 

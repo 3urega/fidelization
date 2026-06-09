@@ -1,6 +1,6 @@
 import { Service } from "diod";
 
-import { AssertTenantPlanFeature } from "../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
 import { TenantRole } from "../../../../tenants/memberships/domain/TenantRole";
 import { TenantAccessSuspended } from "../../../../tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";

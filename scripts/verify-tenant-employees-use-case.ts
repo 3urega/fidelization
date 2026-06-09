@@ -8,6 +8,9 @@ import { UserPlan } from "../src/contexts/identity/users/domain/UserPlan";
 import { CreateStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/application/create/CreateStampCampaign";
 import { StampCampaignForbidden } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignForbidden";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { AssertTenantEmployeeLimit } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantEmployeeLimit";
+import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlan";
+import { PRO_PLAN_FEATURES } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanFeatures";
 import { InviteTenantEmployee } from "../src/contexts/tenants/memberships/application/invite/InviteTenantEmployee";
 import { ListTenantEmployees } from "../src/contexts/tenants/memberships/application/invite/ListTenantEmployees";
 import {
@@ -183,10 +186,23 @@ async function main(): Promise<void> {
 	const tenantRepository = new StubTenantRepository(baseTenant);
 	const membershipRepository = new InMemoryMembershipRepository();
 	const userRegistrar = new StubUserRegistrar(membershipRepository);
+	const assertEmployeeLimit = {
+		execute: async () =>
+			SubscriptionPlan.fromPrimitives({
+				id: "00000000-0000-4000-8000-000000000006",
+				name: "pro",
+				priceMonthly: 2900,
+				priceYearly: 29000,
+				features: PRO_PLAN_FEATURES,
+				limits: { employees: 10 },
+				isActive: true,
+			}),
+	} as unknown as AssertTenantEmployeeLimit;
 	const invite = new InviteTenantEmployee(
 		tenantRepository,
 		membershipRepository,
 		userRegistrar as unknown as UserRegistrar,
+		assertEmployeeLimit,
 	);
 	const list = new ListTenantEmployees(tenantRepository, membershipRepository);
 

@@ -41,6 +41,7 @@ npm run verify:onboarding-plan-selection  # issue #31 — wizard → /onboarding
 npm run verify:stripe-checkout-use-case  # issue #32 — CreateStripeCheckoutSession (domain stub)
 npm run verify:stripe-webhook-checkout-use-case  # issue #32 — CompleteStripeCheckoutSession + webhook payload (domain stub)
 npm run verify:stripe-webhooks-use-case  # issue #33 — SyncTenantSubscriptionFromStripe + ProcessStripeWebhook (domain stub)
+npm run verify:tenant-feature-flags-use-case  # issue #34 — plan feature guards + employee limits (domain stub)
 npm run db:users               # list users, platform_role y memberships
 npm run build:capacitor   # export out/ + cap sync android
 ```
@@ -97,6 +98,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Onboarding plan UI (#31):** tras Step 2, owner en `/onboarding/plan` elige plan; checklist «Elige tu plan» en `/home` hasta `subscriptionPlanId` asignado. `verify:onboarding-plan-selection`.
 - **Stripe Checkout (#32):** Basic sigue con `PATCH`; Pro/Premium → `POST /api/billing/checkout` → redirect Stripe; webhook `checkout.session.completed` en `POST /api/webhooks/stripe` crea fila `subscriptions` y vincula plan. Env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PREMIUM_MONTHLY`. Dev: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. `verify:stripe-checkout-use-case`, `verify:stripe-webhook-checkout-use-case`.
 - **Stripe webhooks lifecycle (#33):** `POST /api/webhooks/stripe` procesa `invoice.payment_failed`, `invoice.paid`, `customer.subscription.updated/deleted` → `SyncTenantSubscriptionFromStripe` (impago → tenant `suspended`; pago recuperado reactiva solo si suscripción estaba `past_due`). Idempotencia en `stripe_webhook_events`. Migración: `20260609150000_stripe_webhook_events`. Dev triggers: `stripe trigger invoice.payment_failed`, `stripe trigger invoice.paid`. `verify:stripe-webhooks-use-case`.
+- **Plan feature flags (#34):** guards `AssertTenantPlanFeature` / `AssertTenantEmployeeLimit` leen `subscription_plans.features`/`limits`. Basic: sellos+puntos; Pro+: `GET /api/loyalty/promotions`; límite empleados en invite. `GET /api/me` incluye `planFeatures[]`. `verify:tenant-feature-flags-use-case`.
 
 # Architecture
 
@@ -160,6 +162,7 @@ docs/
 | Onboarding plan UI (#31) | `verify:onboarding-plan-selection` + `/onboarding/plan` + checklist `/home` |
 | Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` |
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
+| Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

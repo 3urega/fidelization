@@ -20,7 +20,7 @@ export async function GET(request: Request): Promise<Response> {
 	}
 
 	try {
-		const promotions = await container.get(ListPromotions).execute({
+		await container.get(ListPromotions).execute({
 			tenantId: auth.session.tenantId,
 			role: auth.session.role as TenantRole,
 		});
