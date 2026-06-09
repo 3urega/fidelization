@@ -256,6 +256,15 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "SubscriptionPlanNotFound") {
 		return HttpNextResponse.domainError(error, 404);
 	}
+	if (error.type === "FreePlanDoesNotRequireCheckout") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "TenantAlreadyHasActiveSubscription") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "StripeCheckoutNotConfigured") {
+		return HttpNextResponse.domainError(error, 503);
+	}
 
 	return undefined;
 }

@@ -73,6 +73,14 @@ export const env = {
 		return process.env.ALLOW_DEMO_BILLING === "1";
 	},
 
+	get stripeSecretKey(): string {
+		return requireEnv("STRIPE_SECRET_KEY");
+	},
+
+	get stripeWebhookSecret(): string | undefined {
+		return optionalEnv("STRIPE_WEBHOOK_SECRET");
+	},
+
 	/** Warn in production boot when critical vars are missing (non-throwing). */
 	validateProduction(): string[] {
 		const missing: string[] = [];

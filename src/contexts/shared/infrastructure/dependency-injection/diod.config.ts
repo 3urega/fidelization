@@ -10,7 +10,10 @@ import { GooglePlaySubscriptionRepository } from "../../../billing/google_play_s
 import { PostgresGooglePlaySubscriptionRepository } from "../../../billing/google_play_subscription/infrastructure/PostgresGooglePlaySubscriptionRepository";
 import { TenantBillingRepository } from "../../../billing/subscriptions/domain/TenantBillingRepository";
 import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/application/assign/AssignTenantSubscriptionPlan";
+import { CreateStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CreateStripeCheckoutSession";
 import { ListSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListSubscriptionPlans";
+import { StripeCheckoutGateway } from "../../../billing/stripe/domain/StripeCheckoutGateway";
+import { StripeCheckoutGatewayStripe } from "../../../billing/stripe/infrastructure/StripeCheckoutGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
@@ -160,7 +163,10 @@ builder.registerAndUse(PrismaNotificationRepository);
 
 builder.register(TenantBillingRepository).use(PrismaTenantBillingRepository);
 builder.registerAndUse(PrismaTenantBillingRepository);
+builder.register(StripeCheckoutGateway).use(StripeCheckoutGatewayStripe);
+builder.registerAndUse(StripeCheckoutGatewayStripe);
 builder.registerAndUse(ListSubscriptionPlans);
 builder.registerAndUse(AssignTenantSubscriptionPlan);
+builder.registerAndUse(CreateStripeCheckoutSession);
 
 export const container = builder.build();
