@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
-import { resolveTenantHomeUrl } from "../../../../../lib/tenant/resolveTenantHomeUrl";
+import { resolveTenantHomeUrl } from "../../../../../../lib/tenant/resolveTenantHomeUrl";
 import { Button } from "../../../../../_components/ui/Button";
 import { Card } from "../../../../../_components/ui/Card";
 

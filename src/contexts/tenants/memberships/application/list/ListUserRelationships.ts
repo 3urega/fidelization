@@ -1,7 +1,7 @@
 import { Service } from "diod";
 
-import { CustomerRepository } from "../../../loyalty/customers/domain/CustomerRepository";
-import { CustomerEstablishmentSummary } from "../../../loyalty/customers/domain/CustomerEstablishmentSummary";
+import { CustomerRepository } from "../../../../loyalty/customers/domain/CustomerRepository";
+import { CustomerEstablishmentSummary } from "../../../../loyalty/customers/domain/CustomerEstablishmentSummary";
 import { TenantMembershipRepository } from "../../domain/TenantMembershipRepository";
 
 export type UserBusinessSummary = {
