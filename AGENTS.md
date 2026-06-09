@@ -20,6 +20,7 @@ npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEs
 npm run verify:platform-app-establishment-detail  # issue #43 — establishment detail + cross-promos E2E (dev + DATABASE_URL)
 npm run verify:platform-app-global-qr-scan-use-case  # issue #44 — RecordCustomerVisitByQr user QR lookup (domain stub)
 npm run verify:platform-app-global-qr-scan  # issue #44 — user QR staff scan E2E (dev + DATABASE_URL)
+npm run verify:platform-app-google-oauth-use-case  # issue #45 VS1 — AuthenticateGoogleUser (domain stub)
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home

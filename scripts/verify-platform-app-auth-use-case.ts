@@ -45,6 +45,10 @@ class InMemoryUserRepository extends UserRepository {
 		return null;
 	}
 
+	async searchByOAuthSubject(): Promise<User | null> {
+		return null;
+	}
+
 	async updatePasswordHash(userId: UserId, passwordHash: string): Promise<void> {
 		for (const [email, row] of this.users.entries()) {
 			if (row.user.id.value === userId.value) {

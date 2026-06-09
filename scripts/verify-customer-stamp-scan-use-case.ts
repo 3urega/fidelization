@@ -168,6 +168,10 @@ class StubUserRepository extends UserRepository {
 		return null;
 	}
 
+	async searchByOAuthSubject(): Promise<null> {
+		return null;
+	}
+
 	async updatePasswordHash(): Promise<void> {}
 
 	async isPlatformSuperadmin(): Promise<boolean> {

@@ -41,6 +41,10 @@ class InMemoryUserRepository extends UserRepository {
 		return null;
 	}
 
+	async searchByOAuthSubject(): Promise<User | null> {
+		return null;
+	}
+
 	async updatePasswordHash(): Promise<void> {}
 
 	async isPlatformSuperadmin(): Promise<boolean> {

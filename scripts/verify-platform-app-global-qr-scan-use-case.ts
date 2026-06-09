@@ -76,6 +76,10 @@ class InMemoryUserRepository extends UserRepository {
 		return this.byQr.get(qrValue.trim()) ?? null;
 	}
 
+	async searchByOAuthSubject(): Promise<User | null> {
+		return null;
+	}
+
 	async updatePasswordHash(): Promise<void> {}
 
 	async isPlatformSuperadmin(): Promise<boolean> {
