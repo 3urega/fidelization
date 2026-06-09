@@ -393,7 +393,7 @@ A business owner who completed Steps 1–2 can:
 | 42 | Platform app: join establishment + customer link | **Open** — [issue #42](https://github.com/3urega/fidelization/issues/42) |
 | 43 | Platform app: establishment detail | **Open** — [issue #43](https://github.com/3urega/fidelization/issues/43) |
 | 44 | Platform app: global QR + staff scan | **Open** — [issue #44](https://github.com/3urega/fidelization/issues/44) |
-| 45 | Platform app: Google OAuth + Capacitor + verify E2E | **Open** — [issue #45](https://github.com/3urega/fidelization/issues/45) |
+| 45 | Platform app: Google OAuth + Capacitor + verify E2E | **Closed** (2026-06-09) — [issue #45](https://github.com/3urega/fidelization/issues/45) |
 
 ```bash
 gh auth login
