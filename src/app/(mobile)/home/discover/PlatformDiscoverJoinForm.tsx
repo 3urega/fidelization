@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactElement, useState } from "react";
 
-import { platformFetch } from "../../../../../lib/platform/apiUrl";
-import { Button } from "../../../../_components/ui/Button";
-import { Card } from "../../../../_components/ui/Card";
+import { platformFetch } from "../../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../../lib/platform/routes";
+import { Button } from "../../../_components/ui/Button";
+import { Card } from "../../../_components/ui/Card";
 
 export function PlatformDiscoverJoinForm(): ReactElement {
 	const router = useRouter();
@@ -33,7 +34,7 @@ export function PlatformDiscoverJoinForm(): ReactElement {
 			return;
 		}
 
-		router.push("/u/home");
+		router.push(platformRoutes.home);
 	}
 
 	return (

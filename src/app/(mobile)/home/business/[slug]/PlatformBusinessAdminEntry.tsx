@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
-import { platformFetch } from "../../../../../../lib/platform/apiUrl";
-import { Button } from "../../../../../_components/ui/Button";
-import { Card } from "../../../../../_components/ui/Card";
+import { platformFetch } from "../../../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../../../lib/platform/routes";
+import { Button } from "../../../../_components/ui/Button";
+import { Card } from "../../../../_components/ui/Card";
 
 type UserBusiness = {
 	id: string;
@@ -50,7 +51,7 @@ export function PlatformBusinessAdminEntry(): ReactElement {
 			const match = data.businesses.find((row) => row.slug === slug) ?? null;
 
 			if (!match) {
-				router.replace("/u/home");
+				router.replace(platformRoutes.home);
 
 				return;
 			}
@@ -78,7 +79,7 @@ export function PlatformBusinessAdminEntry(): ReactElement {
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
-			<Link href="/u/home" className="text-sm font-medium text-primary hover:opacity-80">
+			<Link href={platformRoutes.home} className="text-sm font-medium text-primary hover:opacity-80">
 				← Volver al inicio
 			</Link>
 

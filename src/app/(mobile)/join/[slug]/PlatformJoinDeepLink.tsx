@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
-import { platformFetch } from "../../../../../lib/platform/apiUrl";
+import { platformFetch } from "../../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../../lib/platform/routes";
 
 type JoinState = "loading" | "error";
 
@@ -44,7 +45,7 @@ export function PlatformJoinDeepLink(): ReactElement {
 				return;
 			}
 
-			router.replace("/u/home");
+			router.replace(platformRoutes.home);
 		}
 
 		void join();
@@ -61,7 +62,7 @@ export function PlatformJoinDeepLink(): ReactElement {
 	return (
 		<div className="flex flex-col gap-4">
 			<p className="text-sm text-error">{error ?? "No se pudo unir al local"}</p>
-			<Link href="/u/home" className="text-sm font-medium text-primary hover:opacity-80">
+			<Link href={platformRoutes.home} className="text-sm font-medium text-primary hover:opacity-80">
 				← Volver al inicio
 			</Link>
 		</div>

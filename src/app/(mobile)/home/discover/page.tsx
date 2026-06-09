@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { platformRoutes } from "../../../lib/platform/routes";
 import { PlatformDiscoverJoinForm } from "./PlatformDiscoverJoinForm";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 export default function PlatformDiscoverPage(): React.ReactElement {
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
-			<Link href="/u/home" className="text-sm font-medium text-primary hover:opacity-80">
+			<Link href={platformRoutes.home} className="text-sm font-medium text-primary hover:opacity-80">
 				← Volver al inicio
 			</Link>
 

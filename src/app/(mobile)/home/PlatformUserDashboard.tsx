@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { type ReactElement, useEffect, useState } from "react";
 
-import { platformFetch } from "../../../../lib/platform/apiUrl";
+import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../lib/platform/routes";
 import { PlatformUserQrModal } from "../../../_components/platform-app/PlatformUserQrModal";
 import {
 	BusinessSummaryCard,
@@ -86,7 +87,7 @@ export function PlatformUserDashboard(): ReactElement {
 
 	async function logout(): Promise<void> {
 		await platformFetch("/api/auth/logout", { method: "POST" });
-		window.location.assign("/u");
+		window.location.assign(platformRoutes.publicHome);
 	}
 
 	if (loading) {
@@ -139,7 +140,7 @@ export function PlatformUserDashboard(): ReactElement {
 							<p className="text-sm text-muted">
 								Aún no tienes un negocio registrado.{" "}
 								<Link
-									href="/u/register/business"
+									href={platformRoutes.registerBusiness}
 									className="font-medium text-primary hover:opacity-80"
 								>
 									Registrar negocio
@@ -167,7 +168,7 @@ export function PlatformUserDashboard(): ReactElement {
 						<Card>
 							<p className="text-sm text-muted">
 								Todavía no tienes locales con actividad.{" "}
-								<Link href="/u/home/discover" className="font-medium text-primary hover:opacity-80">
+								<Link href={platformRoutes.homeDiscover} className="font-medium text-primary hover:opacity-80">
 									Descubrir locales
 								</Link>
 							</p>

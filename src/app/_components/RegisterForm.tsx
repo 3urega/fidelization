@@ -50,7 +50,7 @@ export function RegisterForm(): ReactElement {
 			primaryColor: data.tenant.primaryColor,
 			secondaryColor: data.tenant.secondaryColor,
 		});
-		window.location.assign("/home");
+		window.location.assign("/panel");
 	}
 
 	return (

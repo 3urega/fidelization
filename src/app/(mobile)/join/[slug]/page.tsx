@@ -12,7 +12,7 @@ export function generateMetadata({ params }: PlatformJoinPageProps): Metadata {
 	};
 }
 
-/** Deep link entry: QR / escaparate → /u/join/{slug} (issue #42). */
+/** Deep link entry: QR / escaparate → /join/{slug} (issue #42). */
 export default function PlatformJoinPage(): React.ReactElement {
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">

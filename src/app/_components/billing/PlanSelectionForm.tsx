@@ -115,7 +115,7 @@ export function PlanSelectionForm(): ReactElement {
 		}
 
 		if (hasTenantChosenPlan(session.tenant)) {
-			router.replace("/home");
+			router.replace("/panel");
 
 			return;
 		}
@@ -141,7 +141,7 @@ export function PlanSelectionForm(): ReactElement {
 		}
 
 		await refresh();
-		router.push("/home");
+		router.push("/panel");
 	}
 
 	async function startPaidCheckout(planId: string): Promise<void> {
