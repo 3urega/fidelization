@@ -2,10 +2,10 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { ListUserRelationships } from "../../../../contexts/tenants/memberships/application/list/ListUserRelationships";
-import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { requireUserSession } from "../../../../lib/auth/requireUserSession";
-import { getResolvedTenantFromRequest } from "../../../../lib/tenant/getResolvedTenant";
+import { ListUserRelationships } from "../../../../../contexts/tenants/memberships/application/list/ListUserRelationships";
+import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { requireUserSession } from "../../../../../lib/auth/requireUserSession";
+import { getResolvedTenantFromRequest } from "../../../../../lib/tenant/getResolvedTenant";
 
 export const dynamic = "force-dynamic";
 

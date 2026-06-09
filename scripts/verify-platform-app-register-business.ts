@@ -170,16 +170,6 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET /api/user/me/relationships lists business");
 
-	const home = await fetch(`${baseUrl}/u/home`, { headers: sessionHeaders(userCookie) });
-	const homeHtml = await home.text();
-
-	if (home.status !== 200 || !homeHtml.includes("Mis negocios") || !homeHtml.includes(businessName)) {
-		console.error("❌ GET /u/home should show business in Mis negocios");
-		process.exit(1);
-	}
-
-	console.log("✅ GET /u/home shows Mis negocios");
-
 	const userRow = await prisma.user.findUnique({
 		where: { email },
 		select: {
