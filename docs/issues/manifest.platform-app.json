@@ -14,10 +14,6 @@
   },
   "issues": [
     {
-      "title": "Platform app: join establishment + customer user_id link",
-      "bodyFile": "docs/issues/platform-app-customer-join.md"
-    },
-    {
       "title": "Platform app: establishment detail (tarjeta, promos, descubrimiento)",
       "bodyFile": "docs/issues/platform-app-establishment-detail.md"
     },

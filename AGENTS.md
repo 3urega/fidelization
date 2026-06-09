@@ -14,6 +14,8 @@ npm run verify:platform-app-public-home  # issue #39 — /u home + register/logi
 npm run verify:platform-app-register-business  # issue #40 — /u/register/business + POST /api/user/businesses (dev + DATABASE_URL)
 npm run verify:platform-app-dashboard-use-case  # issue #41 — ListUserRelationships (domain stub)
 npm run verify:platform-app-dashboard  # issue #41 — /u/home dashboard + business shell E2E (dev + DATABASE_URL)
+npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAsCustomer (domain stub)
+npm run verify:platform-app-customer-join  # issue #42 — join by slug + deep link E2E (dev + DATABASE_URL)
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
@@ -115,6 +117,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Platform app home UI (#39):** home pública `/u` (Registrarse · Registrar negocio · Login); formularios `/u/register`, `/u/login` → `/u/home` placeholder; guards middleware `kind: user`. `verify:platform-app-public-home`.
 - **Platform app register business (#40):** `/u/register/business` (auth gate) → `/u/register/business/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/u/home`. `verify:platform-app-register-business`.
 - **Platform app dashboard (#41):** `/u/home` unificado (Mis negocios + Mis locales), `/u/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
+- **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 
 # Architecture
 
@@ -181,7 +184,7 @@ docs/
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
 | Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
-| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41) + `docs/domain/customer-platform-app.md` |
+| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42) + `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |
