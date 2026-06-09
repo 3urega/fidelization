@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Stripe webhooks: subscription lifecycle + tenant suspend",
-      "bodyFile": "docs/issues/stripe-webhooks-lifecycle.md"
-    },
-    {
       "title": "Feature flags: enforce tenant plan limits",
       "bodyFile": "docs/issues/tenant-feature-flags.md"
     }
