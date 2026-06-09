@@ -7,6 +7,7 @@ import {
 	isOnboardingSession,
 	isPlatformSession,
 	isTenantSession,
+	isUserSession,
 } from "./lib/auth/sessionClaims";
 import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
 import { forwardResolvedTenantHeaders } from "./lib/tenant/forwardResolvedTenantHeaders";
@@ -94,6 +95,14 @@ function isCustomerAppPath(pathname: string): boolean {
 	return pathname === "/app" || pathname.startsWith("/app/");
 }
 
+function isPlatformUserPublicPath(pathname: string): boolean {
+	return pathname === "/u" || pathname === "/u/register" || pathname === "/u/login";
+}
+
+function isPlatformUserAppPath(pathname: string): boolean {
+	return pathname === "/u/home" || pathname.startsWith("/u/home/");
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const resolution = await resolveTenantFromRequest(request);
 
@@ -104,6 +113,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const hasTenantSession = session !== null && isTenantSession(session);
 	const hasOnboardingSession = session !== null && isOnboardingSession(session);
 	const hasCustomerSession = session !== null && isCustomerSession(session);
+	const hasUserSession = session !== null && isUserSession(session);
 
 	if (resolution.status === "not_found" && pathname !== "/tenant-not-found") {
 		return NextResponse.rewrite(new URL("/tenant-not-found", request.url), { status: 404 });
@@ -135,6 +145,10 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	} else if (hasPlatformSession && isTenantAppPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasPlatformSession && (pathname === "/login" || isRegisterPath(pathname))) {
+		return NextResponse.redirect(new URL("/platform", request.url));
+	} else if (hasPlatformSession && isPlatformUserPublicPath(pathname)) {
+		return NextResponse.redirect(new URL("/platform", request.url));
+	} else if (hasPlatformSession && isPlatformUserAppPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasOnboardingSession && isPlatformPath(pathname)) {
 		return NextResponse.redirect(new URL("/register/business/tenant", request.url));
@@ -181,6 +195,23 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 				new URL(hasCustomerSession ? "/app/card" : "/app/welcome", request.url),
 			);
 		}
+	}
+
+	if (isPlatformUserAppPath(pathname)) {
+		if (hasOnboardingSession) {
+			return NextResponse.redirect(new URL("/register/business/tenant", request.url));
+		}
+		if (hasTenantSession) {
+			return NextResponse.redirect(new URL("/home", request.url));
+		}
+		if (hasCustomerSession) {
+			return NextResponse.redirect(new URL("/app/card", request.url));
+		}
+		if (!hasUserSession) {
+			return NextResponse.redirect(new URL("/u/login", request.url));
+		}
+	} else if (isPlatformUserPublicPath(pathname) && hasUserSession) {
+		return NextResponse.redirect(new URL("/u/home", request.url));
 	}
 
 	if (isTenantAppPath(pathname)) {
