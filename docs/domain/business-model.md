@@ -14,8 +14,9 @@ Revenue is based on recurring subscriptions plus optional add-ons.
 
 | Area in this doc | Target | Implemented now | Notes |
 |------------------|--------|-------------------|-------|
-| Value proposition (retention, QR, promos, loyalty) | Core product | **Partial** | Loyalty MVP (QR, sellos, puntos, rewards, employees); promociones API placeholder gated |
-| Plans Basic / Pro / Premium (tenant) | Three SaaS tiers with feature sets | **Partial** | Catálogo + checkout (#30–#32); **feature gating enforced** (#34): `AssertTenantPlanFeature`, employee limits, `GET /api/loyalty/promotions` Pro+ |
+| Value proposition (retention, QR, promos, loyalty) | Core product | **Partial** | Loyalty MVP (QR, sellos, puntos, rewards, employees); promos owner API #35 |
+| Promotions owner CRUD | Pro+ gated API | **Partial** | #35 — `GET/POST/PATCH /api/loyalty/promotions`; UI #36; customer list #37 pending |
+| Plans Basic / Pro / Premium (tenant) | Three SaaS tiers with feature sets | **Partial** | Catálogo + checkout (#30–#32); **feature gating enforced** (#34): `AssertTenantPlanFeature`, employee limits, promotions CRUD Pro+ (#35) |
 | Add-ons (Gamification, Marketing, CRM, white-label) | Modular upsell | **No** | Premium flags exist in JSON; no add-on SKUs or separate billing |
 | Pricing strategy (amounts, tiers) | Commercial decisions | **Partial** | Seed prices (0 / 29€ / 59€); Stripe Checkout for paid plans |
 | Revenue: monthly subscriptions per tenant | Stripe (see saas-architecture) | **Partial** | Checkout + webhooks lifecycle (#32–#33); no Customer Portal |

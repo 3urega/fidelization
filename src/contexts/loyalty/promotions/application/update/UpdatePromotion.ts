@@ -8,23 +8,29 @@ import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepos
 import { TenantStatus } from "../../../../tenants/tenants/domain/TenantStatus";
 import { Promotion } from "../../domain/Promotion";
 import { PromotionForbidden } from "../../domain/PromotionForbidden";
+import { PromotionNotFound } from "../../domain/PromotionNotFound";
 import { PromotionRepository } from "../../domain/PromotionRepository";
+import { parsePromotionDeactivate } from "../../domain/PromotionUpdateInput";
 
-export type ListPromotionsParams = {
+export type UpdatePromotionParams = {
 	tenantId: string;
 	role: TenantRole;
+	promotionId: string;
+	input: {
+		isActive?: boolean;
+	};
 };
 
 @Service()
-export class ListPromotions {
+export class UpdatePromotion {
 	constructor(
 		private readonly tenantRepository: TenantRepository,
 		private readonly promotionRepository: PromotionRepository,
 		private readonly assertTenantPlanFeature: AssertTenantPlanFeature,
 	) {}
 
-	async execute(params: ListPromotionsParams): Promise<Promotion[]> {
-		if (params.role !== TenantRole.Owner && params.role !== TenantRole.Employee) {
+	async execute(params: UpdatePromotionParams): Promise<Promotion> {
+		if (params.role !== TenantRole.Owner) {
 			throw new PromotionForbidden(params.role);
 		}
 
@@ -34,7 +40,21 @@ export class ListPromotions {
 			feature: "promotions",
 		});
 
-		return this.promotionRepository.listByTenant(params.tenantId);
+		parsePromotionDeactivate(params.input);
+
+		const existing = await this.promotionRepository.searchById(
+			params.tenantId,
+			params.promotionId,
+		);
+
+		if (!existing) {
+			throw new PromotionNotFound(params.promotionId);
+		}
+
+		const updated = existing.deactivate();
+		await this.promotionRepository.save(updated);
+
+		return updated;
 	}
 
 	private async assertTenantAllowsLoyalty(tenantId: string): Promise<void> {

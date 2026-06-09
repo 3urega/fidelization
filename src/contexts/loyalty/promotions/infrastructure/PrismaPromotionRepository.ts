@@ -17,12 +17,16 @@ export class PrismaPromotionRepository extends PromotionRepository {
 				title: p.title,
 				description: p.description,
 				type: p.type,
+				startDate: p.startDate ? new Date(p.startDate) : null,
+				endDate: p.endDate ? new Date(p.endDate) : null,
 				isActive: p.isActive,
 			},
 			update: {
 				title: p.title,
 				description: p.description,
 				type: p.type,
+				startDate: p.startDate ? new Date(p.startDate) : null,
+				endDate: p.endDate ? new Date(p.endDate) : null,
 				isActive: p.isActive,
 			},
 		});
@@ -33,15 +37,37 @@ export class PrismaPromotionRepository extends PromotionRepository {
 			where: { id, tenantId },
 		});
 
-		return row
-			? Promotion.fromPrimitives({
-					id: row.id,
-					tenantId: row.tenantId,
-					title: row.title,
-					description: row.description,
-					type: row.type as PromotionType,
-					isActive: row.isActive,
-				})
-			: null;
+		return row ? this.mapRow(row) : null;
+	}
+
+	async listByTenant(tenantId: string): Promise<Promotion[]> {
+		const rows = await prisma.promotion.findMany({
+			where: { tenantId },
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => this.mapRow(row));
+	}
+
+	private mapRow(row: {
+		id: string;
+		tenantId: string;
+		title: string;
+		description: string;
+		type: string;
+		startDate: Date | null;
+		endDate: Date | null;
+		isActive: boolean;
+	}): Promotion {
+		return Promotion.fromPrimitives({
+			id: row.id,
+			tenantId: row.tenantId,
+			title: row.title,
+			description: row.description,
+			type: row.type as PromotionType,
+			startDate: row.startDate?.toISOString() ?? null,
+			endDate: row.endDate?.toISOString() ?? null,
+			isActive: row.isActive,
+		});
 	}
 }

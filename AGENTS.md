@@ -31,6 +31,8 @@ npm run verify:stamp-campaigns-use-case  # issue #21 — Create/List/Update stam
 npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campaigns + Prisma (dev + DATABASE_URL)
 npm run verify:rewards-use-case      # issue #24 — Create/List/Update rewards (domain stub)
 npm run verify:rewards               # issue #24 — POST/GET/PATCH rewards + Prisma (dev + DATABASE_URL)
+npm run verify:promotions-use-case   # issue #35 — Create/List/Update promotions + plan gate (domain stub)
+npm run verify:promotions            # issue #35 — POST/GET/PATCH promotions + Prisma (dev + DATABASE_URL)
 npm run verify:customer-reward-redeem-use-case  # issue #25 — list active + redeem (domain stub)
 npm run verify:customer-reward-redeem   # issue #25 — rewards[] in GET me + POST redeem E2E (dev + DATABASE_URL)
 npm run verify:tenant-employees-use-case  # issue #26 — invite/list employees (domain stub)
@@ -99,6 +101,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Stripe Checkout (#32):** Basic sigue con `PATCH`; Pro/Premium → `POST /api/billing/checkout` → redirect Stripe; webhook `checkout.session.completed` en `POST /api/webhooks/stripe` crea fila `subscriptions` y vincula plan. Env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PREMIUM_MONTHLY`. Dev: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. `verify:stripe-checkout-use-case`, `verify:stripe-webhook-checkout-use-case`.
 - **Stripe webhooks lifecycle (#33):** `POST /api/webhooks/stripe` procesa `invoice.payment_failed`, `invoice.paid`, `customer.subscription.updated/deleted` → `SyncTenantSubscriptionFromStripe` (impago → tenant `suspended`; pago recuperado reactiva solo si suscripción estaba `past_due`). Idempotencia en `stripe_webhook_events`. Migración: `20260609150000_stripe_webhook_events`. Dev triggers: `stripe trigger invoice.payment_failed`, `stripe trigger invoice.paid`. `verify:stripe-webhooks-use-case`.
 - **Plan feature flags (#34):** guards `AssertTenantPlanFeature` / `AssertTenantEmployeeLimit` leen `subscription_plans.features`/`limits`. Basic: sellos+puntos; Pro+: `GET /api/loyalty/promotions`; límite empleados en invite. `GET /api/me` incluye `planFeatures[]`. `verify:tenant-feature-flags-use-case`.
+- **Promotions owner API (#35):** owner Pro+ `GET/POST /api/loyalty/promotions`, `PATCH …/[id]`; employee GET only. `verify:promotions-use-case`, `verify:promotions` (dev + `DATABASE_URL`).
 
 # Architecture
 
@@ -152,6 +155,7 @@ docs/
 | Planes Basic/Pro/Premium, add-ons, pricing, modelo de ingresos | `docs/domain/business-model.md` (sección *Implementation status*) |
 | Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
 | Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `verify:tenant-branding` + `verify:customer-qr-session` |
+| App consumidor multi-establecimiento (identidad global, dashboard locales) | `docs/domain/customer-platform-app.md` — **target**; registro unificado owner/cliente, home app (Registrarse / Registrar negocio / Login), dashboard por relación |
 | Stamp campaigns owner CRUD (#21) | `verify:stamp-campaigns-use-case` + `verify:stamp-campaigns` + `/settings/stamps` |
 | Staff scan + stamps (#22) | `verify:customer-stamp-scan-use-case` + `verify:customer-stamp-scan` + `/scan` |
 | Customer stamp progress (#23) | `verify:customer-stamp-progress-use-case` + `verify:customer-stamp-progress` + `/app/card` |
@@ -163,6 +167,8 @@ docs/
 | Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` |
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
+| Promociones owner + cliente (#35–#37) | `verify:promotions-use-case` + `verify:promotions` + `/settings/promotions` (UI #36) |
+| Platform mobile app Phase G (#38–#45) | `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

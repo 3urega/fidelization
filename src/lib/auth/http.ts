@@ -6,6 +6,7 @@ import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
+import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
@@ -106,6 +107,22 @@ export function rewardToJson(
 		type: primitives.type,
 		isActive: primitives.isActive,
 		stockLimit: primitives.stockLimit,
+	};
+}
+
+export function promotionToJson(
+	promotion: Promotion,
+): Record<string, string | boolean | null> {
+	const primitives = promotion.toPrimitives();
+
+	return {
+		id: primitives.id,
+		title: primitives.title,
+		description: primitives.description,
+		type: primitives.type,
+		startDate: primitives.startDate,
+		endDate: primitives.endDate,
+		isActive: primitives.isActive,
 	};
 }
 
@@ -249,6 +266,15 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "RewardInactive") {
 		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "PromotionForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidPromotion") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "PromotionNotFound") {
+		return HttpNextResponse.domainError(error, 404);
 	}
 	if (error.type === "TenantBillingForbidden") {
 		return HttpNextResponse.domainError(error, 403);

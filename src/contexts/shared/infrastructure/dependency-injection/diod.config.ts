@@ -52,6 +52,8 @@ import { CreateReward } from "../../../loyalty/rewards/application/create/Create
 import { ListRewards } from "../../../loyalty/rewards/application/list/ListRewards";
 import { UpdateReward } from "../../../loyalty/rewards/application/update/UpdateReward";
 import { ListPromotions } from "../../../loyalty/promotions/application/list/ListPromotions";
+import { CreatePromotion } from "../../../loyalty/promotions/application/create/CreatePromotion";
+import { UpdatePromotion } from "../../../loyalty/promotions/application/update/UpdatePromotion";
 import { RewardRepository } from "../../../loyalty/rewards/domain/RewardRepository";
 import { PrismaRewardRepository } from "../../../loyalty/rewards/infrastructure/PrismaRewardRepository";
 import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -166,6 +168,8 @@ builder.registerAndUse(ListRewards);
 builder.registerAndUse(UpdateReward);
 
 builder.registerAndUse(ListPromotions);
+builder.registerAndUse(CreatePromotion);
+builder.registerAndUse(UpdatePromotion);
 
 builder.register(PromotionRepository).use(PrismaPromotionRepository);
 builder.registerAndUse(PrismaPromotionRepository);

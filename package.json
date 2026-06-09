@@ -37,6 +37,8 @@
     "verify:customer-stamp-progress": "tsx scripts/verify-customer-stamp-progress.ts",
     "verify:rewards-use-case": "tsx scripts/verify-rewards-use-case.ts",
     "verify:rewards": "tsx scripts/verify-rewards.ts",
+    "verify:promotions-use-case": "tsx scripts/verify-promotions-use-case.ts",
+    "verify:promotions": "tsx scripts/verify-promotions.ts",
     "verify:customer-reward-redeem-use-case": "tsx scripts/verify-customer-reward-redeem-use-case.ts",
     "verify:customer-reward-redeem": "tsx scripts/verify-customer-reward-redeem.ts",
     "verify:tenant-employees-use-case": "tsx scripts/verify-tenant-employees-use-case.ts",

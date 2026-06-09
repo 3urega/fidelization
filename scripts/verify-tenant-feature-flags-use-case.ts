@@ -5,6 +5,8 @@ import { AssertTenantEmployeeLimit } from "../src/contexts/billing/subscriptions
 import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
 import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { ListPromotions } from "../src/contexts/loyalty/promotions/application/list/ListPromotions";
+import { Promotion } from "../src/contexts/loyalty/promotions/domain/Promotion";
+import { PromotionRepository } from "../src/contexts/loyalty/promotions/domain/PromotionRepository";
 import { PlanFeatureNotAvailable } from "../src/contexts/billing/subscriptions/domain/PlanFeatureNotAvailable";
 import {
 	BASIC_PLAN_FEATURES,
@@ -56,6 +58,18 @@ const planPremium = SubscriptionPlan.fromPrimitives({
 	limits: { employees: 50 },
 	isActive: true,
 });
+
+class InMemoryPromotionRepository extends PromotionRepository {
+	async save(): Promise<void> {}
+
+	async searchById(): Promise<Promotion | null> {
+		return null;
+	}
+
+	async listByTenant(): Promise<Promotion[]> {
+		return [];
+	}
+}
 
 class MutableStubTenantRepository extends TenantRepository {
 	constructor(public tenant: Tenant | null) {
@@ -196,7 +210,7 @@ function buildStack(plan: SubscriptionPlan, employees: TenantEmployee[] = []) {
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
 	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
 	const assertEmployeeLimit = new AssertTenantEmployeeLimit(resolvePlan, membershipRepository);
-	const listPromotions = new ListPromotions(tenantRepository, assertFeature);
+	const listPromotions = new ListPromotions(tenantRepository, new InMemoryPromotionRepository(), assertFeature);
 
 	return { assertFeature, assertEmployeeLimit, listPromotions, resolvePlan };
 }
@@ -254,7 +268,7 @@ async function verifyListPromotionsGuard(): Promise<void> {
 	});
 
 	if (promotions.length !== 0) {
-		console.error("❌ ListPromotions placeholder should return empty list", promotions);
+		console.error("❌ ListPromotions should return empty catalog when none exist", promotions);
 		process.exit(1);
 	}
 

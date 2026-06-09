@@ -246,6 +246,37 @@ flowchart LR
 
 ---
 
+## Phase F — Promociones (owner CRUD + cliente)
+
+**Status:** **In progress** — F1 [#35](https://github.com/3urega/fidelization/issues/35) **Implemented** (2026-06-09); F2–F3 open (#36–#37).
+
+**Goal:** Owner Pro+ crea y desactiva promociones; cliente las ve en `/app/card`. Desbloquea promos reales en Phase G (`platform-app-establishment-detail`).
+
+| In | Out |
+|----|-----|
+| Owner CRUD API (`GET/POST/PATCH`) + plan gate | Cupones, push |
+| `/settings/promotions` + nav + checklist `/home` | Condiciones JSON avanzadas |
+| Cliente: `promotions[]` en GET me + UI `/app/card` | Canje de promo |
+| `startDate` / `endDate` opcionales | Cross-tenant promos feed (Phase G) |
+
+### Vertical slices (draft issues)
+
+| Slice | Valor para el usuario | Body file |
+|-------|----------------------|-----------|
+| **F1** | Owner crea catálogo de promociones | **Implemented** [#35](https://github.com/3urega/fidelization/issues/35) (2026-06-09) — `GET/POST/PATCH /api/loyalty/promotions`, `verify:promotions*` |
+| **F2** | UI settings + checklist home | **Published** [#36](https://github.com/3urega/fidelization/issues/36) — `promotions-owner-settings-ui.md` |
+| **F3** | Cliente ve promos activas en tarjeta | **Published** [#37](https://github.com/3urega/fidelization/issues/37) — `promotions-customer-card.md` |
+
+### Acceptance criteria (Phase F — target)
+
+- [x] Owner Pro+ CRUD + `verify:promotions` + `verify:promotions-use-case` (#35 — 2026-06-09)
+- [ ] UI `/settings/promotions` + checklist `/home`
+- [ ] Customer GET me + `/app/card` + `verify:customer-promotions`
+
+Manifest: [`manifest.phase-f-promotions.json`](../issues/manifest.phase-f-promotions.json)
+
+---
+
 ## Deferred — Steps 3–4 (plan + payment)
 
 **Superseded by Phase E** (issues draft arriba). Trigger cumplido: Phase A–D shipped.
@@ -283,6 +314,8 @@ flowchart LR
 | `verify:stripe-webhook-checkout-use-case` | E (#32) |
 | `verify:stripe-webhooks-use-case` | E (#33) |
 | `verify:tenant-feature-flags-use-case` | E (#34) |
+| `verify:promotions` | F |
+| `verify:customer-promotions` | F |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |
 
 ---
@@ -341,10 +374,47 @@ A business owner who completed Steps 1–2 can:
 | 33 | Stripe webhooks: subscription lifecycle + tenant suspend | **Closed** (2026-06-09) — [issue #33](https://github.com/3urega/fidelization/issues/33) |
 | 34 | Feature flags: enforce tenant plan limits | **Closed** (2026-06-09) — [issue #34](https://github.com/3urega/fidelization/issues/34) |
 
+## GitHub issues (Phase F)
+
+| # | Título | Body file |
+|---|--------|-----------|
+| 35 | Promotions: owner CRUD + API + verify (Pro+ plan gate) | **Closed** (2026-06-09) — [issue #35](https://github.com/3urega/fidelization/issues/35) |
+| 36 | Promotions: owner settings UI + home checklist | **Open** — [issue #36](https://github.com/3urega/fidelization/issues/36) |
+| 37 | Promotions: customer active list on /app/card + verify E2E | **Open** — [issue #37](https://github.com/3urega/fidelization/issues/37) |
+
+## GitHub issues (Phase G)
+
+| # | Título | Body file |
+|---|--------|-----------|
+| 38 | Platform app: unified user auth + session kind user | **Open** — [issue #38](https://github.com/3urega/fidelization/issues/38) |
+| 39 | Platform app: public home UI | **Open** — [issue #39](https://github.com/3urega/fidelization/issues/39) |
+| 40 | Platform app: register business flow | **Open** — [issue #40](https://github.com/3urega/fidelization/issues/40) |
+| 41 | Platform app: unified dashboard | **Open** — [issue #41](https://github.com/3urega/fidelization/issues/41) |
+| 42 | Platform app: join establishment + customer link | **Open** — [issue #42](https://github.com/3urega/fidelization/issues/42) |
+| 43 | Platform app: establishment detail | **Open** — [issue #43](https://github.com/3urega/fidelization/issues/43) |
+| 44 | Platform app: global QR + staff scan | **Open** — [issue #44](https://github.com/3urega/fidelization/issues/44) |
+| 45 | Platform app: Google OAuth + Capacitor + verify E2E | **Open** — [issue #45](https://github.com/3urega/fidelization/issues/45) |
+
 ```bash
 gh auth login
-# Phase E — billing (draft)
-powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step3-billing.json
+# Phase F — promociones (publicar primero)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-f-promotions.json
+# Phase G — platform mobile app
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.platform-app.json
 ```
 
 Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanban-board` (close + cleanup `docs/issues/`). Ver [`docs/issues/README.md`](../issues/README.md).
+
+---
+
+## Phase G — Platform mobile app (registro unificado)
+
+**Status:** **Target / not started** — issues [#38–#45](https://github.com/3urega/fidelization/issues/38) published (2026-06-09).
+
+**Goal:** App Capacitor con home (Registrarse · Registrar negocio · Login), **misma cuenta** para owner y cliente, dashboard unificado (mis negocios / mis locales), detalle por establecimiento con tarjetas+promos o solo promos si no hay interacción. Coexiste con web MVP (`/register/business`, `{slug}.domain/app`).
+
+| Slice | Valor | Doc |
+|-------|-------|-----|
+| G1–G8 | Ver vertical slices en [`customer-platform-app.md`](customer-platform-app.md) | Auth unificado + tenant onboarding + dashboards + QR global |
+
+**Issues draft:** [`manifest.platform-app.json`](../issues/manifest.platform-app.json) — **Published** [#38–#45](https://github.com/3urega/fidelization/issues/38).

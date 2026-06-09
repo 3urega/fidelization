@@ -1,0 +1,49 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/customer-platform-app.md",
+  "label": "platform-app",
+  "published": {
+    "38": "https://github.com/3urega/fidelization/issues/38",
+    "39": "https://github.com/3urega/fidelization/issues/39",
+    "40": "https://github.com/3urega/fidelization/issues/40",
+    "41": "https://github.com/3urega/fidelization/issues/41",
+    "42": "https://github.com/3urega/fidelization/issues/42",
+    "43": "https://github.com/3urega/fidelization/issues/43",
+    "44": "https://github.com/3urega/fidelization/issues/44",
+    "45": "https://github.com/3urega/fidelization/issues/45"
+  },
+  "issues": [
+    {
+      "title": "Platform app: unified user auth + session kind user (domain + API)",
+      "bodyFile": "docs/issues/platform-app-unified-auth.md"
+    },
+    {
+      "title": "Platform app: public home UI (Registrarse / Registrar negocio / Login)",
+      "bodyFile": "docs/issues/platform-app-public-home.md"
+    },
+    {
+      "title": "Platform app: register business flow (auth + create tenant)",
+      "bodyFile": "docs/issues/platform-app-register-business.md"
+    },
+    {
+      "title": "Platform app: unified dashboard (mis negocios + mis locales)",
+      "bodyFile": "docs/issues/platform-app-unified-dashboard.md"
+    },
+    {
+      "title": "Platform app: join establishment + customer user_id link",
+      "bodyFile": "docs/issues/platform-app-customer-join.md"
+    },
+    {
+      "title": "Platform app: establishment detail (tarjeta, promos, descubrimiento)",
+      "bodyFile": "docs/issues/platform-app-establishment-detail.md"
+    },
+    {
+      "title": "Platform app: global QR + staff scan lookup",
+      "bodyFile": "docs/issues/platform-app-global-qr-scan.md"
+    },
+    {
+      "title": "Platform app: Google OAuth + Capacitor + verify E2E",
+      "bodyFile": "docs/issues/platform-app-oauth-capacitor.md"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/post-onboarding-mvp-roadmap.md",
+  "label": "phase-f-promotions",
+  "published": {
+    "35": "https://github.com/3urega/fidelization/issues/35",
+    "36": "https://github.com/3urega/fidelization/issues/36",
+    "37": "https://github.com/3urega/fidelization/issues/37"
+  },
+  "issues": [
+    {
+      "title": "Promotions: owner settings UI + home checklist",
+      "bodyFile": "docs/issues/promotions-owner-settings-ui.md"
+    },
+    {
+      "title": "Promotions: customer active list on /app/card + verify E2E",
+      "bodyFile": "docs/issues/promotions-customer-card.md"
+    }
+  ]
+}

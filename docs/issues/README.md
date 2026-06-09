@@ -30,8 +30,12 @@ gh auth login
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.post-onboarding.json
 # Phase D — Step 6 team + rewards (publicado, cerrado)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step6.json
-# Phase E — billing (draft)
+# Phase E — billing (publicado, cerrado)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.step3-billing.json
+# Phase F — promociones (draft; publicar antes de G)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-f-promotions.json
+# Phase G — platform mobile app (draft)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.platform-app.json
 ```
 
 ## After close on GitHub
