@@ -12,6 +12,7 @@ import {
 import { attachResolvedTenantHeaders } from "./lib/tenant/attachResolvedTenantHeaders";
 import { forwardResolvedTenantHeaders } from "./lib/tenant/forwardResolvedTenantHeaders";
 import { getAppDomain, resolveTenantFromRequest } from "./lib/tenant/resolveTenant";
+import { safeRedirectPath } from "./lib/auth/safeRedirectPath";
 
 const allowedOrigins = new Set([
 	"capacitor://localhost",
@@ -103,6 +104,14 @@ function isPlatformUserAppPath(pathname: string): boolean {
 	return pathname === "/u/home" || pathname.startsWith("/u/home/");
 }
 
+function isPlatformUserAuthEntryPath(pathname: string): boolean {
+	return pathname === "/u" || pathname === "/u/register" || pathname === "/u/login";
+}
+
+function isPlatformUserBusinessRegisterPath(pathname: string): boolean {
+	return pathname === "/u/register/business" || pathname.startsWith("/u/register/business/");
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
 	const resolution = await resolveTenantFromRequest(request);
 
@@ -149,6 +158,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 	} else if (hasPlatformSession && isPlatformUserPublicPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasPlatformSession && isPlatformUserAppPath(pathname)) {
+		return NextResponse.redirect(new URL("/platform", request.url));
+	} else if (hasPlatformSession && isPlatformUserBusinessRegisterPath(pathname)) {
 		return NextResponse.redirect(new URL("/platform", request.url));
 	} else if (hasOnboardingSession && isPlatformPath(pathname)) {
 		return NextResponse.redirect(new URL("/register/business/tenant", request.url));
@@ -210,7 +221,27 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 		if (!hasUserSession) {
 			return NextResponse.redirect(new URL("/u/login", request.url));
 		}
-	} else if (isPlatformUserPublicPath(pathname) && hasUserSession) {
+	} else if (pathname === "/u/register/business" && hasUserSession) {
+		return NextResponse.redirect(new URL("/u/register/business/tenant", request.url));
+	} else if (pathname === "/u/register/business/tenant") {
+		if (hasOnboardingSession) {
+			return NextResponse.redirect(new URL("/register/business/tenant", request.url));
+		}
+		if (hasTenantSession) {
+			return NextResponse.redirect(new URL("/home", request.url));
+		}
+		if (hasCustomerSession) {
+			return NextResponse.redirect(new URL("/app/card", request.url));
+		}
+		if (!hasUserSession) {
+			return NextResponse.redirect(new URL("/u/register/business", request.url));
+		}
+	} else if (isPlatformUserAuthEntryPath(pathname) && hasUserSession) {
+		const next = safeRedirectPath(request.nextUrl.searchParams.get("next"));
+		if (next) {
+			return NextResponse.redirect(new URL(next, request.url));
+		}
+
 		return NextResponse.redirect(new URL("/u/home", request.url));
 	}
 

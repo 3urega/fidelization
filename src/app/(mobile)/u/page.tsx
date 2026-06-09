@@ -33,7 +33,7 @@ export default function PlatformAppPublicHomePage(): React.ReactElement {
 						Registrarse
 					</Button>
 				</Link>
-				<Link href="/register/business" className="block w-full">
+				<Link href="/u/register/business" className="block w-full">
 					<Button type="button" variant="secondary" className="w-full py-3">
 						Registrar negocio
 					</Button>

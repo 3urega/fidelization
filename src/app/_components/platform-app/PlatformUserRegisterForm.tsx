@@ -23,7 +23,13 @@ function mapRegisterError(description: string, type?: string): string {
 	return description;
 }
 
-export function PlatformUserRegisterForm(): ReactElement {
+type PlatformUserRegisterFormProps = {
+	redirectTo?: string;
+};
+
+export function PlatformUserRegisterForm({
+	redirectTo = "/u/home",
+}: PlatformUserRegisterFormProps): ReactElement {
 	const router = useRouter();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -80,7 +86,7 @@ export function PlatformUserRegisterForm(): ReactElement {
 			return;
 		}
 
-		router.push("/u/home");
+		router.push(redirectTo);
 		router.refresh();
 	}
 

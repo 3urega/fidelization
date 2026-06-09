@@ -25,7 +25,13 @@ function mapLoginError(description: string, type?: string): string {
 	return description;
 }
 
-export function PlatformUserLoginForm(): ReactElement {
+type PlatformUserLoginFormProps = {
+	redirectTo?: string;
+};
+
+export function PlatformUserLoginForm({
+	redirectTo = "/u/home",
+}: PlatformUserLoginFormProps): ReactElement {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -64,7 +70,7 @@ export function PlatformUserLoginForm(): ReactElement {
 			return;
 		}
 
-		router.push("/u/home");
+		router.push(redirectTo);
 		router.refresh();
 	}
 
