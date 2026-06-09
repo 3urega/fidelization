@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Subscription plans: catalog + tenant plan API + verify",
-      "bodyFile": "docs/issues/subscription-plans-catalog-api.md"
-    },
-    {
       "title": "Onboarding Step 3: plan selection UI + verify E2E",
       "bodyFile": "docs/issues/onboarding-plan-selection-ui.md"
     },
