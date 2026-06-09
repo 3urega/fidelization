@@ -20,8 +20,10 @@ npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEs
 npm run verify:platform-app-establishment-detail  # issue #43 — establishment detail + cross-promos E2E (dev + DATABASE_URL)
 npm run verify:platform-app-global-qr-scan-use-case  # issue #44 — RecordCustomerVisitByQr user QR lookup (domain stub)
 npm run verify:platform-app-global-qr-scan  # issue #44 — user QR staff scan E2E (dev + DATABASE_URL)
-npm run verify:platform-app-google-oauth-use-case  # issue #45 VS1 — AuthenticateGoogleUser (domain stub)
-npm run verify:platform-app-google-oauth  # issue #45 VS2 — Google UI + OAuth API E2E (dev server)
+npm run verify:platform-app-google-oauth-use-case  # issue #45 — AuthenticateGoogleUser (domain stub)
+npm run verify:platform-app-google-oauth  # issue #45 — Google UI + OAuth API E2E (dev server)
+npm run verify:platform-app-capacitor-config  # issue #45 — deep links + build:capacitor (SKIP_CAPACITOR_BUILD=1 to skip build)
+npm run verify:platform-app-e2e  # issue #45 — full platform app flow E2E (dev + DATABASE_URL)
 npm run verify:owner-login     # tenant login cookie + GET /home (demo o OWNER_VERIFY_*)
 npm run verify:platform-login  # superadmin cookie + GET /platform (SUPERADMIN_* en .env)
 npm run verify:platform-isolation  # issue #8 — platform session no accede a /api/me ni /home
@@ -126,7 +128,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 - **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/u/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/u/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
 - **Platform app global QR scan (#44):** `RecordCustomerVisitByQr` resuelve `customers.qr_value` (legacy) luego `users.qr_value` → `customers(user_id, tenant_id)`; sin auto-join → `CustomerNotRegisteredInTenant`. `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.
-- **Platform app Google OAuth (#45):** `POST /api/auth/oauth/google` + botones GIS en `/u`, `/u/register`, `/u/login`. Env: `GOOGLE_CLIENT_ID` + `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (mismo Web client ID). `verify:platform-app-google-oauth`, `verify:platform-app-google-oauth-use-case`.
+- **Platform app Google OAuth (#45):** `POST /api/auth/oauth/google` + botones GIS en `/u`, `/u/register`, `/u/login`. Capacitor: `fidelization://join/{slug}` → `/u/join/[slug]`, `platformFetch` + `NEXT_PUBLIC_API_URL`. Env: `GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `CAPACITOR_SERVER_URL` (dev). `verify:platform-app-google-oauth`, `verify:platform-app-google-oauth-use-case`, `verify:platform-app-capacitor-config`, `verify:platform-app-e2e`, `npm run build:capacitor`.
 
 # Architecture
 
@@ -193,7 +195,7 @@ docs/
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
 | Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
-| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43), `verify:platform-app-global-qr-scan` (#44) + `docs/domain/customer-platform-app.md` |
+| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43), `verify:platform-app-global-qr-scan` (#44), `verify:platform-app-e2e` (#45) + `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

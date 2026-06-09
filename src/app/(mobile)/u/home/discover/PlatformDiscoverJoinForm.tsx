@@ -21,7 +21,6 @@ export function PlatformDiscoverJoinForm(): ReactElement {
 		const response = await platformFetch("/api/user/establishments/join", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			credentials: "include",
 			body: JSON.stringify({ slug: slug.trim() }),
 		});
 

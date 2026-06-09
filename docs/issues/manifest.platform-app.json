@@ -12,10 +12,5 @@
     "44": "https://github.com/3urega/fidelization/issues/44",
     "45": "https://github.com/3urega/fidelization/issues/45"
   },
-  "issues": [
-    {
-      "title": "Platform app: Google OAuth + Capacitor + verify E2E",
-      "bodyFile": "docs/issues/platform-app-oauth-capacitor.md"
-    }
-  ]
+  "issues": []
 }

@@ -13,7 +13,7 @@ Este documento define la **app móvil de plataforma** (Capacitor → App Store /
 
 **Relacionado:** [`business-onboarding.md`](business-onboarding.md) (wizard web owner actual), [`saas-architecture.md`](saas-architecture.md), [`post-onboarding-mvp-roadmap.md`](post-onboarding-mvp-roadmap.md), [`database/data-model.md`](../database/data-model.md), [`AGENTS.md`](../../AGENTS.md).
 
-**Estado:** **In progress** — G1–G4 [#38–#43](https://github.com/3urega/fidelization/issues/38) **Implemented** (2026-06-09); G7 QR global + scan [#44](https://github.com/3urega/fidelization/issues/44) **Implemented** (2026-06-09). G8 OAuth (#45) pendiente. Web legacy sin cambios.
+**Estado:** **Implemented** (2026-06-09) — Phase G [#38–#45](https://github.com/3urega/fidelization/issues/38): auth, dashboard, join, detalle local, QR global, Google OAuth, Capacitor deep links. Web legacy sin cambios.
 
 ---
 
@@ -297,7 +297,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | **G5** | Detalle local sin interacción (solo promos) | Promotions list pública por slug |
 | **G6** | «Otras promos activas» en detalle | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `ListUserCrossTenantPromotions` |
 | **G7** | QR global + scan staff | **Implemented** [#44](https://github.com/3urega/fidelization/issues/44) (2026-06-09) — `users.qr_value`, `RecordCustomerVisitByQr` dual lookup |
-| **G8** | Google OAuth + Capacitor | OAuth, deep links, stores |
+| **G8** | Google OAuth + Capacitor | **Implemented** [#45](https://github.com/3urega/fidelization/issues/45) (2026-06-09) — GIS + `POST /api/auth/oauth/google`, `fidelization://join/{slug}`, `build:capacitor` |
 
 **Dependencias:** Phase F (promociones owner CRUD) alimenta G5–G6 con datos reales.
 
@@ -371,7 +371,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | 42 | Platform app: join establishment + customer user_id link | **Closed** (2026-06-09) — [issue #42](https://github.com/3urega/fidelization/issues/42) |
 | 43 | Platform app: establishment detail (tarjeta, promos, descubrimiento) | **Closed** (2026-06-09) — [issue #43](https://github.com/3urega/fidelization/issues/43) |
 | 44 | Platform app: global QR + staff scan lookup | **Closed** (2026-06-09) — [issue #44](https://github.com/3urega/fidelization/issues/44) |
-| 45 | Platform app: Google OAuth + Capacitor + verify E2E | [issue #45](https://github.com/3urega/fidelization/issues/45) |
+| 45 | Platform app: Google OAuth + Capacitor + verify E2E | **Closed** (2026-06-09) — [issue #45](https://github.com/3urega/fidelization/issues/45) |
 
 Manifest: [`docs/issues/manifest.platform-app.json`](../issues/manifest.platform-app.json)
 

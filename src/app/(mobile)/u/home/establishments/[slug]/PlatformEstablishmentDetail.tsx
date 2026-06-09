@@ -10,7 +10,7 @@ import {
 	type RewardRow,
 	type StampProgressRow,
 } from "../../../../../_components/loyalty/LoyaltyCard";
-import { platformFetch } from "../../../../../lib/platform/apiUrl";
+import { platformFetch } from "../../../../../../lib/platform/apiUrl";
 import { Button } from "../../../../../_components/ui/Button";
 import { Card } from "../../../../../_components/ui/Card";
 
@@ -197,7 +197,6 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		const response = await platformFetch("/api/user/establishments/join", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			credentials: "include",
 			body: JSON.stringify({ slug }),
 		});
 

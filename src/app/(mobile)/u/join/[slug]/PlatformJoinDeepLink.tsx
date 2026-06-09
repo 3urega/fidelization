@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
-import { platformFetch } from "../../../../../../lib/platform/apiUrl";
+import { platformFetch } from "../../../../../lib/platform/apiUrl";
 
 type JoinState = "loading" | "error";
 
