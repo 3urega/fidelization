@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { PlatformBusinessCreationForm } from "../../../../../_components/platform-app/PlatformBusinessCreationForm";
-import { AppShell } from "../../../../../_components/ui/AppShell";
+import { PlatformBusinessCreationForm } from "../../../../_components/platform-app/PlatformBusinessCreationForm";
+import { AppShell } from "../../../../_components/ui/AppShell";
 
 export const metadata: Metadata = {
 	title: "Tu negocio — App Fidelización",

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
-import { platformRoutes } from "../../../lib/platform/routes";
+import { platformRoutes } from "../../../../lib/platform/routes";
 import { PlatformDiscoverJoinForm } from "./PlatformDiscoverJoinForm";
 
 export const metadata: Metadata = {

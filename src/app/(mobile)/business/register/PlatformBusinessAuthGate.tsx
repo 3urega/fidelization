@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button } from "../../../../_components/ui/Button";
+import { Button } from "../../../_components/ui/Button";
 
 type PlatformBusinessAuthGateProps = {
 	registerHref: string;

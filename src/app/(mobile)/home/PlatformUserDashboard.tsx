@@ -5,14 +5,14 @@ import { type ReactElement, useEffect, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
 import { platformRoutes } from "../../../lib/platform/routes";
-import { PlatformUserQrModal } from "../../../_components/platform-app/PlatformUserQrModal";
+import { PlatformUserQrModal } from "../../_components/platform-app/PlatformUserQrModal";
 import {
 	BusinessSummaryCard,
 	DualEmptyRelationshipsCard,
 	EstablishmentSummaryCard,
-} from "../../../_components/platform-app/PlatformRelationshipCards";
-import { Button } from "../../../_components/ui/Button";
-import { Card } from "../../../_components/ui/Card";
+} from "../../_components/platform-app/PlatformRelationshipCards";
+import { Button } from "../../_components/ui/Button";
+import { Card } from "../../_components/ui/Card";
 
 type UserMeResponse = {
 	user: { id: string; name: string; email: string; qrValue: string | null };

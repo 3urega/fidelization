@@ -4,7 +4,7 @@ import Link from "next/link";
 import { type ReactElement } from "react";
 
 import { PlatformUserQrPanel } from "../../../_components/platform-app/PlatformUserQrPanel";
-import { platformRoutes } from "../../../lib/platform/routes";
+import { platformRoutes } from "../../../../lib/platform/routes";
 
 export function PlatformUserQrScreen(): ReactElement {
 	return (
