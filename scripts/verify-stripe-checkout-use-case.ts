@@ -103,6 +103,8 @@ class InMemoryTenantBillingRepository extends TenantBillingRepository {
 		return null;
 	}
 
+	async updateSubscriptionStatus(): Promise<void> {}
+
 	async linkTenantPlan(): Promise<void> {}
 }
 

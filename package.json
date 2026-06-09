@@ -46,6 +46,7 @@
     "verify:onboarding-plan-selection": "tsx scripts/verify-onboarding-plan-selection.ts",
     "verify:stripe-checkout-use-case": "tsx scripts/verify-stripe-checkout-use-case.ts",
     "verify:stripe-webhook-checkout-use-case": "tsx scripts/verify-stripe-webhook-checkout-use-case.ts",
+    "verify:stripe-webhooks-use-case": "tsx scripts/verify-stripe-webhooks-use-case.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

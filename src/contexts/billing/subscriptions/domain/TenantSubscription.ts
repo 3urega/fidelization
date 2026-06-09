@@ -52,4 +52,14 @@ export class TenantSubscription {
 			stripeSubscriptionId: this.stripeSubscriptionId,
 		};
 	}
+
+	withStatus(status: SubscriptionStatus): TenantSubscription {
+		return new TenantSubscription(
+			this.id,
+			this.tenantId,
+			this.planId,
+			status,
+			this.stripeSubscriptionId,
+		);
+	}
 }

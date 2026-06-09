@@ -9,7 +9,10 @@ import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/S
 import { SubscriptionPlanNotFound } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanNotFound";
 import { TenantAlreadyHasActiveSubscription } from "../src/contexts/billing/subscriptions/domain/TenantAlreadyHasActiveSubscription";
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
-import { TenantSubscription } from "../src/contexts/billing/subscriptions/domain/TenantSubscription";
+import {
+	SubscriptionStatus,
+	TenantSubscription,
+} from "../src/contexts/billing/subscriptions/domain/TenantSubscription";
 
 const tenantId = "00000000-0000-4000-8000-0000000000w1";
 const planProId = "00000000-0000-4000-8000-000000000006";
@@ -67,6 +70,15 @@ class InMemoryTenantBillingRepository extends TenantBillingRepository {
 			this.subscriptions.find(
 				(subscription) => subscription.stripeSubscriptionId === stripeSubscriptionIdParam,
 			) ?? null
+		);
+	}
+
+	async updateSubscriptionStatus(
+		subscriptionIdParam: string,
+		status: SubscriptionStatus,
+	): Promise<void> {
+		this.subscriptions = this.subscriptions.map((subscription) =>
+			subscription.id === subscriptionIdParam ? subscription.withStatus(status) : subscription,
 		);
 	}
 

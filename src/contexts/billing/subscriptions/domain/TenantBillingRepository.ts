@@ -18,5 +18,10 @@ export abstract class TenantBillingRepository {
 		stripeSubscriptionId: string,
 	): Promise<TenantSubscription | null>;
 
+	abstract updateSubscriptionStatus(
+		subscriptionId: string,
+		status: SubscriptionStatus,
+	): Promise<void>;
+
 	abstract linkTenantPlan(tenantId: string, planId: string): Promise<void>;
 }

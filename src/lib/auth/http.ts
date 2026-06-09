@@ -271,6 +271,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "StripeCheckoutSessionIncomplete") {
 		return HttpNextResponse.domainError(error, 400);
 	}
+	if (error.type === "StripeSubscriptionNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
 
 	return undefined;
 }

@@ -12,6 +12,7 @@ import { TenantBillingRepository } from "../../../billing/subscriptions/domain/T
 import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/application/assign/AssignTenantSubscriptionPlan";
 import { CreateStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CreateStripeCheckoutSession";
 import { CompleteStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
+import { SyncTenantSubscriptionFromStripe } from "../../../billing/subscriptions/application/sync/SyncTenantSubscriptionFromStripe";
 import { ListSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListSubscriptionPlans";
 import { StripeCheckoutGateway } from "../../../billing/stripe/domain/StripeCheckoutGateway";
 import { StripeWebhookGateway } from "../../../billing/stripe/domain/StripeWebhookGateway";
@@ -70,6 +71,7 @@ import { PrismaOwnerBusinessRepository } from "../../../tenants/owners/infrastru
 import { PrismaOwnerOnboardingRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerOnboardingRepository";
 import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
 import { UpdateTenantBranding } from "../../../tenants/tenants/application/update/UpdateTenantBranding";
+import { UpdateTenantStatus } from "../../../tenants/tenants/application/update/UpdateTenantStatus";
 import { TenantRepository } from "../../../tenants/tenants/domain/TenantRepository";
 import { PrismaTenantRepository } from "../../../tenants/tenants/infrastructure/PrismaTenantRepository";
 import { PostgresConnection } from "../postgres/PostgresConnection";
@@ -122,6 +124,7 @@ builder.registerAndUse(InviteTenantEmployee);
 builder.registerAndUse(ListTenantEmployees);
 builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
+builder.registerAndUse(UpdateTenantStatus);
 
 builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);
 builder.registerAndUse(PostgresGooglePlaySubscriptionRepository);
@@ -174,5 +177,6 @@ builder.registerAndUse(ListSubscriptionPlans);
 builder.registerAndUse(AssignTenantSubscriptionPlan);
 builder.registerAndUse(CreateStripeCheckoutSession);
 builder.registerAndUse(CompleteStripeCheckoutSession);
+builder.registerAndUse(SyncTenantSubscriptionFromStripe);
 
 export const container = builder.build();

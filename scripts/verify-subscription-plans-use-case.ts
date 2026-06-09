@@ -124,6 +124,8 @@ class InMemoryTenantBillingRepository extends TenantBillingRepository {
 		return null;
 	}
 
+	async updateSubscriptionStatus(): Promise<void> {}
+
 	async linkTenantPlan(tenantId: string, planId: string): Promise<void> {
 		const plan = await this.searchPlanById(planId);
 		if (!plan) {

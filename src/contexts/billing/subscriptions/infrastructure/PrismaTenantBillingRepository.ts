@@ -89,6 +89,16 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 		return row ? this.toDomainSubscription(row) : null;
 	}
 
+	async updateSubscriptionStatus(
+		subscriptionId: string,
+		status: SubscriptionStatus,
+	): Promise<void> {
+		await prisma.subscription.update({
+			where: { id: subscriptionId },
+			data: { status },
+		});
+	}
+
 	async linkTenantPlan(tenantId: string, planId: string): Promise<void> {
 		const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
 		if (!plan) {
