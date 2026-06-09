@@ -2,8 +2,7 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { CompleteStripeCheckoutSession } from "../../../../contexts/billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
-import { StripeWebhookGateway } from "../../../../contexts/billing/stripe/domain/StripeWebhookGateway";
+import { ProcessStripeWebhook } from "../../../../contexts/billing/subscriptions/application/sync/ProcessStripeWebhook";
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { handleAuthDomainError } from "../../../../lib/auth/http";
@@ -15,16 +14,7 @@ export async function POST(request: Request): Promise<Response> {
 	const signature = request.headers.get("stripe-signature");
 
 	try {
-		const payload = container.get(StripeWebhookGateway).parseCheckoutSessionCompleted(
-			rawBody,
-			signature,
-		);
-
-		if (!payload) {
-			return NextResponse.json({ received: true });
-		}
-
-		await container.get(CompleteStripeCheckoutSession).execute(payload);
+		await container.get(ProcessStripeWebhook).execute(rawBody, signature);
 
 		return NextResponse.json({ received: true });
 	} catch (error) {

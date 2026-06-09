@@ -13,6 +13,9 @@ import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/app
 import { CreateStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CreateStripeCheckoutSession";
 import { CompleteStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
 import { SyncTenantSubscriptionFromStripe } from "../../../billing/subscriptions/application/sync/SyncTenantSubscriptionFromStripe";
+import { ProcessStripeWebhook } from "../../../billing/subscriptions/application/sync/ProcessStripeWebhook";
+import { StripeWebhookEventRepository } from "../../../billing/stripe/domain/StripeWebhookEventRepository";
+import { PrismaStripeWebhookEventRepository } from "../../../billing/stripe/infrastructure/PrismaStripeWebhookEventRepository";
 import { ListSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListSubscriptionPlans";
 import { StripeCheckoutGateway } from "../../../billing/stripe/domain/StripeCheckoutGateway";
 import { StripeWebhookGateway } from "../../../billing/stripe/domain/StripeWebhookGateway";
@@ -173,10 +176,13 @@ builder.register(StripeCheckoutGateway).use(StripeCheckoutGatewayStripe);
 builder.registerAndUse(StripeCheckoutGatewayStripe);
 builder.register(StripeWebhookGateway).use(StripeWebhookGatewayStripe);
 builder.registerAndUse(StripeWebhookGatewayStripe);
+builder.register(StripeWebhookEventRepository).use(PrismaStripeWebhookEventRepository);
+builder.registerAndUse(PrismaStripeWebhookEventRepository);
 builder.registerAndUse(ListSubscriptionPlans);
 builder.registerAndUse(AssignTenantSubscriptionPlan);
 builder.registerAndUse(CreateStripeCheckoutSession);
 builder.registerAndUse(CompleteStripeCheckoutSession);
 builder.registerAndUse(SyncTenantSubscriptionFromStripe);
+builder.registerAndUse(ProcessStripeWebhook);
 
 export const container = builder.build();

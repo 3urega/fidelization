@@ -1,6 +1,7 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
+import { ProcessStripeWebhook } from "../src/contexts/billing/subscriptions/application/sync/ProcessStripeWebhook";
 import { SyncTenantSubscriptionFromStripe } from "../src/contexts/billing/subscriptions/application/sync/SyncTenantSubscriptionFromStripe";
 import { StripeSubscriptionNotFound } from "../src/contexts/billing/subscriptions/domain/StripeSubscriptionNotFound";
 import { PRO_PLAN_FEATURES } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanFeatures";
@@ -10,10 +11,19 @@ import {
 	SubscriptionStatus,
 	TenantSubscription,
 } from "../src/contexts/billing/subscriptions/domain/TenantSubscription";
+import {
+	StripeWebhookGateway,
+	StripeWebhookPayload,
+} from "../src/contexts/billing/stripe/domain/StripeWebhookGateway";
+import { StripeWebhookEventRepository } from "../src/contexts/billing/stripe/domain/StripeWebhookEventRepository";
+import { RegisterCustomer } from "../src/contexts/loyalty/customers/application/register/RegisterCustomer";
+import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
+import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";
 import { UpdateTenantStatus } from "../src/contexts/tenants/tenants/application/update/UpdateTenantStatus";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantRepository";
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
+import { CompleteStripeCheckoutSession } from "../src/contexts/billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
 
 const tenantId = "00000000-0000-4000-8000-0000000000l1";
 const planProId = "00000000-0000-4000-8000-000000000006";
@@ -143,6 +153,58 @@ class InMemoryTenantBillingRepository extends TenantBillingRepository {
 	getSubscription(): TenantSubscription | undefined {
 		return this.subscriptions.find((subscription) => subscription.id === subscriptionId);
 	}
+}
+
+class StubCustomerRepository extends CustomerRepository {
+	async save(): Promise<void> {}
+
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async searchByQrValue(): Promise<null> {
+		return null;
+	}
+}
+
+class InMemoryStripeWebhookEventRepository extends StripeWebhookEventRepository {
+	private readonly recorded = new Set<string>();
+
+	async tryRecord(eventId: string, _eventType: string): Promise<boolean> {
+		if (this.recorded.has(eventId)) {
+			return false;
+		}
+
+		this.recorded.add(eventId);
+
+		return true;
+	}
+
+	has(eventId: string): boolean {
+		return this.recorded.has(eventId);
+	}
+}
+
+class StubStripeWebhookGateway extends StripeWebhookGateway {
+	constructor(private readonly payload: StripeWebhookPayload) {
+		super();
+	}
+
+	parseWebhookPayload(): StripeWebhookPayload {
+		return this.payload;
+	}
+}
+
+function buildSyncStack(initialSubscription: TenantSubscription, tenantStatus = TenantStatus.Active) {
+	const tenantRepository = new MutableStubTenantRepository(baseTenant(tenantStatus));
+	const billingRepository = new InMemoryTenantBillingRepository([initialSubscription]);
+	const sync = new SyncTenantSubscriptionFromStripe(
+		billingRepository,
+		tenantRepository,
+		new UpdateTenantStatus(tenantRepository),
+	);
+
+	return { tenantRepository, billingRepository, sync };
 }
 
 async function expectError<T extends Error>(
@@ -298,7 +360,123 @@ async function verifySyncStub(): Promise<void> {
 	}
 
 	console.log("✅ repeated past_due while already suspended is idempotent");
+}
+
+async function verifyProcessWebhookStub(): Promise<void> {
+	const { billingRepository, sync } = buildSyncStack(activeSubscription());
+	const eventRepository = new InMemoryStripeWebhookEventRepository();
+	const completeCheckout = {
+		execute: async () => ({
+			subscription: activeSubscription(),
+			created: true,
+		}),
+	} as unknown as CompleteStripeCheckoutSession;
+	const processor = new ProcessStripeWebhook(
+		new StubStripeWebhookGateway({
+			kind: "subscription.lifecycle",
+			eventId: "evt_test_payment_failed",
+			eventType: "invoice.payment_failed",
+			stripeSubscriptionId,
+			stripeStatus: "past_due",
+		}),
+		eventRepository,
+		completeCheckout,
+		sync,
+	);
+
+	await processor.execute("{}", "sig");
+	await processor.execute("{}", "sig");
+
+	if (!eventRepository.has("evt_test_payment_failed")) {
+		console.error("❌ ProcessStripeWebhook should record event id");
+		process.exit(1);
+	}
+
+	const subscription = billingRepository.getSubscription();
+	if (subscription?.status !== "past_due") {
+		console.error("❌ ProcessStripeWebhook should suspend subscription once", subscription?.status);
+		process.exit(1);
+	}
+
+	console.log("✅ ProcessStripeWebhook payment_failed is idempotent by event id");
+}
+
+async function verifyBillingSuspendBlocksCustomer(): Promise<void> {
+	const { tenantRepository, sync } = buildSyncStack(activeSubscription());
+
+	await sync.execute({
+		stripeSubscriptionId,
+		stripeStatus: "past_due",
+	});
+
+	const registerCustomer = new RegisterCustomer(tenantRepository, new StubCustomerRepository());
+
+	await expectError("RegisterCustomer on billing-suspended tenant", () =>
+		registerCustomer.execute({
+			tenantId,
+			name: "Cliente Verify",
+		}),
+		TenantAccessSuspended,
+	);
+
+	console.log("✅ billing suspend blocks customer register");
+}
+
+async function verifyInvoicePaidRecoveryViaProcessor(): Promise<void> {
+	const pastDueSubscription = TenantSubscription.fromPrimitives({
+		id: subscriptionId,
+		tenantId,
+		planId: planProId,
+		status: "past_due",
+		stripeSubscriptionId,
+	});
+	const { tenantRepository, billingRepository, sync } = buildSyncStack(
+		pastDueSubscription,
+		TenantStatus.Suspended,
+	);
+	const processor = new ProcessStripeWebhook(
+		new StubStripeWebhookGateway({
+			kind: "subscription.lifecycle",
+			eventId: "evt_test_invoice_paid",
+			eventType: "invoice.paid",
+			stripeSubscriptionId,
+			stripeStatus: "active",
+		}),
+		new InMemoryStripeWebhookEventRepository(),
+		{
+			execute: async () => ({
+				subscription: pastDueSubscription,
+				created: false,
+			}),
+		} as unknown as CompleteStripeCheckoutSession,
+		sync,
+	);
+
+	await processor.execute("{}", "sig");
+
+	const tenant = await tenantRepository.findById(tenantId);
+	const subscription = billingRepository.getSubscription();
+
+	if (
+		tenant?.status !== TenantStatus.Active ||
+		subscription?.status !== "active"
+	) {
+		console.error("❌ invoice.paid should reactivate tenant and subscription", {
+			tenantStatus: tenant?.status,
+			subscriptionStatus: subscription?.status,
+		});
+		process.exit(1);
+	}
+
+	console.log("✅ invoice.paid via ProcessStripeWebhook reactivates tenant and subscription");
+}
+
+async function main(): Promise<void> {
+	await verifySyncStub();
+	await verifyProcessWebhookStub();
+	await verifyBillingSuspendBlocksCustomer();
+	await verifyInvoicePaidRecoveryViaProcessor();
 	console.log("✅ verify:stripe-webhooks-use-case passed");
 }
 
-void verifySyncStub();
+void main();
