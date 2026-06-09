@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { PlatformUserRegisterForm } from "../../../_components/platform-app/PlatformUserRegisterForm";
 import { AppShell } from "../../../_components/ui/AppShell";
-import { safeRedirectPath } from "../../../lib/auth/safeRedirectPath";
+import { safeRedirectPath } from "../../../../lib/auth/safeRedirectPath";
 
 export const metadata: Metadata = {
 	title: "Registrarse — App Fidelización",

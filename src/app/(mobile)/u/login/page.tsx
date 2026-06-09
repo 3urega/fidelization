@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { PlatformUserLoginForm } from "../../../_components/platform-app/PlatformUserLoginForm";
 import { AppShell } from "../../../_components/ui/AppShell";
-import { safeRedirectPath } from "../../../lib/auth/safeRedirectPath";
+import { safeRedirectPath } from "../../../../lib/auth/safeRedirectPath";
 
 export const metadata: Metadata = {
 	title: "Iniciar sesión — App Fidelización",
