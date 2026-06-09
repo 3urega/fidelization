@@ -126,6 +126,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/u/home/discover`, deep link `/u/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 - **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/u/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/u/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
 - **Platform app global QR scan (#44):** `RecordCustomerVisitByQr` resuelve `customers.qr_value` (legacy) luego `users.qr_value` → `customers(user_id, tenant_id)`; sin auto-join → `CustomerNotRegisteredInTenant`. `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.
+- **Platform app Google OAuth (#45):** `POST /api/auth/oauth/google` + botones GIS en `/u`, `/u/register`, `/u/login`. Env: `GOOGLE_CLIENT_ID` + `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (mismo Web client ID). `verify:platform-app-google-oauth`, `verify:platform-app-google-oauth-use-case`.
 
 # Architecture
 

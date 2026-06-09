@@ -29,18 +29,18 @@ export async function POST(request: Request): Promise<Response> {
 		);
 	}
 
-	if (!env.googleClientId) {
-		return NextResponse.json(
-			{ error: { description: "Google sign-in is not configured (GOOGLE_CLIENT_ID)" } },
-			{ status: 503 },
-		);
-	}
-
 	try {
 		const body = (await request.json()) as Body;
 
 		if (!body.idToken?.trim()) {
 			return NextResponse.json({ error: { description: "idToken is required" } }, { status: 400 });
+		}
+
+		if (!env.googleClientId) {
+			return NextResponse.json(
+				{ error: { description: "Google sign-in is not configured (GOOGLE_CLIENT_ID)" } },
+				{ status: 503 },
+			);
 		}
 
 		const user = await container.get(AuthenticateGoogleUser).authenticate(body.idToken);
