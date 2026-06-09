@@ -70,6 +70,7 @@ import { SetTenantPlatformStatus } from "../../../platform/application/tenants/S
 import { TenantStaffLogin } from "../../../tenants/memberships/application/authenticate/TenantStaffLogin";
 import { InviteTenantEmployee } from "../../../tenants/memberships/application/invite/InviteTenantEmployee";
 import { ListTenantEmployees } from "../../../tenants/memberships/application/invite/ListTenantEmployees";
+import { ListUserRelationships } from "../../../tenants/memberships/application/list/ListUserRelationships";
 import { OwnerMembershipFinder } from "../../../tenants/memberships/application/find/OwnerMembershipFinder";
 import { TenantSessionVerifier } from "../../../tenants/memberships/application/verify/TenantSessionVerifier";
 import { TenantMembershipRepository } from "../../../tenants/memberships/domain/TenantMembershipRepository";
@@ -136,6 +137,7 @@ builder.registerAndUse(TenantStaffLogin);
 builder.registerAndUse(TenantSessionVerifier);
 builder.registerAndUse(InviteTenantEmployee);
 builder.registerAndUse(ListTenantEmployees);
+builder.registerAndUse(ListUserRelationships);
 builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
 builder.registerAndUse(UpdateTenantStatus);

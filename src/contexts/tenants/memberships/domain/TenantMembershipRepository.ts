@@ -17,6 +17,8 @@ export abstract class TenantMembershipRepository {
 
 	abstract findOwnerMembershipByUserId(userId: string): Promise<StaffMembership | null>;
 
+	abstract listOwnerMembershipsByUserId(userId: string): Promise<StaffMembership[]>;
+
 	abstract findById(tenantId: string): Promise<Tenant | null>;
 
 	abstract createStaffMembership(

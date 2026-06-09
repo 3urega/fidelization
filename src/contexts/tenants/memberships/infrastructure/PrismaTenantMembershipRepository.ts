@@ -58,6 +58,16 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 		return membership ? this.toStaffMembership(membership) : null;
 	}
 
+	async listOwnerMembershipsByUserId(userId: string): Promise<StaffMembership[]> {
+		const memberships = await prisma.tenantMembership.findMany({
+			where: { userId, role: "owner" },
+			include: { tenant: true },
+			orderBy: { tenant: { name: "asc" } },
+		});
+
+		return memberships.map((membership) => this.toStaffMembership(membership));
+	}
+
 	async findById(tenantId: string): Promise<Tenant | null> {
 		const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
 

@@ -42,8 +42,8 @@ async function main(): Promise<void> {
 		}
 	}
 
-	if (!homeHtml.includes("/register/business")) {
-		console.error("❌ GET /u: expected link to /register/business");
+	if (!homeHtml.includes("/u/register/business")) {
+		console.error("❌ GET /u: expected link to /u/register/business");
 		process.exit(1);
 	}
 
