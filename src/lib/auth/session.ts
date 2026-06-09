@@ -10,6 +10,7 @@ export {
 	isOnboardingSession,
 	isPlatformSession,
 	isTenantSession,
+	isUserSession,
 	parseSessionPayload,
 	type CustomerSessionClaims,
 	type OnboardingSessionClaims,
@@ -17,6 +18,7 @@ export {
 	SESSION_COOKIE_NAME,
 	type SessionClaims,
 	type TenantSessionClaims,
+	type UserSessionClaims,
 } from "./sessionClaims";
 
 const COOKIE_NAME = SESSION_COOKIE_NAME;
@@ -38,12 +40,18 @@ export async function createSessionToken(claims: SessionClaims): Promise<string>
 							sub: claims.customerId,
 							tenantId: claims.tenantId,
 						}
-					: {
-							kind: "tenant" as const,
-							sub: claims.userId,
-							tenantId: claims.tenantId,
-							role: claims.role,
-						};
+					: claims.kind === "user"
+						? {
+								kind: "user" as const,
+								sub: claims.userId,
+								...(claims.qrValue ? { qrValue: claims.qrValue } : {}),
+							}
+						: {
+								kind: "tenant" as const,
+								sub: claims.userId,
+								tenantId: claims.tenantId,
+								role: claims.role,
+							};
 
 	return new SignJWT(payload)
 		.setProtectedHeader({ alg: "HS256" })

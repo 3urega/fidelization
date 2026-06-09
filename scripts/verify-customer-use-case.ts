@@ -47,6 +47,7 @@ const suspendedTenant = Tenant.fromPrimitives({
 const seededCustomer = Customer.fromPrimitives({
 	id: "00000000-0000-4000-8000-0000000000d1",
 	tenantId: activeTenantId,
+	userId: null,
 	name: "Demo QR Customer",
 	email: null,
 	phone: null,

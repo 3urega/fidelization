@@ -24,11 +24,18 @@ export type CustomerSessionClaims = {
 	tenantId: string;
 };
 
+export type UserSessionClaims = {
+	kind: "user";
+	userId: string;
+	qrValue?: string;
+};
+
 export type SessionClaims =
 	| TenantSessionClaims
 	| PlatformSessionClaims
 	| OnboardingSessionClaims
-	| CustomerSessionClaims;
+	| CustomerSessionClaims
+	| UserSessionClaims;
 
 export function isTenantSession(session: SessionClaims): session is TenantSessionClaims {
 	return session.kind === "tenant";
@@ -44,6 +51,10 @@ export function isOnboardingSession(session: SessionClaims): session is Onboardi
 
 export function isCustomerSession(session: SessionClaims): session is CustomerSessionClaims {
 	return session.kind === "customer";
+}
+
+export function isUserSession(session: SessionClaims): session is UserSessionClaims {
+	return session.kind === "user";
 }
 
 export function parseSessionPayload(payload: Record<string, unknown>): SessionClaims | null {
@@ -71,6 +82,16 @@ export function parseSessionPayload(payload: Record<string, unknown>): SessionCl
 		}
 
 		return null;
+	}
+
+	if (payload.kind === "user") {
+		const qrValue = payload.qrValue;
+
+		return {
+			kind: "user",
+			userId: subjectId,
+			...(typeof qrValue === "string" ? { qrValue } : {}),
+		};
 	}
 
 	const tenantId = payload.tenantId;

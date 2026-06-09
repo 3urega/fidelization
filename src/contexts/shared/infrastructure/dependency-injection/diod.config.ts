@@ -26,6 +26,8 @@ import { StripeCheckoutGatewayStripe } from "../../../billing/stripe/infrastruct
 import { StripeWebhookGatewayStripe } from "../../../billing/stripe/infrastructure/StripeWebhookGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
+import { LoginPlatformUser } from "../../../identity/users/application/authenticate/LoginPlatformUser";
+import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
 import { UserProfileUpdater } from "../../../identity/users/application/update_profile/UserProfileUpdater";
@@ -116,11 +118,13 @@ builder.register(OwnerBusinessRepository).use(PrismaOwnerBusinessRepository);
 builder.registerAndUse(PrismaOwnerBusinessRepository);
 
 builder.registerAndUse(UserRegistrar);
+builder.registerAndUse(RegisterPlatformUser);
 builder.registerAndUse(RegisterBusinessOwnerUser);
 builder.registerAndUse(CreateOwnerBusiness);
 builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(UserAuthenticator);
+builder.registerAndUse(LoginPlatformUser);
 builder.registerAndUse(UserProfileUpdater);
 builder.registerAndUse(OwnerMembershipFinder);
 builder.registerAndUse(PlatformAuthenticator);

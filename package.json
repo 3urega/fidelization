@@ -12,6 +12,7 @@
     "verify:tenant-resolution": "tsx scripts/verify-tenant-resolution.ts",
     "verify:tenant-auth": "tsx scripts/verify-tenant-auth.ts",
     "verify:platform-auth": "tsx scripts/verify-platform-auth.ts",
+    "verify:platform-app-auth-use-case": "tsx scripts/verify-platform-app-auth-use-case.ts",
     "verify:owner-login": "tsx scripts/verify-owner-login-flow.ts",
     "verify:platform-login": "tsx scripts/verify-platform-login-flow.ts",
     "verify:platform-isolation": "tsx scripts/verify-platform-isolation.ts",

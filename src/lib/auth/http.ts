@@ -196,6 +196,16 @@ export function platformAuthResponseToJson(
 	};
 }
 
+export function userAuthResponseToJson(
+	user: Parameters<typeof userToJson>[0],
+	session: { kind: "user" },
+): Record<string, unknown> {
+	return {
+		user: userToJson(user),
+		kind: session.kind,
+	};
+}
+
 export function handleAuthDomainError(error: DomainError): NextResponse | undefined {
 	if (error.type === "InvalidCredentials") {
 		return HttpNextResponse.domainError(error, 401);
@@ -222,6 +232,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 		return HttpNextResponse.domainError(error, 401);
 	}
 	if (error.type === "PlatformUserCannotUseTenantLogin") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "PlatformUserCannotUseUserLogin") {
 		return HttpNextResponse.domainError(error, 403);
 	}
 	if (error.type === "TenantAccessSuspended") {
