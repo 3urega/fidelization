@@ -13,7 +13,7 @@ Este documento define la **app móvil de plataforma** (Capacitor → App Store /
 
 **Relacionado:** [`business-onboarding.md`](business-onboarding.md) (wizard web owner actual), [`saas-architecture.md`](saas-architecture.md), [`post-onboarding-mvp-roadmap.md`](post-onboarding-mvp-roadmap.md), [`database/data-model.md`](../database/data-model.md), [`AGENTS.md`](../../AGENTS.md).
 
-**Estado:** **In progress** — G1 [#38–#39](https://github.com/3urega/fidelization/issues/38) auth + home UI; G2 [#40](https://github.com/3urega/fidelization/issues/40) register business **Implemented** (2026-06-09). Dashboard completo (#41+) pendiente. Web legacy sin cambios.
+**Estado:** **In progress** — G1 [#38–#39](https://github.com/3urega/fidelization/issues/38) auth + home UI; G2 [#40](https://github.com/3urega/fidelization/issues/40) register business; G3 [#41](https://github.com/3urega/fidelization/issues/41) dashboard **Implemented** (2026-06-09). Join/detalle (#42+) pendiente. Web legacy sin cambios.
 
 ---
 

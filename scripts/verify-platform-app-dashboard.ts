@@ -126,7 +126,7 @@ async function main(): Promise<void> {
 
 	const userRow = await prisma.user.findUnique({
 		where: { email },
-		select: { id: true, memberships: { select: { tenant: { select: { slug: true } } } } } },
+		select: { id: true, memberships: { select: { tenant: { select: { slug: true } } } } },
 	});
 
 	if (!userRow?.memberships[0]) {
