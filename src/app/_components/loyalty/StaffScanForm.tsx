@@ -6,16 +6,38 @@ import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
 
+type StampAddedPayload = {
+	campaignName: string;
+	current: number;
+	required: number;
+	completed: boolean;
+};
+
 type ScanResponse = {
 	customer?: {
 		name: string;
 		pointsBalance: number;
 		visitsCount: number;
 	};
+	stampsAdded?: StampAddedPayload[];
 	error?: {
 		description?: string;
 	};
 };
+
+function formatStampsAdded(stamps: StampAddedPayload[]): string {
+	if (stamps.length === 0) {
+		return "";
+	}
+
+	return stamps
+		.map((stamp) => {
+			const status = stamp.completed ? "completada" : `${stamp.current}/${stamp.required}`;
+
+			return `Sello ${status} (${stamp.campaignName})`;
+		})
+		.join(" · ");
+}
 
 export function StaffScanForm(): ReactElement {
 	const [qrValue, setQrValue] = useState("");
@@ -54,9 +76,9 @@ export function StaffScanForm(): ReactElement {
 			}
 
 			if (body.customer) {
-				setSuccess(
-					`${body.customer.name}: +1 punto · total ${body.customer.pointsBalance} (${body.customer.visitsCount} visitas)`,
-				);
+				const stampSummary = formatStampsAdded(body.stampsAdded ?? []);
+				const baseMessage = `${body.customer.name}: +1 punto · total ${body.customer.pointsBalance} (${body.customer.visitsCount} visitas)`;
+				setSuccess(stampSummary ? `${baseMessage} · ${stampSummary}` : baseMessage);
 				setQrValue("");
 			}
 		} catch {

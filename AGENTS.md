@@ -23,6 +23,8 @@ npm run verify:customer-use-case   # issue #18 — RegisterCustomer + Authentica
 npm run verify:customer-loyalty-api  # issue #18 — loyalty APIs (x-tenant headers on apex)
 npm run verify:customer-qr-session   # issue #20 — E2E tenant host → register → /app/card + Prisma (dev + DATABASE_URL)
 npm run verify:customer-scan         # staff scan → points + loyalty_transactions (dev + DATABASE_URL)
+npm run verify:customer-stamp-scan-use-case  # issue #22 — scan adds stamp per active campaign (domain stub)
+npm run verify:customer-stamp-scan   # issue #22 — scan + stamp progress E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaigns-use-case  # issue #21 — Create/List/Update stamp campaigns (domain stub)
 npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campaigns + Prisma (dev + DATABASE_URL)
 npm run db:users               # list users, platform_role y memberships
@@ -71,7 +73,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
 - **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/home`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
 - **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me`. `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
-- **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto y fila en `loyalty_transactions`. Enlace para clientes en checklist `/home`. `verify:customer-scan`.
+- **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto, +1 sello por campaña activa, filas en `loyalty_transactions` (`points_earned`, `stamp_added`). Enlace para clientes en checklist `/home`. `verify:customer-scan`, `verify:customer-stamp-scan`.
 - **Stamp campaigns (#21):** owner en `/settings/stamps` → crear/listar/desactivar campañas (`GET/POST /api/loyalty/stamp-campaigns`, `PATCH …/[id]`). Checklist en `/home`. `verify:stamp-campaigns-use-case`, `verify:stamp-campaigns` (dev + `DATABASE_URL`).
 
 # Architecture
@@ -127,6 +129,7 @@ docs/
 | Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
 | Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `verify:tenant-branding` + `verify:customer-qr-session` |
 | Stamp campaigns owner CRUD (#21) | `verify:stamp-campaigns-use-case` + `verify:stamp-campaigns` + `/settings/stamps` |
+| Staff scan + stamps (#22) | `verify:customer-stamp-scan-use-case` + `verify:customer-stamp-scan` + `/scan` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

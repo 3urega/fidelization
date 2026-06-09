@@ -46,6 +46,23 @@ export class LoyaltyTransaction {
 		});
 	}
 
+	static recordStampAdded(params: {
+		tenantId: string;
+		customerId: string;
+		createdByUserId: string;
+		metadata?: Record<string, unknown> | null;
+	}): LoyaltyTransaction {
+		return LoyaltyTransaction.fromPrimitives({
+			id: randomUUID(),
+			tenantId: params.tenantId,
+			customerId: params.customerId,
+			type: "stamp_added",
+			points: null,
+			metadata: params.metadata ?? null,
+			createdByUserId: params.createdByUserId,
+		});
+	}
+
 	static fromPrimitives(primitives: LoyaltyTransactionPrimitives): LoyaltyTransaction {
 		return new LoyaltyTransaction(
 			primitives.id,

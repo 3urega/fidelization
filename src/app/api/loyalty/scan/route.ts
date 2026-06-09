@@ -6,8 +6,12 @@ import { RecordCustomerVisitByQr } from "../../../../contexts/loyalty/customers/
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { TenantNotFound } from "../../../../contexts/tenants/tenants/domain/TenantNotFound";
-import { customerToJson, handleAuthDomainError } from "../../../../lib/auth/http";
+import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";
+import {
+	customerToJson,
+	handleAuthDomainError,
+	stampAddedSummaryToJson,
+} from "../../../../lib/auth/http";
 import { requireTenantSession } from "../../../../lib/auth/requireTenantSession";
 
 export const dynamic = "force-dynamic";
@@ -28,13 +32,16 @@ export async function POST(request: Request): Promise<Response> {
 	}
 
 	try {
-		const customer = await container.get(RecordCustomerVisitByQr).execute({
+		const result = await container.get(RecordCustomerVisitByQr).execute({
 			tenantId: auth.session.tenantId,
 			qrValue: body.qrValue,
 			createdByUserId: auth.session.userId,
 		});
 
-		return NextResponse.json({ customer: customerToJson(customer) });
+		return NextResponse.json({
+			customer: customerToJson(result.customer),
+			stampsAdded: result.stampsAdded.map((summary) => stampAddedSummaryToJson(summary)),
+		});
 	} catch (error) {
 		if (error instanceof DomainError) {
 			const response = handleAuthDomainError(error);

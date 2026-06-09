@@ -2,6 +2,8 @@ import { Service } from "diod";
 
 import { LoyaltyTransaction } from "../../../loyalty_transactions/domain/LoyaltyTransaction";
 import { LoyaltyTransactionRepository } from "../../../loyalty_transactions/domain/LoyaltyTransactionRepository";
+import { CustomerStampProgress } from "../../../stamp_campaigns/domain/CustomerStampProgress";
+import { StampCampaignRepository } from "../../../stamp_campaigns/domain/StampCampaignRepository";
 import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";
 import { TenantAccessSuspended } from "../../../../tenants/tenants/domain/TenantAccessSuspended";
 import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepository";
@@ -20,40 +22,115 @@ export type RecordCustomerVisitByQrInput = {
 	points?: number;
 };
 
+export type StampAddedSummary = {
+	campaignId: string;
+	campaignName: string;
+	current: number;
+	required: number;
+	completed: boolean;
+};
+
+export type RecordCustomerVisitByQrResult = {
+	customer: Customer;
+	stampsAdded: StampAddedSummary[];
+};
+
 @Service()
 export class RecordCustomerVisitByQr {
 	constructor(
 		private readonly tenantRepository: TenantRepository,
 		private readonly customerRepository: CustomerRepository,
 		private readonly loyaltyTransactionRepository: LoyaltyTransactionRepository,
+		private readonly stampCampaignRepository: StampCampaignRepository,
 	) {}
 
-	async execute(params: RecordCustomerVisitByQrInput): Promise<Customer> {
+	async execute(params: RecordCustomerVisitByQrInput): Promise<RecordCustomerVisitByQrResult> {
 		await this.assertTenantAllowsLoyalty(params.tenantId);
 
 		const points = params.points ?? DEFAULT_POINTS_PER_VISIT;
-		const customer = await this.customerRepository.searchByQrValue(
-			params.tenantId,
-			params.qrValue.trim(),
-		);
+		const trimmedQr = params.qrValue.trim();
+		const customer = await this.customerRepository.searchByQrValue(params.tenantId, trimmedQr);
 
 		if (!customer) {
 			throw new CustomerNotFound(params.tenantId);
 		}
 
 		const updated = customer.recordVisit(points);
-		const transaction = LoyaltyTransaction.recordPointsEarned({
+		const pointsTransaction = LoyaltyTransaction.recordPointsEarned({
 			tenantId: params.tenantId,
 			customerId: updated.id,
 			points,
 			createdByUserId: params.createdByUserId,
-			metadata: { qrValue: params.qrValue.trim(), source: "staff_scan" },
+			metadata: { qrValue: trimmedQr, source: "staff_scan" },
 		});
 
 		await this.customerRepository.save(updated);
-		await this.loyaltyTransactionRepository.save(transaction);
+		await this.loyaltyTransactionRepository.save(pointsTransaction);
 
-		return updated;
+		const stampsAdded = await this.addStampsForActiveCampaigns({
+			tenantId: params.tenantId,
+			customerId: updated.id,
+			createdByUserId: params.createdByUserId,
+			qrValue: trimmedQr,
+		});
+
+		return { customer: updated, stampsAdded };
+	}
+
+	private async addStampsForActiveCampaigns(params: {
+		tenantId: string;
+		customerId: string;
+		createdByUserId: string;
+		qrValue: string;
+	}): Promise<StampAddedSummary[]> {
+		const campaigns = await this.stampCampaignRepository.listActiveByTenant(params.tenantId);
+		const summaries: StampAddedSummary[] = [];
+
+		for (const campaign of campaigns) {
+			const existing = await this.stampCampaignRepository.searchProgress(
+				params.tenantId,
+				params.customerId,
+				campaign.id,
+			);
+			const progress =
+				existing ??
+				CustomerStampProgress.start({
+					tenantId: params.tenantId,
+					customerId: params.customerId,
+					campaignId: campaign.id,
+				});
+
+			const { progress: nextProgress, added } = progress.addStamp(campaign.requiredStamps);
+
+			if (!added) {
+				continue;
+			}
+
+			await this.stampCampaignRepository.saveProgress(nextProgress);
+			await this.loyaltyTransactionRepository.save(
+				LoyaltyTransaction.recordStampAdded({
+					tenantId: params.tenantId,
+					customerId: params.customerId,
+					createdByUserId: params.createdByUserId,
+					metadata: {
+						campaignId: campaign.id,
+						campaignName: campaign.name,
+						source: "staff_scan",
+						qrValue: params.qrValue,
+					},
+				}),
+			);
+
+			summaries.push({
+				campaignId: campaign.id,
+				campaignName: campaign.name,
+				current: nextProgress.currentStamps,
+				required: campaign.requiredStamps,
+				completed: nextProgress.completed,
+			});
+		}
+
+		return summaries;
 	}
 
 	private async assertTenantAllowsLoyalty(tenantId: string): Promise<void> {

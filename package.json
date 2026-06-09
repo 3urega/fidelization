@@ -31,6 +31,8 @@
     "verify:customer-scan": "tsx scripts/verify-customer-scan.ts",
     "verify:stamp-campaigns-use-case": "tsx scripts/verify-stamp-campaigns-use-case.ts",
     "verify:stamp-campaigns": "tsx scripts/verify-stamp-campaigns.ts",
+    "verify:customer-stamp-scan-use-case": "tsx scripts/verify-customer-stamp-scan-use-case.ts",
+    "verify:customer-stamp-scan": "tsx scripts/verify-customer-stamp-scan.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
     "test:ci": "jest --testMatch '**/*.ci.test.ts'",

@@ -147,6 +147,7 @@ flowchart LR
 |------|--------|
 | **Owner link to `/app`** | ✅ Checklist en [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) + [`LoyaltyAppLinkCard`](../../src/app/_components/loyalty/LoyaltyAppLinkCard.tsx) |
 | **Employee QR scan** | ✅ `POST /api/loyalty/scan`, [`/scan`](../../src/app/(app)/scan/page.tsx), `RecordCustomerVisitByQr`, `verify:customer-scan` |
+| **Staff scan + stamps** | ✅ #22 (2026-06-09) — +1 sello por campaña activa, `stamp_added`, `verify:customer-stamp-scan` |
 
 ---
 
@@ -206,6 +207,7 @@ Then implement (separate plan / issues):
 | `verify:tenant-branding` | A |
 | `verify:customer-qr-session` | B |
 | `verify:stamp-campaigns` | C (#21) |
+| `verify:customer-stamp-scan` | C (#22) |
 | `verify:session-cookie-prod` | B (prod cookie on tenant subdomain) |
 
 ---
@@ -242,6 +244,7 @@ A business owner who completed Steps 1–2 can:
 | 19 | Customer loyalty app — `/app` UI + middleware | **Closed** (2026-06-05) — [issue #19](https://github.com/3urega/fidelization/issues/19) |
 | 20 | Customer QR — verify E2E + docs | **Closed** (2026-06-05) — [issue #20](https://github.com/3urega/fidelization/issues/20) |
 | 21 | Stamp campaigns — owner CRUD + API | **Closed** (2026-06-09) — [issue #21](https://github.com/3urega/fidelization/issues/21) |
+| 22 | Staff scan — add stamp on active campaigns | **Closed** (2026-06-09) — [issue #22](https://github.com/3urega/fidelization/issues/22) |
 
 ```bash
 gh auth login

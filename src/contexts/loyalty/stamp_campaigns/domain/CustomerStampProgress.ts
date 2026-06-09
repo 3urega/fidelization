@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 export type CustomerStampProgressPrimitives = {
 	id: string;
 	tenantId: string;
@@ -5,6 +7,17 @@ export type CustomerStampProgressPrimitives = {
 	campaignId: string;
 	currentStamps: number;
 	completed: boolean;
+};
+
+export type CustomerStampProgressStartParams = {
+	tenantId: string;
+	customerId: string;
+	campaignId: string;
+};
+
+export type CustomerStampProgressAddStampResult = {
+	progress: CustomerStampProgress;
+	added: boolean;
 };
 
 export class CustomerStampProgress {
@@ -17,6 +30,17 @@ export class CustomerStampProgress {
 		public readonly completed: boolean,
 	) {}
 
+	static start(params: CustomerStampProgressStartParams): CustomerStampProgress {
+		return new CustomerStampProgress(
+			randomUUID(),
+			params.tenantId,
+			params.customerId,
+			params.campaignId,
+			0,
+			false,
+		);
+	}
+
 	static fromPrimitives(primitives: CustomerStampProgressPrimitives): CustomerStampProgress {
 		return new CustomerStampProgress(
 			primitives.id,
@@ -26,6 +50,27 @@ export class CustomerStampProgress {
 			primitives.currentStamps,
 			primitives.completed,
 		);
+	}
+
+	addStamp(requiredStamps: number): CustomerStampProgressAddStampResult {
+		if (this.completed) {
+			return { progress: this, added: false };
+		}
+
+		const nextStamps = this.currentStamps + 1;
+		const completed = nextStamps >= requiredStamps;
+
+		return {
+			added: true,
+			progress: new CustomerStampProgress(
+				this.id,
+				this.tenantId,
+				this.customerId,
+				this.campaignId,
+				nextStamps,
+				completed,
+			),
+		};
 	}
 
 	toPrimitives(): CustomerStampProgressPrimitives {

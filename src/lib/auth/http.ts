@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
+import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
@@ -85,6 +86,18 @@ export function stampCampaignToJson(
 		requiredStamps: primitives.requiredStamps,
 		isActive: primitives.isActive,
 		rewardId: primitives.rewardId,
+	};
+}
+
+export function stampAddedSummaryToJson(
+	summary: StampAddedSummary,
+): Record<string, string | number | boolean> {
+	return {
+		campaignId: summary.campaignId,
+		campaignName: summary.campaignName,
+		current: summary.current,
+		required: summary.required,
+		completed: summary.completed,
 	};
 }
 
