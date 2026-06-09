@@ -1,18 +1,18 @@
-/** Canonical paths for the unified platform app (apex). Tenant owner panel stays at `/home`. */
+/** Canonical paths for the unified platform app (apex). Tenant owner panel at `/panel`. */
 
 export const platformRoutes = {
 	publicHome: "/",
 	login: "/login",
 	register: "/register",
-	dashboard: "/dashboard",
-	dashboardDiscover: "/dashboard/discover",
-	dashboardQr: "/dashboard/qr",
-	dashboardBusiness: (slug: string) => `/dashboard/business/${encodeURIComponent(slug)}`,
-	dashboardEstablishment: (slug: string) =>
-		`/dashboard/establishments/${encodeURIComponent(slug)}`,
+	home: "/home",
+	homeDiscover: "/home/discover",
+	homeQr: "/home/qr",
+	homeBusiness: (slug: string) => `/home/business/${encodeURIComponent(slug)}`,
+	homeEstablishment: (slug: string) => `/home/establishments/${encodeURIComponent(slug)}`,
 	join: (slug: string) => `/join/${encodeURIComponent(slug)}`,
 	registerBusiness: "/business/register",
 	registerBusinessTenant: "/business/register/tenant",
+	tenantPanel: "/panel",
 } as const;
 
 const LEGACY_PREFIX = "/u";
@@ -32,11 +32,11 @@ export function mapLegacyPlatformPath(pathname: string): string | null {
 	}
 
 	if (pathname === "/u/home") {
-		return platformRoutes.dashboard;
+		return platformRoutes.home;
 	}
 
 	if (pathname.startsWith("/u/home/")) {
-		return pathname.replace("/u/home", platformRoutes.dashboard);
+		return pathname.replace("/u/home", platformRoutes.home);
 	}
 
 	if (pathname.startsWith("/u/join/")) {
@@ -68,8 +68,8 @@ export function isPlatformAppPublicPath(pathname: string): boolean {
 
 export function isPlatformAppProtectedPath(pathname: string): boolean {
 	return (
-		pathname === platformRoutes.dashboard ||
-		pathname.startsWith(`${platformRoutes.dashboard}/`) ||
+		pathname === platformRoutes.home ||
+		pathname.startsWith(`${platformRoutes.home}/`) ||
 		pathname.startsWith("/join/")
 	);
 }

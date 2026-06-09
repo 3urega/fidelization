@@ -1,6 +1,6 @@
 import { isLocalDevApexHost } from "../tenant/resolveTenantAppUrl";
 
-const PLATFORM_HOME_PATH = "/u/home";
+const PLATFORM_HOME_PATH = "/home";
 
 /** Client: platform user dashboard on apex; from tenant subdomain redirects to apex host. */
 export function resolvePlatformHomeUrl(): string {

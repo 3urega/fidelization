@@ -12,7 +12,7 @@ export type TenantAdminNavItem = {
 };
 
 export const tenantAdminNav: readonly TenantAdminNavItem[] = [
-	{ href: "/home", label: "Inicio", icon: "home" },
+	{ href: "/panel", label: "Inicio", icon: "home" },
 	{ href: "/scan", label: "Escanear QR", icon: "scan" },
 	{ href: "/settings/branding", label: "Branding", icon: "palette", ownerOnly: true },
 	{ href: "/settings/stamps", label: "Sellos", icon: "stamps", ownerOnly: true },
