@@ -33,6 +33,8 @@ npm run verify:rewards-use-case      # issue #24 — Create/List/Update rewards 
 npm run verify:rewards               # issue #24 — POST/GET/PATCH rewards + Prisma (dev + DATABASE_URL)
 npm run verify:promotions-use-case   # issue #35 — Create/List/Update promotions + plan gate (domain stub)
 npm run verify:promotions            # issue #35 — POST/GET/PATCH promotions + Prisma (dev + DATABASE_URL)
+npm run verify:customer-promotions-use-case # issue #37 — ListActivePromotionsForCustomer (domain stub)
+npm run verify:customer-promotions   # issue #37 — customer GET me promotions + deactivate E2E (dev + DATABASE_URL)
 npm run verify:customer-reward-redeem-use-case  # issue #25 — list active + redeem (domain stub)
 npm run verify:customer-reward-redeem   # issue #25 — rewards[] in GET me + POST redeem E2E (dev + DATABASE_URL)
 npm run verify:tenant-employees-use-case  # issue #26 — invite/list employees (domain stub)
@@ -103,6 +105,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Plan feature flags (#34):** guards `AssertTenantPlanFeature` / `AssertTenantEmployeeLimit` leen `subscription_plans.features`/`limits`. Basic: sellos+puntos; Pro+: `GET /api/loyalty/promotions`; límite empleados en invite. `GET /api/me` incluye `planFeatures[]`. `verify:tenant-feature-flags-use-case`.
 - **Promotions owner API (#35):** owner Pro+ `GET/POST /api/loyalty/promotions`, `PATCH …/[id]`; employee GET only. `verify:promotions-use-case`, `verify:promotions` (dev + `DATABASE_URL`).
 - **Promotions owner UI (#36):** owner en `/settings/promotions` → crear/listar/desactivar promos; nav owner-only; checklist «Crea tu primera promoción» en `/home` (Pro+); Basic → upsell `/onboarding/plan`. `planFeatures` en sesión tenant.
+- **Customer promotions (#37):** cliente en `/app/card` ve promos activas; `GET /api/loyalty/me` incluye `promotions[]`; Basic → `[]` sin error. `verify:customer-promotions-use-case`, `verify:customer-promotions` (dev + `DATABASE_URL`).
 
 # Architecture
 
@@ -168,7 +171,7 @@ docs/
 | Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` |
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
-| Promociones owner + cliente (#35–#37) | `verify:promotions-use-case` + `verify:promotions` + `/settings/promotions` (#36 UI + checklist `/home`) |
+| Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
 | Platform mobile app Phase G (#38–#45) | `docs/domain/customer-platform-app.md` |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |

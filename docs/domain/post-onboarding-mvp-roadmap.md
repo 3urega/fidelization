@@ -248,7 +248,7 @@ flowchart LR
 
 ## Phase F — Promociones (owner CRUD + cliente)
 
-**Status:** **In progress** — F1 [#35](https://github.com/3urega/fidelization/issues/35) **Implemented** (2026-06-09); F2 [#36](https://github.com/3urega/fidelization/issues/36) **Implemented** (2026-06-09); F3 open (#37).
+**Status:** **Implemented** — F1 [#35](https://github.com/3urega/fidelization/issues/35), F2 [#36](https://github.com/3urega/fidelization/issues/36), F3 [#37](https://github.com/3urega/fidelization/issues/37) (2026-06-09).
 
 **Goal:** Owner Pro+ crea y desactiva promociones; cliente las ve en `/app/card`. Desbloquea promos reales en Phase G (`platform-app-establishment-detail`).
 
@@ -265,13 +265,13 @@ flowchart LR
 |-------|----------------------|-----------|
 | **F1** | Owner crea catálogo de promociones | **Implemented** [#35](https://github.com/3urega/fidelization/issues/35) (2026-06-09) — `GET/POST/PATCH /api/loyalty/promotions`, `verify:promotions*` |
 | **F2** | UI settings + checklist home | **Implemented** [#36](https://github.com/3urega/fidelization/issues/36) (2026-06-09) — `/settings/promotions`, nav, checklist `/home`, Basic upsell |
-| **F3** | Cliente ve promos activas en tarjeta | **Published** [#37](https://github.com/3urega/fidelization/issues/37) — `promotions-customer-card.md` |
+| **F3** | Cliente ve promos activas en tarjeta | **Implemented** [#37](https://github.com/3urega/fidelization/issues/37) (2026-06-09) — `promotions[]` en GET me, `/app/card`, `verify:customer-promotions*` |
 
 ### Acceptance criteria (Phase F — target)
 
 - [x] Owner Pro+ CRUD + `verify:promotions` + `verify:promotions-use-case` (#35 — 2026-06-09)
 - [x] UI `/settings/promotions` + checklist `/home` (#36 — 2026-06-09)
-- [ ] Customer GET me + `/app/card` + `verify:customer-promotions`
+- [x] Customer GET me + `/app/card` + `verify:customer-promotions` (#37 — 2026-06-09)
 
 Manifest: [`manifest.phase-f-promotions.json`](../issues/manifest.phase-f-promotions.json)
 
@@ -380,7 +380,7 @@ A business owner who completed Steps 1–2 can:
 |---|--------|-----------|
 | 35 | Promotions: owner CRUD + API + verify (Pro+ plan gate) | **Closed** (2026-06-09) — [issue #35](https://github.com/3urega/fidelization/issues/35) |
 | 36 | Promotions: owner settings UI + home checklist | **Closed** (2026-06-09) — [issue #36](https://github.com/3urega/fidelization/issues/36) |
-| 37 | Promotions: customer active list on /app/card + verify E2E | **Open** — [issue #37](https://github.com/3urega/fidelization/issues/37) |
+| 37 | Promotions: customer active list on /app/card + verify E2E | **Closed** (2026-06-09) — [issue #37](https://github.com/3urega/fidelization/issues/37) |
 
 ## GitHub issues (Phase G)
 
