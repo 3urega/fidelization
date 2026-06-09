@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../lib/platform/routes";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
@@ -31,7 +32,7 @@ type PlatformUserRegisterFormProps = {
 };
 
 export function PlatformUserRegisterForm({
-	redirectTo = "/u/home",
+	redirectTo = platformRoutes.home,
 }: PlatformUserRegisterFormProps): ReactElement {
 	const router = useRouter();
 	const [name, setName] = useState("");
@@ -141,7 +142,7 @@ export function PlatformUserRegisterForm({
 			</Button>
 			<p className="text-center text-sm text-muted">
 				¿Ya tienes cuenta?{" "}
-				<Link href="/u/login" className="font-medium text-primary hover:opacity-80">
+				<Link href={platformRoutes.login} className="font-medium text-primary hover:opacity-80">
 					Inicia sesión
 				</Link>
 			</p>

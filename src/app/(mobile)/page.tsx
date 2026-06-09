@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
-import { PlatformGoogleOAuthEnabledMarker } from "../../_components/platform-app/PlatformGoogleOAuthEnabledMarker";
-import { PlatformPublicHomeActions } from "../../_components/platform-app/PlatformPublicHomeActions";
+import { PlatformGoogleOAuthEnabledMarker } from "../_components/platform-app/PlatformGoogleOAuthEnabledMarker";
+import { PlatformPublicHomeActions } from "../_components/platform-app/PlatformPublicHomeActions";
+import { platformRoutes } from "../../lib/platform/routes";
 
 export const metadata: Metadata = {
 	title: "App — Fidelización",
@@ -33,7 +34,7 @@ export default function PlatformAppPublicHomePage(): React.ReactElement {
 
 			<p className="text-center text-sm text-muted">
 				¿Ya tienes cuenta?{" "}
-				<Link href="/u/login" className="font-medium text-primary hover:opacity-80">
+				<Link href={platformRoutes.login} className="font-medium text-primary hover:opacity-80">
 					Iniciar sesión
 				</Link>
 			</p>

@@ -44,7 +44,7 @@ export function HomeDashboard(): ReactElement {
 
 		setCheckoutNotice(true);
 		void refresh();
-		router.replace("/home");
+		router.replace("/panel");
 	}, [searchParams, refresh, router]);
 
 	useEffect(() => {

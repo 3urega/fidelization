@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { parseJoinDeepLink } from "../../../lib/platform/deepLinks";
+import { platformRoutes } from "../../../lib/platform/routes";
 
-/** Routes `fidelization://join/{slug}` → `/u/join/{slug}` on native (issue #45). */
+/** Routes `fidelization://join/{slug}` → `/join/{slug}` on native (issue #45). */
 export function PlatformCapacitorDeepLinkListener(): null {
 	const router = useRouter();
 
@@ -22,7 +23,7 @@ export function PlatformCapacitorDeepLinkListener(): null {
 				return;
 			}
 
-			router.replace(`/u/join/${encodeURIComponent(slug)}`);
+			router.replace(platformRoutes.join(slug));
 		}
 
 		void App.getLaunchUrl().then((result) => {

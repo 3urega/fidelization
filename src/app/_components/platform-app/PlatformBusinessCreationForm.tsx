@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, useEffect, useMemo, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../lib/platform/routes";
 import { BUSINESS_TYPE_OPTIONS } from "../../../contexts/tenants/owners/domain/BusinessType";
 import { formatTenantHost } from "../../../lib/tenant/formatTenantHost";
 import { slugifyBusinessName } from "../../../lib/tenant/slugifyBusinessName";
@@ -117,7 +118,7 @@ export function PlatformBusinessCreationForm(): ReactElement {
 		}
 
 		sessionStorage.removeItem(DRAFT_STORAGE_KEY);
-		router.push("/u/home");
+		router.push(platformRoutes.home);
 		router.refresh();
 	}
 

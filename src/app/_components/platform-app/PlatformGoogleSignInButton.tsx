@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../lib/platform/routes";
 import {
 	getGoogleOAuthClientId,
 	mapGoogleOAuthApiError,
@@ -23,7 +24,7 @@ type UserAuthResponse = {
 };
 
 export function PlatformGoogleSignInButton({
-	redirectTo = "/u/home",
+	redirectTo = platformRoutes.home,
 	text = "continue_with",
 }: PlatformGoogleSignInButtonProps): ReactElement | null {
 	const router = useRouter();

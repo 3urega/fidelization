@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../lib/platform/routes";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
@@ -33,7 +34,7 @@ type PlatformUserLoginFormProps = {
 };
 
 export function PlatformUserLoginForm({
-	redirectTo = "/u/home",
+	redirectTo = platformRoutes.home,
 }: PlatformUserLoginFormProps): ReactElement {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
@@ -106,7 +107,7 @@ export function PlatformUserLoginForm({
 			</Button>
 			<p className="text-center text-sm text-muted">
 				¿No tienes cuenta?{" "}
-				<Link href="/u/register" className="font-medium text-primary hover:opacity-80">
+				<Link href={platformRoutes.register} className="font-medium text-primary hover:opacity-80">
 					Regístrate
 				</Link>
 			</p>

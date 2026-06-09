@@ -2,6 +2,7 @@ import Link from "next/link";
 import { type ReactElement } from "react";
 
 import { Card } from "../ui/Card";
+import { platformRoutes } from "../../../lib/platform/routes";
 
 type UserBusiness = {
 	id: string;
@@ -39,7 +40,7 @@ function BusinessAvatar({ name, logoUrl }: { name: string; logoUrl: string | nul
 
 export function BusinessSummaryCard({ business }: { business: UserBusiness }): ReactElement {
 	return (
-		<Link href={`/u/home/business/${business.slug}`} className="block">
+		<Link href={platformRoutes.homeBusiness(business.slug)} className="block">
 			<Card className="transition-opacity hover:opacity-90">
 				<div className="flex items-start gap-3">
 					<BusinessAvatar name={business.name} logoUrl={business.logoUrl} />
@@ -76,7 +77,7 @@ export function EstablishmentSummaryCard({
 	establishment: UserEstablishment;
 }): ReactElement {
 	return (
-		<Link href={`/u/home/establishments/${establishment.slug}`} className="block">
+		<Link href={platformRoutes.homeEstablishment(establishment.slug)} className="block">
 			<Card className="transition-opacity hover:opacity-90">
 				<div className="flex items-start gap-3">
 					<BusinessAvatar name={establishment.name} logoUrl={establishment.logoUrl} />
@@ -102,13 +103,13 @@ export function DualEmptyRelationshipsCard(): ReactElement {
 				</p>
 				<div className="flex flex-col gap-2">
 					<Link
-						href="/u/register/business"
+						href={platformRoutes.registerBusiness}
 						className="text-center text-sm font-medium text-primary hover:opacity-80"
 					>
 						Registrar negocio
 					</Link>
 					<Link
-						href="/u/home/discover"
+						href={platformRoutes.homeDiscover}
 						className="text-center text-sm font-medium text-primary hover:opacity-80"
 					>
 						Descubrir locales
