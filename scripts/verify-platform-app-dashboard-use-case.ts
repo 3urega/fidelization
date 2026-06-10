@@ -1,6 +1,8 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
+import { GetCustomerStampProgress } from "../src/contexts/loyalty/customers/application/profile/GetCustomerStampProgress";
+import { StampAddedSummary } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { ListUserRelationships } from "../src/contexts/tenants/memberships/application/list/ListUserRelationships";
 import { CustomerEstablishmentSummary } from "../src/contexts/loyalty/customers/domain/CustomerEstablishmentSummary";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
@@ -71,6 +73,16 @@ class InMemoryCustomerRepository extends CustomerRepository {
 	}
 }
 
+class StubGetCustomerStampProgress extends GetCustomerStampProgress {
+	constructor(private readonly byCustomerId: Map<string, StampAddedSummary[]>) {
+		super({ findById: async () => null } as never, { listActiveByTenant: async () => [] } as never);
+	}
+
+	async execute(params: { tenantId: string; customerId: string }): Promise<StampAddedSummary[]> {
+		return this.byCustomerId.get(params.customerId) ?? [];
+	}
+}
+
 const tenantA = Tenant.fromPrimitives({
 	id: "tenant-a",
 	name: "Cafe Sol",
@@ -98,6 +110,21 @@ const tenantB = Tenant.fromPrimitives({
 });
 
 async function main(): Promise<void> {
+	const stampProgressByCustomer = new Map<string, StampAddedSummary[]>([
+		[
+			"cust-1",
+			[
+				{
+					campaignId: "camp-1",
+					campaignName: "Tarjeta verano",
+					current: 5,
+					required: 10,
+					completed: false,
+				},
+			],
+		],
+	]);
+
 	const memberships = new Map<string, StaffMembership[]>([
 		["user-a", [{ tenant: tenantA, role: TenantRole.Owner }]],
 		["user-b", [{ tenant: tenantB, role: TenantRole.Owner }]],
@@ -115,6 +142,15 @@ async function main(): Promise<void> {
 					pointsBalance: 12,
 					visitsCount: 3,
 				},
+				{
+					customerId: "cust-owned",
+					tenantId: "tenant-a",
+					name: "Cafe Sol",
+					slug: "cafe-sol",
+					logoUrl: null,
+					pointsBalance: 1,
+					visitsCount: 1,
+				},
 			],
 		],
 	]);
@@ -122,6 +158,7 @@ async function main(): Promise<void> {
 	const list = new ListUserRelationships(
 		new InMemoryMembershipRepository(memberships),
 		new InMemoryCustomerRepository(customers),
+		new StubGetCustomerStampProgress(stampProgressByCustomer),
 	);
 
 	const userA = await list.list("user-a");
@@ -137,11 +174,21 @@ async function main(): Promise<void> {
 	}
 
 	if (userA.establishments.length !== 1 || userA.establishments[0]?.slug !== "bar-norte") {
-		console.error("❌ expected one establishment for user-a");
+		console.error("❌ expected one establishment for user-a (owned cafe-sol deduped)");
 		process.exit(1);
 	}
 
-	console.log("✅ ListUserRelationships returns businesses + establishments");
+	const establishment = userA.establishments[0];
+	if (
+		establishment?.stampProgress.length !== 1 ||
+		establishment.stampProgress[0]?.current !== 5 ||
+		establishment.stampProgress[0]?.required !== 10
+	) {
+		console.error("❌ expected stampProgress on establishment summary", establishment);
+		process.exit(1);
+	}
+
+	console.log("✅ ListUserRelationships returns businesses + establishments + stampProgress");
 
 	const userB = await list.list("user-b");
 

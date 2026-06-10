@@ -1,5 +1,6 @@
 import { Tenant } from "./Tenant";
 import { TenantBrandingUpdate } from "./TenantBrandingUpdate";
+import { TenantProfileUpdate } from "./TenantProfileUpdate";
 import { TenantStatus } from "./TenantStatus";
 
 export abstract class TenantRepository {
@@ -12,4 +13,8 @@ export abstract class TenantRepository {
 	abstract updateStatus(tenantId: string, status: TenantStatus): Promise<Tenant | null>;
 
 	abstract updateBranding(tenantId: string, branding: TenantBrandingUpdate): Promise<Tenant | null>;
+
+	async updateProfile(_tenantId: string, _profile: TenantProfileUpdate): Promise<Tenant | null> {
+		return null;
+	}
 }

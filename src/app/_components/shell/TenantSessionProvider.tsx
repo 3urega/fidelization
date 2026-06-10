@@ -31,6 +31,8 @@ export type TenantSessionTenant = {
 	secondaryColor: string;
 	subscriptionPlan: string;
 	subscriptionPlanId: string | null;
+	address: string;
+	description: string;
 };
 
 export type TenantSessionData = {

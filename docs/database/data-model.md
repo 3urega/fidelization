@@ -81,6 +81,8 @@ erDiagram
 | `logo_url` | text | Default `''` |
 | `primary_color` | text | Branding; runtime theme |
 | `secondary_color` | text | Branding; runtime theme |
+| `address` | text | Default `''`; optional business address (owner-editable) |
+| `description` | text | Default `''`; optional business description |
 | `subscription_plan` | text | Default `'basic'` — string placeholder, not FK to plan catalog |
 | `created_at` | timestamp | |
 

@@ -98,16 +98,35 @@ async function main(): Promise<void> {
 
 	console.log("✅ /home accessible with user session");
 
-	const businessPage = await fetch(`${baseUrl}/home/business/${slug}`, {
+	const enter = await fetch(`${baseUrl}/api/user/businesses/${slug}/enter`, {
+		method: "POST",
 		headers: sessionHeaders(userCookie),
 	});
+	const enterBody = (await enter.json()) as { redirectUrl?: string; kind?: string };
 
-	if (businessPage.status !== 200) {
-		console.error("❌ business admin shell:", businessPage.status);
+	if (enter.status !== 200 || enterBody.kind !== "tenant" || !enterBody.redirectUrl?.includes("/panel")) {
+		console.error("❌ enter business panel:", enter.status, enterBody);
 		process.exit(1);
 	}
 
-	console.log("✅ /home/business/[slug] shell OK");
+	console.log("✅ POST enter → tenant session + /panel redirectUrl");
+
+	const legacyBusinessRoute = await fetch(`${baseUrl}/home/business/${slug}`, {
+		headers: sessionHeaders(userCookie),
+	});
+
+	if (legacyBusinessRoute.status !== 200) {
+		console.error("❌ /home/business/[slug] legacy route:", legacyBusinessRoute.status);
+		process.exit(1);
+	}
+
+	const legacyHtml = await legacyBusinessRoute.text();
+	if (!legacyHtml.includes("Abriendo panel")) {
+		console.error("❌ /home/business/[slug] should auto-enter (spinner copy)");
+		process.exit(1);
+	}
+
+	console.log("✅ /home/business/[slug] auto-enter shell OK");
 
 	const discover = await fetch(`${baseUrl}/home/discover`, { headers: sessionHeaders(userCookie) });
 	const discoverHtml = await discover.text();

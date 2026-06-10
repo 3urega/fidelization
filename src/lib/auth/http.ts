@@ -43,6 +43,8 @@ export function tenantToJson(tenant: Tenant): Record<string, string | null> {
 		subscriptionPlan: primitives.subscriptionPlan,
 		subscriptionPlanId: primitives.subscriptionPlanId,
 		status: primitives.status,
+		address: primitives.address,
+		description: primitives.description,
 	};
 }
 
@@ -255,10 +257,16 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "TenantBrandingForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "TenantProfileForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
 	if (error.type === "TenantEmployeesForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
 	if (error.type === "InvalidTenantBranding") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "InvalidTenantProfile") {
 		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "CustomerNotFound") {

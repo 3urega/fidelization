@@ -1,21 +1,25 @@
 import Link from "next/link";
 import { type ReactElement } from "react";
 
-import { Card } from "../ui/Card";
 import { platformRoutes } from "../../../lib/platform/routes";
+import { Card } from "../ui/Card";
+import { formatStampProgressLine } from "./formatStampProgressLine";
 
-type UserBusiness = {
-	id: string;
+type UserEstablishment = {
+	customerId: string;
 	name: string;
 	slug: string;
 	logoUrl: string | null;
-	subscriptionPlan: string;
-	status: string;
+	pointsBalance: number;
+	visitsCount: number;
+	stampProgress: {
+		campaignId: string;
+		campaignName: string;
+		current: number;
+		required: number;
+		completed: boolean;
+	}[];
 };
-
-function planLabel(plan: string): string {
-	return plan.charAt(0).toUpperCase() + plan.slice(1);
-}
 
 function BusinessAvatar({ name, logoUrl }: { name: string; logoUrl: string | null }): ReactElement {
 	if (logoUrl) {
@@ -38,39 +42,6 @@ function BusinessAvatar({ name, logoUrl }: { name: string; logoUrl: string | nul
 	);
 }
 
-export function BusinessSummaryCard({ business }: { business: UserBusiness }): ReactElement {
-	return (
-		<Link href={platformRoutes.homeBusiness(business.slug)} className="block">
-			<Card className="transition-opacity hover:opacity-90">
-				<div className="flex items-start gap-3">
-					<BusinessAvatar name={business.name} logoUrl={business.logoUrl} />
-					<div className="flex min-w-0 flex-1 flex-col gap-1">
-						<p className="font-medium text-foreground">{business.name}</p>
-						<p className="text-xs text-muted">{business.slug}</p>
-						<div className="flex flex-wrap gap-2 pt-1">
-							<span className="rounded-theme bg-muted/30 px-2 py-0.5 text-xs text-muted">
-								Plan {planLabel(business.subscriptionPlan)}
-							</span>
-							<span className="rounded-theme bg-muted/30 px-2 py-0.5 text-xs capitalize text-muted">
-								{business.status}
-							</span>
-						</div>
-					</div>
-				</div>
-			</Card>
-		</Link>
-	);
-}
-
-type UserEstablishment = {
-	customerId: string;
-	name: string;
-	slug: string;
-	logoUrl: string | null;
-	pointsBalance: number;
-	visitsCount: number;
-};
-
 export function EstablishmentSummaryCard({
 	establishment,
 }: {
@@ -83,6 +54,15 @@ export function EstablishmentSummaryCard({
 					<BusinessAvatar name={establishment.name} logoUrl={establishment.logoUrl} />
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
 						<p className="font-medium text-foreground">{establishment.name}</p>
+						{establishment.stampProgress.length > 0 ? (
+							<ul className="flex flex-col gap-0.5">
+								{establishment.stampProgress.map((row) => (
+									<li key={row.campaignId} className="text-xs text-muted">
+										{formatStampProgressLine(row)}
+									</li>
+								))}
+							</ul>
+						) : null}
 						<p className="text-xs text-muted">
 							{establishment.pointsBalance} pts · {establishment.visitsCount} visitas
 						</p>

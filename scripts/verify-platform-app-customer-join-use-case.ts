@@ -8,6 +8,8 @@ import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/u
 import { JoinTenantAsCustomer } from "../src/contexts/loyalty/customers/application/join/JoinTenantAsCustomer";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
+import { GetCustomerStampProgress } from "../src/contexts/loyalty/customers/application/profile/GetCustomerStampProgress";
+import { StampAddedSummary } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { ListUserRelationships } from "../src/contexts/tenants/memberships/application/list/ListUserRelationships";
 import { TenantMembershipRepository } from "../src/contexts/tenants/memberships/domain/TenantMembershipRepository";
 import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";
@@ -189,7 +191,14 @@ const tenantRepo = new InMemoryTenantRepository(
 );
 const customerRepo = new InMemoryCustomerRepository();
 const join = new JoinTenantAsCustomer(tenantRepo, customerRepo, new UserFinder(new InMemoryUserRepository(users)));
-const relationships = new ListUserRelationships(new EmptyMembershipRepository(), customerRepo);
+const stubGetCustomerStampProgress = {
+	execute: async (): Promise<StampAddedSummary[]> => [],
+} as GetCustomerStampProgress;
+const relationships = new ListUserRelationships(
+	new EmptyMembershipRepository(),
+	customerRepo,
+	stubGetCustomerStampProgress,
+);
 
 async function expectError<T extends Error>(
 	label: string,

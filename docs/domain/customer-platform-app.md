@@ -137,19 +137,19 @@ Visible si tiene `tenant_memberships` con rol owner (o employee con permisos ope
 | Elemento | Contenido |
 |----------|-----------|
 | Lista | Negocios que posee o gestiona (logo, nombre, plan, estado) |
-| Tap | Panel admin del negocio (`/panel` en web owner) |
+| Tap | Abre el panel del negocio directamente (`POST …/enter` → `/panel`) |
 | CTA | «Añadir negocio» → flujo B paso 2 |
 
-Un owner con **varios** negocios ve todos en esta sección.
+Un owner con **varios** negocios ve todos en esta sección. Los locales que ya son negocio propio **no** se duplican en «Mis locales».
 
 ### Sección «Mis locales» (cliente)
 
-Visible si tiene al menos un `customers` vinculado a su `user_id`.
+Visible si tiene al menos un `customers` vinculado a su `user_id` (excluyendo negocios propios).
 
 | Elemento | Contenido |
 |----------|-----------|
 | Lista | Locales con **interacción** (visitas, sellos, puntos, canjes) |
-| Resumen por fila | Puntos, progreso sellos, badge «promo activa» |
+| Resumen por fila | Nombre del local; progreso de sellos (`5/10 — Tarjeta verano`); `{pts} pts · {visitas} visitas` |
 | Tap | Detalle del local (§ Vista detalle de un local) |
 | CTA | «Descubrir locales» — buscar / escanear QR |
 

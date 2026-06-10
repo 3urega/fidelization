@@ -35,6 +35,8 @@ npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + ow
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
 npm run verify:session-cookie-prod # production cookie Domain + resolveTenantHomeUrl
 npm run verify:tenant-branding     # issue #17 — PATCH branding + GET /api/me + Prisma (dev server + DATABASE_URL)
+npm run verify:tenant-profile-use-case # tenant profile — UpdateTenantProfile domain stub
+npm run verify:tenant-profile      # PATCH /api/tenant/profile + GET /api/me + Prisma (dev server + DATABASE_URL)
 npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.register (domain)
 npm run verify:customer-use-case   # issue #18 — RegisterCustomer + AuthenticateCustomerByQr + DI
 npm run verify:customer-loyalty-api  # issue #18 — loyalty APIs (x-tenant headers on apex)
@@ -107,7 +109,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
 - **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
-- **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/home`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
+- **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/panel`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
+- **Tenant profile:** owner en `/settings/profile` → dirección (recomendada) + descripción opcionales; checklist «Añade la dirección» en `/panel`. API: `PATCH /api/tenant/profile`. Visible en detalle del local (app personal). `verify:tenant-profile-use-case`, `verify:tenant-profile`.
 - **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me` (incl. `stampProgress[]` desde #23, `rewards[]` desde #25). `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
 - **Customer stamp progress (#23):** en `/app/card`, sección «Sellos» con progreso por campaña activa (`0/N`, «Completada»). `verify:customer-stamp-progress-use-case`, `verify:customer-stamp-progress`.
 - **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto, +1 sello por campaña activa, filas en `loyalty_transactions` (`points_earned`, `stamp_added`). Enlace para clientes en checklist `/home`. `verify:customer-scan`, `verify:customer-stamp-scan`.
@@ -141,7 +144,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - Frontend in `src/app/`, API routes in `src/app/api/`.
 - **App Router groups (issue #4):** `(public)/` landing, `(auth)/` login+register, `(app)/` owner shell (`/home` — no confundir con URL `/app`), `(loyalty)/` customer `/app`, `(platform)/` superadmin; URLs sin cambio (`/`, `/login`, `/home`, `/app`, …).
 - **Superadmin foundation (issue #8):** auth `kind: platform`, aislamiento de tenant APIs y middleware; dashboard operativo (CRUD) fuera de alcance.
-- **Env:** [`src/lib/env.ts`](src/lib/env.ts) — acceso centralizado server-side; ver [`.env.example`](.env.example).
+- **Env:** [`src/lib/env.ts`](src/lib/env.ts) — acceso centralizado server-side; ver [`.env.example`](.env.example) y [`docs/backend/external-services-env.md`](docs/backend/external-services-env.md) (Google OAuth, Stripe).
 
 # Documentation
 
@@ -164,6 +167,7 @@ docs/
 │   ├── dependency-injection-diod.md
 │   ├── hexagonal-architecture.md
 │   ├── session-cookies-localhost-dev.md   # cookies sin Domain en localhost; rutas login dev
+│   ├── external-services-env.md           # Google Sign-In + Stripe: claves, .env, dev local
 │   └── thin-api-routes.md
 ├── database/
 │   ├── data-model.md            # esquema implementado (Fase 0) + entidades target + roadmap migraciones
@@ -193,11 +197,11 @@ docs/
 | Tenant employees (#26–#27) | `verify:tenant-employees-use-case` + `verify:tenant-employees` + `/settings/team` |
 | Subscription plans (#30) | `verify:subscription-plans-use-case` + `verify:subscription-plans` + `/api/billing/plans` |
 | Onboarding plan UI (#31) | `verify:onboarding-plan-selection` + `/onboarding/plan` + checklist `/home` |
-| Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` |
+| Stripe Checkout (#32) | `verify:stripe-checkout-use-case` + `verify:stripe-webhook-checkout-use-case` + `/api/billing/checkout` + `/api/webhooks/stripe` + **`docs/backend/external-services-env.md`** (claves Stripe) |
 | Stripe webhooks lifecycle (#33) | `verify:stripe-webhooks-use-case` + `ProcessStripeWebhook` + `stripe_webhook_events` |
 | Plan feature flags (#34) | `verify:tenant-feature-flags-use-case` + `GET /api/loyalty/promotions` + `planFeatures` in `/api/me` |
 | Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
-| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43), `verify:platform-app-global-qr-scan` (#44), `verify:platform-app-e2e` (#45) + `docs/domain/customer-platform-app.md` |
+| Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43), `verify:platform-app-global-qr-scan` (#44), `verify:platform-app-e2e` (#45) + `docs/domain/customer-platform-app.md` + **`docs/backend/external-services-env.md`** (Google OAuth) |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
 | Superadmin dashboard (issue #9) | `docs/domain/saas-architecture.md` + `npm run verify:platform-tenants` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |

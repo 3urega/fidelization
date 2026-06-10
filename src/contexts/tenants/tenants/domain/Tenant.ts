@@ -11,6 +11,8 @@ export type TenantPrimitives = {
 	subscriptionPlanId: string | null;
 	status: TenantStatus;
 	createdAt: string;
+	address?: string;
+	description?: string;
 };
 
 export class Tenant {
@@ -25,6 +27,8 @@ export class Tenant {
 		public readonly subscriptionPlanId: string | null,
 		public readonly status: TenantStatus,
 		public readonly createdAt: string,
+		public readonly address: string,
+		public readonly description: string,
 	) {}
 
 	static fromPrimitives(primitives: TenantPrimitives): Tenant {
@@ -39,6 +43,8 @@ export class Tenant {
 			primitives.subscriptionPlanId,
 			primitives.status,
 			primitives.createdAt,
+			primitives.address ?? "",
+			primitives.description ?? "",
 		);
 	}
 
@@ -54,6 +60,8 @@ export class Tenant {
 			subscriptionPlanId: this.subscriptionPlanId,
 			status: this.status,
 			createdAt: this.createdAt,
+			address: this.address,
+			description: this.description,
 		};
 	}
 }

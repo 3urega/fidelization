@@ -29,6 +29,8 @@ export type EstablishmentDetailTenant = {
 	secondaryColor: string | null;
 	subscriptionPlan: string;
 	status: string;
+	address: string | null;
+	description: string | null;
 };
 
 export type GetEstablishmentDetailForUserParams = {
@@ -93,6 +95,8 @@ export class GetEstablishmentDetailForUser {
 			secondaryColor: primitives.secondaryColor || null,
 			subscriptionPlan: primitives.subscriptionPlan,
 			status: primitives.status,
+			address: primitives.address?.trim() ? primitives.address : null,
+			description: primitives.description?.trim() ? primitives.description : null,
 		};
 
 		if (!customer) {

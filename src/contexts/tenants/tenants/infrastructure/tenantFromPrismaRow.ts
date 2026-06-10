@@ -12,6 +12,8 @@ export type PrismaTenantRow = {
 	subscriptionPlanId: string | null;
 	status: string;
 	createdAt: Date;
+	address: string;
+	description: string;
 };
 
 export function tenantFromPrismaRow(row: PrismaTenantRow): Tenant {
@@ -26,5 +28,7 @@ export function tenantFromPrismaRow(row: PrismaTenantRow): Tenant {
 		subscriptionPlanId: row.subscriptionPlanId,
 		status: parseTenantStatus(row.status),
 		createdAt: row.createdAt.toISOString(),
+		address: row.address,
+		description: row.description,
 	});
 }

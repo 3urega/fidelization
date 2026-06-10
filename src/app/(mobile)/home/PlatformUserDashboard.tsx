@@ -8,6 +8,8 @@ import { platformRoutes } from "../../../lib/platform/routes";
 import { PlatformUserQrModal } from "../../_components/platform-app/PlatformUserQrModal";
 import {
 	BusinessSummaryCard,
+} from "../../_components/platform-app/BusinessSummaryCard";
+import {
 	DualEmptyRelationshipsCard,
 	EstablishmentSummaryCard,
 } from "../../_components/platform-app/PlatformRelationshipCards";
@@ -35,6 +37,13 @@ type UserEstablishment = {
 	logoUrl: string | null;
 	pointsBalance: number;
 	visitsCount: number;
+	stampProgress: {
+		campaignId: string;
+		campaignName: string;
+		current: number;
+		required: number;
+		completed: boolean;
+	}[];
 };
 
 type UserRelationshipsResponse = {

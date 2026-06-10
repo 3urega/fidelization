@@ -24,6 +24,8 @@ type EstablishmentTenant = {
 	secondaryColor: string | null;
 	subscriptionPlan: string;
 	status: string;
+	address?: string | null;
+	description?: string | null;
 };
 
 type EstablishmentCustomer = {
@@ -85,6 +87,32 @@ function EstablishmentHeader({ tenant }: { tenant: EstablishmentTenant }): React
 				<p className="text-sm text-muted">{tenant.slug}</p>
 			</div>
 		</header>
+	);
+}
+
+function EstablishmentProfileInfo({ tenant }: { tenant: EstablishmentTenant }): ReactElement | null {
+	const description = tenant.description?.trim();
+	const address = tenant.address?.trim();
+
+	if (!description && !address) {
+		return null;
+	}
+
+	return (
+		<Card className="flex flex-col gap-3">
+			{description ? (
+				<div>
+					<h2 className="text-sm font-medium text-foreground">Sobre el local</h2>
+					<p className="mt-1 text-sm text-muted whitespace-pre-wrap">{description}</p>
+				</div>
+			) : null}
+			{address ? (
+				<div>
+					<h2 className="text-sm font-medium text-foreground">Dirección</h2>
+					<p className="mt-1 text-sm text-muted">{address}</p>
+				</div>
+			) : null}
+		</Card>
 	);
 }
 
@@ -266,6 +294,8 @@ export function PlatformEstablishmentDetail(): ReactElement {
 			</Link>
 
 			<EstablishmentHeader tenant={detail.tenant} />
+
+			<EstablishmentProfileInfo tenant={detail.tenant} />
 
 			{detail.mode === "discovery" ? (
 				<>
