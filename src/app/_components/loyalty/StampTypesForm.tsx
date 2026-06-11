@@ -24,7 +24,11 @@ type StampTypesResponse = {
 	};
 };
 
-export function StampTypesForm(): ReactElement {
+type StampTypesFormProps = {
+	onTypesChanged?: () => void;
+};
+
+export function StampTypesForm({ onTypesChanged }: StampTypesFormProps): ReactElement {
 	const { session, loading, error } = useTenantSession();
 	const [types, setTypes] = useState<StampTypePayload[]>([]);
 	const [listLoading, setListLoading] = useState(true);
@@ -51,13 +55,14 @@ export function StampTypesForm(): ReactElement {
 			}
 
 			setTypes(body.types ?? []);
+			onTypesChanged?.();
 		} catch {
 			setSubmitError("Error de red al cargar los tipos.");
 			setTypes([]);
 		} finally {
 			setListLoading(false);
 		}
-	}, []);
+	}, [onTypesChanged]);
 
 	useEffect(() => {
 		if (!session || session.role !== "owner") {
@@ -117,9 +122,12 @@ export function StampTypesForm(): ReactElement {
 			}
 
 			if (body.stampType) {
-				setSuccess(`Tipo creado: «${body.stampType.label}». Lo verá el empleado al escanear.`);
+				setSuccess(
+					`Tipo creado: «${body.stampType.label}». Configura su campaña en la pestaña Campañas.`,
+				);
 				setLabel("");
 				await loadTypes();
+				onTypesChanged?.();
 			}
 		} catch {
 			setSubmitError("Error de red al crear el tipo.");
@@ -151,6 +159,7 @@ export function StampTypesForm(): ReactElement {
 
 			setSuccess("Tipo desactivado.");
 			await loadTypes();
+			onTypesChanged?.();
 		} catch {
 			setSubmitError("Error de red al desactivar el tipo.");
 		} finally {
@@ -163,13 +172,14 @@ export function StampTypesForm(): ReactElement {
 			<Card>
 				<h2 className="font-medium text-foreground">Tipos de consumición</h2>
 				<p className="mt-1 text-sm text-muted">
-					El empleado elige uno de estos botones al escanear (p. ej. Café, Menú).
+					Cada tipo crea un botón para el empleado al escanear (p. ej. Café, Cóctail). La
+					tarjeta de sellos se configura en la pestaña Campañas.
 				</p>
 				{listLoading ? (
 					<p className="mt-3 text-sm text-muted">Cargando tipos…</p>
 				) : types.length === 0 ? (
 					<p className="mt-3 text-sm text-muted">
-						Aún no hay tipos. Créalos abajo para campañas específicas.
+						Crea el primer tipo abajo. Sin tipos no podrás añadir campañas de sellos.
 					</p>
 				) : (
 					<ul className="mt-4 flex flex-col gap-3">

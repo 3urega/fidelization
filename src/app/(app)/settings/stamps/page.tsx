@@ -1,5 +1,4 @@
-import { StampCampaignsForm } from "../../../_components/loyalty/StampCampaignsForm";
-import { StampTypesForm } from "../../../_components/loyalty/StampTypesForm";
+import { StampSettingsPanel } from "../../../_components/loyalty/StampSettingsPanel";
 import { PageHeader } from "../../../_components/shell/PageHeader";
 
 export default function StampSettingsPage(): React.ReactElement {
@@ -7,10 +6,9 @@ export default function StampSettingsPage(): React.ReactElement {
 		<>
 			<PageHeader
 				title="Tarjeta de sellos"
-				description="Define tipos de consumición y campañas para que el empleado escaneé el carril correcto."
+				description="Primero define tipos de consumición; después crea campañas ligadas a cada tipo."
 			/>
-			<StampTypesForm />
-			<StampCampaignsForm />
+			<StampSettingsPanel />
 		</>
 	);
 }

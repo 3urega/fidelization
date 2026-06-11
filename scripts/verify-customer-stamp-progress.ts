@@ -63,11 +63,29 @@ async function main(): Promise<void> {
 		cookie: `session=${ownerCookie}`,
 	});
 
+	const typeLabel = `Verify stamp progress type ${Date.now()}`;
+	const createType = await fetch(`${apexBaseUrl}/api/loyalty/stamp-types`, {
+		method: "POST",
+		headers: ownerHeaders,
+		body: JSON.stringify({ label: typeLabel }),
+	});
+	const createTypeBody = (await createType.json()) as {
+		stampType?: { id: string; isActive: boolean };
+	};
+
+	if (!createType.ok || !createTypeBody.stampType?.id || !createTypeBody.stampType.isActive) {
+		console.error("❌ setup create stamp type:", createType.status, createTypeBody);
+		process.exit(1);
+	}
+
+	const stampTypeId = createTypeBody.stampType.id;
+	console.log("✅ setup stamp type for progress verify");
+
 	const campaignName = `Verify stamp progress ${Date.now()}`;
 	const createCampaign = await fetch(`${apexBaseUrl}/api/loyalty/stamp-campaigns`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ name: campaignName, requiredStamps: 3 }),
+		body: JSON.stringify({ name: campaignName, requiredStamps: 3, stampTypeId }),
 	});
 	const createCampaignBody = (await createCampaign.json()) as {
 		campaign?: { id: string; isActive: boolean };
@@ -134,7 +152,7 @@ async function main(): Promise<void> {
 	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue }),
+		body: JSON.stringify({ qrValue, stampTypeId }),
 	});
 
 	if (!scan.ok) {
@@ -164,7 +182,7 @@ async function main(): Promise<void> {
 		const nextScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 			method: "POST",
 			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue }),
+			body: JSON.stringify({ qrValue, stampTypeId }),
 		});
 
 		if (!nextScan.ok) {

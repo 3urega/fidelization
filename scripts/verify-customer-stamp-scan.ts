@@ -51,11 +51,29 @@ async function main(): Promise<void> {
 		cookie: `session=${ownerCookie}`,
 	});
 
+	const typeLabel = `Verify stamp scan type ${Date.now()}`;
+	const createType = await fetch(`${apexBaseUrl}/api/loyalty/stamp-types`, {
+		method: "POST",
+		headers: ownerHeaders,
+		body: JSON.stringify({ label: typeLabel }),
+	});
+	const createTypeBody = (await createType.json()) as {
+		stampType?: { id: string; isActive: boolean };
+	};
+
+	if (!createType.ok || !createTypeBody.stampType?.id || !createTypeBody.stampType.isActive) {
+		console.error("❌ setup create stamp type:", createType.status, createTypeBody);
+		process.exit(1);
+	}
+
+	const stampTypeId = createTypeBody.stampType.id;
+	console.log("✅ setup stamp type for scan verify");
+
 	const campaignName = `Verify stamp scan ${Date.now()}`;
 	const createCampaign = await fetch(`${apexBaseUrl}/api/loyalty/stamp-campaigns`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ name: campaignName, requiredStamps: 10 }),
+		body: JSON.stringify({ name: campaignName, requiredStamps: 10, stampTypeId }),
 	});
 	const createCampaignBody = (await createCampaign.json()) as {
 		campaign?: { id: string; isActive: boolean };
@@ -90,7 +108,7 @@ async function main(): Promise<void> {
 	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue, stampTypeId: null }),
+		body: JSON.stringify({ qrValue, stampTypeId }),
 	});
 	const scanBody = (await scan.json()) as {
 		customer?: { pointsBalance: number; visitsCount: number };
@@ -149,7 +167,7 @@ async function main(): Promise<void> {
 		const nextScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 			method: "POST",
 			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue, stampTypeId: null }),
+			body: JSON.stringify({ qrValue, stampTypeId }),
 		});
 		const nextBody = (await nextScan.json()) as {
 			stampsAdded?: { campaignId?: string; current: number; completed: boolean }[];
@@ -177,7 +195,7 @@ async function main(): Promise<void> {
 	const afterCompleted = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue, stampTypeId: null }),
+		body: JSON.stringify({ qrValue, stampTypeId }),
 	});
 	const afterCompletedBody = (await afterCompleted.json()) as {
 		stampsAdded?: { campaignId?: string }[];
@@ -239,7 +257,7 @@ async function main(): Promise<void> {
 	const inactiveScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue: inactiveQr }),
+		body: JSON.stringify({ qrValue: inactiveQr, stampTypeId }),
 	});
 	const inactiveScanBody = (await inactiveScan.json()) as {
 		stampsAdded?: { campaignId?: string }[];

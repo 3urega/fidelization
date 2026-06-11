@@ -58,11 +58,43 @@ async function main(): Promise<void> {
 
 	console.log("✅ POST invalid campaign → 400 InvalidStampCampaign");
 
+	const missingTypePost = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/stamp-campaigns`, {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ name: "Missing type", requiredStamps: 5 }),
+	});
+	const missingTypeBody = (await missingTypePost.json()) as { error?: { type?: string } };
+
+	if (missingTypePost.status !== 400 || missingTypeBody.error?.type !== "InvalidStampCampaign") {
+		console.error("❌ POST campaign without stampTypeId:", missingTypePost.status, missingTypeBody);
+		process.exit(1);
+	}
+
+	console.log("✅ POST campaign without stampTypeId → 400 InvalidStampCampaign");
+
+	const typeLabel = `Verify type ${Date.now()}`;
+	const createType = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/stamp-types`, {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ label: typeLabel }),
+	});
+	const createTypeBody = (await createType.json()) as {
+		stampType?: { id: string; label: string; isActive: boolean };
+	};
+
+	if (!createType.ok || !createTypeBody.stampType?.id || !createTypeBody.stampType.isActive) {
+		console.error("❌ POST /api/loyalty/stamp-types:", createType.status, createTypeBody);
+		process.exit(1);
+	}
+
+	const stampTypeId = createTypeBody.stampType.id;
+	console.log(`✅ POST /api/loyalty/stamp-types → ${stampTypeId}`);
+
 	const campaignName = `Verify stamp ${Date.now()}`;
 	const create = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/stamp-campaigns`, {
 		method: "POST",
 		headers,
-		body: JSON.stringify({ name: campaignName, requiredStamps: 8 }),
+		body: JSON.stringify({ name: campaignName, requiredStamps: 8, stampTypeId }),
 	});
 	const createBody = (await create.json()) as {
 		campaign?: { id: string; name: string; requiredStamps: number; isActive: boolean };
@@ -84,14 +116,15 @@ async function main(): Promise<void> {
 
 	const rowAfterCreate = await prisma.stampCampaign.findFirst({
 		where: { id: campaignId, tenantId },
-		select: { name: true, requiredStamps: true, isActive: true },
+		select: { name: true, requiredStamps: true, isActive: true, stampTypeId: true },
 	});
 
 	if (
 		!rowAfterCreate ||
 		rowAfterCreate.name !== campaignName ||
 		rowAfterCreate.requiredStamps !== 8 ||
-		!rowAfterCreate.isActive
+		!rowAfterCreate.isActive ||
+		rowAfterCreate.stampTypeId !== stampTypeId
 	) {
 		console.error("❌ Prisma stamp_campaigns after POST:", rowAfterCreate);
 		process.exit(1);

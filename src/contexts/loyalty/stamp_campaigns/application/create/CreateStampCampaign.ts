@@ -40,9 +40,15 @@ export class CreateStampCampaign {
 
 		const parsed = parseStampCampaignCreate(params.input);
 
-		if (parsed.stampTypeId) {
-			await this.assertActiveStampType(params.tenantId, parsed.stampTypeId);
+		const activeTypeCount = await this.stampTypeRepository.countActiveByTenant(params.tenantId);
+
+		if (activeTypeCount === 0) {
+			throw new InvalidStampCampaign(
+				"Create at least one active stamp type before creating campaigns",
+			);
 		}
+
+		await this.assertActiveStampType(params.tenantId, parsed.stampTypeId);
 
 		const campaign = StampCampaign.create({
 			tenantId: params.tenantId,

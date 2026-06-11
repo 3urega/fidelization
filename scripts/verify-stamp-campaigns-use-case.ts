@@ -171,13 +171,53 @@ async function main(): Promise<void> {
 		list.execute({ tenantId, role: TenantRole.Employee }),
 	);
 
+	try {
+		await create.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			input: { name: "Missing type", requiredStamps: 5 },
+		});
+		console.error("❌ expected InvalidStampCampaign for missing stampTypeId");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof InvalidStampCampaign)) {
+			console.error("❌ wrong error for missing stampTypeId", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ missing stampTypeId → InvalidStampCampaign");
+
+	const createNoTypes = new CreateStampCampaign(
+		tenantRepository,
+		stampRepository,
+		new InMemoryStampTypeRepository([]),
+	);
+
+	try {
+		await createNoTypes.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			input: { name: "No types tenant", requiredStamps: 5, stampTypeId: cafeType.id },
+		});
+		console.error("❌ expected InvalidStampCampaign when no active stamp types");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof InvalidStampCampaign)) {
+			console.error("❌ wrong error for no active stamp types", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ no active stamp types → InvalidStampCampaign");
+
 	const created = await create.execute({
 		tenantId,
 		role: TenantRole.Owner,
-		input: { name: "10 cafés → 1 gratis", requiredStamps: 10 },
+		input: { name: "10 cafés → 1 gratis", requiredStamps: 10, stampTypeId: cafeType.id },
 	});
 
-	if (!created.isActive || created.requiredStamps !== 10) {
+	if (!created.isActive || created.requiredStamps !== 10 || created.stampTypeId !== cafeType.id) {
 		console.error("❌ CreateStampCampaign owner", created.toPrimitives());
 		process.exit(1);
 	}
@@ -275,7 +315,7 @@ async function main(): Promise<void> {
 		await missingTenantCreate.execute({
 			tenantId,
 			role: TenantRole.Owner,
-			input: { name: "X", requiredStamps: 1 },
+			input: { name: "X", requiredStamps: 1, stampTypeId: cafeType.id },
 		});
 		console.error("❌ expected TenantNotFound");
 		process.exit(1);

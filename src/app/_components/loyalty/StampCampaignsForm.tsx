@@ -30,7 +30,15 @@ type CampaignsResponse = {
 	};
 };
 
-export function StampCampaignsForm(): ReactElement {
+type StampCampaignsFormProps = {
+	hasActiveTypes: boolean;
+	onGoToTypesTab: () => void;
+};
+
+export function StampCampaignsForm({
+	hasActiveTypes,
+	onGoToTypesTab,
+}: StampCampaignsFormProps): ReactElement {
 	const { session, loading, error } = useTenantSession();
 	const [campaigns, setCampaigns] = useState<CampaignPayload[]>([]);
 	const [stampTypes, setStampTypes] = useState<StampTypePayload[]>([]);
@@ -92,6 +100,18 @@ export function StampCampaignsForm(): ReactElement {
 		void loadStampTypes();
 	}, [session, loadCampaigns, loadStampTypes]);
 
+	useEffect(() => {
+		if (stampTypes.length === 0) {
+			setStampTypeId("");
+
+			return;
+		}
+
+		setStampTypeId((current) =>
+			current && stampTypes.some((type) => type.id === current) ? current : stampTypes[0].id,
+		);
+	}, [stampTypes]);
+
 	if (error) {
 		return <p className="text-sm text-error">{error}</p>;
 	}
@@ -113,14 +133,21 @@ export function StampCampaignsForm(): ReactElement {
 	const parsedStamps = Number.parseInt(requiredStamps, 10);
 	const stampsValid = Number.isInteger(parsedStamps) && parsedStamps >= 1;
 	const nameValid = name.trim().length > 0;
+	const typeValid = stampTypeId.trim().length > 0;
 
 	async function handleCreate(event: React.FormEvent<HTMLFormElement>): Promise<void> {
 		event.preventDefault();
 		setSubmitError(null);
 		setSuccess(null);
 
-		if (!nameValid || !stampsValid) {
-			setSubmitError("Revisa el nombre y el número de sellos (mínimo 1).");
+		if (!hasActiveTypes) {
+			setSubmitError("Crea al menos un tipo de consumición antes de añadir campañas.");
+
+			return;
+		}
+
+		if (!nameValid || !stampsValid || !typeValid) {
+			setSubmitError("Revisa el nombre, los sellos (mínimo 1) y el tipo de consumición.");
 
 			return;
 		}
@@ -135,7 +162,7 @@ export function StampCampaignsForm(): ReactElement {
 				body: JSON.stringify({
 					name: name.trim(),
 					requiredStamps: parsedStamps,
-					stampTypeId: stampTypeId.trim() ? stampTypeId : null,
+					stampTypeId: stampTypeId.trim(),
 				}),
 			});
 
@@ -153,7 +180,9 @@ export function StampCampaignsForm(): ReactElement {
 				);
 				setName("");
 				setRequiredStamps("10");
-				setStampTypeId("");
+				if (stampTypes[0]) {
+					setStampTypeId(stampTypes[0].id);
+				}
 				await loadCampaigns();
 			}
 		} catch {
@@ -214,7 +243,7 @@ export function StampCampaignsForm(): ReactElement {
 										{campaign.requiredStamps} sellos
 										{campaign.stampTypeId
 											? ` · ${stampTypes.find((type) => type.id === campaign.stampTypeId)?.label ?? "Tipo"}`
-											: " · Visita general"}
+											: " · Sin tipo (legacy)"}
 									</p>
 								</div>
 								<div className="flex items-center gap-3">
@@ -246,67 +275,79 @@ export function StampCampaignsForm(): ReactElement {
 				)}
 			</Card>
 
-			<Card>
-				<h2 className="font-medium text-foreground">Nueva campaña</h2>
-				<form className="mt-4 flex flex-col gap-5" onSubmit={(event) => void handleCreate(event)}>
-					<Field label="Nombre de la campaña">
-						<Input
-							type="text"
-							name="name"
-							value={name}
-							onChange={(event) => setName(event.target.value)}
-							placeholder="10 cafés → 1 gratis"
-							autoComplete="off"
-							maxLength={120}
-						/>
-						<p className="mt-1 text-xs text-muted">
-							Describe la promoción. Ejemplo: compra 10 veces y obtén un café gratis.
-						</p>
-					</Field>
+			{hasActiveTypes ? (
+				<Card>
+					<h2 className="font-medium text-foreground">Nueva campaña</h2>
+					<form className="mt-4 flex flex-col gap-5" onSubmit={(event) => void handleCreate(event)}>
+						<Field label="Nombre de la campaña">
+							<Input
+								type="text"
+								name="name"
+								value={name}
+								onChange={(event) => setName(event.target.value)}
+								placeholder="10 cafés → 1 gratis"
+								autoComplete="off"
+								maxLength={120}
+							/>
+							<p className="mt-1 text-xs text-muted">
+								Describe la promoción. Ejemplo: compra 10 veces y obtén un café gratis.
+							</p>
+						</Field>
 
-					<Field label="Sellos necesarios">
-						<Input
-							type="number"
-							name="requiredStamps"
-							value={requiredStamps}
-							onChange={(event) => setRequiredStamps(event.target.value)}
-							min={1}
-							step={1}
-							className="max-w-[8rem]"
-						/>
-					</Field>
+						<Field label="Sellos necesarios">
+							<Input
+								type="number"
+								name="requiredStamps"
+								value={requiredStamps}
+								onChange={(event) => setRequiredStamps(event.target.value)}
+								min={1}
+								step={1}
+								className="max-w-[8rem]"
+							/>
+						</Field>
 
-					<Field label="Tipo de consumición">
-						<select
-							name="stampTypeId"
-							value={stampTypeId}
-							onChange={(event) => setStampTypeId(event.target.value)}
-							className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+						<Field label="Tipo de consumición">
+							<select
+								name="stampTypeId"
+								value={stampTypeId}
+								onChange={(event) => setStampTypeId(event.target.value)}
+								className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+								required
+							>
+								{stampTypes.map((type) => (
+									<option key={type.id} value={type.id}>
+										{type.label}
+									</option>
+								))}
+							</select>
+							<p className="mt-1 text-xs text-muted">
+								El sello solo avanza cuando el empleado escanea con el botón de este tipo.
+							</p>
+						</Field>
+
+						{submitError ? <p className="text-sm text-error">{submitError}</p> : null}
+						{success ? <p className="text-sm text-foreground">{success}</p> : null}
+
+						<Button
+							type="submit"
+							disabled={saving || !nameValid || !stampsValid || !typeValid}
+							className="w-full sm:w-auto"
 						>
-							<option value="">Visita general (sin tipo concreto)</option>
-							{stampTypes.map((type) => (
-								<option key={type.id} value={type.id}>
-									{type.label}
-								</option>
-							))}
-						</select>
-						<p className="mt-1 text-xs text-muted">
-							Si eliges un tipo, el sello solo avanza cuando el empleado escanea con ese botón.
-						</p>
-					</Field>
-
-					{submitError ? <p className="text-sm text-error">{submitError}</p> : null}
-					{success ? <p className="text-sm text-foreground">{success}</p> : null}
-
-					<Button
-						type="submit"
-						disabled={saving || !nameValid || !stampsValid}
-						className="w-full sm:w-auto"
-					>
-						{saving ? "Creando…" : "Crear campaña"}
+							{saving ? "Creando…" : "Crear campaña"}
+						</Button>
+					</form>
+				</Card>
+			) : (
+				<Card>
+					<h2 className="font-medium text-foreground">Nueva campaña</h2>
+					<p className="mt-2 text-sm text-muted">
+						Crea al menos un tipo de consumición antes de añadir campañas de sellos.
+					</p>
+					<Button type="button" className="mt-4 w-full sm:w-auto" onClick={onGoToTypesTab}>
+						Ir a tipos
 					</Button>
-				</form>
-			</Card>
+				</Card>
+			)}
 		</div>
 	);
 }

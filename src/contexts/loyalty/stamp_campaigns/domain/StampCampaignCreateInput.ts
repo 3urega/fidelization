@@ -5,7 +5,7 @@ const MAX_NAME_LENGTH = 120;
 export type StampCampaignCreateInput = {
 	name: string;
 	requiredStamps: number;
-	stampTypeId: string | null;
+	stampTypeId: string;
 };
 
 export function parseStampCampaignCreate(input: {
@@ -33,17 +33,19 @@ export function parseStampCampaignCreate(input: {
 		throw new InvalidStampCampaign("requiredStamps must be an integer greater than or equal to 1");
 	}
 
-	let stampTypeId: string | null = null;
+	let stampTypeId: string;
 
-	if (input.stampTypeId !== undefined && input.stampTypeId !== null) {
-		const trimmed = String(input.stampTypeId).trim();
-
-		if (!trimmed) {
-			throw new InvalidStampCampaign("stampTypeId must be a non-empty id or null");
-		}
-
-		stampTypeId = trimmed;
+	if (input.stampTypeId === undefined || input.stampTypeId === null) {
+		throw new InvalidStampCampaign("stampTypeId is required");
 	}
+
+	const trimmedTypeId = String(input.stampTypeId).trim();
+
+	if (!trimmedTypeId) {
+		throw new InvalidStampCampaign("stampTypeId is required");
+	}
+
+	stampTypeId = trimmedTypeId;
 
 	return { name, requiredStamps, stampTypeId };
 }
