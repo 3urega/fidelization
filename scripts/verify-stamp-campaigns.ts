@@ -94,10 +94,23 @@ async function main(): Promise<void> {
 	const create = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/stamp-campaigns`, {
 		method: "POST",
 		headers,
-		body: JSON.stringify({ name: campaignName, requiredStamps: 8, stampTypeId }),
+		body: JSON.stringify({
+			name: campaignName,
+			requiredStamps: 8,
+			stampTypeId,
+			visualTemplate: "coffee",
+			cardBackgroundVariant: "coffee-sketch",
+		}),
 	});
 	const createBody = (await create.json()) as {
-		campaign?: { id: string; name: string; requiredStamps: number; isActive: boolean };
+		campaign?: {
+			id: string;
+			name: string;
+			requiredStamps: number;
+			isActive: boolean;
+			visualTemplate?: string;
+			cardBackgroundVariant?: string;
+		};
 	};
 
 	if (
@@ -105,7 +118,9 @@ async function main(): Promise<void> {
 		!createBody.campaign?.id ||
 		createBody.campaign.name !== campaignName ||
 		createBody.campaign.requiredStamps !== 8 ||
-		!createBody.campaign.isActive
+		!createBody.campaign.isActive ||
+		createBody.campaign.visualTemplate !== "coffee" ||
+		createBody.campaign.cardBackgroundVariant !== "coffee-sketch"
 	) {
 		console.error("❌ POST /api/loyalty/stamp-campaigns:", create.status, createBody);
 		process.exit(1);
@@ -116,7 +131,14 @@ async function main(): Promise<void> {
 
 	const rowAfterCreate = await prisma.stampCampaign.findFirst({
 		where: { id: campaignId, tenantId },
-		select: { name: true, requiredStamps: true, isActive: true, stampTypeId: true },
+		select: {
+			name: true,
+			requiredStamps: true,
+			isActive: true,
+			stampTypeId: true,
+			visualTemplate: true,
+			cardBackgroundVariant: true,
+		},
 	});
 
 	if (
@@ -124,7 +146,9 @@ async function main(): Promise<void> {
 		rowAfterCreate.name !== campaignName ||
 		rowAfterCreate.requiredStamps !== 8 ||
 		!rowAfterCreate.isActive ||
-		rowAfterCreate.stampTypeId !== stampTypeId
+		rowAfterCreate.stampTypeId !== stampTypeId ||
+		rowAfterCreate.visualTemplate !== "coffee" ||
+		rowAfterCreate.cardBackgroundVariant !== "coffee-sketch"
 	) {
 		console.error("❌ Prisma stamp_campaigns after POST:", rowAfterCreate);
 		process.exit(1);

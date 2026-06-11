@@ -46,6 +46,8 @@ export class GetCustomerStampProgress {
 				stampTypeLabel: campaign.stampTypeId
 					? (typeLabels.get(campaign.stampTypeId) ?? GENERIC_STAMP_VISIT_LABEL)
 					: GENERIC_STAMP_VISIT_LABEL,
+				visualTemplate: campaign.visualTemplate,
+				cardBackgroundVariant: campaign.cardBackgroundVariant,
 			});
 		}
 

@@ -1,4 +1,8 @@
 import { InvalidStampCampaign } from "./InvalidStampCampaign";
+import {
+	parseStampCampaignCardBackgroundVariant,
+	parseStampCampaignVisualTemplate,
+} from "./StampCampaignVisualAssets";
 
 const MAX_NAME_LENGTH = 120;
 
@@ -6,12 +10,16 @@ export type StampCampaignCreateInput = {
 	name: string;
 	requiredStamps: number;
 	stampTypeId: string;
+	visualTemplate: ReturnType<typeof parseStampCampaignVisualTemplate>;
+	cardBackgroundVariant: ReturnType<typeof parseStampCampaignCardBackgroundVariant>;
 };
 
 export function parseStampCampaignCreate(input: {
 	name?: string;
 	requiredStamps?: number;
 	stampTypeId?: string | null;
+	visualTemplate?: unknown;
+	cardBackgroundVariant?: unknown;
 }): StampCampaignCreateInput {
 	const name = input.name?.trim() ?? "";
 
@@ -47,5 +55,11 @@ export function parseStampCampaignCreate(input: {
 
 	stampTypeId = trimmedTypeId;
 
-	return { name, requiredStamps, stampTypeId };
+	return {
+		name,
+		requiredStamps,
+		stampTypeId,
+		visualTemplate: parseStampCampaignVisualTemplate(input.visualTemplate),
+		cardBackgroundVariant: parseStampCampaignCardBackgroundVariant(input.cardBackgroundVariant),
+	};
 }

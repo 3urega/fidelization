@@ -1,5 +1,10 @@
 import { randomUUID } from "crypto";
 
+import {
+	type StampCampaignCardBackgroundVariant,
+	type StampCampaignVisualTemplate,
+} from "./StampCampaignVisualAssets";
+
 export type StampCampaignPrimitives = {
 	id: string;
 	tenantId: string;
@@ -7,6 +12,8 @@ export type StampCampaignPrimitives = {
 	requiredStamps: number;
 	rewardId: string | null;
 	stampTypeId: string | null;
+	visualTemplate: StampCampaignVisualTemplate;
+	cardBackgroundVariant: StampCampaignCardBackgroundVariant;
 	isActive: boolean;
 };
 
@@ -15,6 +22,8 @@ export type StampCampaignCreateParams = {
 	name: string;
 	requiredStamps: number;
 	stampTypeId?: string | null;
+	visualTemplate?: StampCampaignVisualTemplate;
+	cardBackgroundVariant?: StampCampaignCardBackgroundVariant;
 };
 
 export class StampCampaign {
@@ -25,6 +34,8 @@ export class StampCampaign {
 		public readonly requiredStamps: number,
 		public readonly rewardId: string | null,
 		public readonly stampTypeId: string | null,
+		public readonly visualTemplate: StampCampaignVisualTemplate,
+		public readonly cardBackgroundVariant: StampCampaignCardBackgroundVariant,
 		public readonly isActive: boolean,
 	) {}
 
@@ -36,6 +47,8 @@ export class StampCampaign {
 			params.requiredStamps,
 			null,
 			params.stampTypeId ?? null,
+			params.visualTemplate ?? "generic",
+			params.cardBackgroundVariant ?? "coffee-photo",
 			true,
 		);
 	}
@@ -48,6 +61,8 @@ export class StampCampaign {
 			primitives.requiredStamps,
 			primitives.rewardId,
 			primitives.stampTypeId,
+			primitives.visualTemplate,
+			primitives.cardBackgroundVariant,
 			primitives.isActive,
 		);
 	}
@@ -60,6 +75,8 @@ export class StampCampaign {
 			requiredStamps: this.requiredStamps,
 			rewardId: this.rewardId,
 			stampTypeId: this.stampTypeId,
+			visualTemplate: this.visualTemplate,
+			cardBackgroundVariant: this.cardBackgroundVariant,
 			isActive: this.isActive,
 		};
 	}
@@ -76,6 +93,8 @@ export class StampCampaign {
 			this.requiredStamps,
 			this.rewardId,
 			this.stampTypeId,
+			this.visualTemplate,
+			this.cardBackgroundVariant,
 			false,
 		);
 	}

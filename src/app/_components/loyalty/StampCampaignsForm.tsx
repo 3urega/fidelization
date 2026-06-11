@@ -7,6 +7,17 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
+import { LoyaltyCardBackground, LoyaltyCardBackgroundSwatch } from "./LoyaltyCardBackground";
+import { LoyaltyProgress } from "./LoyaltyProgress";
+import { LoyaltyVisualTemplatePicker } from "./LoyaltyVisualTemplatePicker";
+import {
+	LOYALTY_CARD_BACKGROUNDS,
+	type LoyaltyCardBackgroundVariant,
+} from "./loyaltyCardBackgrounds";
+import {
+	type LoyaltyVisualTemplate,
+	resolveLoyaltyVisualTemplate,
+} from "./loyaltyVisualTemplates";
 
 type CampaignPayload = {
 	id: string;
@@ -14,6 +25,8 @@ type CampaignPayload = {
 	requiredStamps: number;
 	isActive: boolean;
 	stampTypeId?: string | null;
+	visualTemplate?: string;
+	cardBackgroundVariant?: string;
 };
 
 type StampTypePayload = {
@@ -46,6 +59,9 @@ export function StampCampaignsForm({
 	const [name, setName] = useState("");
 	const [requiredStamps, setRequiredStamps] = useState("10");
 	const [stampTypeId, setStampTypeId] = useState("");
+	const [visualTemplate, setVisualTemplate] = useState<LoyaltyVisualTemplate>("generic");
+	const [cardBackgroundVariant, setCardBackgroundVariant] =
+		useState<LoyaltyCardBackgroundVariant>("coffee-photo");
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -163,6 +179,8 @@ export function StampCampaignsForm({
 					name: name.trim(),
 					requiredStamps: parsedStamps,
 					stampTypeId: stampTypeId.trim(),
+					visualTemplate,
+					cardBackgroundVariant,
 				}),
 			});
 
@@ -180,6 +198,8 @@ export function StampCampaignsForm({
 				);
 				setName("");
 				setRequiredStamps("10");
+				setVisualTemplate("generic");
+				setCardBackgroundVariant("coffee-photo");
 				if (stampTypes[0]) {
 					setStampTypeId(stampTypes[0].id);
 				}
@@ -244,6 +264,7 @@ export function StampCampaignsForm({
 										{campaign.stampTypeId
 											? ` · ${stampTypes.find((type) => type.id === campaign.stampTypeId)?.label ?? "Tipo"}`
 											: " · Sin tipo (legacy)"}
+										{` · ${resolveLoyaltyVisualTemplate(campaign.visualTemplate).label}`}
 									</p>
 								</div>
 								<div className="flex items-center gap-3">
@@ -323,6 +344,43 @@ export function StampCampaignsForm({
 							<p className="mt-1 text-xs text-muted">
 								El sello solo avanza cuando el empleado escanea con el botón de este tipo.
 							</p>
+						</Field>
+
+						<Field label="Plantilla visual de sellos">
+							<LoyaltyVisualTemplatePicker
+								value={visualTemplate}
+								onChange={setVisualTemplate}
+								previewRequired={stampsValid ? parsedStamps : 10}
+								previewCurrent={3}
+							/>
+						</Field>
+
+						<Field label="Fondo de la tarjeta">
+							<div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+								{LOYALTY_CARD_BACKGROUNDS.map((background) => (
+									<LoyaltyCardBackgroundSwatch
+										key={background.id}
+										variant={background.id}
+										selected={cardBackgroundVariant === background.id}
+										onSelect={() => setCardBackgroundVariant(background.id)}
+									/>
+								))}
+							</div>
+						</Field>
+
+						<Field label="Vista previa">
+							<LoyaltyCardBackground variant={cardBackgroundVariant}>
+								<div className="flex flex-col gap-2">
+									<p className="text-sm font-medium text-foreground">
+										{name.trim() || "Tu campaña"}
+									</p>
+									<LoyaltyProgress
+										template={visualTemplate}
+										current={3}
+										required={stampsValid ? parsedStamps : 10}
+									/>
+								</div>
+							</LoyaltyCardBackground>
 						</Field>
 
 						{submitError ? <p className="text-sm text-error">{submitError}</p> : null}

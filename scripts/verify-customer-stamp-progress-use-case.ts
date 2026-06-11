@@ -175,6 +175,8 @@ async function main(): Promise<void> {
 		beforeScan[0]?.current !== 0 ||
 		beforeScan[0]?.required !== 3 ||
 		beforeScan[0]?.stampTypeLabel !== GENERIC_STAMP_VISIT_LABEL ||
+		beforeScan[0]?.visualTemplate !== "generic" ||
+		beforeScan[0]?.cardBackgroundVariant !== "coffee-photo" ||
 		beforeScan[0]?.completed
 	) {
 		console.error("❌ active campaign without progress should be 0/N", beforeScan);

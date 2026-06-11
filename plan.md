@@ -1,155 +1,260 @@
-Ahora mismo tienes 3 “mundos” distintos:
+Exactamente. Si quieres que Cursor genere tarjetas dinámicamente, no necesitas una imagen bonita de ejemplo. Necesitas un **sistema de assets reutilizable**.
 
-1. Superadmin (tu SaaS)
-Solo tú / tu empresa
-No tiene onboarding público
-No se registra desde la app
+La forma profesional de hacerlo es crear un documento tipo:
 
-👉 Se crea manualmente o seed en DB
+# `docs/domain/visual-assets-system.md`
 
-2. Business (cafés / negocios)
-Pagan SaaS
-Crean su cuenta en tu plataforma
+```md
+# Visual Assets System
 
-👉 Esto es B2B signup
+## Objective
 
-3. End Customers (clientes del café)
-NO son usuarios del SaaS
-NO tienen acceso a billing ni admin
-Solo usan loyalty app
+All loyalty cards must be generated dynamically using reusable sprite assets.
 
-👉 Esto es B2C signup (pero dentro del tenant)
+The UI must never depend on pre-rendered images.
 
-🧭 Regla clave (muy importante)
+Cards are built by combining:
 
-❗ SOLO existe UN sistema de autenticación
-pero con 3 roles y 2 contextos
+- Empty sprite
+- Filled sprite
+- Reward sprite
 
-🏗️ Arquitectura correcta (simplificada)
-🔐 Auth system único
-
-Tabla users:
-
-id
-email
-password
-role: superadmin | owner | employee | customer
-tenant_id (nullable para superadmin)
-🧠 Pero el truco real está aquí:
-👉 el contexto cambia según cómo entras
-🌐 1. Superadmin login
-app.com/superadmin
-role = superadmin
-tenant_id = null
-🏢 2. Business login (admins del café)
-cafe-joan.app.com/admin
-role = owner / employee
-tenant_id = obligatorio
-👤 3. Customer (cliente final)
-
-Aquí viene lo importante:
-
-❗ NO usan el mismo login que el SaaS
-
-Tienen 3 opciones:
-
-Opción A (RECOMENDADA): QR-first (sin password)
-scan QR → customer auto-login
-customer_id se resuelve desde QR
-sesión temporal o token
-UX muy fluida
-Opción B: login opcional
-email / phone
-dentro del tenant
-Opción C: magic link
-email link
-sin password
-🔥 La clave que te falta entender
-
-NO tienes 3 register systems
-tienes 1 sistema de auth + 3 onboarding flows
-
-🧩 Flujo correcto completo
-🏢 Business onboarding
-Landing → pricing → signup → tenant creado → admin panel
-👤 Customer onboarding
-QR scan → tenant detectado → customer creado automáticamente
-
-o:
-
-QR scan → optional signup → loyalty tracking
-🧠 Superadmin
-manual seed / protected route only
-🧠 Cómo evitar el caos (regla de oro)
-❌ ERROR típico:
-3 sistemas de auth separados
-3 tablas de users distintas
-lógica duplicada
-✅ CORRECTO:
-
-1 users table
-3 roles
-2 contexts (SaaS vs Tenant)
-
-🏗️ Modelo mental correcto
-          ┌──────────────┐
-          │ Superadmin   │
-          └──────┬───────┘
-                 │
-        SaaS Platform Layer
-                 │
-     ┌───────────┴───────────┐
-     │                       │
-Business Admins       Customers (App)
-     │                       │
- tenant_id              tenant_id
-🚨 Lo que te estaba generando el lío
-
-Estabas mezclando:
-
-auth
-onboarding
-tenant resolution
-roles
-app contexts
-
-👉 todo junto sin separación mental
-
-🧭 Decisión importante (te simplifica TODO)
-👉 Customer ≠ User del SaaS
-
-Esto es clave:
-
-Business users → SaaS system
-Customers → Loyalty system
-
-aunque compartan tabla (opcional), conceptualmente son distintos mundos
-
-💡 Recomendación práctica (para tu código)
-1. Auth base única
-email/password
-session
-2. Middleware define contexto
-if (subdomain === "app") {
-  context = "saas"
-}
-
-if (subdomain === "{tenant}") {
-  context = "tenant"
-}
-3. Route separation clara
-app/
-  superadmin/
-  admin/
-  app/ (customers)
+This allows unlimited campaigns while maintaining a consistent design system.
 
 ---
 
-## Nota de implementación (repo)
+# Asset Structure
 
-La implementación **no** usa `users.tenant_id` ni un único `users.role` global. Usa:
+public/
 
-- `users.platform_role` = `superadmin` (mundo plataforma, sin membership)
-- `tenant_memberships.role` = `owner` | `employee` | `admin` | `customer` (mundo negocio)
-- JWT con `kind`: `platform` | `tenant` ([`src/lib/auth/session.ts`](src/lib/auth/session.ts))
-- Clientes finales: tabla `customers` (mundo loyalty), no el login de `/login`
+  assets/
+
+    loyalty/
+
+      coffee/
+
+        coffee-empty.svg
+        coffee-filled.svg
+        coffee-reward.svg
+
+      croissant/
+
+        croissant-empty.svg
+        croissant-filled.svg
+        croissant-reward.svg
+
+      burger/
+
+        burger-empty.svg
+        burger-filled.svg
+        burger-reward.svg
+
+      generic/
+
+        generic-empty.svg
+        generic-filled.svg
+        generic-reward.svg
+
+---
+
+# Rendering Rules
+
+Example:
+
+Required stamps: 10
+
+Current stamps: 7
+
+Render:
+
+filled x7
+empty x2
+reward x1
+
+Visual:
+
+☕ ☕ ☕ ☕ ☕ ☕ ☕ ○ ○ 🎁
+
+---
+
+# React Component
+
+Component:
+
+<LoyaltyProgress />
+
+Props:
+
+{
+  template: "coffee",
+  current: 7,
+  required: 10
+}
+
+---
+
+# Rendering Algorithm
+
+for index in required:
+
+  if index <= current:
+    render filled sprite
+
+  else:
+    render empty sprite
+
+last position:
+  render reward sprite
+
+---
+
+# Mobile Rules
+
+Sprites:
+
+width: 40px
+height: 40px
+
+Tablet:
+
+width: 56px
+height: 56px
+
+Desktop:
+
+width: 64px
+height: 64px
+
+---
+
+# Visual Behaviour
+
+Filled:
+- Full color
+
+Empty:
+- 30% opacity
+
+Reward:
+- Larger than stamps
+- Gold accent
+- Subtle animation
+
+---
+
+# Future Templates
+
+coffee
+croissant
+burger
+pizza
+beer
+icecream
+generic
+
+All templates must implement:
+
+- empty
+- filled
+- reward
+```
+
+---
+
+Luego le abriría una issue a Cursor:
+
+# Issue: Create Loyalty Asset Library
+
+```md
+Create the complete loyalty sprite system.
+
+Requirements:
+
+Use SVG.
+
+Each template must include:
+
+- empty state
+- filled state
+- reward state
+
+Templates:
+
+- coffee
+- croissant
+- burger
+- pizza
+- generic
+
+All assets must:
+
+- be flat SVG
+- support CSS color overrides
+- work on dark mode
+- work on light mode
+
+Store assets under:
+
+public/assets/loyalty/
+```
+
+---
+
+Y lo más importante:
+
+## NO generes PNG
+
+Haz que Cursor genere SVG.
+
+Por ejemplo:
+
+```svg
+coffee-empty.svg
+coffee-filled.svg
+coffee-reward.svg
+```
+
+Porque entonces podrás:
+
+```css
+fill: var(--tenant-primary);
+```
+
+y automáticamente el café de Barcelona tendrá los sellos azules y el de Madrid los tendrá verdes sin crear imágenes nuevas.
+
+---
+
+La arquitectura que yo usaría sería:
+
+```text
+campaign
+    ↓
+template = coffee
+    ↓
+coffee-filled.svg
+coffee-empty.svg
+coffee-reward.svg
+    ↓
+LoyaltyCard component
+    ↓
+Tarjeta renderizada
+```
+
+Así no diseñas 500 promociones.
+
+Diseñas 5–10 packs de sprites y el sistema genera millones de combinaciones automáticamente.
+
+---
+
+## Implementación (Phase J)
+
+Plan detallado y issues: [`docs/domain/visual-assets-system.md`](docs/domain/visual-assets-system.md).
+
+| Slice | GitHub |
+|-------|--------|
+| J1 Doc dominio | [#49](https://github.com/3urega/fidelization/issues/49) — **Closed** |
+| J2 Sprites SVG + fondos | [#50](https://github.com/3urega/fidelization/issues/50) — **Closed** |
+| J3 LoyaltyProgress | [#51](https://github.com/3urega/fidelization/issues/51) |
+| J4 API visualTemplate | [#52](https://github.com/3urega/fidelization/issues/52) |
+| J5 Owner picker + preview | [#53](https://github.com/3urega/fidelization/issues/53) |
+| J6 Cliente LoyaltyCard | [#54](https://github.com/3urega/fidelization/issues/54) |

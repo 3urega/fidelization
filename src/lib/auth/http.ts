@@ -97,6 +97,8 @@ export function stampCampaignToJson(
 		isActive: primitives.isActive,
 		rewardId: primitives.rewardId,
 		stampTypeId: primitives.stampTypeId,
+		visualTemplate: primitives.visualTemplate,
+		cardBackgroundVariant: primitives.cardBackgroundVariant,
 	};
 }
 
@@ -191,6 +193,8 @@ export function stampProgressToJson(
 		completed: summary.completed,
 		stampTypeId: summary.stampTypeId,
 		stampTypeLabel: summary.stampTypeLabel,
+		visualTemplate: summary.visualTemplate,
+		cardBackgroundVariant: summary.cardBackgroundVariant,
 	};
 }
 

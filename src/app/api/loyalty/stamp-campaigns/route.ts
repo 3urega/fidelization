@@ -18,6 +18,8 @@ type Body = {
 	name?: string;
 	requiredStamps?: number;
 	stampTypeId?: string | null;
+	visualTemplate?: string;
+	cardBackgroundVariant?: string;
 };
 
 export async function GET(request: Request): Promise<Response> {

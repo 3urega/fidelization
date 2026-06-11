@@ -36,8 +36,9 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-f-promotions.json
 # Phase G — platform mobile app (draft)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.platform-app.json
-# Phase I — explorar locales (draft)
-powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-i-discover-establishments.json
+# Phase I — explorar locales (publicado, cerrado)
+# Phase J — loyalty visual templates (draft)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-j-loyalty-visual.json
 ```
 
 ## After close on GitHub

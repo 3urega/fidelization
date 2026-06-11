@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense, type ReactElement } from "react";
 
 import { parsePlatformHomeTab } from "../../../lib/platform/routes";
+import { PlatformMobileDashboardShell } from "../../_components/platform-app/PlatformMobileDashboardShell";
 import { PlatformUserDashboard } from "./PlatformUserDashboard";
 
 export const metadata: Metadata = {
@@ -18,8 +19,10 @@ export default function PlatformUserHomePage({
 	const initialTab = parsePlatformHomeTab(searchParams.tab);
 
 	return (
-		<Suspense fallback={<p className="text-sm text-muted">Cargando…</p>}>
-			<PlatformUserDashboard initialTab={initialTab} />
-		</Suspense>
+		<PlatformMobileDashboardShell>
+			<Suspense fallback={<p className="text-sm text-muted">Cargando…</p>}>
+				<PlatformUserDashboard initialTab={initialTab} />
+			</Suspense>
+		</PlatformMobileDashboardShell>
 	);
 }

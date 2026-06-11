@@ -188,6 +188,28 @@ async function main(): Promise<void> {
 
 	console.log("✅ missing stampTypeId → InvalidStampCampaign");
 
+	try {
+		await create.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			input: {
+				name: "Bad template",
+				requiredStamps: 5,
+				stampTypeId: cafeType.id,
+				visualTemplate: "beer",
+			},
+		});
+		console.error("❌ expected InvalidStampCampaign for invalid visualTemplate");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof InvalidStampCampaign)) {
+			console.error("❌ wrong error for invalid visualTemplate", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ invalid visualTemplate → InvalidStampCampaign");
+
 	const createNoTypes = new CreateStampCampaign(
 		tenantRepository,
 		stampRepository,
@@ -214,10 +236,22 @@ async function main(): Promise<void> {
 	const created = await create.execute({
 		tenantId,
 		role: TenantRole.Owner,
-		input: { name: "10 cafés → 1 gratis", requiredStamps: 10, stampTypeId: cafeType.id },
+		input: {
+			name: "10 cafés → 1 gratis",
+			requiredStamps: 10,
+			stampTypeId: cafeType.id,
+			visualTemplate: "coffee",
+			cardBackgroundVariant: "coffee-pattern",
+		},
 	});
 
-	if (!created.isActive || created.requiredStamps !== 10 || created.stampTypeId !== cafeType.id) {
+	if (
+		!created.isActive ||
+		created.requiredStamps !== 10 ||
+		created.stampTypeId !== cafeType.id ||
+		created.visualTemplate !== "coffee" ||
+		created.cardBackgroundVariant !== "coffee-pattern"
+	) {
 		console.error("❌ CreateStampCampaign owner", created.toPrimitives());
 		process.exit(1);
 	}

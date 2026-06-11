@@ -1,0 +1,23 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/visual-assets-system.md",
+  "label": "phase-j-loyalty-visual",
+  "issues": [
+    {
+      "title": "Phase J3: LoyaltyProgress component",
+      "bodyFile": "docs/issues/loyalty-progress-component.md"
+    },
+    {
+      "title": "Phase J4: Stamp campaign visualTemplate API",
+      "bodyFile": "docs/issues/stamp-campaign-visual-template-api.md"
+    },
+    {
+      "title": "Phase J5: Owner template picker + card preview",
+      "bodyFile": "docs/issues/owner-stamp-campaign-visual-picker.md"
+    },
+    {
+      "title": "Phase J6: Customer LoyaltyCard visual stamps",
+      "bodyFile": "docs/issues/customer-loyalty-card-visual-stamps.md"
+    }
+  ]
+}

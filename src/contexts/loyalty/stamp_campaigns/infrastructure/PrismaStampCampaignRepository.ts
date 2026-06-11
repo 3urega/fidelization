@@ -19,6 +19,8 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 				requiredStamps: p.requiredStamps,
 				rewardId: p.rewardId,
 				stampTypeId: p.stampTypeId,
+				visualTemplate: p.visualTemplate,
+				cardBackgroundVariant: p.cardBackgroundVariant,
 				isActive: p.isActive,
 			},
 			update: {
@@ -26,6 +28,8 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 				requiredStamps: p.requiredStamps,
 				rewardId: p.rewardId,
 				stampTypeId: p.stampTypeId,
+				visualTemplate: p.visualTemplate,
+				cardBackgroundVariant: p.cardBackgroundVariant,
 				isActive: p.isActive,
 			},
 		});
@@ -109,6 +113,8 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 		requiredStamps: number;
 		rewardId: string | null;
 		stampTypeId: string | null;
+		visualTemplate: string;
+		cardBackgroundVariant: string;
 		isActive: boolean;
 	}): StampCampaign {
 		return StampCampaign.fromPrimitives({
@@ -118,6 +124,8 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 			requiredStamps: row.requiredStamps,
 			rewardId: row.rewardId,
 			stampTypeId: row.stampTypeId,
+			visualTemplate: row.visualTemplate as StampCampaign["visualTemplate"],
+			cardBackgroundVariant: row.cardBackgroundVariant as StampCampaign["cardBackgroundVariant"],
 			isActive: row.isActive,
 		});
 	}

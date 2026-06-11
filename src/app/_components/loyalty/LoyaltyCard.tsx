@@ -5,6 +5,11 @@ import type { ReactElement } from "react";
 
 import { Button } from "../ui/Button";
 import { QrDevScanHint } from "./QrDevScanHint";
+import { LoyaltyCardBackground } from "./LoyaltyCardBackground";
+import type { LoyaltyCardBackgroundVariant } from "./loyaltyCardBackgrounds";
+import { LoyaltyProgress } from "./LoyaltyProgress";
+import { resolveLoyaltyCardBackground } from "./loyaltyCardBackgrounds";
+import { parseLoyaltyVisualTemplate } from "./loyaltyVisualTemplates";
 
 export type StampProgressRow = {
 	campaignId: string;
@@ -14,6 +19,8 @@ export type StampProgressRow = {
 	completed: boolean;
 	stampTypeId?: string | null;
 	stampTypeLabel?: string;
+	visualTemplate?: string | null;
+	cardBackgroundVariant?: LoyaltyCardBackgroundVariant | string | null;
 };
 
 export type RewardRow = {
@@ -71,6 +78,8 @@ type LoyaltyCardProps = {
 	redeemingRewardId?: string | null;
 	redeemError?: string | null;
 	onRedeemReward?: (rewardId: string) => void;
+	/** Sprite quadrant from `public/fondos.png` (Phase J). */
+	cardBackgroundVariant?: LoyaltyCardBackgroundVariant | null;
 };
 
 export function LoyaltyCard({
@@ -84,6 +93,7 @@ export function LoyaltyCard({
 	redeemingRewardId = null,
 	redeemError = null,
 	onRedeemReward,
+	cardBackgroundVariant = "coffee-photo",
 }: LoyaltyCardProps): ReactElement {
 	return (
 		<div className="flex flex-col gap-6">
@@ -155,27 +165,43 @@ export function LoyaltyCard({
 			) : null}
 
 			{stampProgress.length > 0 ? (
-				<div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
+				<div className="flex flex-col gap-3">
 					<h2 className="text-sm font-medium text-foreground">Sellos</h2>
-					<ul className="flex flex-col gap-2">
+					<ul className="flex flex-col gap-3">
 						{stampProgress.map((row) => (
-							<li
-								key={row.campaignId}
-								className="flex items-center justify-between gap-3 text-sm"
-							>
-								<div className="flex min-w-0 flex-col gap-0.5">
-									<span className="text-foreground">{row.campaignName}</span>
-									{row.stampTypeLabel ? (
-										<span className="text-xs text-muted">{row.stampTypeLabel}</span>
-									) : null}
-								</div>
-								{row.completed ? (
-									<span className="font-medium text-primary">Completada</span>
-								) : (
-									<span className="text-muted">
-										{row.current} / {row.required}
-									</span>
-								)}
+							<li key={row.campaignId}>
+								<LoyaltyCardBackground
+									variant={
+										resolveLoyaltyCardBackground(
+											(row.cardBackgroundVariant as LoyaltyCardBackgroundVariant | null) ??
+												cardBackgroundVariant,
+										).id
+									}
+								>
+									<div className="flex flex-col gap-3">
+										<div className="flex items-start justify-between gap-3 text-sm">
+											<div className="flex min-w-0 flex-col gap-0.5">
+												<span className="font-medium text-foreground">{row.campaignName}</span>
+												{row.stampTypeLabel ? (
+													<span className="text-xs text-muted">{row.stampTypeLabel}</span>
+												) : null}
+											</div>
+											{row.completed ? (
+												<span className="shrink-0 font-medium text-primary">Completada</span>
+											) : (
+												<span className="shrink-0 text-muted">
+													{row.current} / {row.required}
+												</span>
+											)}
+										</div>
+										<LoyaltyProgress
+											template={parseLoyaltyVisualTemplate(row.visualTemplate)}
+											current={row.current}
+											required={row.required}
+											completed={row.completed}
+										/>
+									</div>
+								</LoyaltyCardBackground>
 							</li>
 						))}
 					</ul>

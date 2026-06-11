@@ -20,6 +20,8 @@ export type CreateStampCampaignParams = {
 		name?: string;
 		requiredStamps?: number;
 		stampTypeId?: string | null;
+		visualTemplate?: unknown;
+		cardBackgroundVariant?: unknown;
 	};
 };
 
@@ -55,6 +57,8 @@ export class CreateStampCampaign {
 			name: parsed.name,
 			requiredStamps: parsed.requiredStamps,
 			stampTypeId: parsed.stampTypeId,
+			visualTemplate: parsed.visualTemplate,
+			cardBackgroundVariant: parsed.cardBackgroundVariant,
 		});
 
 		await this.stampCampaignRepository.saveCampaign(campaign);
