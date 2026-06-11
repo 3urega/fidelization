@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
+import { Suspense, type ReactElement } from "react";
 
+import { parsePlatformHomeTab } from "../../../lib/platform/routes";
 import { PlatformUserDashboard } from "./PlatformUserDashboard";
 
 export const metadata: Metadata = {
 	title: "Inicio — App Fidelización",
 };
 
-export default function PlatformUserHomePage(): React.ReactElement {
-	return <PlatformUserDashboard />;
+type PlatformUserHomePageProps = {
+	searchParams: { tab?: string };
+};
+
+export default function PlatformUserHomePage({
+	searchParams,
+}: PlatformUserHomePageProps): ReactElement {
+	const initialTab = parsePlatformHomeTab(searchParams.tab);
+
+	return (
+		<Suspense fallback={<p className="text-sm text-muted">Cargando…</p>}>
+			<PlatformUserDashboard initialTab={initialTab} />
+		</Suspense>
+	);
 }

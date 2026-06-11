@@ -131,12 +131,16 @@ async function main(): Promise<void> {
 	const discover = await fetch(`${baseUrl}/home/discover`, { headers: sessionHeaders(userCookie) });
 	const discoverHtml = await discover.text();
 
-	if (discover.status !== 200 || !discoverHtml.includes("Descubrir locales")) {
-		console.error("❌ discover page:", discover.status);
+	if (
+		discover.status !== 200 ||
+		!discoverHtml.includes("Mis locales") ||
+		!discoverHtml.includes("Unirme al local")
+	) {
+		console.error("❌ discover redirect to locales tab:", discover.status);
 		process.exit(1);
 	}
 
-	console.log("✅ /home/discover OK");
+	console.log("✅ /home/discover redirects to locales tab with join form");
 
 	const userRow = await prisma.user.findUnique({
 		where: { email },

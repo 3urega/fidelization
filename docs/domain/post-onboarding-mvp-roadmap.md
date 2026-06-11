@@ -313,7 +313,7 @@ Manifest: [`manifest.phase-h-stamp-types.json`](../issues/manifest.phase-h-stamp
 | In | Out |
 |----|-----|
 | `GET /api/user/establishments` paginado | Búsqueda / filtros por categoría |
-| `EstablishmentDiscoverGrid` en `/home` y `/home/discover` | Mapa geográfico |
+| `EstablishmentDiscoverGrid` en pestaña Explorar de `/home`; join en pestaña Mis locales | Mapa geográfico |
 | Solo tenants `active` | Ocultar suspendidos del catálogo |
 
 ### Acceptance criteria (Phase I)
@@ -329,10 +329,10 @@ Manifest: [`manifest.phase-h-stamp-types.json`](../issues/manifest.phase-h-stamp
 | # | Slice | Título |
 |---|-------|--------|
 | [#46](https://github.com/3urega/fidelization/issues/46) | **I1** | Discover establishments API — **Closed** (2026-06-11) |
-| [#47](https://github.com/3urega/fidelization/issues/47) | **I2** | Discover grid UI (blur cards + infinite scroll) |
+| [#47](https://github.com/3urega/fidelization/issues/47) | **I2** | Discover grid UI — **Closed** (2026-06-11) |
 | [#48](https://github.com/3urega/fidelization/issues/48) | **I3** | Home/discover integration + docs + verify E2E |
 
-Manifest: [`manifest.phase-i-discover-establishments.json`](../issues/manifest.phase-i-discover-establishments.json) (I2–I3 pendientes)
+Manifest: [`manifest.phase-i-discover-establishments.json`](../issues/manifest.phase-i-discover-establishments.json) (I3 pendiente)
 
 ---
 

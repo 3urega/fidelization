@@ -35,7 +35,7 @@ Phase I3 — cierra Phase I. El usuario autenticado ve el catálogo al entrar en
 ## Issues relacionadas
 
 - [#46](https://github.com/3urega/fidelization/issues/46) (cerrada)
-- `discover-establishments-grid-ui.md`
+- [#47](https://github.com/3urega/fidelization/issues/47) (cerrada)
 
 ## Referencias
 

@@ -4,10 +4,6 @@
   "label": "phase-i-discover-establishments",
   "issues": [
     {
-      "title": "Phase I2 — Discover establishments grid UI (blur cards + infinite scroll)",
-      "bodyFile": "docs/issues/discover-establishments-grid-ui.md"
-    },
-    {
       "title": "Phase I3 — Home/discover integration + docs + verify E2E",
       "bodyFile": "docs/issues/discover-establishments-home-integration.md"
     }

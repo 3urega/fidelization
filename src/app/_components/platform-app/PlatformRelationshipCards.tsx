@@ -89,10 +89,16 @@ export function DualEmptyRelationshipsCard(): ReactElement {
 						Registrar negocio
 					</Link>
 					<Link
-						href={platformRoutes.homeDiscover}
+						href={platformRoutes.homeTab("explore")}
 						className="text-center text-sm font-medium text-primary hover:opacity-80"
 					>
-						Descubrir locales
+						Explorar locales
+					</Link>
+					<Link
+						href={platformRoutes.homeTab("locales")}
+						className="text-center text-sm font-medium text-primary hover:opacity-80"
+					>
+						Unirse por identificador
 					</Link>
 				</div>
 			</div>

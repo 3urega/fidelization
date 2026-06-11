@@ -8,7 +8,13 @@ import { platformRoutes } from "../../../../lib/platform/routes";
 import { Button } from "../../../_components/ui/Button";
 import { Card } from "../../../_components/ui/Card";
 
-export function PlatformDiscoverJoinForm(): ReactElement {
+type PlatformDiscoverJoinFormProps = {
+	onJoined?: () => void;
+};
+
+export function PlatformDiscoverJoinForm({
+	onJoined,
+}: PlatformDiscoverJoinFormProps): ReactElement {
 	const router = useRouter();
 	const [slug, setSlug] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -34,7 +40,15 @@ export function PlatformDiscoverJoinForm(): ReactElement {
 			return;
 		}
 
-		router.push(platformRoutes.home);
+		if (onJoined) {
+			setSlug("");
+			setLoading(false);
+			onJoined();
+
+			return;
+		}
+
+		router.push(platformRoutes.homeTab("locales"));
 	}
 
 	return (

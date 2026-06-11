@@ -1,10 +1,22 @@
 /** Canonical paths for the unified platform app (apex). Tenant owner panel at `/panel`. */
 
+export type PlatformHomeTab = "explore" | "locales" | "negocios";
+
+export function parsePlatformHomeTab(value: string | null | undefined): PlatformHomeTab {
+	if (value === "locales" || value === "negocios") {
+		return value;
+	}
+
+	return "explore";
+}
+
 export const platformRoutes = {
 	publicHome: "/",
 	login: "/login",
 	register: "/register",
 	home: "/home",
+	homeTab: (tab: PlatformHomeTab): string =>
+		tab === "explore" ? "/home" : `/home?tab=${tab}`,
 	homeDiscover: "/home/discover",
 	homeQr: "/home/qr",
 	homeBusiness: (slug: string) => `/home/business/${encodeURIComponent(slug)}`,

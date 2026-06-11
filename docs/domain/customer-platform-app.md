@@ -128,24 +128,24 @@ Un owner puede repetir «Añadir negocio» más adelante para un **segundo tenan
 
 ## Dashboard post-login
 
-Una sola pantalla home autenticada (`/home`). Contenido según relaciones del `userId`:
+Una sola pantalla home autenticada (`/home`) con **tres pestañas** (2026-06-11): **Explorar** (por defecto), **Mis locales**, **Mis negocios**. Header (saludo + email), botón «Mostrar mi QR» y cerrar sesión quedan fuera de las pestañas.
 
-### Sección «Explorar locales» (todos los usuarios autenticados)
+### Pestaña «Explorar» (todos los usuarios autenticados)
 
 **Decisión de producto (2026-06-11):** al entrar en la app, el usuario debe poder **ver de forma visual todos los negocios activos** dados de alta en la plataforma, no solo los que ya tienen relación.
 
 | Elemento | Contenido |
 |----------|-----------|
-| Ubicación | `/home` (sección principal) y `/home/discover` (vista ampliada + unirse por slug) |
+| Ubicación | `/home` (pestaña por defecto) |
 | Layout | Cuadrícula **2 columnas** en móvil; cada local es un recuadro clicable |
 | Imagen | `tenants.logoUrl` como fondo **difuminado**; si no hay logo, placeholder genérico con inicial del nombre |
 | Texto | Nombre del establecimiento **sobreimpreso** centrado sobre la imagen |
 | Scroll | **Infinite scroll** — `GET /api/user/establishments?page=&limit=` devuelve páginas de tenants `status: active` ordenados por nombre |
 | Tap | Abre detalle `/home/establishments/[slug]` (modo discovery o interaction según relación) |
 
-«Mis negocios» y «Mis locales» siguen debajo como resumen de **relaciones propias**; el grid de exploración es el catálogo global.
+Deep link legacy: `/home/discover` redirige a `/home?tab=locales`.
 
-### Sección «Mis negocios» (owner / employee)
+### Pestaña «Mis negocios» (owner / employee)
 
 Visible si tiene `tenant_memberships` con rol owner (o employee con permisos operativos).
 
@@ -157,7 +157,7 @@ Visible si tiene `tenant_memberships` con rol owner (o employee con permisos ope
 
 Un owner con **varios** negocios ve todos en esta sección. Los locales que ya son negocio propio **no** se duplican en «Mis locales».
 
-### Sección «Mis locales» (cliente)
+### Pestaña «Mis locales» (cliente)
 
 Visible si tiene al menos un `customers` vinculado a su `user_id` (excluyendo negocios propios).
 
@@ -166,7 +166,7 @@ Visible si tiene al menos un `customers` vinculado a su `user_id` (excluyendo ne
 | Lista | Locales con **interacción** (visitas, sellos, puntos, canjes) |
 | Resumen por fila | Nombre del local; progreso de sellos (`5/10 — Tarjeta verano`); `{pts} pts · {visitas} visitas` |
 | Tap | Detalle del local (§ Vista detalle de un local) |
-| CTA | Enlace a `/home/discover` (grid completo + unirse por slug) |
+| CTA | Explorar locales (pestaña Explorar) o **Unirse por identificador** (formulario en la misma pestaña) |
 
 **Interacción** = existe fila `customers` con historial (visitas > 0, sellos, puntos, canje, etc.) o join explícito previo. Locales solo «vistos» en modo descubrimiento no aparecen aquí hasta la primera interacción (decisión: opcional mostrar en «Recientes» sin historial — fase posterior).
 
@@ -400,7 +400,7 @@ Manifest: [`docs/issues/manifest.platform-app.json`](../issues/manifest.platform
 | # | Slice | Título |
 |---|-------|--------|
 | [#46](https://github.com/3urega/fidelization/issues/46) | I1 | Discover establishments API — **Closed** (2026-06-11) |
-| [#47](https://github.com/3urega/fidelization/issues/47) | I2 | Discover grid UI |
+| [#47](https://github.com/3urega/fidelization/issues/47) | I2 | Discover grid UI — **Closed** (2026-06-11) |
 | [#48](https://github.com/3urega/fidelization/issues/48) | I3 | Home/discover integration |
 
 Manifest: [`manifest.phase-i-discover-establishments.json`](../issues/manifest.phase-i-discover-establishments.json)
