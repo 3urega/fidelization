@@ -16,6 +16,8 @@ npm run verify:platform-app-enter-tenant-use-case  # EnterTenantStaffFromUserSes
 npm run verify:platform-app-enter-user-use-case  # EnterPlatformUserFromTenantSession (domain stub)
 npm run verify:platform-app-dashboard-use-case  # issue #41 — ListUserRelationships (domain stub)
 npm run verify:platform-app-dashboard  # issue #41 — /home dashboard + business shell E2E (dev + DATABASE_URL)
+npm run verify:platform-app-discover-establishments-use-case  # Phase I — ListDiscoverableEstablishments (domain stub)
+npm run verify:platform-app-discover-establishments  # Phase I — GET /api/user/establishments grid E2E (dev server)
 npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAsCustomer (domain stub)
 npm run verify:platform-app-customer-join  # issue #42 — join by slug + deep link E2E (dev + DATABASE_URL)
 npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEstablishmentDetailForUser (domain stub)
@@ -134,6 +136,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Platform app home UI (#39):** home pública `/` (Registrarse · Registrar negocio · Login); formularios `/register`, `/login` host-aware → `/home`; guards middleware `kind: user`; legacy `/u/*` → 308. `verify:platform-app-public-home`.
 - **Platform app register business (#40):** `/business/register` (auth gate) → `/business/register/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/home`; `POST /api/user/businesses/[slug]/enter` emite sesión `kind: tenant` y abre `/panel` sin re-login; desde el panel del negocio, «App personal» → `POST /api/user/enter` vuelve a sesión `kind: user` en `/home`. `verify:platform-app-register-business`, `verify:platform-app-enter-tenant-use-case`, `verify:platform-app-enter-user-use-case`.
 - **Platform app dashboard (#41):** `/home` unificado (Mis negocios + Mis locales), botón «Mostrar mi QR» (modal), `/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.
+- **Platform app explorar locales (Phase I):** grid 2 cols en `/home` + `/home/discover`, imagen difuminada, infinite scroll, `GET /api/user/establishments`. `verify:platform-app-discover-establishments*`.
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/home/discover`, deep link `/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 - **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
 - **Platform app global QR scan (#44):** `RecordCustomerVisitByQr` resuelve `customers.qr_value` (legacy) luego `users.qr_value` → `customers(user_id, tenant_id)`; **auto-join en primer escaneo** si no hay fila customer. Dashboard: botón «Mostrar mi QR» (modal). `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.

@@ -1,7 +1,12 @@
 import { Service } from "diod";
 
 import { prisma } from "../../../../lib/prisma";
+import {
+	type DiscoverableEstablishment,
+	type DiscoverableEstablishmentsPage,
+} from "../domain/DiscoverableEstablishment";
 import { Tenant } from "../domain/Tenant";
+import type { ListDiscoverableEstablishmentsParams } from "../domain/TenantRepository";
 import { TenantBrandingUpdate } from "../domain/TenantBrandingUpdate";
 import { TenantProfileUpdate } from "../domain/TenantProfileUpdate";
 import { TenantRepository } from "../domain/TenantRepository";
@@ -16,6 +21,33 @@ export class PrismaTenantRepository extends TenantRepository {
 		});
 
 		return rows.map((row) => tenantFromPrismaRow(row));
+	}
+
+	async listDiscoverableActive(
+		params: ListDiscoverableEstablishmentsParams,
+	): Promise<DiscoverableEstablishmentsPage> {
+		const limit = Math.min(Math.max(params.limit, 1), 50);
+		const page = Math.max(params.page, 0);
+		const skip = page * limit;
+
+		const rows = await prisma.tenant.findMany({
+			where: { status: TenantStatus.Active },
+			orderBy: [{ name: "asc" }, { id: "asc" }],
+			skip,
+			take: limit + 1,
+			select: { id: true, name: true, slug: true, logoUrl: true },
+		});
+
+		const hasMore = rows.length > limit;
+		const pageRows = hasMore ? rows.slice(0, limit) : rows;
+		const establishments: DiscoverableEstablishment[] = pageRows.map((row) => ({
+			id: row.id,
+			name: row.name,
+			slug: row.slug,
+			logoUrl: row.logoUrl?.trim() ? row.logoUrl.trim() : null,
+		}));
+
+		return { establishments, hasMore };
 	}
 
 	async findById(tenantId: string): Promise<Tenant | null> {

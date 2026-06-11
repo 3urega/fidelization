@@ -19,6 +19,8 @@
     "verify:platform-app-enter-user-use-case": "tsx scripts/verify-platform-app-enter-user-use-case.ts",
     "verify:platform-app-dashboard-use-case": "tsx scripts/verify-platform-app-dashboard-use-case.ts",
     "verify:platform-app-dashboard": "tsx scripts/verify-platform-app-dashboard.ts",
+    "verify:platform-app-discover-establishments-use-case": "tsx scripts/verify-platform-app-discover-establishments-use-case.ts",
+    "verify:platform-app-discover-establishments": "tsx scripts/verify-platform-app-discover-establishments.ts",
     "verify:platform-app-customer-join-use-case": "tsx scripts/verify-platform-app-customer-join-use-case.ts",
     "verify:platform-app-customer-join": "tsx scripts/verify-platform-app-customer-join.ts",
     "verify:platform-app-establishment-detail-use-case": "tsx scripts/verify-platform-app-establishment-detail-use-case.ts",

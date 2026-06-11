@@ -9,6 +9,7 @@ import { PlatformUserQrModal } from "../../_components/platform-app/PlatformUser
 import {
 	BusinessSummaryCard,
 } from "../../_components/platform-app/BusinessSummaryCard";
+import { EstablishmentDiscoverGrid } from "../../_components/platform-app/EstablishmentDiscoverGrid";
 import {
 	DualEmptyRelationshipsCard,
 	EstablishmentSummaryCard,
@@ -136,6 +137,8 @@ export function PlatformUserDashboard(): ReactElement {
 				name={user.name}
 				qrValue={user.qrValue}
 			/>
+
+			<EstablishmentDiscoverGrid />
 
 			{hasNoRelationships ? <DualEmptyRelationshipsCard /> : null}
 

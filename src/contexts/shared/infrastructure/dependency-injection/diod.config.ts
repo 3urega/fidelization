@@ -98,6 +98,7 @@ import { PrismaOwnerBusinessRepository } from "../../../tenants/owners/infrastru
 import { PrismaOwnerOnboardingRepository } from "../../../tenants/owners/infrastructure/PrismaOwnerOnboardingRepository";
 import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
 import { UpdateTenantBranding } from "../../../tenants/tenants/application/update/UpdateTenantBranding";
+import { ListDiscoverableEstablishments } from "../../../tenants/tenants/application/list/ListDiscoverableEstablishments";
 import { UpdateTenantProfile } from "../../../tenants/tenants/application/update/UpdateTenantProfile";
 import { UpdateTenantStatus } from "../../../tenants/tenants/application/update/UpdateTenantStatus";
 import { TenantRepository } from "../../../tenants/tenants/domain/TenantRepository";
@@ -170,6 +171,7 @@ builder.registerAndUse(ListTenantEmployees);
 builder.registerAndUse(ListUserRelationships);
 builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
+builder.registerAndUse(ListDiscoverableEstablishments);
 builder.registerAndUse(UpdateTenantProfile);
 builder.registerAndUse(UpdateTenantStatus);
 

@@ -1,10 +1,22 @@
+import { DiscoverableEstablishmentsPage } from "./DiscoverableEstablishment";
 import { Tenant } from "./Tenant";
 import { TenantBrandingUpdate } from "./TenantBrandingUpdate";
 import { TenantProfileUpdate } from "./TenantProfileUpdate";
 import { TenantStatus } from "./TenantStatus";
 
+export type ListDiscoverableEstablishmentsParams = {
+	page: number;
+	limit: number;
+};
+
 export abstract class TenantRepository {
 	abstract findAll(): Promise<Tenant[]>;
+
+	async listDiscoverableActive(
+		_params: ListDiscoverableEstablishmentsParams,
+	): Promise<DiscoverableEstablishmentsPage> {
+		return { establishments: [], hasMore: false };
+	}
 
 	abstract findById(tenantId: string): Promise<Tenant | null>;
 
