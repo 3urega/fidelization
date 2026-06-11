@@ -3,6 +3,9 @@ import "dotenv/config";
 
 import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import { ResolveStampScanOptions } from "../src/contexts/loyalty/stamp_types/application/scan/ResolveStampScanOptions";
+import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
+import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { LoyaltyTransaction } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransaction";
@@ -10,6 +13,7 @@ import { LoyaltyTransactionRepository } from "../src/contexts/loyalty/loyalty_tr
 import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
 import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantRepository";
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
@@ -134,6 +138,15 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 		);
 	}
 
+	async hasActiveGenericCampaigns(tenantId: string): Promise<boolean> {
+		return Array.from(this.campaigns.values()).some(
+			(campaign) =>
+				campaign.tenantId === tenantId &&
+				campaign.isActive &&
+				campaign.stampTypeId === null,
+		);
+	}
+
 	async saveProgress(progress: CustomerStampProgress): Promise<void> {
 		this.progress.set(`${progress.customerId}:${progress.campaignId}`, progress);
 	}
@@ -150,6 +163,34 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 
 	getProgress(customerId: string, campaignId: string): CustomerStampProgress | undefined {
 		return this.progress.get(`${customerId}:${campaignId}`);
+	}
+}
+
+class InMemoryStampTypeRepository extends StampTypeRepository {
+	async save(_stampType: StampType): Promise<void> {}
+
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async searchBySlug(): Promise<null> {
+		return null;
+	}
+
+	async listByTenant(): Promise<StampType[]> {
+		return [];
+	}
+
+	async listActiveByTenant(): Promise<StampType[]> {
+		return [];
+	}
+
+	async countActiveByTenant(): Promise<number> {
+		return 0;
+	}
+
+	async maxSortOrder(): Promise<number> {
+		return 0;
 	}
 }
 
@@ -200,6 +241,12 @@ async function main(): Promise<void> {
 	const customerRepository = new InMemoryCustomerRepository([customer]);
 	const loyaltyRepository = new InMemoryLoyaltyTransactionRepository();
 	const stampRepository = new InMemoryStampCampaignRepository([activeCampaign, deactivated]);
+	const stampTypeRepository = new InMemoryStampTypeRepository();
+	const resolveStampScanOptions = new ResolveStampScanOptions(
+		tenantRepository,
+		stampTypeRepository,
+		stampRepository,
+	);
 
 	const useCase = new RecordCustomerVisitByQr(
 		tenantRepository,
@@ -207,12 +254,15 @@ async function main(): Promise<void> {
 		new StubUserRepository(),
 		loyaltyRepository,
 		stampRepository,
+		stampTypeRepository,
+		resolveStampScanOptions,
 	);
 
 	const first = await useCase.execute({
 		tenantId,
 		qrValue: customer.qrValue,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 
 	if (first.stampsAdded.length !== 1 || first.stampsAdded[0]?.current !== 1) {
@@ -238,11 +288,13 @@ async function main(): Promise<void> {
 		tenantId,
 		qrValue: customer.qrValue,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 	await useCase.execute({
 		tenantId,
 		qrValue: customer.qrValue,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 
 	const progressCompleted = stampRepository.getProgress(customer.id, activeCampaign.id);
@@ -261,6 +313,7 @@ async function main(): Promise<void> {
 		tenantId,
 		qrValue: customer.qrValue,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 
 	if (afterCompleted.stampsAdded.length !== 0) {

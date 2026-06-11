@@ -13,6 +13,13 @@ type CampaignPayload = {
 	name: string;
 	requiredStamps: number;
 	isActive: boolean;
+	stampTypeId?: string | null;
+};
+
+type StampTypePayload = {
+	id: string;
+	label: string;
+	isActive: boolean;
 };
 
 type CampaignsResponse = {
@@ -26,13 +33,30 @@ type CampaignsResponse = {
 export function StampCampaignsForm(): ReactElement {
 	const { session, loading, error } = useTenantSession();
 	const [campaigns, setCampaigns] = useState<CampaignPayload[]>([]);
+	const [stampTypes, setStampTypes] = useState<StampTypePayload[]>([]);
 	const [listLoading, setListLoading] = useState(true);
 	const [name, setName] = useState("");
 	const [requiredStamps, setRequiredStamps] = useState("10");
+	const [stampTypeId, setStampTypeId] = useState("");
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
+
+	const loadStampTypes = useCallback(async (): Promise<void> => {
+		try {
+			const response = await fetch("/api/loyalty/stamp-types", {
+				credentials: "include",
+			});
+			const body = (await response.json()) as { types?: StampTypePayload[] };
+
+			if (response.ok) {
+				setStampTypes((body.types ?? []).filter((type) => type.isActive));
+			}
+		} catch {
+			setStampTypes([]);
+		}
+	}, []);
 
 	const loadCampaigns = useCallback(async (): Promise<void> => {
 		setListLoading(true);
@@ -65,7 +89,8 @@ export function StampCampaignsForm(): ReactElement {
 		}
 
 		void loadCampaigns();
-	}, [session, loadCampaigns]);
+		void loadStampTypes();
+	}, [session, loadCampaigns, loadStampTypes]);
 
 	if (error) {
 		return <p className="text-sm text-error">{error}</p>;
@@ -110,6 +135,7 @@ export function StampCampaignsForm(): ReactElement {
 				body: JSON.stringify({
 					name: name.trim(),
 					requiredStamps: parsedStamps,
+					stampTypeId: stampTypeId.trim() ? stampTypeId : null,
 				}),
 			});
 
@@ -127,6 +153,7 @@ export function StampCampaignsForm(): ReactElement {
 				);
 				setName("");
 				setRequiredStamps("10");
+				setStampTypeId("");
 				await loadCampaigns();
 			}
 		} catch {
@@ -183,7 +210,12 @@ export function StampCampaignsForm(): ReactElement {
 							>
 								<div>
 									<p className="text-sm font-medium text-foreground">{campaign.name}</p>
-									<p className="text-sm text-muted">{campaign.requiredStamps} sellos</p>
+									<p className="text-sm text-muted">
+										{campaign.requiredStamps} sellos
+										{campaign.stampTypeId
+											? ` · ${stampTypes.find((type) => type.id === campaign.stampTypeId)?.label ?? "Tipo"}`
+											: " · Visita general"}
+									</p>
 								</div>
 								<div className="flex items-center gap-3">
 									<span
@@ -242,6 +274,25 @@ export function StampCampaignsForm(): ReactElement {
 							step={1}
 							className="max-w-[8rem]"
 						/>
+					</Field>
+
+					<Field label="Tipo de consumición">
+						<select
+							name="stampTypeId"
+							value={stampTypeId}
+							onChange={(event) => setStampTypeId(event.target.value)}
+							className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+						>
+							<option value="">Visita general (sin tipo concreto)</option>
+							{stampTypes.map((type) => (
+								<option key={type.id} value={type.id}>
+									{type.label}
+								</option>
+							))}
+						</select>
+						<p className="mt-1 text-xs text-muted">
+							Si eliges un tipo, el sello solo avanza cuando el empleado escanea con ese botón.
+						</p>
 					</Field>
 
 					{submitError ? <p className="text-sm text-error">{submitError}</p> : null}

@@ -96,7 +96,6 @@ export function PlatformGoogleSignInButton({
 					size="large"
 					text={text}
 					shape="rectangular"
-					locale="es"
 					width={320}
 				/>
 			</div>

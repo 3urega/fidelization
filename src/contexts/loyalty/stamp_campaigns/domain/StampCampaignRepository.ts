@@ -17,4 +17,6 @@ export abstract class StampCampaignRepository {
 		customerId: string,
 		campaignId: string,
 	): Promise<CustomerStampProgress | null>;
+
+	abstract hasActiveGenericCampaigns(tenantId: string): Promise<boolean>;
 }

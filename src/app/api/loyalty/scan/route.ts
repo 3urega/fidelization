@@ -7,6 +7,7 @@ import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { TenantNotFound } from "../../../../contexts/tenants/tenants/domain/TenantNotFound";
+import { TenantRole } from "../../../../contexts/tenants/memberships/domain/TenantRole";
 import {
 	customerToJson,
 	handleAuthDomainError,
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 type Body = {
 	qrValue?: string;
+	stampTypeId?: string | null;
 };
 
 export async function POST(request: Request): Promise<Response> {
@@ -36,11 +38,15 @@ export async function POST(request: Request): Promise<Response> {
 			tenantId: auth.session.tenantId,
 			qrValue: body.qrValue,
 			createdByUserId: auth.session.userId,
+			staffRole: auth.session.role as TenantRole,
+			stampTypeId: body.stampTypeId,
 		});
 
 		return NextResponse.json({
 			customer: customerToJson(result.customer),
 			stampsAdded: result.stampsAdded.map((summary) => stampAddedSummaryToJson(summary)),
+			selectedStampTypeId: result.selectedStampTypeId,
+			selectedStampTypeLabel: result.selectedStampTypeLabel,
 		});
 	} catch (error) {
 		if (error instanceof DomainError) {

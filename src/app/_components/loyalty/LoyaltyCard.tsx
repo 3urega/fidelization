@@ -4,6 +4,7 @@ import QRCode from "react-qr-code";
 import type { ReactElement } from "react";
 
 import { Button } from "../ui/Button";
+import { QrDevScanHint } from "./QrDevScanHint";
 
 export type StampProgressRow = {
 	campaignId: string;
@@ -11,6 +12,8 @@ export type StampProgressRow = {
 	current: number;
 	required: number;
 	completed: boolean;
+	stampTypeId?: string | null;
+	stampTypeLabel?: string;
 };
 
 export type RewardRow = {
@@ -160,7 +163,12 @@ export function LoyaltyCard({
 								key={row.campaignId}
 								className="flex items-center justify-between gap-3 text-sm"
 							>
-								<span className="text-foreground">{row.campaignName}</span>
+								<div className="flex min-w-0 flex-col gap-0.5">
+									<span className="text-foreground">{row.campaignName}</span>
+									{row.stampTypeLabel ? (
+										<span className="text-xs text-muted">{row.stampTypeLabel}</span>
+									) : null}
+								</div>
 								{row.completed ? (
 									<span className="font-medium text-primary">Completada</span>
 								) : (
@@ -174,8 +182,11 @@ export function LoyaltyCard({
 				</div>
 			) : null}
 
-			<div className="mx-auto rounded-xl border border-border bg-white p-4 shadow-sm">
-				<QRCode value={qrValue} size={200} level="M" />
+			<div className="mx-auto flex flex-col items-center gap-3">
+				<div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+					<QRCode value={qrValue} size={200} level="M" />
+				</div>
+				<QrDevScanHint qrValue={qrValue} />
 			</div>
 
 			<p className="text-center text-sm text-muted">

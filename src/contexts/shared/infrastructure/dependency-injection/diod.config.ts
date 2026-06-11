@@ -71,6 +71,12 @@ import { CreateStampCampaign } from "../../../loyalty/stamp_campaigns/applicatio
 import { ListStampCampaigns } from "../../../loyalty/stamp_campaigns/application/list/ListStampCampaigns";
 import { UpdateStampCampaign } from "../../../loyalty/stamp_campaigns/application/update/UpdateStampCampaign";
 import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
+import { StampTypeRepository } from "../../../loyalty/stamp_types/domain/StampTypeRepository";
+import { CreateStampType } from "../../../loyalty/stamp_types/application/create/CreateStampType";
+import { ListStampTypes } from "../../../loyalty/stamp_types/application/list/ListStampTypes";
+import { ResolveStampScanOptions } from "../../../loyalty/stamp_types/application/scan/ResolveStampScanOptions";
+import { UpdateStampType } from "../../../loyalty/stamp_types/application/update/UpdateStampType";
+import { PrismaStampTypeRepository } from "../../../loyalty/stamp_types/infrastructure/PrismaStampTypeRepository";
 import { PlatformAuthenticator } from "../../../platform/application/authenticate/PlatformAuthenticator";
 import { ListPlatformTenants } from "../../../platform/application/tenants/ListPlatformTenants";
 import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
@@ -194,6 +200,13 @@ builder.registerAndUse(PrismaStampCampaignRepository);
 builder.registerAndUse(CreateStampCampaign);
 builder.registerAndUse(ListStampCampaigns);
 builder.registerAndUse(UpdateStampCampaign);
+
+builder.register(StampTypeRepository).use(PrismaStampTypeRepository);
+builder.registerAndUse(PrismaStampTypeRepository);
+builder.registerAndUse(CreateStampType);
+builder.registerAndUse(ListStampTypes);
+builder.registerAndUse(UpdateStampType);
+builder.registerAndUse(ResolveStampScanOptions);
 
 builder.register(RewardRepository).use(PrismaRewardRepository);
 builder.registerAndUse(PrismaRewardRepository);

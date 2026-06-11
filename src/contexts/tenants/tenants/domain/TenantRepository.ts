@@ -8,7 +8,9 @@ export abstract class TenantRepository {
 
 	abstract findById(tenantId: string): Promise<Tenant | null>;
 
-	abstract findBySlug(slug: string): Promise<Tenant | null>;
+	async findBySlug(_slug: string): Promise<Tenant | null> {
+		return null;
+	}
 
 	abstract updateStatus(tenantId: string, status: TenantStatus): Promise<Tenant | null>;
 

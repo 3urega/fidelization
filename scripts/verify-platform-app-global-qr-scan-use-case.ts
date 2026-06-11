@@ -4,10 +4,14 @@ import "dotenv/config";
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
 import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import { ResolveStampScanOptions } from "../src/contexts/loyalty/stamp_types/application/scan/ResolveStampScanOptions";
+import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
+import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { LoyaltyTransactionRepository } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransactionRepository";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantRepository";
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
@@ -140,14 +144,50 @@ class NoopStampCampaignRepository extends StampCampaignRepository {
 		return null;
 	}
 
+	async listByTenant(): Promise<never[]> {
+		return [];
+	}
+
 	async listActiveByTenant(): Promise<never[]> {
 		return [];
+	}
+
+	async hasActiveGenericCampaigns(): Promise<boolean> {
+		return false;
 	}
 
 	async saveProgress(): Promise<void> {}
 
 	async searchProgress(): Promise<null> {
 		return null;
+	}
+}
+
+class InMemoryStampTypeRepository extends StampTypeRepository {
+	async save(_stampType: StampType): Promise<void> {}
+
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async searchBySlug(): Promise<null> {
+		return null;
+	}
+
+	async listByTenant(): Promise<StampType[]> {
+		return [];
+	}
+
+	async listActiveByTenant(): Promise<StampType[]> {
+		return [];
+	}
+
+	async countActiveByTenant(): Promise<number> {
+		return 0;
+	}
+
+	async maxSortOrder(): Promise<number> {
+		return 0;
 	}
 }
 
@@ -175,18 +215,28 @@ async function main(): Promise<void> {
 	const tenantRepository = new StubTenantRepository(baseTenant);
 	const customerRepository = new InMemoryCustomerRepository([legacyCustomer, linkedCustomer]);
 	const userRepository = new InMemoryUserRepository(usersByQr);
+	const stampRepository = new NoopStampCampaignRepository();
+	const stampTypeRepository = new InMemoryStampTypeRepository();
+	const resolveStampScanOptions = new ResolveStampScanOptions(
+		tenantRepository,
+		stampTypeRepository,
+		stampRepository,
+	);
 	const useCase = new RecordCustomerVisitByQr(
 		tenantRepository,
 		customerRepository,
 		userRepository,
 		new NoopLoyaltyTransactionRepository(),
-		new NoopStampCampaignRepository(),
+		stampRepository,
+		stampTypeRepository,
+		resolveStampScanOptions,
 	);
 
 	const legacyResult = await useCase.execute({
 		tenantId,
 		qrValue: legacyCustomer.qrValue,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 
 	if (legacyResult.customer.id !== legacyCustomer.id || legacyResult.customer.pointsBalance !== 1) {
@@ -200,6 +250,7 @@ async function main(): Promise<void> {
 		tenantId,
 		qrValue: userGlobalQr,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 
 	if (globalResult.customer.id !== linkedCustomer.id || globalResult.customer.pointsBalance !== 1) {
@@ -224,6 +275,7 @@ async function main(): Promise<void> {
 		tenantId,
 		qrValue: orphanUserQr,
 		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
 	});
 
 	if (

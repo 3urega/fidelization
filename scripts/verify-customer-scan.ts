@@ -65,13 +65,22 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
+	const scanOptionsRes = await fetch(`${apexBaseUrl}/api/loyalty/stamp-types`, {
+		headers: tenantHeaders({ cookie: `session=${ownerCookie}` }),
+	});
+	const scanOptionsBody = (await scanOptionsRes.json()) as { selectionRequired?: boolean };
+	const scanPayload =
+		scanOptionsBody.selectionRequired === true
+			? { qrValue, stampTypeId: null }
+			: { qrValue };
+
 	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: tenantHeaders({
 			"Content-Type": "application/json",
 			cookie: `session=${ownerCookie}`,
 		}),
-		body: JSON.stringify({ qrValue }),
+		body: JSON.stringify(scanPayload),
 	});
 	const scanBody = (await scan.json()) as {
 		customer?: { pointsBalance: number; visitsCount: number; name: string };

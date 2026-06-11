@@ -1,5 +1,5 @@
 import { SubscriptionPlan } from "./SubscriptionPlan";
-import { TenantSubscription } from "./TenantSubscription";
+import { type SubscriptionStatus, TenantSubscription } from "./TenantSubscription";
 
 export abstract class TenantBillingRepository {
 	abstract savePlan(plan: SubscriptionPlan): Promise<void>;

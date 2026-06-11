@@ -277,6 +277,33 @@ Manifest: [`manifest.phase-f-promotions.json`](../issues/manifest.phase-f-promot
 
 ---
 
+## Phase H — Sellos tipados (empleado elige al escanear)
+
+**Status:** **Implemented** (2026-06-11).
+
+**Goal:** Separar campañas por tipo de consumición (café ≠ menú). El empleado elige en `/scan`; campañas genéricas solo avanzan con «Visita general».
+
+| In | Out |
+|----|-----|
+| Catálogo owner `stamp_types` + API | Opt-in del cliente / QR dinámico |
+| Campañas con `stampTypeId` opcional | Puntos diferenciados por tipo |
+| `POST /api/loyalty/scan` + `stampTypeId` | Cámara en `/scan` |
+| Selector staff en `/scan` + `/settings/stamps` | Canje automático al completar sello |
+| `stampProgress[]` con `stampTypeLabel` | POS / ticket import |
+
+### Vertical slices
+
+| Slice | Valor | Verify |
+|-------|-------|--------|
+| **H1** | Owner define tipos (Café, Menú…) | `verify:stamp-types-use-case`, `verify:stamp-types` |
+| **H2** | Campaña ligada a tipo | `verify:stamp-campaigns*` (extendido) |
+| **H3** | Escaneo tipado en `/scan` | `verify:customer-stamp-scan-targeted*` |
+| **H4** | Cliente ve etiqueta en tarjeta | `verify:customer-stamp-progress*` (extendido) |
+
+Manifest: [`manifest.phase-h-stamp-types.json`](../issues/manifest.phase-h-stamp-types.json)
+
+---
+
 ## Deferred — Steps 3–4 (plan + payment)
 
 **Superseded by Phase E** (issues draft arriba). Trigger cumplido: Phase A–D shipped.

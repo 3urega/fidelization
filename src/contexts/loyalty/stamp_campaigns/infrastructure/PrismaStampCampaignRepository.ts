@@ -18,12 +18,14 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 				name: p.name,
 				requiredStamps: p.requiredStamps,
 				rewardId: p.rewardId,
+				stampTypeId: p.stampTypeId,
 				isActive: p.isActive,
 			},
 			update: {
 				name: p.name,
 				requiredStamps: p.requiredStamps,
 				rewardId: p.rewardId,
+				stampTypeId: p.stampTypeId,
 				isActive: p.isActive,
 			},
 		});
@@ -53,6 +55,14 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 		});
 
 		return rows.map((row) => this.toCampaign(row));
+	}
+
+	async hasActiveGenericCampaigns(tenantId: string): Promise<boolean> {
+		const count = await prisma.stampCampaign.count({
+			where: { tenantId, isActive: true, stampTypeId: null },
+		});
+
+		return count > 0;
 	}
 
 	async saveProgress(progress: CustomerStampProgress): Promise<void> {
@@ -98,6 +108,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 		name: string;
 		requiredStamps: number;
 		rewardId: string | null;
+		stampTypeId: string | null;
 		isActive: boolean;
 	}): StampCampaign {
 		return StampCampaign.fromPrimitives({
@@ -106,6 +117,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 			name: row.name,
 			requiredStamps: row.requiredStamps,
 			rewardId: row.rewardId,
+			stampTypeId: row.stampTypeId,
 			isActive: row.isActive,
 		});
 	}

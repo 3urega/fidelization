@@ -9,6 +9,8 @@ import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/St
 import { StampCampaignForbidden } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignForbidden";
 import { StampCampaignNotFound } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignNotFound";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
+import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
 import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantNotFound } from "../src/contexts/tenants/tenants/domain/TenantNotFound";
@@ -80,6 +82,49 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 	async searchProgress(): Promise<null> {
 		return null;
 	}
+
+	async hasActiveGenericCampaigns(tenantId: string): Promise<boolean> {
+		return Array.from(this.campaigns.values()).some(
+			(campaign) =>
+				campaign.tenantId === tenantId &&
+				campaign.isActive &&
+				campaign.stampTypeId === null,
+		);
+	}
+}
+
+class InMemoryStampTypeRepository extends StampTypeRepository {
+	constructor(private readonly types: StampType[]) {
+		super();
+	}
+
+	async save(stampType: StampType): Promise<void> {
+		this.types.push(stampType);
+	}
+
+	async searchById(tenantId: string, id: string): Promise<StampType | null> {
+		return this.types.find((type) => type.tenantId === tenantId && type.id === id) ?? null;
+	}
+
+	async searchBySlug(): Promise<null> {
+		return null;
+	}
+
+	async listByTenant(tenantId: string): Promise<StampType[]> {
+		return this.types.filter((type) => type.tenantId === tenantId);
+	}
+
+	async listActiveByTenant(tenantId: string): Promise<StampType[]> {
+		return this.types.filter((type) => type.tenantId === tenantId && type.isActive);
+	}
+
+	async countActiveByTenant(tenantId: string): Promise<number> {
+		return (await this.listActiveByTenant(tenantId)).length;
+	}
+
+	async maxSortOrder(): Promise<number> {
+		return 0;
+	}
 }
 
 async function expectForbidden(
@@ -103,7 +148,14 @@ async function expectForbidden(
 async function main(): Promise<void> {
 	const tenantRepository = new StubTenantRepository(baseTenant);
 	const stampRepository = new InMemoryStampCampaignRepository();
-	const create = new CreateStampCampaign(tenantRepository, stampRepository);
+	const cafeType = StampType.create({
+		tenantId,
+		label: "Café",
+		slug: "cafe",
+		sortOrder: 1,
+	});
+	const stampTypeRepository = new InMemoryStampTypeRepository([cafeType]);
+	const create = new CreateStampCampaign(tenantRepository, stampRepository, stampTypeRepository);
 	const list = new ListStampCampaigns(tenantRepository, stampRepository);
 	const update = new UpdateStampCampaign(tenantRepository, stampRepository);
 
@@ -132,9 +184,22 @@ async function main(): Promise<void> {
 
 	console.log("✅ CreateStampCampaign owner");
 
+	const typed = await create.execute({
+		tenantId,
+		role: TenantRole.Owner,
+		input: { name: "5 menús gratis", requiredStamps: 5, stampTypeId: cafeType.id },
+	});
+
+	if (typed.stampTypeId !== cafeType.id) {
+		console.error("❌ CreateStampCampaign with stampTypeId", typed.toPrimitives());
+		process.exit(1);
+	}
+
+	console.log("✅ CreateStampCampaign with stampTypeId");
+
 	const campaigns = await list.execute({ tenantId, role: TenantRole.Owner });
 
-	if (campaigns.length !== 1 || campaigns[0]?.id !== created.id) {
+	if (campaigns.length !== 2 || !campaigns.some((campaign) => campaign.id === typed.id)) {
 		console.error("❌ ListStampCampaigns owner", campaigns);
 		process.exit(1);
 	}
@@ -200,7 +265,11 @@ async function main(): Promise<void> {
 
 	console.log("✅ UpdateStampCampaign deactivate");
 
-	const missingTenantCreate = new CreateStampCampaign(new StubTenantRepository(null), stampRepository);
+	const missingTenantCreate = new CreateStampCampaign(
+		new StubTenantRepository(null),
+		stampRepository,
+		stampTypeRepository,
+	);
 
 	try {
 		await missingTenantCreate.execute({

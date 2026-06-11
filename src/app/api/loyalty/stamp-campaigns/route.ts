@@ -17,6 +17,7 @@ export const dynamic = "force-dynamic";
 type Body = {
 	name?: string;
 	requiredStamps?: number;
+	stampTypeId?: string | null;
 };
 
 export async function GET(request: Request): Promise<Response> {

@@ -6,6 +6,7 @@ export type StampCampaignPrimitives = {
 	name: string;
 	requiredStamps: number;
 	rewardId: string | null;
+	stampTypeId: string | null;
 	isActive: boolean;
 };
 
@@ -13,6 +14,7 @@ export type StampCampaignCreateParams = {
 	tenantId: string;
 	name: string;
 	requiredStamps: number;
+	stampTypeId?: string | null;
 };
 
 export class StampCampaign {
@@ -22,6 +24,7 @@ export class StampCampaign {
 		public readonly name: string,
 		public readonly requiredStamps: number,
 		public readonly rewardId: string | null,
+		public readonly stampTypeId: string | null,
 		public readonly isActive: boolean,
 	) {}
 
@@ -32,6 +35,7 @@ export class StampCampaign {
 			params.name,
 			params.requiredStamps,
 			null,
+			params.stampTypeId ?? null,
 			true,
 		);
 	}
@@ -43,6 +47,7 @@ export class StampCampaign {
 			primitives.name,
 			primitives.requiredStamps,
 			primitives.rewardId,
+			primitives.stampTypeId,
 			primitives.isActive,
 		);
 	}
@@ -54,6 +59,7 @@ export class StampCampaign {
 			name: this.name,
 			requiredStamps: this.requiredStamps,
 			rewardId: this.rewardId,
+			stampTypeId: this.stampTypeId,
 			isActive: this.isActive,
 		};
 	}
@@ -69,6 +75,7 @@ export class StampCampaign {
 			this.name,
 			this.requiredStamps,
 			this.rewardId,
+			this.stampTypeId,
 			false,
 		);
 	}

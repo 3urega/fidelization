@@ -123,6 +123,8 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 			subscriptionPlanId: string | null;
 			status: string;
 			createdAt: Date;
+			address: string;
+			description: string;
 		};
 		role: string;
 	}): StaffMembership {

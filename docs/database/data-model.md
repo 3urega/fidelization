@@ -228,7 +228,18 @@ Example: buy 10 coffees → 1 free.
 | Field | Notes |
 |-------|-------|
 | `id`, `tenant_id`, `name` | |
-| `required_stamps`, `reward_id`, `is_active`, `created_at` | |
+| `required_stamps`, `reward_id`, `stamp_type_id` (nullable FK), `is_active`, `created_at` | `stamp_type_id` null = campaña genérica («Visita general») |
+
+---
+
+## 2.7.1 Stamp type (implemented — Phase H)
+
+Catálogo owner: etiquetas que el empleado elige al escanear (p. ej. Café, Menú).
+
+| Field | Notes |
+|-------|-------|
+| `id`, `tenant_id`, `label`, `slug` | `slug` único por tenant |
+| `sort_order`, `is_active`, `created_at` | |
 
 ---
 

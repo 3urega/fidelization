@@ -244,14 +244,14 @@ async function main(): Promise<void> {
 
 	const originalDate = Date;
 	global.Date = class extends Date {
-		constructor(...args: ConstructorParameters<typeof Date>) {
+		constructor(...args: unknown[]) {
 			if (args.length === 0) {
 				super(fixedAt.toISOString());
 
 				return;
 			}
 
-			super(...args);
+			super(...(args as ConstructorParameters<typeof Date>));
 		}
 
 		static now(): number {

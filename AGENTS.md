@@ -48,6 +48,10 @@ npm run verify:customer-stamp-progress-use-case  # issue #23 — GET me stampPro
 npm run verify:customer-stamp-progress   # issue #23 — register → scan → GET me stampProgress E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaigns-use-case  # issue #21 — Create/List/Update stamp campaigns (domain stub)
 npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campaigns + Prisma (dev + DATABASE_URL)
+npm run verify:stamp-types-use-case  # Phase H1 — stamp_types catalog (domain stub)
+npm run verify:stamp-types           # Phase H1 — stamp types API + Prisma (dev + DATABASE_URL)
+npm run verify:customer-stamp-scan-targeted-use-case  # Phase H3 — typed scan filters campaigns (domain stub)
+npm run verify:customer-stamp-scan-targeted  # Phase H3 — café/menú E2E scan (dev + DATABASE_URL)
 npm run verify:rewards-use-case      # issue #24 — Create/List/Update rewards (domain stub)
 npm run verify:rewards               # issue #24 — POST/GET/PATCH rewards + Prisma (dev + DATABASE_URL)
 npm run verify:promotions-use-case   # issue #35 — Create/List/Update promotions + plan gate (domain stub)
@@ -114,7 +118,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me` (incl. `stampProgress[]` desde #23, `rewards[]` desde #25). `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
 - **Customer stamp progress (#23):** en `/app/card`, sección «Sellos» con progreso por campaña activa (`0/N`, «Completada»). `verify:customer-stamp-progress-use-case`, `verify:customer-stamp-progress`.
 - **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto, +1 sello por campaña activa, filas en `loyalty_transactions` (`points_earned`, `stamp_added`). Enlace para clientes en checklist `/home`. `verify:customer-scan`, `verify:customer-stamp-scan`.
-- **Stamp campaigns (#21):** owner en `/settings/stamps` → crear/listar/desactivar campañas (`GET/POST /api/loyalty/stamp-campaigns`, `PATCH …/[id]`). Checklist en `/home`. `verify:stamp-campaigns-use-case`, `verify:stamp-campaigns` (dev + `DATABASE_URL`).
+- **Stamp campaigns (#21):** owner en `/settings/stamps` → tipos de consumición (Phase H) + campañas (`GET/POST /api/loyalty/stamp-types`, `GET/POST/PATCH /api/loyalty/stamp-campaigns`). Empleado en `/scan` elige tipo antes de escanear. `verify:stamp-types*`, `verify:stamp-campaigns*`, `verify:customer-stamp-scan-targeted*`.
 - **Rewards (#24):** owner API `GET/POST /api/loyalty/rewards`, `PATCH …/[id]` (owner-only; sin UI aún). `verify:rewards-use-case`, `verify:rewards`.
 - **Customer reward redeem (#25):** en `/app/card`, sección «Recompensas» con catálogo activo; `POST /api/loyalty/rewards/redeem` descuenta puntos y crea `reward_redeemed`. `verify:customer-reward-redeem-use-case`, `verify:customer-reward-redeem`.
 - **Tenant employees (#26–#27):** owner en `/settings/team` invita empleados (`GET/POST /api/tenant/employees`); empleado inicia sesión en subdominio tenant y usa `/scan`. Checklist «Invita a tu empleado» en `/home`. `verify:tenant-employees-use-case`, `verify:tenant-employees`.
@@ -189,7 +193,7 @@ docs/
 | Alta self-service del negocio (registro owner, wizard, trial, checkout) | `docs/domain/business-onboarding.md` + `/register/business` + `/register/business/tenant` + `verify:business-register` + `verify:business-onboarding` |
 | Post-onboarding MVP (branding corto → customer `/app`; planes después) | `docs/domain/post-onboarding-mvp-roadmap.md` + `verify:tenant-branding` + `verify:customer-qr-session` |
 | App consumidor multi-establecimiento (identidad global, dashboard locales) | `docs/domain/customer-platform-app.md` — **target**; registro unificado owner/cliente, home app (Registrarse / Registrar negocio / Login), dashboard por relación |
-| Stamp campaigns owner CRUD (#21) | `verify:stamp-campaigns-use-case` + `verify:stamp-campaigns` + `/settings/stamps` |
+| Stamp campaigns owner CRUD (#21) + typed scan (Phase H) | `verify:stamp-campaigns*` + `verify:stamp-types*` + `verify:customer-stamp-scan-targeted*` + `/settings/stamps` + `/scan` |
 | Staff scan + stamps (#22) | `verify:customer-stamp-scan-use-case` + `verify:customer-stamp-scan` + `/scan` |
 | Customer stamp progress (#23) | `verify:customer-stamp-progress-use-case` + `verify:customer-stamp-progress` + `/app/card` |
 | Rewards owner CRUD (#24) | `verify:rewards-use-case` + `verify:rewards` + `/api/loyalty/rewards` |

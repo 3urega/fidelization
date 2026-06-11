@@ -5,6 +5,7 @@ import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/Http
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
+import { StampType } from "../../contexts/loyalty/stamp_types/domain/StampType";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
@@ -43,8 +44,8 @@ export function tenantToJson(tenant: Tenant): Record<string, string | null> {
 		subscriptionPlan: primitives.subscriptionPlan,
 		subscriptionPlanId: primitives.subscriptionPlanId,
 		status: primitives.status,
-		address: primitives.address,
-		description: primitives.description,
+		address: primitives.address ?? "",
+		description: primitives.description ?? "",
 	};
 }
 
@@ -95,6 +96,21 @@ export function stampCampaignToJson(
 		requiredStamps: primitives.requiredStamps,
 		isActive: primitives.isActive,
 		rewardId: primitives.rewardId,
+		stampTypeId: primitives.stampTypeId,
+	};
+}
+
+export function stampTypeToJson(
+	stampType: StampType,
+): Record<string, string | number | boolean> {
+	const primitives = stampType.toPrimitives();
+
+	return {
+		id: primitives.id,
+		label: primitives.label,
+		slug: primitives.slug,
+		sortOrder: primitives.sortOrder,
+		isActive: primitives.isActive,
 	};
 }
 
@@ -166,13 +182,15 @@ export function stampAddedSummaryToJson(
 
 export function stampProgressToJson(
 	summary: StampAddedSummary,
-): Record<string, string | number | boolean> {
+): Record<string, string | number | boolean | null> {
 	return {
 		campaignId: summary.campaignId,
 		campaignName: summary.campaignName,
 		current: summary.current,
 		required: summary.required,
 		completed: summary.completed,
+		stampTypeId: summary.stampTypeId,
+		stampTypeLabel: summary.stampTypeLabel,
 	};
 }
 
@@ -286,6 +304,18 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "StampCampaignNotFound") {
 		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "StampTypeForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidStampType") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "StampTypeNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "InvalidStampScan") {
+		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "RewardForbidden") {
 		return HttpNextResponse.domainError(error, 403);

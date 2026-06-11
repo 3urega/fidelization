@@ -90,7 +90,7 @@ async function main(): Promise<void> {
 	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue }),
+		body: JSON.stringify({ qrValue, stampTypeId: null }),
 	});
 	const scanBody = (await scan.json()) as {
 		customer?: { pointsBalance: number; visitsCount: number };
@@ -149,7 +149,7 @@ async function main(): Promise<void> {
 		const nextScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 			method: "POST",
 			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue }),
+			body: JSON.stringify({ qrValue, stampTypeId: null }),
 		});
 		const nextBody = (await nextScan.json()) as {
 			stampsAdded?: { campaignId?: string; current: number; completed: boolean }[];
@@ -177,7 +177,7 @@ async function main(): Promise<void> {
 	const afterCompleted = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
 		method: "POST",
 		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue }),
+		body: JSON.stringify({ qrValue, stampTypeId: null }),
 	});
 	const afterCompletedBody = (await afterCompleted.json()) as {
 		stampsAdded?: { campaignId?: string }[];

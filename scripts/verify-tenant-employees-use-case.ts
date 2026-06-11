@@ -8,6 +8,8 @@ import { UserPlan } from "../src/contexts/identity/users/domain/UserPlan";
 import { CreateStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/application/create/CreateStampCampaign";
 import { StampCampaignForbidden } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignForbidden";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
+import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
 import { AssertTenantEmployeeLimit } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantEmployeeLimit";
 import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { PRO_PLAN_FEATURES } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanFeatures";
@@ -180,6 +182,38 @@ class EmptyStampCampaignRepository extends StampCampaignRepository {
 	async searchProgress(): Promise<null> {
 		return null;
 	}
+
+	async hasActiveGenericCampaigns(): Promise<boolean> {
+		return false;
+	}
+}
+
+class EmptyStampTypeRepository extends StampTypeRepository {
+	async save(_stampType: StampType): Promise<void> {}
+
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async searchBySlug(): Promise<null> {
+		return null;
+	}
+
+	async listByTenant(): Promise<StampType[]> {
+		return [];
+	}
+
+	async listActiveByTenant(): Promise<StampType[]> {
+		return [];
+	}
+
+	async countActiveByTenant(): Promise<number> {
+		return 0;
+	}
+
+	async maxSortOrder(): Promise<number> {
+		return 0;
+	}
 }
 
 async function main(): Promise<void> {
@@ -316,6 +350,7 @@ async function main(): Promise<void> {
 	const createStamp = new CreateStampCampaign(
 		tenantRepository,
 		new EmptyStampCampaignRepository(),
+		new EmptyStampTypeRepository(),
 	);
 
 	try {

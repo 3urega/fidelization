@@ -76,6 +76,14 @@ export class PostgresUserRepository extends PostgresRepository<User> implements 
 		return false;
 	}
 
+	async searchByQrValue(_qrValue: string): Promise<User | null> {
+		return null;
+	}
+
+	async searchByOAuthSubject(_oauthSubject: string): Promise<User | null> {
+		return null;
+	}
+
 	protected toAggregate(row: DatabaseUserRow): User {
 		return User.fromPrimitives({
 			id: row.id,
@@ -83,6 +91,9 @@ export class PostgresUserRepository extends PostgresRepository<User> implements 
 			email: row.email,
 			profilePicture: row.profile_picture,
 			plan: row.subscription_plan as UserPlan,
+			qrValue: null,
+			oauthProvider: null,
+			oauthSubject: null,
 		});
 	}
 }

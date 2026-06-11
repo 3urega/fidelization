@@ -4,6 +4,7 @@ import QRCode from "react-qr-code";
 import { type ReactElement, useEffect, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
+import { QrDevScanHint } from "../loyalty/QrDevScanHint";
 import { Card } from "../ui/Card";
 
 type PlatformUserQrPanelProps = {
@@ -97,6 +98,7 @@ export function PlatformUserQrPanel({
 				<div className="rounded-xl border border-border bg-white p-4">
 					<QRCode value={qrValue} size={240} level="M" />
 				</div>
+				<QrDevScanHint qrValue={qrValue} />
 				<p className="text-center text-sm text-muted">
 					Muestra este código al personal en cualquier local de la plataforma. Si es tu primera
 					visita, el local se añadirá automáticamente a «Mis locales».

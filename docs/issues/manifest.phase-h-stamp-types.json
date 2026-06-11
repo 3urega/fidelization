@@ -1,0 +1,23 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/post-onboarding-mvp-roadmap.md",
+  "label": "phase-h-stamp-types",
+  "issues": [
+    {
+      "title": "Phase H1 — Stamp types catalog (owner CRUD + settings UI)",
+      "bodyFile": "docs/issues/stamp-types-catalog.md"
+    },
+    {
+      "title": "Phase H2 — Stamp campaigns linked to stamp type",
+      "bodyFile": "docs/issues/stamp-campaigns-stamp-type.md"
+    },
+    {
+      "title": "Phase H3 — Staff targeted stamp scan (/scan selector)",
+      "bodyFile": "docs/issues/staff-stamp-scan-targeted.md"
+    },
+    {
+      "title": "Phase H4 — Customer stamp progress labels on loyalty card",
+      "bodyFile": "docs/issues/customer-stamp-progress-labels.md"
+    }
+  ]
+}
