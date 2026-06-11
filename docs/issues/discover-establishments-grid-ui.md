@@ -30,7 +30,7 @@ Phase I2 — requiere I1 (`GET /api/user/establishments`). Decisión de producto
 
 ## Issues relacionadas
 
-- `discover-establishments-api.md`
+- [#46](https://github.com/3urega/fidelization/issues/46) (cerrada)
 - `discover-establishments-home-integration.md`
 
 ## Referencias
