@@ -176,7 +176,7 @@ export function subscriptionPlanToJson(
 
 export function stampAddedSummaryToJson(
 	summary: StampAddedSummary,
-): Record<string, string | number | boolean> {
+): Record<string, string | number | boolean | null> {
 	return stampProgressToJson(summary);
 }
 

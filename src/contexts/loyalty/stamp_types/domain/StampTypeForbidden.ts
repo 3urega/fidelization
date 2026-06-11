@@ -3,8 +3,11 @@ import { TenantRole } from "../../../tenants/memberships/domain/TenantRole";
 
 export class StampTypeForbidden extends DomainError {
 	readonly type = "StampTypeForbidden";
+	readonly message: string;
 
 	constructor(role: TenantRole) {
-		super(`Stamp type management is forbidden for role ${role}`);
+		const description = `Stamp type management is forbidden for role ${role}`;
+		super(description);
+		this.message = description;
 	}
 }

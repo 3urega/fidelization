@@ -3,6 +3,7 @@ import { Service } from "diod";
 import { TenantMembershipRepository } from "../../../../tenants/memberships/domain/TenantMembershipRepository";
 import { SubscriptionPlan } from "../../domain/SubscriptionPlan";
 import { TenantPlanLimitExceeded } from "../../domain/TenantPlanLimitExceeded";
+import { areTenantPlanGatesDisabled } from "../../domain/TenantPlanFeature";
 import { ResolveTenantSubscriptionPlan } from "../resolve/ResolveTenantSubscriptionPlan";
 
 @Service()
@@ -14,6 +15,11 @@ export class AssertTenantEmployeeLimit {
 
 	async execute(tenantId: string): Promise<SubscriptionPlan> {
 		const plan = await this.resolveTenantSubscriptionPlan.execute(tenantId);
+
+		if (areTenantPlanGatesDisabled()) {
+			return plan;
+		}
+
 		const limit = plan.limits?.employees;
 
 		if (limit === undefined) {

@@ -14,6 +14,7 @@ Referencia de plantilla: [`.env.example`](../../.env.example). Acceso tipado en 
 | `DATABASE_URL` | **Sí** (E2E, Prisma) | Postgres |
 | `GOOGLE_CLIENT_ID` + `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | No | Botón «Continuar con Google» en la app personal |
 | `STRIPE_*` | No | Checkout Pro/Premium y webhooks de suscripción |
+| `DISABLE_TENANT_PLAN_GATES=1` | No | Dev/staging: promociones Pro+, límites empleados, etc. sin asignar plan (ignorado en producción) |
 
 Sin Google ni Stripe la app arranca y puedes usar registro/login por email, plan Basic gratis y el resto del MVP.
 

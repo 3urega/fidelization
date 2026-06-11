@@ -1,5 +1,5 @@
 import { slugifyBusinessName } from "../../../../lib/tenant/slugifyBusinessName";
-import { StampTypeRepository } from "../../domain/StampTypeRepository";
+import { StampTypeRepository } from "../domain/StampTypeRepository";
 
 export async function resolveUniqueStampTypeSlug(
 	repository: StampTypeRepository,

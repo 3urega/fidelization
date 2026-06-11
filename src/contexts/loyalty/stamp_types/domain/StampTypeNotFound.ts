@@ -2,8 +2,11 @@ import { DomainError } from "../../../shared/domain/DomainError";
 
 export class StampTypeNotFound extends DomainError {
 	readonly type = "StampTypeNotFound";
+	readonly message: string;
 
 	constructor(id: string) {
-		super(`Stamp type ${id} not found`);
+		const description = `Stamp type ${id} not found`;
+		super(description);
+		this.message = description;
 	}
 }

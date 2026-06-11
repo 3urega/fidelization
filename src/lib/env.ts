@@ -78,6 +78,14 @@ export const env = {
 		return process.env.ALLOW_DEMO_BILLING === "1";
 	},
 
+	/**
+	 * Dev/staging only: skip tenant plan feature gates and employee limits (UI + API).
+	 * Ignored in production even if set.
+	 */
+	get disableTenantPlanGates(): boolean {
+		return !env.isProduction && process.env.DISABLE_TENANT_PLAN_GATES === "1";
+	},
+
 	get stripeSecretKey(): string {
 		return requireEnv("STRIPE_SECRET_KEY");
 	},
