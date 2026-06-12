@@ -100,6 +100,7 @@ import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFi
 import { UpdateTenantBranding } from "../../../tenants/tenants/application/update/UpdateTenantBranding";
 import { ListDiscoverableEstablishments } from "../../../tenants/tenants/application/list/ListDiscoverableEstablishments";
 import { UpdateTenantProfile } from "../../../tenants/tenants/application/update/UpdateTenantProfile";
+import { UploadTenantCoverImage } from "../../../tenants/tenants/application/update/UploadTenantCoverImage";
 import { UpdateTenantStatus } from "../../../tenants/tenants/application/update/UpdateTenantStatus";
 import { TenantRepository } from "../../../tenants/tenants/domain/TenantRepository";
 import { PrismaTenantRepository } from "../../../tenants/tenants/infrastructure/PrismaTenantRepository";
@@ -173,6 +174,7 @@ builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
 builder.registerAndUse(ListDiscoverableEstablishments);
 builder.registerAndUse(UpdateTenantProfile);
+builder.registerAndUse(UploadTenantCoverImage);
 builder.registerAndUse(UpdateTenantStatus);
 
 builder.register(GooglePlaySubscriptionRepository).use(PostgresGooglePlaySubscriptionRepository);

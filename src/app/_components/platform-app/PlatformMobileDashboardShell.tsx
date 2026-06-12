@@ -1,9 +1,15 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 
-import { PLATFORM_MOBILE_DASHBOARD_BACKGROUND_URL } from "../../../lib/platform/mobileDashboardBackground";
+import {
+	PLATFORM_MOBILE_DASHBOARD_BACKGROUND_URL,
+} from "../../../lib/platform/mobileDashboardBackground";
 
 type PlatformMobileDashboardShellProps = {
 	children: ReactNode;
+	backgroundUrl?: string;
+	backgroundSize?: CSSProperties["backgroundSize"];
+	backgroundRepeat?: CSSProperties["backgroundRepeat"];
+	backgroundPosition?: CSSProperties["backgroundPosition"];
 };
 
 /**
@@ -11,12 +17,16 @@ type PlatformMobileDashboardShellProps = {
  */
 export function PlatformMobileDashboardShell({
 	children,
+	backgroundUrl = PLATFORM_MOBILE_DASHBOARD_BACKGROUND_URL,
+	backgroundSize = "cover",
+	backgroundRepeat = "no-repeat",
+	backgroundPosition = "center top",
 }: PlatformMobileDashboardShellProps): ReactElement {
 	const backgroundStyle: CSSProperties = {
-		backgroundImage: `url(${PLATFORM_MOBILE_DASHBOARD_BACKGROUND_URL})`,
-		backgroundSize: "cover",
-		backgroundPosition: "center top",
-		backgroundRepeat: "no-repeat",
+		backgroundImage: `url("${encodeURI(backgroundUrl)}")`,
+		backgroundSize,
+		backgroundPosition,
+		backgroundRepeat,
 	};
 
 	return (

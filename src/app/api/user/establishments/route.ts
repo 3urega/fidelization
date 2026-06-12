@@ -58,8 +58,13 @@ export async function GET(request: Request): Promise<Response> {
 	const { searchParams } = new URL(request.url);
 	const page = parseNonNegativeInt(searchParams.get("page"), 0);
 	const limit = parsePositiveInt(searchParams.get("limit"), 20, 50);
+	const offsetParam = searchParams.get("offset");
+	const offset =
+		offsetParam !== null
+			? parseNonNegativeInt(offsetParam, 0)
+			: page * limit;
 
-	const result = await container.get(ListDiscoverableEstablishments).execute({ page, limit });
+	const result = await container.get(ListDiscoverableEstablishments).execute({ offset, limit });
 
 	return NextResponse.json(result);
 }

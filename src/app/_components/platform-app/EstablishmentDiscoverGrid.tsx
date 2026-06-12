@@ -14,7 +14,8 @@ type DiscoverResponse = {
 	error?: { description?: string };
 };
 
-const PAGE_SIZE = 20;
+const INITIAL_LIMIT = 6;
+const LOAD_MORE_LIMIT = 4;
 
 type EstablishmentDiscoverGridProps = {
 	/** When true, shows a compact heading; omit on dedicated discover page. */
@@ -31,9 +32,9 @@ export function EstablishmentDiscoverGrid({
 	const [error, setError] = useState<string | null>(null);
 	const sentinelRef = useRef<HTMLDivElement | null>(null);
 	const fetchingRef = useRef(false);
-	const pageRef = useRef(0);
+	const offsetRef = useRef(0);
 
-	const loadPage = useCallback(async (pageToLoad: number, append: boolean): Promise<void> => {
+	const loadBatch = useCallback(async (offset: number, limit: number, append: boolean): Promise<void> => {
 		if (fetchingRef.current) {
 			return;
 		}
@@ -50,7 +51,7 @@ export function EstablishmentDiscoverGrid({
 
 		try {
 			const response = await platformFetch(
-				`/api/user/establishments?page=${pageToLoad}&limit=${PAGE_SIZE}`,
+				`/api/user/establishments?offset=${offset}&limit=${limit}`,
 			);
 			const body = (await response.json()) as DiscoverResponse;
 
@@ -67,7 +68,7 @@ export function EstablishmentDiscoverGrid({
 			const batch = body.establishments ?? [];
 			setItems((current) => (append ? [...current, ...batch] : batch));
 			setHasMore(body.hasMore === true);
-			pageRef.current = pageToLoad;
+			offsetRef.current = append ? offset + batch.length : batch.length;
 		} catch {
 			setError("Error de red al cargar los locales.");
 			if (!append) {
@@ -82,8 +83,9 @@ export function EstablishmentDiscoverGrid({
 	}, []);
 
 	useEffect(() => {
-		void loadPage(0, false);
-	}, [loadPage]);
+		offsetRef.current = 0;
+		void loadBatch(0, INITIAL_LIMIT, false);
+	}, [loadBatch]);
 
 	useEffect(() => {
 		const sentinel = sentinelRef.current;
@@ -94,7 +96,7 @@ export function EstablishmentDiscoverGrid({
 		const observer = new IntersectionObserver(
 			(entries) => {
 				if (entries.some((entry) => entry.isIntersecting)) {
-					void loadPage(pageRef.current + 1, true);
+					void loadBatch(offsetRef.current, LOAD_MORE_LIMIT, true);
 				}
 			},
 			{ rootMargin: "200px" },
@@ -105,7 +107,7 @@ export function EstablishmentDiscoverGrid({
 		return () => {
 			observer.disconnect();
 		};
-	}, [hasMore, loadPage, loading, loadingMore]);
+	}, [hasMore, loadBatch, loading, loadingMore]);
 
 	return (
 		<div className="flex flex-col gap-4">

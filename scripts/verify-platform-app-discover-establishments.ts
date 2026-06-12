@@ -91,6 +91,50 @@ async function main(): Promise<void> {
 		console.log("✅ GET page 1 without overlap");
 	}
 
+	const initialBatch = await fetch(`${baseUrl}/api/user/establishments?offset=0&limit=6`, { headers });
+	const initialBatchBody = (await initialBatch.json()) as {
+		establishments?: { slug: string }[];
+		hasMore?: boolean;
+	};
+
+	if (
+		!initialBatch.ok ||
+		!Array.isArray(initialBatchBody.establishments) ||
+		initialBatchBody.establishments.length === 0 ||
+		initialBatchBody.establishments.length > 6
+	) {
+		console.error("❌ GET offset 0 limit 6:", initialBatch.status, initialBatchBody);
+		process.exit(1);
+	}
+
+	console.log(`✅ GET offset 0 limit 6 → ${initialBatchBody.establishments.length} establishments`);
+
+	if (initialBatchBody.hasMore) {
+		const nextOffset = initialBatchBody.establishments.length;
+		const nextBatch = await fetch(
+			`${baseUrl}/api/user/establishments?offset=${nextOffset}&limit=4`,
+			{ headers },
+		);
+		const nextBatchBody = (await nextBatch.json()) as {
+			establishments?: { slug: string }[];
+		};
+
+		if (!nextBatch.ok || !Array.isArray(nextBatchBody.establishments)) {
+			console.error("❌ GET offset next limit 4:", nextBatch.status, nextBatchBody);
+			process.exit(1);
+		}
+
+		const initialSlugs = new Set(initialBatchBody.establishments.map((row) => row.slug));
+		const offsetOverlap = nextBatchBody.establishments.some((row) => initialSlugs.has(row.slug));
+
+		if (offsetOverlap) {
+			console.error("❌ offset batch overlaps initial batch");
+			process.exit(1);
+		}
+
+		console.log(`✅ GET offset ${nextOffset} limit 4 without overlap`);
+	}
+
 	const home = await fetch(`${baseUrl}/home`, { headers, redirect: "manual" });
 	if (home.status !== 200) {
 		console.error("❌ GET /home:", home.status);

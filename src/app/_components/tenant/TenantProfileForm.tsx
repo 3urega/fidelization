@@ -2,16 +2,20 @@
 
 import { type ReactElement, useEffect, useState } from "react";
 
+import { type TenantDiscoveryTagId } from "../../../contexts/tenants/tenants/domain/TenantDiscoveryTag";
 import { useTenantSession } from "../shell/TenantSessionProvider";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
+import { TenantCoverImageUpload } from "./TenantCoverImageUpload";
+import { TenantDiscoveryTagsPicker } from "./TenantDiscoveryTagsPicker";
 
 type ProfilePatchResponse = {
 	tenant?: {
 		address: string;
 		description: string;
+		discoveryTags?: TenantDiscoveryTagId[];
 	};
 	error?: {
 		type?: string;
@@ -23,6 +27,7 @@ export function TenantProfileForm(): ReactElement {
 	const { session, loading, error, refresh } = useTenantSession();
 	const [address, setAddress] = useState("");
 	const [description, setDescription] = useState("");
+	const [discoveryTags, setDiscoveryTags] = useState<TenantDiscoveryTagId[]>([]);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [addressHint, setAddressHint] = useState<string | null>(null);
@@ -35,6 +40,7 @@ export function TenantProfileForm(): ReactElement {
 
 		setAddress(session.tenant.address ?? "");
 		setDescription(session.tenant.description ?? "");
+		setDiscoveryTags((session.tenant.discoveryTags ?? []) as TenantDiscoveryTagId[]);
 	}, [session]);
 
 	if (loading) {
@@ -61,7 +67,7 @@ export function TenantProfileForm(): ReactElement {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
-				body: JSON.stringify({ address, description }),
+				body: JSON.stringify({ address, description, discoveryTags }),
 			});
 			const body = (await response.json()) as ProfilePatchResponse;
 
@@ -87,46 +93,56 @@ export function TenantProfileForm(): ReactElement {
 	}
 
 	return (
-		<Card>
-			<form className="flex flex-col gap-5" onSubmit={(event) => void handleSubmit(event)}>
-				<Field label="Descripción">
-					<textarea
-						name="description"
-						value={description}
-						onChange={(event) => setDescription(event.target.value)}
-						placeholder="Cuénta a tus clientes qué ofrece tu negocio…"
-						rows={4}
-						className="w-full rounded-theme border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-					/>
-					<p className="mt-1 text-xs text-muted">Opcional. Visible en el detalle del local.</p>
-				</Field>
+		<div className="flex flex-col gap-6">
+			<Card>
+				<TenantCoverImageUpload />
+			</Card>
 
-				<Field label="Dirección">
-					<Input
-						type="text"
-						name="address"
-						value={address}
-						onChange={(event) => setAddress(event.target.value)}
-						placeholder="Calle, número, ciudad…"
-						autoComplete="street-address"
-					/>
-					<p className="mt-1 text-xs text-muted">
-						Opcional. Recomendamos añadir la dirección para que los clientes te encuentren.
-					</p>
-				</Field>
+			<Card>
+				<form className="flex flex-col gap-5" onSubmit={(event) => void handleSubmit(event)}>
+					<Field label="Tags del local">
+						<TenantDiscoveryTagsPicker value={discoveryTags} onChange={setDiscoveryTags} />
+					</Field>
 
-				{addressHint ? (
-					<p className="rounded-theme border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
-						{addressHint}
-					</p>
-				) : null}
-				{submitError ? <p className="text-sm text-error">{submitError}</p> : null}
-				{success ? <p className="text-sm text-foreground">{success}</p> : null}
+					<Field label="Descripción">
+						<textarea
+							name="description"
+							value={description}
+							onChange={(event) => setDescription(event.target.value)}
+							placeholder="Cuénta a tus clientes qué ofrece tu negocio…"
+							rows={4}
+							className="w-full rounded-theme border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+						/>
+						<p className="mt-1 text-xs text-muted">Opcional. Visible en el detalle del local.</p>
+					</Field>
 
-				<Button type="submit" disabled={saving} className="w-full sm:w-auto">
-					{saving ? "Guardando…" : "Guardar datos"}
-				</Button>
-			</form>
-		</Card>
+					<Field label="Dirección">
+						<Input
+							type="text"
+							name="address"
+							value={address}
+							onChange={(event) => setAddress(event.target.value)}
+							placeholder="Calle, número, ciudad…"
+							autoComplete="street-address"
+						/>
+						<p className="mt-1 text-xs text-muted">
+							Opcional. Recomendamos añadir la dirección para que los clientes te encuentren.
+						</p>
+					</Field>
+
+					{addressHint ? (
+						<p className="rounded-theme border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
+							{addressHint}
+						</p>
+					) : null}
+					{submitError ? <p className="text-sm text-error">{submitError}</p> : null}
+					{success ? <p className="text-sm text-foreground">{success}</p> : null}
+
+					<Button type="submit" disabled={saving} className="w-full sm:w-auto">
+						{saving ? "Guardando…" : "Guardar datos"}
+					</Button>
+				</form>
+			</Card>
+		</div>
 	);
 }

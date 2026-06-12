@@ -33,6 +33,8 @@ export type TenantSessionTenant = {
 	subscriptionPlanId: string | null;
 	address: string;
 	description: string;
+	coverImageUrl: string;
+	discoveryTags: string[];
 };
 
 export type TenantSessionData = {

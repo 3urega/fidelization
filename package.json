@@ -45,6 +45,7 @@
     "verify:tenant-branding": "tsx scripts/verify-tenant-branding.ts",
     "verify:tenant-profile-use-case": "tsx scripts/verify-tenant-profile-use-case.ts",
     "verify:tenant-profile": "tsx scripts/verify-tenant-profile.ts",
+    "verify:tenant-discovery-cover": "tsx scripts/verify-tenant-discovery-cover.ts",
     "verify:customer-session": "tsx scripts/verify-customer-session.ts",
     "verify:customer-use-case": "tsx scripts/verify-customer-use-case.ts",
     "verify:customer-loyalty-api": "tsx scripts/verify-customer-loyalty-api.ts",

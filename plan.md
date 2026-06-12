@@ -254,7 +254,9 @@ Plan detallado y issues: [`docs/domain/visual-assets-system.md`](docs/domain/vis
 |-------|--------|
 | J1 Doc dominio | [#49](https://github.com/3urega/fidelization/issues/49) — **Closed** |
 | J2 Sprites SVG + fondos | [#50](https://github.com/3urega/fidelization/issues/50) — **Closed** |
-| J3 LoyaltyProgress | [#51](https://github.com/3urega/fidelization/issues/51) |
-| J4 API visualTemplate | [#52](https://github.com/3urega/fidelization/issues/52) |
-| J5 Owner picker + preview | [#53](https://github.com/3urega/fidelization/issues/53) |
-| J6 Cliente LoyaltyCard | [#54](https://github.com/3urega/fidelization/issues/54) |
+| J3 LoyaltyProgress | [#51](https://github.com/3urega/fidelization/issues/51) — **Closed** |
+| J4 API visualTemplate | [#52](https://github.com/3urega/fidelization/issues/52) — **Closed** |
+| J5 Owner picker + preview | [#53](https://github.com/3urega/fidelization/issues/53) — **Closed** |
+| J6 Cliente LoyaltyCard | [#54](https://github.com/3urega/fidelization/issues/54) — **Closed** |
+
+**Phase J complete** (2026-06-11).

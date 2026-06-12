@@ -3,6 +3,8 @@ export type DiscoverableEstablishment = {
 	name: string;
 	slug: string;
 	logoUrl: string | null;
+	coverImageUrl: string | null;
+	tags: string[];
 };
 
 export type DiscoverableEstablishmentsPage = {

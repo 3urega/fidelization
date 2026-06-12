@@ -5,7 +5,7 @@ import { TenantProfileUpdate } from "./TenantProfileUpdate";
 import { TenantStatus } from "./TenantStatus";
 
 export type ListDiscoverableEstablishmentsParams = {
-	page: number;
+	offset: number;
 	limit: number;
 };
 
@@ -29,6 +29,10 @@ export abstract class TenantRepository {
 	abstract updateBranding(tenantId: string, branding: TenantBrandingUpdate): Promise<Tenant | null>;
 
 	async updateProfile(_tenantId: string, _profile: TenantProfileUpdate): Promise<Tenant | null> {
+		return null;
+	}
+
+	async updateCoverImageUrl(_tenantId: string, _coverImageUrl: string): Promise<Tenant | null> {
 		return null;
 	}
 }

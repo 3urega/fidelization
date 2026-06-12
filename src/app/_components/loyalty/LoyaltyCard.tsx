@@ -80,6 +80,8 @@ type LoyaltyCardProps = {
 	onRedeemReward?: (rewardId: string) => void;
 	/** Sprite quadrant from `public/fondos.png` (Phase J). */
 	cardBackgroundVariant?: LoyaltyCardBackgroundVariant | null;
+	/** When false, hides QR block (e.g. platform establishment detail). */
+	showQr?: boolean;
 };
 
 export function LoyaltyCard({
@@ -94,6 +96,7 @@ export function LoyaltyCard({
 	redeemError = null,
 	onRedeemReward,
 	cardBackgroundVariant = "coffee-photo",
+	showQr = true,
 }: LoyaltyCardProps): ReactElement {
 	return (
 		<div className="flex flex-col gap-6">
@@ -208,16 +211,20 @@ export function LoyaltyCard({
 				</div>
 			) : null}
 
-			<div className="mx-auto flex flex-col items-center gap-3">
-				<div className="rounded-xl border border-border bg-white p-4 shadow-sm">
-					<QRCode value={qrValue} size={200} level="M" />
-				</div>
-				<QrDevScanHint qrValue={qrValue} />
-			</div>
+			{showQr ? (
+				<>
+					<div className="mx-auto flex flex-col items-center gap-3">
+						<div className="rounded-xl border border-border bg-white p-4 shadow-sm">
+							<QRCode value={qrValue} size={200} level="M" />
+						</div>
+						<QrDevScanHint qrValue={qrValue} />
+					</div>
 
-			<p className="text-center text-sm text-muted">
-				Muestra este código QR al personal para acumular puntos.
-			</p>
+					<p className="text-center text-sm text-muted">
+						Muestra este código QR al personal para acumular puntos.
+					</p>
+				</>
+			) : null}
 		</div>
 	);
 }

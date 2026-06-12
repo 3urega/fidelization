@@ -4,21 +4,24 @@ import { DiscoverableEstablishmentsPage } from "../../domain/DiscoverableEstabli
 import { TenantRepository } from "../../domain/TenantRepository";
 
 export type ListDiscoverableEstablishmentsParams = {
+	offset?: number;
 	page?: number;
 	limit?: number;
 };
 
 const DEFAULT_LIMIT = 20;
-const DEFAULT_PAGE = 0;
+const DEFAULT_OFFSET = 0;
 
 @Service()
 export class ListDiscoverableEstablishments {
 	constructor(private readonly tenantRepository: TenantRepository) {}
 
 	async execute(params: ListDiscoverableEstablishmentsParams = {}): Promise<DiscoverableEstablishmentsPage> {
-		const page = params.page ?? DEFAULT_PAGE;
 		const limit = params.limit ?? DEFAULT_LIMIT;
+		const offset =
+			params.offset ??
+			(params.page !== undefined ? params.page * limit : DEFAULT_OFFSET);
 
-		return this.tenantRepository.listDiscoverableActive({ page, limit });
+		return this.tenantRepository.listDiscoverableActive({ offset, limit });
 	}
 }

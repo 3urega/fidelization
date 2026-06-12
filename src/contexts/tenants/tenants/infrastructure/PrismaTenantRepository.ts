@@ -11,7 +11,7 @@ import { TenantBrandingUpdate } from "../domain/TenantBrandingUpdate";
 import { TenantProfileUpdate } from "../domain/TenantProfileUpdate";
 import { TenantRepository } from "../domain/TenantRepository";
 import { TenantStatus } from "../domain/TenantStatus";
-import { tenantFromPrismaRow } from "./tenantFromPrismaRow";
+import { discoveryTagsFromPrisma, tenantFromPrismaRow } from "./tenantFromPrismaRow";
 
 @Service()
 export class PrismaTenantRepository extends TenantRepository {
@@ -27,15 +27,22 @@ export class PrismaTenantRepository extends TenantRepository {
 		params: ListDiscoverableEstablishmentsParams,
 	): Promise<DiscoverableEstablishmentsPage> {
 		const limit = Math.min(Math.max(params.limit, 1), 50);
-		const page = Math.max(params.page, 0);
-		const skip = page * limit;
+		const offset = Math.max(params.offset, 0);
+		const skip = offset;
 
 		const rows = await prisma.tenant.findMany({
 			where: { status: TenantStatus.Active },
 			orderBy: [{ name: "asc" }, { id: "asc" }],
 			skip,
 			take: limit + 1,
-			select: { id: true, name: true, slug: true, logoUrl: true },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				logoUrl: true,
+				coverImageUrl: true,
+				discoveryTags: true,
+			},
 		});
 
 		const hasMore = rows.length > limit;
@@ -45,6 +52,8 @@ export class PrismaTenantRepository extends TenantRepository {
 			name: row.name,
 			slug: row.slug,
 			logoUrl: row.logoUrl?.trim() ? row.logoUrl.trim() : null,
+			coverImageUrl: row.coverImageUrl?.trim() ? row.coverImageUrl.trim() : null,
+			tags: discoveryTagsFromPrisma(row.discoveryTags),
 		}));
 
 		return { establishments, hasMore };
@@ -111,7 +120,23 @@ export class PrismaTenantRepository extends TenantRepository {
 				data: {
 					...(profile.address !== undefined ? { address: profile.address } : {}),
 					...(profile.description !== undefined ? { description: profile.description } : {}),
+					...(profile.discoveryTags !== undefined
+						? { discoveryTags: profile.discoveryTags }
+						: {}),
 				},
+			});
+
+			return tenantFromPrismaRow(row);
+		} catch {
+			return null;
+		}
+	}
+
+	async updateCoverImageUrl(tenantId: string, coverImageUrl: string): Promise<Tenant | null> {
+		try {
+			const row = await prisma.tenant.update({
+				where: { id: tenantId },
+				data: { coverImageUrl },
 			});
 
 			return tenantFromPrismaRow(row);

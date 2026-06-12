@@ -1,4 +1,5 @@
 import { TenantStatus } from "./TenantStatus";
+import type { TenantDiscoveryTagId } from "./TenantDiscoveryTag";
 
 export type TenantPrimitives = {
 	id: string;
@@ -13,6 +14,8 @@ export type TenantPrimitives = {
 	createdAt: string;
 	address?: string;
 	description?: string;
+	coverImageUrl?: string;
+	discoveryTags?: TenantDiscoveryTagId[];
 };
 
 export class Tenant {
@@ -29,6 +32,8 @@ export class Tenant {
 		public readonly createdAt: string,
 		public readonly address: string,
 		public readonly description: string,
+		public readonly coverImageUrl: string,
+		public readonly discoveryTags: TenantDiscoveryTagId[],
 	) {}
 
 	static fromPrimitives(primitives: TenantPrimitives): Tenant {
@@ -45,6 +50,8 @@ export class Tenant {
 			primitives.createdAt,
 			primitives.address ?? "",
 			primitives.description ?? "",
+			primitives.coverImageUrl ?? "",
+			primitives.discoveryTags ?? [],
 		);
 	}
 
@@ -62,6 +69,8 @@ export class Tenant {
 			createdAt: this.createdAt,
 			address: this.address,
 			description: this.description,
+			coverImageUrl: this.coverImageUrl,
+			discoveryTags: this.discoveryTags,
 		};
 	}
 }

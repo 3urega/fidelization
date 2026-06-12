@@ -7,6 +7,7 @@ import { type ReactElement, useEffect, useState } from "react";
 import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard";
 import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
 import { hasTenantAddress } from "../../../lib/tenant/hasTenantAddress";
+import { hasTenantDiscoveryTags } from "../../../lib/tenant/hasTenantDiscoveryTags";
 import { hasTenantChosenPlan } from "../../../lib/tenant/hasTenantChosenPlan";
 import { PageHeader } from "../../_components/shell/PageHeader";
 import { tenantHasFeature } from "../../_components/shell/planFeatures";
@@ -182,6 +183,7 @@ export function HomeDashboard(): ReactElement {
 	const isOwner = session.role === "owner";
 	const brandingDone = isTenantBrandingCustomized(session.tenant);
 	const addressDone = isOwner ? hasTenantAddress(session.tenant) : false;
+	const tagsDone = isOwner ? hasTenantDiscoveryTags(session.tenant) : false;
 	const planDone = isOwner ? hasTenantChosenPlan(session.tenant) : false;
 	const stampsComplete = isOwner ? stampsDone : false;
 	const teamComplete = isOwner ? teamDone : false;
@@ -313,6 +315,41 @@ export function HomeDashboard(): ReactElement {
 						) : (
 							<span className="text-sm text-muted sm:shrink-0">
 								{addressDone ? "Completado" : "Pendiente (owner)"}
+							</span>
+						)}
+					</li>
+					<li className="flex flex-col gap-1 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex items-start gap-2">
+							<span
+								className={[
+									"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
+									tagsDone
+										? "bg-primary text-primary-foreground"
+										: "border border-border text-muted",
+								].join(" ")}
+								aria-hidden
+							>
+								{tagsDone ? "✓" : "·"}
+							</span>
+							<div>
+								<p className="text-sm font-medium text-foreground">Añade tags a tu local</p>
+								<p className="text-sm text-muted">
+									{tagsDone
+										? "Tu local aparece categorizado en exploración."
+										: "Ayuda a los clientes a descubrir qué ofreces."}
+								</p>
+							</div>
+						</div>
+						{isOwner ? (
+							<Link
+								href="/settings/profile"
+								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
+							>
+								{tagsDone ? "Editar" : "Añadir tags"}
+							</Link>
+						) : (
+							<span className="text-sm text-muted sm:shrink-0">
+								{tagsDone ? "Completado" : "Pendiente (owner)"}
 							</span>
 						)}
 					</li>

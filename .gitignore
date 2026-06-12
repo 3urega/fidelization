@@ -8,3 +8,4 @@
 /generated/prisma
 .capacitor-api-stash
 *.tsbuildinfo
+/public/uploads/

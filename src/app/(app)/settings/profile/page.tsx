@@ -6,7 +6,7 @@ export default function TenantProfileSettingsPage(): React.ReactElement {
 		<>
 			<PageHeader
 				title="Datos del negocio"
-				description="Descripción y dirección de tu local. Los clientes los verán en el detalle del negocio."
+				description="Imagen de portada, tags, descripción y dirección. Los clientes los verán en exploración y en el detalle del negocio."
 			/>
 			<TenantProfileForm />
 		</>

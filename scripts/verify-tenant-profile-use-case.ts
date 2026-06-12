@@ -69,8 +69,13 @@ class StubTenantRepository extends TenantRepository {
 				...primitives,
 				address: profile.address ?? primitives.address,
 				description: profile.description ?? primitives.description,
+				discoveryTags: profile.discoveryTags ?? primitives.discoveryTags,
 			})
 		);
+	}
+
+	async updateCoverImageUrl(_id: string, _coverImageUrl: string): Promise<Tenant | null> {
+		return null;
 	}
 }
 
@@ -214,12 +219,49 @@ async function verifyEmptyFieldsAllowed(): Promise<void> {
 	console.log("✅ empty address/description allowed");
 }
 
+async function verifyDiscoveryTags(): Promise<void> {
+	const updated = Tenant.fromPrimitives({
+		...baseTenant.toPrimitives(),
+		discoveryTags: ["desayunos", "brunch"],
+	});
+	const useCase = new UpdateTenantProfile(new StubTenantRepository(baseTenant, updated));
+
+	const tenant = await useCase.execute({
+		tenantId,
+		role: TenantRole.Owner,
+		profile: { discoveryTags: ["desayunos", "brunch"] },
+	});
+
+	if (tenant.discoveryTags.join(",") !== "desayunos,brunch") {
+		console.error("❌ discoveryTags update failed", tenant.discoveryTags);
+		process.exit(1);
+	}
+
+	try {
+		await useCase.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			profile: { discoveryTags: ["invalid-tag"] },
+		});
+		console.error("❌ expected InvalidTenantProfile for invalid tag");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof InvalidTenantProfile)) {
+			console.error("❌ wrong error for invalid tag", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ discoveryTags update + invalid tag rejected");
+}
+
 async function main(): Promise<void> {
 	await verifyForbidden();
 	await verifyInvalidProfile();
 	await verifyTenantNotFound();
 	await verifyOwnerSuccessStub();
 	await verifyEmptyFieldsAllowed();
+	await verifyDiscoveryTags();
 	console.log("\n✅ verify-tenant-profile-use-case passed");
 }
 

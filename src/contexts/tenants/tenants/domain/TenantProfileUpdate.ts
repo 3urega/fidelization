@@ -1,4 +1,5 @@
 import { InvalidTenantProfile } from "./InvalidTenantProfile";
+import { parseTenantDiscoveryTags, type TenantDiscoveryTagId } from "./TenantDiscoveryTag";
 
 export const TENANT_ADDRESS_MAX_LENGTH = 500;
 export const TENANT_DESCRIPTION_MAX_LENGTH = 2000;
@@ -6,11 +7,13 @@ export const TENANT_DESCRIPTION_MAX_LENGTH = 2000;
 export type TenantProfileUpdate = {
 	address?: string;
 	description?: string;
+	discoveryTags?: TenantDiscoveryTagId[];
 };
 
 export type TenantProfileUpdateInput = {
 	address?: string;
 	description?: string;
+	discoveryTags?: unknown;
 };
 
 function trimField(value: string | undefined): string | undefined {
@@ -40,6 +43,10 @@ export function parseTenantProfileUpdate(input: TenantProfileUpdateInput): Tenan
 		const description = trimField(input.description) ?? "";
 		assertMaxLength(description, TENANT_DESCRIPTION_MAX_LENGTH, "description");
 		profile.description = description;
+	}
+
+	if (input.discoveryTags !== undefined) {
+		profile.discoveryTags = parseTenantDiscoveryTags(input.discoveryTags);
 	}
 
 	if (Object.keys(profile).length === 0) {

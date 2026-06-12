@@ -31,7 +31,7 @@ export function userToJson(user: {
 	};
 }
 
-export function tenantToJson(tenant: Tenant): Record<string, string | null> {
+export function tenantToJson(tenant: Tenant): Record<string, string | null | string[]> {
 	const primitives = tenant.toPrimitives();
 
 	return {
@@ -46,6 +46,8 @@ export function tenantToJson(tenant: Tenant): Record<string, string | null> {
 		status: primitives.status,
 		address: primitives.address ?? "",
 		description: primitives.description ?? "",
+		coverImageUrl: primitives.coverImageUrl ?? "",
+		discoveryTags: primitives.discoveryTags ?? [],
 	};
 }
 
@@ -289,6 +291,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "InvalidTenantProfile") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "InvalidTenantCoverImage") {
 		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "CustomerNotFound") {

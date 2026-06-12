@@ -323,7 +323,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 				</>
 			) : (
 				<>
-					{detail.customer && qrValue ? (
+					{detail.customer ? (
 						<Card>
 							<LoyaltyCard
 								name={detail.customer.name}
@@ -335,6 +335,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 								promotions={detail.promotions}
 								redeemingRewardId={redeemingRewardId}
 								redeemError={redeemError}
+								showQr={false}
 								onRedeemReward={(rewardId) => {
 									void handleRedeemReward(rewardId);
 								}}
@@ -342,7 +343,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 						</Card>
 					) : (
 						<Card>
-							<p className="text-sm text-error">No se pudo cargar tu QR de usuario.</p>
+							<p className="text-sm text-error">No se pudo cargar tu tarjeta de fidelización.</p>
 						</Card>
 					)}
 
