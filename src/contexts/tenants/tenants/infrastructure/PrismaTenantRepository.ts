@@ -1,5 +1,6 @@
 import { Service } from "diod";
 
+import { Prisma } from "../../../../../generated/prisma/client";
 import { prisma } from "../../../../lib/prisma";
 import {
 	type DiscoverableEstablishment,
@@ -29,9 +30,23 @@ export class PrismaTenantRepository extends TenantRepository {
 		const limit = Math.min(Math.max(params.limit, 1), 50);
 		const offset = Math.max(params.offset, 0);
 		const skip = offset;
+		const filterTags = params.tags ?? [];
+
+		const where = {
+			status: TenantStatus.Active,
+			...(filterTags.length > 0
+				? {
+						OR: filterTags.map((tag) => ({
+							discoveryTags: {
+								array_contains: tag,
+							},
+						})),
+					}
+				: {}),
+		} satisfies Prisma.TenantWhereInput;
 
 		const rows = await prisma.tenant.findMany({
-			where: { status: TenantStatus.Active },
+			where,
 			orderBy: [{ name: "asc" }, { id: "asc" }],
 			skip,
 			take: limit + 1,

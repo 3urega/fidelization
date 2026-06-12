@@ -2,7 +2,11 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
+import { DomainError } from "../../../../contexts/shared/domain/DomainError";
+import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { ListDiscoverableEstablishments } from "../../../../contexts/tenants/tenants/application/list/ListDiscoverableEstablishments";
+import { InvalidDiscoverFilter } from "../../../../contexts/tenants/tenants/domain/InvalidDiscoverFilter";
+import { parseDiscoverFilterTags } from "../../../../contexts/tenants/tenants/domain/TenantDiscoveryTag";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { requireUserSession } from "../../../../lib/auth/requireUserSession";
 import { getResolvedTenantFromRequest } from "../../../../lib/tenant/getResolvedTenant";
@@ -37,6 +41,16 @@ function parsePositiveInt(value: string | null, fallback: number, max: number): 
 	return Math.min(parsed, max);
 }
 
+function parseTagsQueryParam(searchParams: URLSearchParams): unknown {
+	const repeated = searchParams.getAll("tags");
+
+	if (repeated.length === 0) {
+		return [];
+	}
+
+	return repeated;
+}
+
 export async function GET(request: Request): Promise<Response> {
 	if (getResolvedTenantFromRequest(request)) {
 		return NextResponse.json(
@@ -56,6 +70,18 @@ export async function GET(request: Request): Promise<Response> {
 	}
 
 	const { searchParams } = new URL(request.url);
+
+	let tags;
+	try {
+		tags = parseDiscoverFilterTags(parseTagsQueryParam(searchParams));
+	} catch (error) {
+		if (error instanceof InvalidDiscoverFilter) {
+			return HttpNextResponse.domainError(error, 400);
+		}
+
+		throw error;
+	}
+
 	const page = parseNonNegativeInt(searchParams.get("page"), 0);
 	const limit = parsePositiveInt(searchParams.get("limit"), 20, 50);
 	const offsetParam = searchParams.get("offset");
@@ -64,7 +90,22 @@ export async function GET(request: Request): Promise<Response> {
 			? parseNonNegativeInt(offsetParam, 0)
 			: page * limit;
 
-	const result = await container.get(ListDiscoverableEstablishments).execute({ offset, limit });
+	try {
+		const result = await container.get(ListDiscoverableEstablishments).execute({
+			offset,
+			limit,
+			tags,
+		});
 
-	return NextResponse.json(result);
+		return NextResponse.json(result);
+	} catch (error) {
+		if (error instanceof DomainError) {
+			const response = HttpNextResponse.domainError(error, 400);
+			if (response) {
+				return response;
+			}
+		}
+
+		throw error;
+	}
 }

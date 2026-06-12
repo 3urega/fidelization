@@ -37,31 +37,33 @@ export function EstablishmentDiscoverCard({
 				<img
 					src={coverUrl}
 					alt=""
-					className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+					className="absolute inset-0 h-full w-full scale-105 object-cover transition-transform duration-300 group-hover:scale-110"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
 
-				<div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3">
-					<p className="text-center text-sm font-semibold leading-snug text-foreground">
-						{establishment.name}
-					</p>
-					{visibleTags.length > 0 ? (
-						<ul className="flex flex-wrap justify-center gap-1">
-							{visibleTags.map((tagId) => (
-								<li
-									key={tagId}
-									className="rounded-full bg-surface/90 px-2 py-0.5 text-[10px] font-medium text-foreground"
-								>
-									{resolveTenantDiscoveryTagLabel(tagId)}
-								</li>
-							))}
-							{hiddenTagCount > 0 ? (
-								<li className="rounded-full bg-surface/90 px-2 py-0.5 text-[10px] font-medium text-muted">
-									+{hiddenTagCount}
-								</li>
-							) : null}
-						</ul>
-					) : null}
+				{visibleTags.length > 0 ? (
+					<ul className="absolute inset-x-0 top-0 z-10 flex flex-wrap gap-1 p-2">
+						{visibleTags.map((tagId) => (
+							<li
+								key={tagId}
+								className="rounded-full bg-black/85 px-2 py-0.5 text-[10px] font-medium text-white"
+							>
+								{resolveTenantDiscoveryTagLabel(tagId)}
+							</li>
+						))}
+						{hiddenTagCount > 0 ? (
+							<li className="rounded-full bg-black/85 px-2 py-0.5 text-[10px] font-medium text-white">
+								+{hiddenTagCount}
+							</li>
+						) : null}
+					</ul>
+				) : null}
+
+				<div className="absolute inset-x-0 bottom-0 z-10 p-2">
+					<div className="rounded-theme bg-foreground/75 px-3 py-2 backdrop-blur-md">
+						<p className="text-center text-sm font-semibold leading-snug text-background">
+							{establishment.name}
+						</p>
+					</div>
 				</div>
 			</div>
 		</Link>

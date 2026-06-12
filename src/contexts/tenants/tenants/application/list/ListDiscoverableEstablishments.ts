@@ -2,11 +2,13 @@ import { Service } from "diod";
 
 import { DiscoverableEstablishmentsPage } from "../../domain/DiscoverableEstablishment";
 import { TenantRepository } from "../../domain/TenantRepository";
+import type { TenantDiscoveryTagId } from "../../domain/TenantDiscoveryTag";
 
 export type ListDiscoverableEstablishmentsParams = {
 	offset?: number;
 	page?: number;
 	limit?: number;
+	tags?: TenantDiscoveryTagId[];
 };
 
 const DEFAULT_LIMIT = 20;
@@ -22,6 +24,10 @@ export class ListDiscoverableEstablishments {
 			params.offset ??
 			(params.page !== undefined ? params.page * limit : DEFAULT_OFFSET);
 
-		return this.tenantRepository.listDiscoverableActive({ offset, limit });
+		return this.tenantRepository.listDiscoverableActive({
+			offset,
+			limit,
+			tags: params.tags,
+		});
 	}
 }

@@ -3,7 +3,13 @@ import "dotenv/config";
 
 import { ListDiscoverableEstablishments } from "../src/contexts/tenants/tenants/application/list/ListDiscoverableEstablishments";
 import { DEFAULT_TENANT_COVER_IMAGE_URL, resolveTenantCoverImageUrl } from "../src/lib/platform/tenantDiscoveryAssets";
+import {
+	parseDiscoverFilterTags,
+	tenantMatchesDiscoverFilterTags,
+} from "../src/contexts/tenants/tenants/domain/TenantDiscoveryTag";
+import { InvalidDiscoverFilter } from "../src/contexts/tenants/tenants/domain/InvalidDiscoverFilter";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
+import type { ListDiscoverableEstablishmentsParams } from "../src/contexts/tenants/tenants/domain/TenantRepository";
 import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantRepository";
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
 
@@ -32,6 +38,20 @@ const tenantB = Tenant.fromPrimitives({
 	subscriptionPlan: "FREE",
 	subscriptionPlanId: null,
 	status: TenantStatus.Active,
+	createdAt: new Date().toISOString(),
+});
+
+const tenantBrunch = Tenant.fromPrimitives({
+	id: "00000000-0000-4000-8000-0000000000d4",
+	name: "Brunch House",
+	slug: "brunch-house",
+	logoUrl: "",
+	primaryColor: "#7C3AED",
+	secondaryColor: "#4F46E5",
+	subscriptionPlan: "FREE",
+	subscriptionPlanId: null,
+	status: TenantStatus.Active,
+	discoveryTags: ["brunch"],
 	createdAt: new Date().toISOString(),
 });
 
@@ -78,9 +98,13 @@ class StubTenantRepository extends TenantRepository {
 		return this.activeTenants.find((tenant) => tenant.id === id) ?? null;
 	}
 
-	async listDiscoverableActive(params: { offset: number; limit: number }) {
+	async listDiscoverableActive(params: ListDiscoverableEstablishmentsParams) {
+		const filterTags = params.tags ?? [];
 		const active = this.activeTenants
 			.filter((tenant) => tenant.status === TenantStatus.Active)
+			.filter((tenant) =>
+				tenantMatchesDiscoverFilterTags(tenant.discoveryTags, filterTags),
+			)
 			.sort((left, right) => left.name.localeCompare(right.name));
 		const skip = params.offset;
 		const slice = active.slice(skip, skip + params.limit + 1);
@@ -102,7 +126,7 @@ class StubTenantRepository extends TenantRepository {
 }
 
 async function main(): Promise<void> {
-	const repository = new StubTenantRepository([tenantSuspended, tenantB, tenantA]);
+	const repository = new StubTenantRepository([tenantSuspended, tenantB, tenantBrunch, tenantA]);
 	const list = new ListDiscoverableEstablishments(repository);
 
 	const firstPage = await list.execute({ page: 0, limit: 1 });
@@ -128,7 +152,7 @@ async function main(): Promise<void> {
 		secondPage.establishments[0]?.logoUrl !== null ||
 		secondPage.establishments[0]?.coverImageUrl !== null ||
 		(secondPage.establishments[0]?.tags ?? []).length > 0 ||
-		secondPage.hasMore
+		!secondPage.hasMore
 	) {
 		console.error("❌ second page", secondPage);
 		process.exit(1);
@@ -146,12 +170,56 @@ async function main(): Promise<void> {
 
 	const all = await list.execute({ page: 0, limit: 10 });
 
-	if (all.establishments.length !== 2 || all.hasMore) {
+	if (all.establishments.length !== 3 || all.hasMore) {
 		console.error("❌ full page excludes suspended", all);
 		process.exit(1);
 	}
 
 	console.log("✅ suspended tenants excluded");
+
+	const filteredOne = await list.execute({ page: 0, limit: 10, tags: ["desayunos"] });
+
+	if (
+		filteredOne.establishments.length !== 1 ||
+		filteredOne.establishments[0]?.slug !== "alpha-cafe"
+	) {
+		console.error("❌ filter single tag", filteredOne);
+		process.exit(1);
+	}
+
+	console.log("✅ filter OR single tag");
+
+	const filteredOr = await list.execute({
+		page: 0,
+		limit: 10,
+		tags: ["desayunos", "brunch"],
+	});
+
+	if (filteredOr.establishments.length !== 2) {
+		console.error("❌ filter OR multiple tags", filteredOr);
+		process.exit(1);
+	}
+
+	const filteredSlugs = new Set(filteredOr.establishments.map((row) => row.slug));
+	if (!filteredSlugs.has("alpha-cafe") || !filteredSlugs.has("brunch-house")) {
+		console.error("❌ filter OR slugs", filteredSlugs);
+		process.exit(1);
+	}
+
+	console.log("✅ filter OR multiple tags");
+
+	try {
+		parseDiscoverFilterTags(["invalid-tag"]);
+		console.error("❌ expected InvalidDiscoverFilter");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof InvalidDiscoverFilter)) {
+			console.error("❌ wrong error for invalid filter tag", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ invalid filter tag rejected");
 
 	const manyTenants = Array.from({ length: 10 }, (_, index) => makeShopTenant(index + 1));
 	const manyList = new ListDiscoverableEstablishments(new StubTenantRepository(manyTenants));

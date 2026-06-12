@@ -3,10 +3,12 @@ import { Tenant } from "./Tenant";
 import { TenantBrandingUpdate } from "./TenantBrandingUpdate";
 import { TenantProfileUpdate } from "./TenantProfileUpdate";
 import { TenantStatus } from "./TenantStatus";
+import type { TenantDiscoveryTagId } from "./TenantDiscoveryTag";
 
 export type ListDiscoverableEstablishmentsParams = {
 	offset: number;
 	limit: number;
+	tags?: TenantDiscoveryTagId[];
 };
 
 export abstract class TenantRepository {

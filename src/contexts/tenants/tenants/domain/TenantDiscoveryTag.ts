@@ -1,4 +1,5 @@
 import { InvalidTenantProfile } from "./InvalidTenantProfile";
+import { InvalidDiscoverFilter } from "./InvalidDiscoverFilter";
 
 export type TenantDiscoveryTagId =
 	| "panaderia"
@@ -62,6 +63,61 @@ export function parseTenantDiscoveryTags(value: unknown): TenantDiscoveryTagId[]
 	}
 
 	return unique;
+}
+
+export function parseDiscoverFilterTags(value: unknown): TenantDiscoveryTagId[] {
+	if (value === undefined || value === null) {
+		return [];
+	}
+
+	const rawEntries: string[] = [];
+
+	if (typeof value === "string") {
+		rawEntries.push(
+			...value
+				.split(",")
+				.map((entry) => entry.trim())
+				.filter(Boolean),
+		);
+	} else if (Array.isArray(value)) {
+		for (const entry of value) {
+			if (typeof entry === "string") {
+				rawEntries.push(
+					...entry
+						.split(",")
+						.map((part) => part.trim())
+						.filter(Boolean),
+				);
+			}
+		}
+	} else {
+		throw new InvalidDiscoverFilter("tags must be a string or array of strings");
+	}
+
+	const unique: TenantDiscoveryTagId[] = [];
+
+	for (const entry of rawEntries) {
+		if (!isTenantDiscoveryTagId(entry)) {
+			throw new InvalidDiscoverFilter(`Invalid discovery filter tag: ${entry}`);
+		}
+
+		if (!unique.includes(entry)) {
+			unique.push(entry);
+		}
+	}
+
+	return unique;
+}
+
+export function tenantMatchesDiscoverFilterTags(
+	tenantTags: readonly string[],
+	filterTags: readonly TenantDiscoveryTagId[],
+): boolean {
+	if (filterTags.length === 0) {
+		return true;
+	}
+
+	return filterTags.some((tag) => tenantTags.includes(tag));
 }
 
 export function resolveTenantDiscoveryTagLabel(tagId: string): string {
