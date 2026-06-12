@@ -8,6 +8,9 @@ import {
 import { ListActivePromotionsForCustomer } from "../../../promotions/application/list/ListActivePromotionsForCustomer";
 import { Promotion } from "../../../promotions/domain/Promotion";
 import { Reward } from "../../../rewards/domain/Reward";
+import { GENERIC_STAMP_VISIT_LABEL } from "../../../stamp_types/domain/StampType";
+import { StampTypeRepository } from "../../../stamp_types/domain/StampTypeRepository";
+import { StampCampaignRepository } from "../../../stamp_campaigns/domain/StampCampaignRepository";
 import { GetCustomerActiveRewards } from "./GetCustomerActiveRewards";
 import { GetCustomerStampProgress } from "./GetCustomerStampProgress";
 import { StampAddedSummary } from "../scan/RecordCustomerVisitByQr";
@@ -31,6 +34,7 @@ export type EstablishmentDetailTenant = {
 	status: string;
 	address: string | null;
 	description: string | null;
+	coverImageUrl: string | null;
 };
 
 export type GetEstablishmentDetailForUserParams = {
@@ -59,6 +63,8 @@ export class GetEstablishmentDetailForUser {
 		private readonly getCustomerActiveRewards: GetCustomerActiveRewards,
 		private readonly listUserCrossTenantPromotions: ListUserCrossTenantPromotions,
 		private readonly userFinder: UserFinder,
+		private readonly stampCampaignRepository: StampCampaignRepository,
+		private readonly stampTypeRepository: StampTypeRepository,
 	) {}
 
 	async execute(params: GetEstablishmentDetailForUserParams): Promise<EstablishmentDetailResult> {
@@ -97,15 +103,18 @@ export class GetEstablishmentDetailForUser {
 			status: primitives.status,
 			address: primitives.address?.trim() ? primitives.address : null,
 			description: primitives.description?.trim() ? primitives.description : null,
+			coverImageUrl: primitives.coverImageUrl?.trim() ? primitives.coverImageUrl.trim() : null,
 		};
 
 		if (!customer) {
+			const stampProgress = await this.buildStampCampaignPreview(tenant.id);
+
 			return {
 				mode: "discovery",
 				tenant: tenantSummary,
 				promotions,
 				customer: null,
-				stampProgress: [],
+				stampProgress,
 				rewards: [],
 				userQrValue: null,
 				otherPromotions: [],
@@ -136,5 +145,49 @@ export class GetEstablishmentDetailForUser {
 			userQrValue: user.qrValue,
 			otherPromotions,
 		};
+	}
+
+	private async buildStampCampaignPreview(tenantId: string): Promise<StampAddedSummary[]> {
+		const campaigns = await this.stampCampaignRepository.listActiveByTenant(tenantId);
+		const typeLabels = await this.loadStampTypeLabels(tenantId, campaigns);
+
+		return campaigns.map((campaign) => ({
+			campaignId: campaign.id,
+			campaignName: campaign.name,
+			current: 0,
+			required: campaign.requiredStamps,
+			completed: false,
+			stampTypeId: campaign.stampTypeId,
+			stampTypeLabel: campaign.stampTypeId
+				? (typeLabels.get(campaign.stampTypeId) ?? GENERIC_STAMP_VISIT_LABEL)
+				: GENERIC_STAMP_VISIT_LABEL,
+			visualTemplate: campaign.visualTemplate,
+			cardBackgroundVariant: campaign.cardBackgroundVariant,
+		}));
+	}
+
+	private async loadStampTypeLabels(
+		tenantId: string,
+		campaigns: { stampTypeId: string | null }[],
+	): Promise<Map<string, string>> {
+		const ids = Array.from(
+			new Set(
+				campaigns
+					.map((campaign) => campaign.stampTypeId)
+					.filter((id): id is string => id !== null),
+			),
+		);
+		const labels = new Map<string, string>();
+
+		await Promise.all(
+			ids.map(async (id) => {
+				const stampType = await this.stampTypeRepository.searchById(tenantId, id);
+				if (stampType) {
+					labels.set(id, stampType.label);
+				}
+			}),
+		);
+
+		return labels;
 	}
 }

@@ -3,6 +3,9 @@ import "dotenv/config";
 
 import { randomUUID } from "crypto";
 
+import { prisma } from "../src/lib/prisma";
+import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
+
 /**
  * E2E: GET /api/user/establishments paginated list for platform user.
  * Requires dev server + DATABASE_URL.
@@ -142,6 +145,88 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ GET /home loads for discover grid shell");
+
+	const invalidTags = await fetch(`${baseUrl}/api/user/establishments?tags=invalid-tag`, { headers });
+	const invalidTagsBody = (await invalidTags.json()) as { error?: { type?: string } };
+
+	if (invalidTags.status !== 400 || invalidTagsBody.error?.type !== "InvalidDiscoverFilter") {
+		console.error("❌ GET invalid tags:", invalidTags.status, invalidTagsBody);
+		process.exit(1);
+	}
+
+	console.log("✅ GET invalid tags → 400 InvalidDiscoverFilter");
+
+	const demoBefore = await prisma.tenant.findUnique({
+		where: { id: DEMO_TENANT_ID },
+		select: { discoveryTags: true, slug: true },
+	});
+
+	if (!demoBefore) {
+		console.error("❌ demo tenant missing");
+		process.exit(1);
+	}
+
+	await prisma.tenant.update({
+		where: { id: DEMO_TENANT_ID },
+		data: { discoveryTags: ["desayunos", "brunch"] },
+	});
+
+	const filteredDesayunos = await fetch(`${baseUrl}/api/user/establishments?tags=desayunos`, {
+		headers,
+	});
+	const filteredDesayunosBody = (await filteredDesayunos.json()) as {
+		establishments?: { slug: string }[];
+	};
+
+	if (
+		!filteredDesayunos.ok ||
+		!filteredDesayunosBody.establishments?.some((row) => row.slug === demoBefore.slug)
+	) {
+		console.error("❌ GET tags=desayunos:", filteredDesayunos.status, filteredDesayunosBody);
+		process.exit(1);
+	}
+
+	console.log("✅ GET tags=desayunos includes demo tenant");
+
+	const filteredBrunch = await fetch(
+		`${baseUrl}/api/user/establishments?tags=desayunos,brunch&limit=50`,
+		{ headers },
+	);
+	const filteredBrunchBody = (await filteredBrunch.json()) as {
+		establishments?: { slug: string }[];
+	};
+
+	if (
+		!filteredBrunch.ok ||
+		!filteredBrunchBody.establishments?.some((row) => row.slug === demoBefore.slug)
+	) {
+		console.error("❌ GET tags CSV OR:", filteredBrunch.status, filteredBrunchBody);
+		process.exit(1);
+	}
+
+	console.log("✅ GET tags CSV OR filter");
+
+	const filteredMiss = await fetch(`${baseUrl}/api/user/establishments?tags=panaderia`, { headers });
+	const filteredMissBody = (await filteredMiss.json()) as {
+		establishments?: { slug: string }[];
+	};
+
+	if (
+		!filteredMiss.ok ||
+		filteredMissBody.establishments?.some((row) => row.slug === demoBefore.slug)
+	) {
+		console.error("❌ GET tags=panaderia should exclude demo tenant", filteredMiss.status, filteredMissBody);
+		process.exit(1);
+	}
+
+	console.log("✅ GET tags=panaderia excludes demo tenant");
+
+	await prisma.tenant.update({
+		where: { id: DEMO_TENANT_ID },
+		data: { discoveryTags: demoBefore.discoveryTags ?? [] },
+	});
+
+	console.log("✅ restored demo tenant discovery tags");
 	console.log("✅ verify:platform-app-discover-establishments passed");
 }
 

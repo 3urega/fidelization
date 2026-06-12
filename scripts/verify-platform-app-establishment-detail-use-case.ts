@@ -5,6 +5,10 @@ import { GetEstablishmentDetailForUser } from "../src/contexts/loyalty/customers
 import { ListActivePromotionsForCustomer } from "../src/contexts/loyalty/promotions/application/list/ListActivePromotionsForCustomer";
 import { ListUserCrossTenantPromotions } from "../src/contexts/loyalty/promotions/application/list/ListUserCrossTenantPromotions";
 import { Promotion } from "../src/contexts/loyalty/promotions/domain/Promotion";
+import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
+import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
+import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
+import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { UserFinder } from "../src/contexts/identity/users/application/find/UserFinder";
@@ -152,6 +156,68 @@ class StubListUserCrossTenantPromotions {
 	}
 }
 
+class InMemoryStampCampaignRepository extends StampCampaignRepository {
+	private campaigns = new Map<string, StampCampaign>();
+
+	constructor(campaigns: StampCampaign[]) {
+		super();
+		for (const campaign of campaigns) {
+			this.campaigns.set(campaign.id, campaign);
+		}
+	}
+
+	async saveCampaign(campaign: StampCampaign): Promise<void> {
+		this.campaigns.set(campaign.id, campaign);
+	}
+
+	async searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null> {
+		const campaign = this.campaigns.get(id);
+
+		return campaign && campaign.tenantId === tenantId ? campaign : null;
+	}
+
+	async listByTenant(tenantId: string): Promise<StampCampaign[]> {
+		return Array.from(this.campaigns.values()).filter((campaign) => campaign.tenantId === tenantId);
+	}
+
+	async listActiveByTenant(tenantId: string): Promise<StampCampaign[]> {
+		return Array.from(this.campaigns.values()).filter(
+			(campaign) => campaign.tenantId === tenantId && campaign.isActive,
+		);
+	}
+
+	async saveProgress(): Promise<void> {}
+
+	async searchProgress(): Promise<CustomerStampProgress | null> {
+		return null;
+	}
+
+	async hasActiveGenericCampaigns(tenantId: string): Promise<boolean> {
+		return Array.from(this.campaigns.values()).some(
+			(campaign) =>
+				campaign.tenantId === tenantId &&
+				campaign.isActive &&
+				campaign.stampTypeId === null,
+		);
+	}
+}
+
+class InMemoryStampTypeRepository extends StampTypeRepository {
+	async save(): Promise<void> {}
+
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async searchBySlug(): Promise<null> {
+		return null;
+	}
+
+	async listByTenant(): Promise<[]> {
+		return [];
+	}
+}
+
 const activeTenant = Tenant.fromPrimitives({
 	id: "tenant-detail",
 	name: "Detail Cafe",
@@ -163,6 +229,13 @@ const activeTenant = Tenant.fromPrimitives({
 	subscriptionPlanId: "plan-pro",
 	status: TenantStatus.Active,
 	createdAt: new Date().toISOString(),
+	coverImageUrl: "https://example.com/cover.png",
+});
+
+const previewCampaign = StampCampaign.create({
+	tenantId: "tenant-detail",
+	name: "Preview loyalty card",
+	requiredStamps: 5,
 });
 
 const suspendedTenant = Tenant.fromPrimitives({
@@ -202,6 +275,8 @@ const getDetail = new GetEstablishmentDetailForUser(
 	new StubGetCustomerActiveRewards() as never,
 	new StubListUserCrossTenantPromotions() as unknown as ListUserCrossTenantPromotions,
 	new UserFinder(new InMemoryUserRepository(users)),
+	new InMemoryStampCampaignRepository([previewCampaign]),
+	new InMemoryStampTypeRepository(),
 );
 
 async function expectError<T extends Error>(
@@ -225,6 +300,20 @@ async function main(): Promise<void> {
 	const discovery = await getDetail.execute({ userId: "user-without-link", slug: "detail-cafe" });
 	if (discovery.mode !== "discovery" || discovery.customer !== null) {
 		console.error("❌ expected discovery mode without customer");
+		process.exit(1);
+	}
+
+	if (discovery.tenant.coverImageUrl !== "https://example.com/cover.png") {
+		console.error("❌ expected tenant coverImageUrl in discovery", discovery.tenant.coverImageUrl);
+		process.exit(1);
+	}
+
+	if (
+		discovery.stampProgress.length !== 1 ||
+		discovery.stampProgress[0]?.current !== 0 ||
+		discovery.stampProgress[0]?.campaignName !== "Preview loyalty card"
+	) {
+		console.error("❌ expected stamp campaign preview in discovery", discovery.stampProgress);
 		process.exit(1);
 	}
 

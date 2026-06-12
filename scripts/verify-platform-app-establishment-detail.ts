@@ -29,13 +29,27 @@ function sessionHeaders(session: string): { cookie: string } {
 
 type DetailResponse = {
 	mode?: string;
+	tenant?: { coverImageUrl?: string | null };
 	promotions?: { title: string }[];
 	customer?: { id: string; pointsBalance: number };
 	userQrValue?: string | null;
-	stampProgress?: unknown[];
+	stampProgress?: { campaignName: string; current: number; required: number }[];
 	rewards?: unknown[];
 	otherPromotions?: { tenantSlug: string; promotions: { title: string }[] }[];
 };
+
+async function createActiveStampCampaign(tenantId: string, name: string): Promise<string> {
+	const campaign = await prisma.stampCampaign.create({
+		data: {
+			tenantId,
+			name,
+			requiredStamps: 4,
+			isActive: true,
+		},
+	});
+
+	return campaign.id;
+}
 
 async function registerUser(name: string): Promise<{ email: string; cookie: string }> {
 	const email = `verify-est-detail-${randomUUID()}@example.local`;
@@ -104,7 +118,13 @@ async function main(): Promise<void> {
 	}
 
 	await assignProAndCreatePromotion(tenantA.id, "Promo Cafe A");
-	console.log(`✅ tenant A ready (${slugA}) with promo`);
+	const campaignIdA = await createActiveStampCampaign(tenantA.id, "Verify Detail Stamp A");
+	const campaignIdB = await createActiveStampCampaign(tenantA.id, "Verify Detail Stamp B");
+	await prisma.tenant.update({
+		where: { id: tenantA.id },
+		data: { coverImageUrl: "https://example.com/verify-detail-cover.png" },
+	});
+	console.log(`✅ tenant A ready (${slugA}) with promo + stamp preview`);
 
 	const ownerB = await registerUser("Detail Owner B");
 	const slugB = await createBusiness(ownerB.cookie, "Verify Detail Cafe B");
@@ -135,7 +155,28 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ discovery mode with tenant promos");
+	if (discoveryBody.tenant?.coverImageUrl !== "https://example.com/verify-detail-cover.png") {
+		console.error("❌ discovery tenant coverImageUrl missing", discoveryBody.tenant);
+		process.exit(1);
+	}
+
+	const stampPreview = discoveryBody.stampProgress ?? [];
+	const previewA = stampPreview.find((row) => row.campaignName === "Verify Detail Stamp A");
+	const previewB = stampPreview.find((row) => row.campaignName === "Verify Detail Stamp B");
+
+	if (
+		stampPreview.length !== 2 ||
+		!previewA ||
+		previewA.current !== 0 ||
+		previewA.required !== 4 ||
+		!previewB ||
+		previewB.current !== 0
+	) {
+		console.error("❌ discovery stamp preview missing", stampPreview);
+		process.exit(1);
+	}
+
+	console.log("✅ discovery mode with tenant promos and stamp preview");
 
 	const joinA = await fetch(`${baseUrl}/api/user/establishments/join`, {
 		method: "POST",
@@ -159,6 +200,33 @@ async function main(): Promise<void> {
 
 	console.log("✅ client joined both locales");
 
+	const clientRowForProgress = await prisma.user.findUnique({
+		where: { email: client.email },
+		select: { id: true },
+	});
+
+	const customerAfterJoin = await prisma.customer.findFirst({
+		where: { tenantId: tenantA.id, userId: clientRowForProgress?.id ?? "" },
+		select: { id: true },
+	});
+
+	if (!customerAfterJoin) {
+		console.error("❌ customer A missing after join");
+		process.exit(1);
+	}
+
+	await prisma.customerStampProgress.create({
+		data: {
+			tenantId: tenantA.id,
+			customerId: customerAfterJoin.id,
+			campaignId: campaignIdA,
+			currentStamps: 2,
+			completed: false,
+		},
+	});
+
+	console.log("✅ client progress on one stamp campaign");
+
 	const interaction = await fetch(`${baseUrl}/api/user/establishments/${slugA}`, {
 		headers: sessionHeaders(client.cookie),
 	});
@@ -179,7 +247,32 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ interaction mode with user QR");
+	const activeRow = interactionBody.stampProgress.find((row) => row.campaignName === "Verify Detail Stamp A");
+	const availableRow = interactionBody.stampProgress.find(
+		(row) => row.campaignName === "Verify Detail Stamp B",
+	);
+
+	if (
+		interactionBody.stampProgress.length !== 2 ||
+		!activeRow ||
+		activeRow.current !== 2 ||
+		!availableRow ||
+		availableRow.current !== 0
+	) {
+		console.error("❌ interaction stamp split missing", interactionBody.stampProgress);
+		process.exit(1);
+	}
+
+	if (
+		!interactionBody.promotions ||
+		interactionBody.promotions.length < 1 ||
+		interactionBody.promotions[0]?.title !== "Promo Cafe A"
+	) {
+		console.error("❌ interaction tenant promos missing", interactionBody.promotions);
+		process.exit(1);
+	}
+
+	console.log("✅ interaction mode with user QR, stamp split and tenant promos");
 
 	const other = interactionBody.otherPromotions ?? [];
 	if (
@@ -232,6 +325,8 @@ async function main(): Promise<void> {
 		...ownerBRow.memberships.map((row) => row.tenantId),
 	];
 	await prisma.promotion.deleteMany({ where: { tenantId: { in: tenantIds } } });
+	await prisma.customerStampProgress.deleteMany({ where: { customerId: clientRow.id } });
+	await prisma.stampCampaign.deleteMany({ where: { id: { in: [campaignIdA, campaignIdB] } } });
 	await prisma.customer.deleteMany({ where: { userId: clientRow.id } });
 	await prisma.tenantMembership.deleteMany({
 		where: { userId: { in: [ownerARow.id, ownerBRow.id] } },

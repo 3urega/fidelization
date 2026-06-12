@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { type CSSProperties, type ReactElement, useCallback, useEffect, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import {
-	LoyaltyCard,
 	type PromotionRow,
-	type RewardRow,
 	type StampProgressRow,
 } from "../../../../_components/loyalty/LoyaltyCard";
+import { StampCampaignCards } from "../../../../_components/loyalty/StampCampaignCards";
+import { EstablishmentHeroCover } from "../../../../_components/platform-app/EstablishmentHeroCover";
 import { platformFetch } from "../../../../../lib/platform/apiUrl";
 import { platformRoutes } from "../../../../../lib/platform/routes";
 import { Button } from "../../../../_components/ui/Button";
@@ -26,6 +26,7 @@ type EstablishmentTenant = {
 	status: string;
 	address?: string | null;
 	description?: string | null;
+	coverImageUrl?: string | null;
 };
 
 type EstablishmentCustomer = {
@@ -35,60 +36,14 @@ type EstablishmentCustomer = {
 	visitsCount: number;
 };
 
-type OtherPromotionGroup = {
-	tenantId: string;
-	tenantName: string;
-	tenantSlug: string;
-	promotions: PromotionRow[];
-};
-
 type EstablishmentDetailResponse = {
 	mode: "discovery" | "interaction";
 	tenant: EstablishmentTenant;
 	promotions: PromotionRow[];
 	customer: EstablishmentCustomer | null;
 	stampProgress?: StampProgressRow[];
-	rewards?: RewardRow[];
-	userQrValue?: string | null;
-	otherPromotions?: OtherPromotionGroup[];
 	error?: { description?: string };
 };
-
-function tenantAccentStyle(tenant: EstablishmentTenant): CSSProperties | undefined {
-	if (!tenant.primaryColor) {
-		return undefined;
-	}
-
-	return { ["--color-primary" as string]: tenant.primaryColor };
-}
-
-function EstablishmentHeader({ tenant }: { tenant: EstablishmentTenant }): ReactElement {
-	return (
-		<header
-			className="flex flex-col items-center gap-3 rounded-theme border border-border bg-surface p-4"
-			style={tenantAccentStyle(tenant)}
-		>
-			{tenant.logoUrl ? (
-				<img
-					src={tenant.logoUrl}
-					alt=""
-					className="h-16 w-16 rounded-theme border border-border object-cover"
-				/>
-			) : (
-				<div
-					aria-hidden
-					className="flex h-16 w-16 items-center justify-center rounded-theme border border-border bg-background text-xl font-semibold text-primary"
-				>
-					{tenant.name.charAt(0).toUpperCase()}
-				</div>
-			)}
-			<div className="flex flex-col items-center gap-1 text-center">
-				<h1 className="text-2xl font-semibold text-foreground">{tenant.name}</h1>
-				<p className="text-sm text-muted">{tenant.slug}</p>
-			</div>
-		</header>
-	);
-}
 
 function EstablishmentProfileInfo({ tenant }: { tenant: EstablishmentTenant }): ReactElement | null {
 	const description = tenant.description?.trim();
@@ -150,35 +105,14 @@ function PromotionsSection({
 	);
 }
 
-function OtherPromotionsSection({ groups }: { groups: OtherPromotionGroup[] }): ReactElement | null {
-	if (groups.length === 0) {
-		return null;
-	}
+function splitStampProgressRows(rows: StampProgressRow[]): {
+	activeCards: StampProgressRow[];
+	availableCards: StampProgressRow[];
+} {
+	const activeCards = rows.filter((row) => row.current > 0 || row.completed);
+	const availableCards = rows.filter((row) => row.current === 0 && !row.completed);
 
-	return (
-		<section aria-labelledby="other-promos-heading" className="flex flex-col gap-3">
-			<h2 id="other-promos-heading" className="text-lg font-semibold text-foreground">
-				Otras promos activas
-			</h2>
-			<ul className="flex flex-col gap-4">
-				{groups.map((group) => (
-					<li key={group.tenantId}>
-						<p className="mb-2 text-sm font-medium text-muted">{group.tenantName}</p>
-						<ul className="flex flex-col gap-2">
-							{group.promotions.map((promotion) => (
-								<li key={promotion.id}>
-									<Card>
-										<p className="font-medium text-foreground">{promotion.title}</p>
-										<p className="text-sm text-muted">{promotion.description}</p>
-									</Card>
-								</li>
-							))}
-						</ul>
-					</li>
-				))}
-			</ul>
-		</section>
-	);
+	return { activeCards, availableCards };
 }
 
 export function PlatformEstablishmentDetail(): ReactElement {
@@ -188,8 +122,6 @@ export function PlatformEstablishmentDetail(): ReactElement {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [joining, setJoining] = useState(false);
-	const [redeemError, setRedeemError] = useState<string | null>(null);
-	const [redeemingRewardId, setRedeemingRewardId] = useState<string | null>(null);
 
 	const loadDetail = useCallback(async (): Promise<void> => {
 		if (!slug) {
@@ -243,33 +175,6 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		await loadDetail();
 	}
 
-	async function handleRedeemReward(rewardId: string): Promise<void> {
-		setRedeemError(null);
-		setRedeemingRewardId(rewardId);
-
-		const response = await platformFetch(
-			`/api/user/establishments/${encodeURIComponent(slug)}/rewards/redeem`,
-			{
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ rewardId }),
-			},
-		);
-
-		const body = (await response.json()) as { error?: { description?: string } };
-
-		if (!response.ok) {
-			setRedeemError(body.error?.description ?? "No se pudo canjear la recompensa");
-			setRedeemingRewardId(null);
-
-			return;
-		}
-
-		setRedeemingRewardId(null);
-		setLoading(true);
-		await loadDetail();
-	}
-
 	if (loading) {
 		return <p className="text-sm text-muted">Cargando local…</p>;
 	}
@@ -285,7 +190,8 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		);
 	}
 
-	const qrValue = detail.userQrValue ?? "";
+	const stampRows = detail.stampProgress ?? [];
+	const { activeCards, availableCards } = splitStampProgressRows(stampRows);
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
@@ -293,7 +199,12 @@ export function PlatformEstablishmentDetail(): ReactElement {
 				← Volver al inicio
 			</Link>
 
-			<EstablishmentHeader tenant={detail.tenant} />
+			<EstablishmentHeroCover
+				name={detail.tenant.name}
+				logoUrl={detail.tenant.logoUrl}
+				coverImageUrl={detail.tenant.coverImageUrl}
+				primaryColor={detail.tenant.primaryColor}
+			/>
 
 			<EstablishmentProfileInfo tenant={detail.tenant} />
 
@@ -302,8 +213,8 @@ export function PlatformEstablishmentDetail(): ReactElement {
 					<Card>
 						<div className="flex flex-col gap-4">
 							<p className="text-sm text-muted">
-								Explora las promociones de este local. Cuando quieras acumular puntos, únete para
-								activar tu tarjeta de fidelización.
+								Explora las campañas de sellos y promociones de este local. Únete para activar tu
+								tarjeta de fidelización.
 							</p>
 							<Button
 								type="button"
@@ -315,6 +226,9 @@ export function PlatformEstablishmentDetail(): ReactElement {
 							</Button>
 						</div>
 					</Card>
+
+					<StampCampaignCards rows={stampRows} preview />
+
 					<PromotionsSection
 						title="Promociones"
 						promotions={detail.promotions}
@@ -323,35 +237,28 @@ export function PlatformEstablishmentDetail(): ReactElement {
 				</>
 			) : (
 				<>
-					{detail.customer ? (
-						<Card>
-							<LoyaltyCard
-								name={detail.customer.name}
-								pointsBalance={detail.customer.pointsBalance}
-								qrValue={qrValue}
-								businessName={detail.tenant.name}
-								stampProgress={detail.stampProgress ?? []}
-								rewards={detail.rewards ?? []}
-								promotions={detail.promotions}
-								redeemingRewardId={redeemingRewardId}
-								redeemError={redeemError}
-								showQr={false}
-								onRedeemReward={(rewardId) => {
-									void handleRedeemReward(rewardId);
-								}}
-							/>
-						</Card>
-					) : (
-						<Card>
-							<p className="text-sm text-error">No se pudo cargar tu tarjeta de fidelización.</p>
-						</Card>
-					)}
+					{activeCards.length > 0 ? (
+						<StampCampaignCards title="Mis tarjetas" rows={activeCards} />
+					) : null}
 
-					<Link href={platformRoutes.homeQr} className="text-center text-sm font-medium text-primary hover:opacity-80">
-						Ver QR en pantalla completa
-					</Link>
+					{availableCards.length > 0 ? (
+						<StampCampaignCards
+							title="Otras tarjetas disponibles"
+							preview
+							previewSubtitle="Escanea en el local para empezar a acumular."
+							rows={availableCards}
+						/>
+					) : null}
 
-					<OtherPromotionsSection groups={detail.otherPromotions ?? []} />
+					{activeCards.length === 0 && availableCards.length === 0 ? (
+						<StampCampaignCards rows={[]} />
+					) : null}
+
+					<PromotionsSection
+						title="Promociones"
+						promotions={detail.promotions}
+						emptyMessage="Este local no tiene promociones activas ahora."
+					/>
 				</>
 			)}
 		</main>

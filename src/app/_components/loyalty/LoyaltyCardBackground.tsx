@@ -25,7 +25,7 @@ export function LoyaltyCardBackground({
 
 	return (
 		<div
-			className={`relative overflow-hidden rounded-xl border border-border ${className}`.trim()}
+			className={`relative overflow-hidden rounded-xl ${className || "border border-border"}`.trim()}
 			style={backgroundStyle}
 			aria-label={`Fondo tarjeta: ${config.label}`}
 		>

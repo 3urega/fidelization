@@ -1,8 +1,7 @@
 import type { CSSProperties } from "react";
 
-/** Sprite sheet `public/fondos.png` — 2×2 grid (1254×1254 px; each quadrant 627×627). */
-
-export const LOYALTY_CARD_BACKGROUND_SPRITE_URL = "/fondos.png";
+/** Default stamp card background (variant `coffee-photo`). */
+export const LOYALTY_CARD_BACKGROUND_IMAGE_URL = "/fondo_tarjetas.png";
 
 export type LoyaltyCardBackgroundVariant =
 	| "coffee-photo"
@@ -13,37 +12,30 @@ export type LoyaltyCardBackgroundVariant =
 export type LoyaltyCardBackgroundConfig = {
 	id: LoyaltyCardBackgroundVariant;
 	label: string;
-	/** CSS background-position for one quadrant (`background-size: 200% 200%`). */
-	backgroundPosition: string;
+	imageUrl: string;
 };
 
-/**
- * Quadrants per sprite instructions in fondos.png:
- * - coffee-photo:   (0,0) → (25%,25%)   top-left
- * - coffee-sketch:  (25%,0) → (50%,25%)  top-right
- * - coffee-pattern: (0,25%) → (25%,50%)  bottom-left
- * - coffee-minimal: (25%,25%) → (50%,50%) bottom-right
- */
+/** One full image per variant (`public/fondo_tarjetas*.png`). */
 export const LOYALTY_CARD_BACKGROUNDS: LoyaltyCardBackgroundConfig[] = [
 	{
 		id: "coffee-photo",
-		label: "Foto café",
-		backgroundPosition: "0% 0%",
+		label: "Café con corazón",
+		imageUrl: "/fondo_tarjetas.png",
 	},
 	{
 		id: "coffee-sketch",
-		label: "Ilustración",
-		backgroundPosition: "100% 0%",
+		label: "Tarta y postre",
+		imageUrl: "/fondo_tarjetas2.png",
 	},
 	{
 		id: "coffee-pattern",
-		label: "Patrón oscuro",
-		backgroundPosition: "0% 100%",
+		label: "Matcha",
+		imageUrl: "/fondo_tarjetas3.png",
 	},
 	{
 		id: "coffee-minimal",
-		label: "Línea minimal",
-		backgroundPosition: "100% 100%",
+		label: "Patrón fidelización",
+		imageUrl: "/fondo_tarjetas4.png",
 	},
 ];
 
@@ -64,9 +56,9 @@ export function loyaltyCardBackgroundStyle(
 	const config = resolveLoyaltyCardBackground(variant);
 
 	return {
-		backgroundImage: `url(${LOYALTY_CARD_BACKGROUND_SPRITE_URL})`,
-		backgroundSize: "200% 200%",
-		backgroundPosition: config.backgroundPosition,
+		backgroundImage: `url(${config.imageUrl})`,
+		backgroundSize: "cover",
+		backgroundPosition: "center",
 		backgroundRepeat: "no-repeat",
 	};
 }
