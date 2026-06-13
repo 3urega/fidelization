@@ -4,10 +4,6 @@
   "label": "phase-l-customer-zone",
   "issues": [
     {
-      "title": "Phase L4: Customer zone UI insights and segment sections",
-      "bodyFile": "docs/issues/customer-zone-segments-ui.md"
-    },
-    {
       "title": "Phase L5: Customer zone UI all customers table",
       "bodyFile": "docs/issues/customer-zone-table-ui.md"
     },

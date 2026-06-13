@@ -273,7 +273,7 @@ Porque esos cuatro bloques aportan mucho más valor al comerciante que una simpl
 | [#59](https://github.com/3urega/fidelization/issues/59) | L1 | Customer zone analytics domain and read repository | **Closed** (2026-06-11) |
 | [#60](https://github.com/3urega/fidelization/issues/60) | L2 | Customer zone API insights list and detail | **Closed** (2026-06-11) |
 | [#61](https://github.com/3urega/fidelization/issues/61) | L3 | Customer zone nav entry and remove dashboard placeholder | **Closed** (2026-06-11) |
-| [#62](https://github.com/3urega/fidelization/issues/62) | L4 | Customer zone UI insights and segment sections |
+| [#62](https://github.com/3urega/fidelization/issues/62) | L4 | Customer zone UI insights and segment sections | **Closed** (2026-06-11) |
 | [#63](https://github.com/3urega/fidelization/issues/63) | L5 | Customer zone UI all customers table |
 | [#64](https://github.com/3urega/fidelization/issues/64) | L6 | Customer zone UI customer detail page |
 

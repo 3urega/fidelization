@@ -1,5 +1,5 @@
 import { PageHeader } from "../../_components/shell/PageHeader";
-import { Card } from "../../_components/ui/Card";
+import { CustomerZonePage } from "../../_components/loyalty/customer-zone/CustomerZonePage";
 
 export default function CustomersPage(): React.ReactElement {
 	return (
@@ -8,11 +8,7 @@ export default function CustomersPage(): React.ReactElement {
 				title="Clientes"
 				description="Conoce a tus clientes fieles, detecta riesgo de abandono y quién está cerca de una recompensa."
 			/>
-			<Card>
-				<p className="text-sm text-muted">
-					Próximamente: insights, clientes destacados, en riesgo y tabla completa.
-				</p>
-			</Card>
+			<CustomerZonePage />
 		</div>
 	);
 }

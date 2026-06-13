@@ -2,15 +2,15 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { ListTenantCustomersBySegment } from "../../../../../contexts/loyalty/customers/application/analytics/ListTenantCustomersBySegment";
-import { DomainError } from "../../../../../contexts/shared/domain/DomainError";
-import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { TenantRole } from "../../../../../contexts/tenants/memberships/domain/TenantRole";
-import { TenantNotFound } from "../../../../../contexts/tenants/tenants/domain/TenantNotFound";
-import { customerZoneListToJson, handleAuthDomainError } from "../../../../../lib/auth/http";
-import { requireTenantSession } from "../../../../../lib/auth/requireTenantSession";
-import { parseCustomerSegment } from "../../../../../lib/loyalty/parseCustomerSegment";
+import { ListTenantCustomersBySegment } from "../../../../contexts/loyalty/customers/application/analytics/ListTenantCustomersBySegment";
+import { DomainError } from "../../../../contexts/shared/domain/DomainError";
+import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { TenantRole } from "../../../../contexts/tenants/memberships/domain/TenantRole";
+import { TenantNotFound } from "../../../../contexts/tenants/tenants/domain/TenantNotFound";
+import { customerZoneListToJson, handleAuthDomainError } from "../../../../lib/auth/http";
+import { requireTenantSession } from "../../../../lib/auth/requireTenantSession";
+import { parseCustomerSegment } from "../../../../lib/loyalty/parseCustomerSegment";
 
 export const dynamic = "force-dynamic";
 
