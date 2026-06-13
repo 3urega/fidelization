@@ -106,7 +106,7 @@ class StubTenantRepository extends TenantRepository {
 class InMemoryStampTypeRepository extends StampTypeRepository {
 	async save(): Promise<void> {}
 
-	async searchById(id: string, typeTenantId: string): Promise<StampType | null> {
+	async searchById(typeTenantId: string, id: string): Promise<StampType | null> {
 		if (typeTenantId !== tenantId || id !== stampTypeId) {
 			return null;
 		}
@@ -134,7 +134,7 @@ class InMemoryStampTypeRepository extends StampTypeRepository {
 			return [];
 		}
 
-		const type = await this.searchById(stampTypeId, tenantId);
+		const type = await this.searchById(tenantId, stampTypeId);
 
 		return type ? [type] : [];
 	}

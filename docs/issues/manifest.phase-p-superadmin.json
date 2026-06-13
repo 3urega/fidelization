@@ -3,10 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P10: Platform admin global stamp campaign templates",
-      "bodyFile": "docs/issues/platform-admin-campaign-templates.md"
-    },
-    {
       "title": "Phase P11: Platform admin gamification games library (foundation)",
       "bodyFile": "docs/issues/platform-admin-gamification-library.md"
     },
