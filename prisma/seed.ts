@@ -21,6 +21,9 @@ const DEMO_PLAN_PRO_ID = "00000000-0000-4000-8000-000000000006";
 const DEMO_PLAN_PREMIUM_ID = "00000000-0000-4000-8000-000000000007";
 const DEMO_CUSTOMER_ID = "00000000-0000-4000-8000-000000000005";
 const SUPERADMIN_USER_ID = "00000000-0000-4000-8000-000000000010";
+const DEMO_TEMPLATE_COFFEE_ID = "00000000-0000-4000-8000-000000000020";
+const DEMO_TEMPLATE_CROISSANT_ID = "00000000-0000-4000-8000-000000000021";
+const DEMO_TEMPLATE_MATCHA_ID = "00000000-0000-4000-8000-000000000022";
 
 async function main(): Promise<void> {
 	const superadminEmail = (process.env.SUPERADMIN_EMAIL ?? "superadmin@platform.local").toLowerCase().trim();
@@ -216,7 +219,89 @@ async function main(): Promise<void> {
 		},
 	});
 
+	await prisma.platformCampaignTemplate.upsert({
+		where: { id: DEMO_TEMPLATE_COFFEE_ID },
+		update: {
+			name: "10 cafés = 1 gratis",
+			description: "Tarjeta clásica de fidelización para bebidas de café.",
+			requiredStamps: 10,
+			suggestedStampTypeLabel: "Café",
+			visualTemplate: "coffee",
+			cardBackgroundVariant: "coffee-photo",
+			conditions: "Válido en bebidas de café estándar.",
+			isActive: true,
+			sortOrder: 1,
+		},
+		create: {
+			id: DEMO_TEMPLATE_COFFEE_ID,
+			name: "10 cafés = 1 gratis",
+			description: "Tarjeta clásica de fidelización para bebidas de café.",
+			requiredStamps: 10,
+			suggestedStampTypeLabel: "Café",
+			visualTemplate: "coffee",
+			cardBackgroundVariant: "coffee-photo",
+			conditions: "Válido en bebidas de café estándar.",
+			isActive: true,
+			sortOrder: 1,
+		},
+	});
+
+	await prisma.platformCampaignTemplate.upsert({
+		where: { id: DEMO_TEMPLATE_CROISSANT_ID },
+		update: {
+			name: "8 croissants = 1 gratis",
+			description: "Ideal para panaderías y desayunos.",
+			requiredStamps: 8,
+			suggestedStampTypeLabel: "Croissant",
+			visualTemplate: "croissant",
+			cardBackgroundVariant: "coffee-sketch",
+			conditions: "",
+			isActive: true,
+			sortOrder: 2,
+		},
+		create: {
+			id: DEMO_TEMPLATE_CROISSANT_ID,
+			name: "8 croissants = 1 gratis",
+			description: "Ideal para panaderías y desayunos.",
+			requiredStamps: 8,
+			suggestedStampTypeLabel: "Croissant",
+			visualTemplate: "croissant",
+			cardBackgroundVariant: "coffee-sketch",
+			conditions: "",
+			isActive: true,
+			sortOrder: 2,
+		},
+	});
+
+	await prisma.platformCampaignTemplate.upsert({
+		where: { id: DEMO_TEMPLATE_MATCHA_ID },
+		update: {
+			name: "5 matchas = 1 gratis",
+			description: "Campaña corta para bebidas matcha.",
+			requiredStamps: 5,
+			suggestedStampTypeLabel: "Matcha",
+			visualTemplate: "generic",
+			cardBackgroundVariant: "coffee-minimal",
+			conditions: "",
+			isActive: true,
+			sortOrder: 3,
+		},
+		create: {
+			id: DEMO_TEMPLATE_MATCHA_ID,
+			name: "5 matchas = 1 gratis",
+			description: "Campaña corta para bebidas matcha.",
+			requiredStamps: 5,
+			suggestedStampTypeLabel: "Matcha",
+			visualTemplate: "generic",
+			cardBackgroundVariant: "coffee-minimal",
+			conditions: "",
+			isActive: true,
+			sortOrder: 3,
+		},
+	});
+
 	console.log("Seed: demo owner + plans basic/pro/premium + customer QR (demo-qr-cafe-demo)");
+	console.log("Seed: 3 platform campaign templates (coffee, croissant, matcha)");
 	console.log(`Seed: superadmin ${superadminEmail} (no tenant membership)`);
 }
 

@@ -353,3 +353,21 @@ model StripeWebhookEvent {
 
   @@map("stripe_webhook_events")
 }
+
+model PlatformCampaignTemplate {
+  id                      String   @id @default(uuid())
+  name                    String
+  description             String   @default("")
+  requiredStamps          Int      @map("required_stamps")
+  suggestedStampTypeLabel String   @default("") @map("suggested_stamp_type_label")
+  visualTemplate          String   @default("generic") @map("visual_template")
+  cardBackgroundVariant   String   @default("coffee-photo") @map("card_background_variant")
+  conditions              String   @default("")
+  isActive                Boolean  @default(true) @map("is_active")
+  sortOrder               Int      @default(0) @map("sort_order")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("platform_campaign_templates")
+}

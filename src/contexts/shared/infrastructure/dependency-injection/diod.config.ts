@@ -104,6 +104,9 @@ import { GetPlatformDashboardMetrics } from "../../../platform/application/dashb
 import { AssignPlatformTenantSubscriptionPlan } from "../../../platform/application/tenants/AssignPlatformTenantSubscriptionPlan";
 import { EndPlatformImpersonation } from "../../../platform/application/impersonation/EndPlatformImpersonation";
 import { ImpersonateTenantOwnerFromPlatformSession } from "../../../platform/application/impersonation/ImpersonateTenantOwnerFromPlatformSession";
+import { CreatePlatformCampaignTemplate } from "../../../platform/application/campaign_templates/CreatePlatformCampaignTemplate";
+import { ListPlatformCampaignTemplates } from "../../../platform/application/campaign_templates/ListPlatformCampaignTemplates";
+import { UpdatePlatformCampaignTemplate } from "../../../platform/application/campaign_templates/UpdatePlatformCampaignTemplate";
 import { GetPlatformAppUserDetail } from "../../../platform/application/users/GetPlatformAppUserDetail";
 import { ListPlatformAppUsers } from "../../../platform/application/users/ListPlatformAppUsers";
 import { ListPlatformOwners } from "../../../platform/application/owners/ListPlatformOwners";
@@ -111,6 +114,7 @@ import { GetPlatformTenantDetail } from "../../../platform/application/tenants/G
 import { ListPlatformTenants } from "../../../platform/application/tenants/ListPlatformTenants";
 import { UpdatePlatformTenant } from "../../../platform/application/tenants/UpdatePlatformTenant";
 import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
+import { PlatformCampaignTemplateRepository } from "../../../platform/domain/PlatformCampaignTemplateRepository";
 import { PlatformAppUsersReadRepository } from "../../../platform/domain/PlatformAppUsersReadRepository";
 import { PlatformAnalyticsReadRepository } from "../../../platform/domain/PlatformAnalyticsReadRepository";
 import { PlatformBillingReadRepository } from "../../../platform/domain/PlatformBillingReadRepository";
@@ -118,6 +122,7 @@ import { PlatformOwnersReadRepository } from "../../../platform/domain/PlatformO
 import { PlatformDashboardReadRepository } from "../../../platform/domain/PlatformDashboardReadRepository";
 import { PlatformImpersonationEventRepository } from "../../../platform/domain/PlatformImpersonationEventRepository";
 import { PlatformTenantDetailReadRepository } from "../../../platform/domain/PlatformTenantDetailReadRepository";
+import { PrismaPlatformCampaignTemplateRepository } from "../../../platform/infrastructure/PrismaPlatformCampaignTemplateRepository";
 import { PrismaPlatformAppUsersReadRepository } from "../../../platform/infrastructure/PrismaPlatformAppUsersReadRepository";
 import { PrismaPlatformAnalyticsReadRepository } from "../../../platform/infrastructure/PrismaPlatformAnalyticsReadRepository";
 import { PrismaPlatformBillingReadRepository } from "../../../platform/infrastructure/PrismaPlatformBillingReadRepository";
@@ -219,6 +224,11 @@ builder.register(PlatformAppUsersReadRepository).use(PrismaPlatformAppUsersReadR
 builder.registerAndUse(PrismaPlatformAppUsersReadRepository);
 builder.registerAndUse(ListPlatformAppUsers);
 builder.registerAndUse(GetPlatformAppUserDetail);
+builder.register(PlatformCampaignTemplateRepository).use(PrismaPlatformCampaignTemplateRepository);
+builder.registerAndUse(PrismaPlatformCampaignTemplateRepository);
+builder.registerAndUse(ListPlatformCampaignTemplates);
+builder.registerAndUse(CreatePlatformCampaignTemplate);
+builder.registerAndUse(UpdatePlatformCampaignTemplate);
 builder.register(PlatformBillingReadRepository).use(PrismaPlatformBillingReadRepository);
 builder.registerAndUse(PrismaPlatformBillingReadRepository);
 builder.registerAndUse(GetPlatformBillingOverview);
