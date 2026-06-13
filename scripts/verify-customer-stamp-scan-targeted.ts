@@ -14,6 +14,11 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	findStampAddedOutcome,
+	postStaffScan,
+} from "./lib/staff-scan-verify-helpers";
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -24,7 +29,7 @@ function tenantHeaders(extra: Record<string, string> = {}): Record<string, strin
 }
 
 /**
- * E2E: typed stamp types + campaigns → staff scan with stampTypeId routes stamps correctly.
+ * E2E: typed campaigns → staff scan by targetId routes stamps to one campaign only.
  */
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) {
@@ -138,21 +143,15 @@ async function main(): Promise<void> {
 	const qrValue = registerBody.customer.qrValue;
 
 	for (let i = 1; i <= 3; i += 1) {
-		const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-			method: "POST",
-			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue, stampTypeId: cafeTypeId }),
-		});
-		const scanBody = (await scan.json()) as {
-			stampsAdded?: { campaignId?: string; current: number }[];
-		};
-
-		const coffeeStamp = scanBody.stampsAdded?.find(
-			(stamp) => stamp.campaignId === coffeeCampaignId,
+		const scan = await postStaffScan(
+			apexBaseUrl,
+			ownerHeaders,
+			campaignScanBody(qrValue, coffeeCampaignId),
 		);
+		const coffeeStamp = findStampAddedOutcome(scan.body.outcomes, coffeeCampaignId);
 
-		if (!scan.ok || coffeeStamp?.current !== i) {
-			console.error(`❌ café scan ${i}:`, scan.status, scanBody);
+		if (scan.status !== 200 || coffeeStamp?.current !== i) {
+			console.error(`❌ café scan ${i}:`, scan.status, scan.body);
 			process.exit(1);
 		}
 	}
@@ -169,37 +168,29 @@ async function main(): Promise<void> {
 	console.log("✅ café scans only advance coffee campaign");
 
 	for (let i = 1; i <= 2; i += 1) {
-		const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-			method: "POST",
-			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue, stampTypeId: menuTypeId }),
-		});
-		const scanBody = (await scan.json()) as {
-			stampsAdded?: { campaignId?: string; current: number }[];
-		};
+		const scan = await postStaffScan(
+			apexBaseUrl,
+			ownerHeaders,
+			campaignScanBody(qrValue, menuCampaignId),
+		);
+		const menuStamp = findStampAddedOutcome(scan.body.outcomes, menuCampaignId);
 
-		const menuStamp = scanBody.stampsAdded?.find((stamp) => stamp.campaignId === menuCampaignId);
-
-		if (!scan.ok || menuStamp?.current !== i) {
-			console.error(`❌ menú scan ${i}:`, scan.status, scanBody);
+		if (scan.status !== 200 || menuStamp?.current !== i) {
+			console.error(`❌ menú scan ${i}:`, scan.status, scan.body);
 			process.exit(1);
 		}
 	}
 
 	console.log("✅ menú scans only advance menu campaign");
 
-	const missingTypeScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue }),
-	});
+	const missingTargetScan = await postStaffScan(apexBaseUrl, ownerHeaders, { qrValue });
 
-	if (missingTypeScan.status !== 400) {
-		console.error("❌ expected 400 when stampTypeId omitted", missingTypeScan.status);
+	if (missingTargetScan.status !== 400 || missingTargetScan.body.error?.type !== "InvalidStampScan") {
+		console.error("❌ expected 400 when targetType omitted", missingTargetScan.status, missingTargetScan.body);
 		process.exit(1);
 	}
 
-	console.log("✅ missing stampTypeId → 400");
+	console.log("✅ missing targetType → 400 InvalidStampScan");
 
 	await prisma.loyaltyTransaction.deleteMany({ where: { customerId } });
 	await prisma.customerStampProgress.deleteMany({ where: { customerId } });

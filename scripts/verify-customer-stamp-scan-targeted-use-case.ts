@@ -1,16 +1,20 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
-import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
-import { InvalidStampScan } from "../src/contexts/loyalty/customers/domain/InvalidStampScan";
+import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
+import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
+import { InvalidStampScan } from "../src/contexts/loyalty/customers/domain/InvalidStampScan";
+import type { StaffScanOutcome } from "../src/contexts/loyalty/customers/domain/StaffScanOutcome";
 import { LoyaltyTransaction } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransaction";
 import { LoyaltyTransactionRepository } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransactionRepository";
-import { ResolveStampScanOptions } from "../src/contexts/loyalty/stamp_types/application/scan/ResolveStampScanOptions";
-import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
-import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
+import { CustomerPromotionUsageRepository } from "../src/contexts/loyalty/promotions/domain/CustomerPromotionUsageRepository";
+import { PromotionRepository } from "../src/contexts/loyalty/promotions/domain/PromotionRepository";
 import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
 import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -57,6 +61,36 @@ class StubTenantRepository extends TenantRepository {
 	}
 }
 
+class StubTenantBillingRepository extends TenantBillingRepository {
+	async savePlan(): Promise<void> {}
+
+	async searchPlanByName(): Promise<null> {
+		return null;
+	}
+
+	async searchPlanById(): Promise<null> {
+		return null;
+	}
+
+	async listActivePlans(): Promise<never[]> {
+		return [];
+	}
+
+	async saveSubscription(): Promise<void> {}
+
+	async searchActiveSubscription(): Promise<null> {
+		return null;
+	}
+
+	async searchSubscriptionByStripeId(): Promise<null> {
+		return null;
+	}
+
+	async updateSubscriptionStatus(): Promise<void> {}
+
+	async linkTenantPlan(): Promise<void> {}
+}
+
 class StubUserRepository extends UserRepository {
 	async searchByQrValue(): Promise<null> {
 		return null;
@@ -68,38 +102,6 @@ class InMemoryLoyaltyTransactionRepository extends LoyaltyTransactionRepository 
 
 	async save(transaction: LoyaltyTransaction): Promise<void> {
 		this.saved.push(transaction);
-	}
-}
-
-class InMemoryStampTypeRepository extends StampTypeRepository {
-	constructor(private readonly types: StampType[]) {
-		super();
-	}
-
-	async save(): Promise<void> {}
-
-	async searchById(tenantIdValue: string, id: string): Promise<StampType | null> {
-		return this.types.find((type) => type.tenantId === tenantIdValue && type.id === id) ?? null;
-	}
-
-	async searchBySlug(): Promise<null> {
-		return null;
-	}
-
-	async listByTenant(tenantIdValue: string): Promise<StampType[]> {
-		return this.types.filter((type) => type.tenantId === tenantIdValue);
-	}
-
-	async listActiveByTenant(tenantIdValue: string): Promise<StampType[]> {
-		return this.types.filter((type) => type.tenantId === tenantIdValue && type.isActive);
-	}
-
-	async countActiveByTenant(tenantIdValue: string): Promise<number> {
-		return (await this.listActiveByTenant(tenantIdValue)).length;
-	}
-
-	async maxSortOrder(): Promise<number> {
-		return 0;
 	}
 }
 
@@ -116,8 +118,10 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 
 	async deleteCampaign(): Promise<void> {}
 
-	async searchCampaignById(): Promise<null> {
-		return null;
+	async searchCampaignById(tenantIdValue: string, id: string): Promise<StampCampaign | null> {
+		const campaign = this.campaigns.find((row) => row.id === id);
+
+		return campaign && campaign.tenantId === tenantIdValue ? campaign : null;
 	}
 
 	async listByTenant(): Promise<StampCampaign[]> {
@@ -193,37 +197,80 @@ class InMemoryCustomerRepository extends CustomerRepository {
 	}
 }
 
-async function main(): Promise<void> {
-	const cafeType = StampType.create({
-		tenantId,
-		label: "Café",
-		slug: "cafe",
-		sortOrder: 1,
-	});
-	const menuType = StampType.create({
-		tenantId,
-		label: "Menú",
-		slug: "menu",
-		sortOrder: 2,
-	});
+class StubPromotionRepository extends PromotionRepository {
+	async save(): Promise<void> {}
 
-	const coffeeCampaign = StampCampaign.create({
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async listByTenant(): Promise<never[]> {
+		return [];
+	}
+
+	async listActiveByTenantAt(): Promise<never[]> {
+		return [];
+	}
+}
+
+class StubCustomerPromotionUsageRepository extends CustomerPromotionUsageRepository {
+	async saveUsage(): Promise<void> {}
+
+	async searchUsage(): Promise<null> {
+		return null;
+	}
+}
+
+function findStampAdded(
+	outcomes: StaffScanOutcome[],
+	campaignId: string,
+): StaffScanOutcome | undefined {
+	return outcomes.find(
+		(outcome) => outcome.kind === "stamp_added" && outcome.campaignId === campaignId,
+	);
+}
+
+async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "1";
+
+	const cafeTypeId = "00000000-0000-4000-8000-0000000000t1";
+	const menuTypeId = "00000000-0000-4000-8000-0000000000t2";
+
+	const coffeeCampaign = StampCampaign.fromPrimitives({
+		id: "00000000-0000-4000-8000-0000000000c1",
 		tenantId,
 		name: "10 cafés gratis",
 		requiredStamps: 10,
-		stampTypeId: cafeType.id,
+		rewardId: null,
+		stampTypeId: cafeTypeId,
+		visualTemplate: "coffee",
+		cardBackgroundVariant: "coffee-photo",
+		conditions: "",
+		isActive: true,
 	});
-	const menuCampaign = StampCampaign.create({
+	const menuCampaign = StampCampaign.fromPrimitives({
+		id: "00000000-0000-4000-8000-0000000000c2",
 		tenantId,
 		name: "5 menús gratis",
 		requiredStamps: 5,
-		stampTypeId: menuType.id,
+		rewardId: null,
+		stampTypeId: menuTypeId,
+		visualTemplate: "generic",
+		cardBackgroundVariant: "coffee-photo",
+		conditions: "",
+		isActive: true,
 	});
-	const generalCampaign = StampCampaign.create({
+	const generalCampaign = StampCampaign.fromPrimitives({
+		id: "00000000-0000-4000-8000-0000000000c3",
 		tenantId,
 		name: "8 visitas fiel",
 		requiredStamps: 8,
+		rewardId: null,
 		stampTypeId: null,
+		visualTemplate: "generic",
+		cardBackgroundVariant: "coffee-photo",
+		conditions: "",
+		isActive: true,
 	});
 
 	const customer = Customer.register({
@@ -232,7 +279,6 @@ async function main(): Promise<void> {
 	});
 
 	const tenantRepository = new StubTenantRepository(baseTenant);
-	const stampTypeRepository = new InMemoryStampTypeRepository([cafeType, menuType]);
 	const stampRepository = new InMemoryStampCampaignRepository([
 		coffeeCampaign,
 		menuCampaign,
@@ -240,55 +286,61 @@ async function main(): Promise<void> {
 	]);
 	const customerRepository = new InMemoryCustomerRepository([customer]);
 	const loyaltyRepository = new InMemoryLoyaltyTransactionRepository();
-	const resolveStampScanOptions = new ResolveStampScanOptions(
+	const resolvePlan = new ResolveTenantSubscriptionPlan(
 		tenantRepository,
-		stampTypeRepository,
-		stampRepository,
+		new StubTenantBillingRepository(),
 	);
-
-	const useCase = new RecordCustomerVisitByQr(
-		tenantRepository,
+	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveCustomer = new ResolveCustomerByQrForStaffScan(
 		customerRepository,
 		new StubUserRepository(),
+	);
+
+	const useCase = new RecordStaffScanByTarget(
+		tenantRepository,
+		customerRepository,
+		resolveCustomer,
 		loyaltyRepository,
 		stampRepository,
-		stampTypeRepository,
-		resolveStampScanOptions,
+		new StubPromotionRepository(),
+		new StubCustomerPromotionUsageRepository(),
+		assertFeature,
 	);
+
+	const baseParams = {
+		tenantId,
+		qrValue: customer.qrValue,
+		createdByUserId: staffUserId,
+		staffRole: TenantRole.Owner,
+	};
 
 	try {
 		await useCase.execute({
-			tenantId,
-			qrValue: customer.qrValue,
-			createdByUserId: staffUserId,
-			staffRole: TenantRole.Owner,
+			...baseParams,
+			targetType: undefined,
+			targetId: coffeeCampaign.id,
 		});
-		console.error("❌ expected InvalidStampScan when stampTypeId omitted");
+		console.error("❌ expected InvalidStampScan when targetType omitted");
 		process.exit(1);
 	} catch (error) {
 		if (!(error instanceof InvalidStampScan)) {
-			console.error("❌ wrong error when stampTypeId omitted", error);
+			console.error("❌ wrong error when targetType omitted", error);
 			process.exit(1);
 		}
 	}
 
-	console.log("✅ missing stampTypeId → InvalidStampScan");
+	console.log("✅ missing targetType → InvalidStampScan");
 
 	for (let i = 1; i <= 3; i += 1) {
 		const result = await useCase.execute({
-			tenantId,
-			qrValue: customer.qrValue,
-			createdByUserId: staffUserId,
-			staffRole: TenantRole.Owner,
-			stampTypeId: cafeType.id,
+			...baseParams,
+			targetType: "stamp_campaign",
+			targetId: coffeeCampaign.id,
 		});
+		const stamp = findStampAdded(result.outcomes, coffeeCampaign.id);
 
-		if (
-			result.stampsAdded.length !== 1 ||
-			result.stampsAdded[0]?.campaignId !== coffeeCampaign.id ||
-			result.stampsAdded[0]?.current !== i
-		) {
-			console.error(`❌ café scan ${i}`, result.stampsAdded);
+		if (!stamp || stamp.kind !== "stamp_added" || stamp.current !== i) {
+			console.error(`❌ café scan ${i}`, result.outcomes);
 			process.exit(1);
 		}
 	}
@@ -303,19 +355,14 @@ async function main(): Promise<void> {
 
 	for (let i = 1; i <= 2; i += 1) {
 		const result = await useCase.execute({
-			tenantId,
-			qrValue: customer.qrValue,
-			createdByUserId: staffUserId,
-			staffRole: TenantRole.Owner,
-			stampTypeId: menuType.id,
+			...baseParams,
+			targetType: "stamp_campaign",
+			targetId: menuCampaign.id,
 		});
+		const stamp = findStampAdded(result.outcomes, menuCampaign.id);
 
-		if (
-			result.stampsAdded.length !== 1 ||
-			result.stampsAdded[0]?.campaignId !== menuCampaign.id ||
-			result.stampsAdded[0]?.current !== i
-		) {
-			console.error(`❌ menú scan ${i}`, result.stampsAdded);
+		if (!stamp || stamp.kind !== "stamp_added" || stamp.current !== i) {
+			console.error(`❌ menú scan ${i}`, result.outcomes);
 			process.exit(1);
 		}
 	}
@@ -323,23 +370,18 @@ async function main(): Promise<void> {
 	console.log("✅ menú scans only advance menu campaign");
 
 	const general = await useCase.execute({
-		tenantId,
-		qrValue: customer.qrValue,
-		createdByUserId: staffUserId,
-		staffRole: TenantRole.Owner,
-		stampTypeId: null,
+		...baseParams,
+		targetType: "stamp_campaign",
+		targetId: generalCampaign.id,
 	});
+	const generalStamp = findStampAdded(general.outcomes, generalCampaign.id);
 
-	if (
-		general.stampsAdded.length !== 1 ||
-		general.stampsAdded[0]?.campaignId !== generalCampaign.id ||
-		general.stampsAdded[0]?.current !== 1
-	) {
-		console.error("❌ general scan", general.stampsAdded);
+	if (!generalStamp || generalStamp.kind !== "stamp_added" || generalStamp.current !== 1) {
+		console.error("❌ general scan", general.outcomes);
 		process.exit(1);
 	}
 
-	console.log("✅ Visita general only advances generic campaign");
+	console.log("✅ generic campaign scan advances only selected target");
 	console.log("✅ verify:customer-stamp-scan-targeted-use-case passed");
 }
 

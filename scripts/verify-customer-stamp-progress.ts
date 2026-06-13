@@ -16,6 +16,7 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import { campaignScanBody, postStaffScan } from "./lib/staff-scan-verify-helpers";
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -149,14 +150,14 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET /api/loyalty/me → stampProgress 0/3");
 
-	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue, stampTypeId }),
-	});
+	const scan = await postStaffScan(
+		apexBaseUrl,
+		ownerHeaders,
+		campaignScanBody(qrValue, campaignId),
+	);
 
-	if (!scan.ok) {
-		console.error("❌ POST /api/loyalty/scan:", scan.status, await scan.json());
+	if (scan.status !== 200) {
+		console.error("❌ POST /api/loyalty/scan:", scan.status, scan.body);
 		process.exit(1);
 	}
 
@@ -179,14 +180,14 @@ async function main(): Promise<void> {
 	console.log("✅ GET /api/loyalty/me after scan → 1/3");
 
 	for (let expected = 2; expected <= 3; expected += 1) {
-		const nextScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-			method: "POST",
-			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue, stampTypeId }),
-		});
+		const nextScan = await postStaffScan(
+			apexBaseUrl,
+			ownerHeaders,
+			campaignScanBody(qrValue, campaignId),
+		);
 
-		if (!nextScan.ok) {
-			console.error(`❌ scan ${expected}/3:`, nextScan.status, await nextScan.json());
+		if (nextScan.status !== 200) {
+			console.error(`❌ scan ${expected}/3:`, nextScan.status, nextScan.body);
 			process.exit(1);
 		}
 	}

@@ -1,15 +1,20 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
-import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
-import { ResolveStampScanOptions } from "../src/contexts/loyalty/stamp_types/application/scan/ResolveStampScanOptions";
-import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
-import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
+import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
+import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
+import { InvalidStampScan } from "../src/contexts/loyalty/customers/domain/InvalidStampScan";
+import type { StaffScanOutcome } from "../src/contexts/loyalty/customers/domain/StaffScanOutcome";
 import { LoyaltyTransaction } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransaction";
 import { LoyaltyTransactionRepository } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransactionRepository";
+import { CustomerPromotionUsageRepository } from "../src/contexts/loyalty/promotions/domain/CustomerPromotionUsageRepository";
+import { PromotionRepository } from "../src/contexts/loyalty/promotions/domain/PromotionRepository";
 import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
 import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -56,6 +61,36 @@ class StubTenantRepository extends TenantRepository {
 	}
 }
 
+class StubTenantBillingRepository extends TenantBillingRepository {
+	async savePlan(): Promise<void> {}
+
+	async searchPlanByName(): Promise<null> {
+		return null;
+	}
+
+	async searchPlanById(): Promise<null> {
+		return null;
+	}
+
+	async listActivePlans(): Promise<never[]> {
+		return [];
+	}
+
+	async saveSubscription(): Promise<void> {}
+
+	async searchActiveSubscription(): Promise<null> {
+		return null;
+	}
+
+	async searchSubscriptionByStripeId(): Promise<null> {
+		return null;
+	}
+
+	async updateSubscriptionStatus(): Promise<void> {}
+
+	async linkTenantPlan(): Promise<void> {}
+}
+
 class InMemoryCustomerRepository extends CustomerRepository {
 	private customers = new Map<string, Customer>();
 
@@ -70,24 +105,20 @@ class InMemoryCustomerRepository extends CustomerRepository {
 		this.customers.set(customer.id, customer);
 	}
 
-	async searchById(_tenantId: string, _id: string): Promise<Customer | null> {
+	async searchById(): Promise<null> {
 		return null;
 	}
 
-	async searchByQrValue(tenantId: string, qrValue: string): Promise<Customer | null> {
+	async searchByQrValue(tenantIdValue: string, qrValue: string): Promise<Customer | null> {
 		return (
 			Array.from(this.customers.values()).find(
-				(customer) => customer.tenantId === tenantId && customer.qrValue === qrValue,
+				(customer) => customer.tenantId === tenantIdValue && customer.qrValue === qrValue,
 			) ?? null
 		);
 	}
 
-	async searchByUserIdAndTenantId(userId: string, tenantId: string): Promise<Customer | null> {
-		return (
-			Array.from(this.customers.values()).find(
-				(customer) => customer.userId === userId && customer.tenantId === tenantId,
-			) ?? null
-		);
+	async searchByUserIdAndTenantId(): Promise<null> {
+		return null;
 	}
 
 	async listWithInteractionByUserId(): Promise<never[]> {
@@ -100,10 +131,6 @@ class InMemoryLoyaltyTransactionRepository extends LoyaltyTransactionRepository 
 
 	async save(transaction: LoyaltyTransaction): Promise<void> {
 		this.saved.push(transaction);
-	}
-
-	async searchById(_tenantId: string, _id: string): Promise<LoyaltyTransaction | null> {
-		return null;
 	}
 }
 
@@ -124,29 +151,24 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 
 	async deleteCampaign(): Promise<void> {}
 
-	async searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null> {
+	async searchCampaignById(tenantIdValue: string, id: string): Promise<StampCampaign | null> {
 		const campaign = this.campaigns.get(id);
 
-		return campaign && campaign.tenantId === tenantId ? campaign : null;
+		return campaign && campaign.tenantId === tenantIdValue ? campaign : null;
 	}
 
-	async listByTenant(tenantId: string): Promise<StampCampaign[]> {
-		return Array.from(this.campaigns.values()).filter((campaign) => campaign.tenantId === tenantId);
+	async listByTenant(tenantIdValue: string): Promise<StampCampaign[]> {
+		return Array.from(this.campaigns.values()).filter((campaign) => campaign.tenantId === tenantIdValue);
 	}
 
-	async listActiveByTenant(tenantId: string): Promise<StampCampaign[]> {
+	async listActiveByTenant(tenantIdValue: string): Promise<StampCampaign[]> {
 		return Array.from(this.campaigns.values()).filter(
-			(campaign) => campaign.tenantId === tenantId && campaign.isActive,
+			(campaign) => campaign.tenantId === tenantIdValue && campaign.isActive,
 		);
 	}
 
-	async hasActiveGenericCampaigns(tenantId: string): Promise<boolean> {
-		return Array.from(this.campaigns.values()).some(
-			(campaign) =>
-				campaign.tenantId === tenantId &&
-				campaign.isActive &&
-				campaign.stampTypeId === null,
-		);
+	async hasActiveGenericCampaigns(): Promise<boolean> {
+		return false;
 	}
 
 	async saveProgress(progress: CustomerStampProgress): Promise<void> {
@@ -154,13 +176,13 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 	}
 
 	async searchProgress(
-		tenantId: string,
+		tenantIdValue: string,
 		customerId: string,
 		campaignId: string,
 	): Promise<CustomerStampProgress | null> {
 		const row = this.progress.get(`${customerId}:${campaignId}`);
 
-		return row && row.tenantId === tenantId ? row : null;
+		return row && row.tenantId === tenantIdValue ? row : null;
 	}
 
 	getProgress(customerId: string, campaignId: string): CustomerStampProgress | undefined {
@@ -168,31 +190,27 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 	}
 }
 
-class InMemoryStampTypeRepository extends StampTypeRepository {
-	async save(_stampType: StampType): Promise<void> {}
+class StubPromotionRepository extends PromotionRepository {
+	async save(): Promise<void> {}
 
 	async searchById(): Promise<null> {
 		return null;
 	}
 
-	async searchBySlug(): Promise<null> {
+	async listByTenant(): Promise<never[]> {
+		return [];
+	}
+
+	async listActiveByTenantAt(): Promise<never[]> {
+		return [];
+	}
+}
+
+class StubCustomerPromotionUsageRepository extends CustomerPromotionUsageRepository {
+	async saveUsage(): Promise<void> {}
+
+	async searchUsage(): Promise<null> {
 		return null;
-	}
-
-	async listByTenant(): Promise<StampType[]> {
-		return [];
-	}
-
-	async listActiveByTenant(): Promise<StampType[]> {
-		return [];
-	}
-
-	async countActiveByTenant(): Promise<number> {
-		return 0;
-	}
-
-	async maxSortOrder(): Promise<number> {
-		return 0;
 	}
 }
 
@@ -222,7 +240,41 @@ class StubUserRepository extends UserRepository {
 	}
 }
 
+function hasKind(outcomes: StaffScanOutcome[], kind: StaffScanOutcome["kind"]): boolean {
+	return outcomes.some((outcome) => outcome.kind === kind);
+}
+
+function findStampAdded(
+	outcomes: StaffScanOutcome[],
+	campaignId: string,
+): StaffScanOutcome | undefined {
+	return outcomes.find(
+		(outcome) => outcome.kind === "stamp_added" && outcome.campaignId === campaignId,
+	);
+}
+
+async function expectError<T extends Error>(
+	label: string,
+	action: () => Promise<unknown>,
+	Expected: new (...args: never[]) => T,
+): Promise<void> {
+	try {
+		await action();
+		console.error(`❌ expected ${Expected.name} for ${label}`);
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof Expected)) {
+			console.error(`❌ wrong error for ${label}`, error);
+			process.exit(1);
+		}
+	}
+
+	console.log(`✅ ${label} → ${Expected.name}`);
+}
+
 async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "1";
+
 	const customer = Customer.register({
 		tenantId,
 		name: "Stamp Scan Customer",
@@ -243,32 +295,41 @@ async function main(): Promise<void> {
 	const customerRepository = new InMemoryCustomerRepository([customer]);
 	const loyaltyRepository = new InMemoryLoyaltyTransactionRepository();
 	const stampRepository = new InMemoryStampCampaignRepository([activeCampaign, deactivated]);
-	const stampTypeRepository = new InMemoryStampTypeRepository();
-	const resolveStampScanOptions = new ResolveStampScanOptions(
+	const resolvePlan = new ResolveTenantSubscriptionPlan(
 		tenantRepository,
-		stampTypeRepository,
-		stampRepository,
+		new StubTenantBillingRepository(),
 	);
-
-	const useCase = new RecordCustomerVisitByQr(
-		tenantRepository,
+	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveCustomer = new ResolveCustomerByQrForStaffScan(
 		customerRepository,
 		new StubUserRepository(),
-		loyaltyRepository,
-		stampRepository,
-		stampTypeRepository,
-		resolveStampScanOptions,
 	);
 
-	const first = await useCase.execute({
+	const useCase = new RecordStaffScanByTarget(
+		tenantRepository,
+		customerRepository,
+		resolveCustomer,
+		loyaltyRepository,
+		stampRepository,
+		new StubPromotionRepository(),
+		new StubCustomerPromotionUsageRepository(),
+		assertFeature,
+	);
+
+	const scanParams = {
 		tenantId,
 		qrValue: customer.qrValue,
+		targetType: "stamp_campaign" as const,
+		targetId: activeCampaign.id,
 		createdByUserId: staffUserId,
 		staffRole: TenantRole.Owner,
-	});
+	};
 
-	if (first.stampsAdded.length !== 1 || first.stampsAdded[0]?.current !== 1) {
-		console.error("❌ first scan stampsAdded", first.stampsAdded);
+	const first = await useCase.execute(scanParams);
+	const firstStamp = findStampAdded(first.outcomes, activeCampaign.id);
+
+	if (!firstStamp || firstStamp.kind !== "stamp_added" || firstStamp.current !== 1) {
+		console.error("❌ first scan outcomes", first.outcomes);
 		process.exit(1);
 	}
 
@@ -286,18 +347,8 @@ async function main(): Promise<void> {
 
 	console.log("✅ first scan adds stamp 1/3");
 
-	await useCase.execute({
-		tenantId,
-		qrValue: customer.qrValue,
-		createdByUserId: staffUserId,
-		staffRole: TenantRole.Owner,
-	});
-	await useCase.execute({
-		tenantId,
-		qrValue: customer.qrValue,
-		createdByUserId: staffUserId,
-		staffRole: TenantRole.Owner,
-	});
+	await useCase.execute(scanParams);
+	await useCase.execute(scanParams);
 
 	const progressCompleted = stampRepository.getProgress(customer.id, activeCampaign.id);
 	if (
@@ -311,15 +362,13 @@ async function main(): Promise<void> {
 
 	console.log("✅ scans reach completed at required_stamps");
 
-	const afterCompleted = await useCase.execute({
-		tenantId,
-		qrValue: customer.qrValue,
-		createdByUserId: staffUserId,
-		staffRole: TenantRole.Owner,
-	});
+	const afterCompleted = await useCase.execute(scanParams);
 
-	if (afterCompleted.stampsAdded.length !== 0) {
-		console.error("❌ completed campaign should not add stamps", afterCompleted.stampsAdded);
+	if (
+		!hasKind(afterCompleted.outcomes, "card_already_completed") ||
+		hasKind(afterCompleted.outcomes, "stamp_added")
+	) {
+		console.error("❌ completed campaign should not add stamps", afterCompleted.outcomes);
 		process.exit(1);
 	}
 
@@ -331,13 +380,23 @@ async function main(): Promise<void> {
 
 	console.log("✅ completed campaign does not add more stamps");
 
+	await expectError(
+		"inactive campaign target",
+		() =>
+			useCase.execute({
+				...scanParams,
+				targetId: deactivated.id,
+			}),
+		InvalidStampScan,
+	);
+
 	const inactiveProgress = stampRepository.getProgress(customer.id, deactivated.id);
 	if (inactiveProgress) {
 		console.error("❌ inactive campaign should not have progress", inactiveProgress.toPrimitives());
 		process.exit(1);
 	}
 
-	console.log("✅ inactive campaign ignored");
+	console.log("✅ inactive campaign target rejected");
 	console.log("✅ verify:customer-stamp-scan-use-case passed");
 }
 

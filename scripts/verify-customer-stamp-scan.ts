@@ -14,6 +14,12 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	findStampAddedOutcome,
+	hasStaffScanOutcome,
+	postStaffScan,
+} from "./lib/staff-scan-verify-helpers";
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -24,7 +30,7 @@ function tenantHeaders(extra: Record<string, string> = {}): Record<string, strin
 }
 
 /**
- * E2E: active stamp campaign → staff scan → customer_stamp_progress + stamp_added tx.
+ * E2E: active stamp campaign → staff scan by targetId → progress + stamp_added tx.
  */
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) {
@@ -105,38 +111,20 @@ async function main(): Promise<void> {
 	const qrValue = registerBody.customer.qrValue;
 	console.log("✅ setup customer for stamp scan");
 
-	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue, stampTypeId }),
-	});
-	const scanBody = (await scan.json()) as {
-		customer?: { pointsBalance: number; visitsCount: number };
-		stampsAdded?: {
-			campaignId: string;
-			current: number;
-			required: number;
-			completed: boolean;
-		}[];
-	};
+	const scan = await postStaffScan(apexBaseUrl, ownerHeaders, campaignScanBody(qrValue, campaignId));
+	const scanStamp = findStampAddedOutcome(scan.body.outcomes, campaignId);
 
 	if (
-		!scan.ok ||
-		!scanBody.stampsAdded?.some(
-			(stamp) => stamp.current === 1 && stamp.required === 10,
-		)
+		scan.status !== 200 ||
+		!scanStamp ||
+		scanStamp.current !== 1 ||
+		scanStamp.required !== 10
 	) {
-		console.error("❌ POST /api/loyalty/scan:", scan.status, scanBody);
+		console.error("❌ POST /api/loyalty/scan:", scan.status, scan.body);
 		process.exit(1);
 	}
 
-	const scanStamp = scanBody.stampsAdded?.find((stamp) => stamp.required === 10);
-	if (!scanStamp) {
-		console.error("❌ expected stamp progress for created campaign in response");
-		process.exit(1);
-	}
-
-	console.log("✅ POST /api/loyalty/scan → stampsAdded 1/10");
+	console.log("✅ POST /api/loyalty/scan → outcomes stamp_added 1/10");
 
 	const progress = await prisma.customerStampProgress.findFirst({
 		where: { tenantId: DEMO_TENANT_ID, customerId, campaignId },
@@ -164,19 +152,15 @@ async function main(): Promise<void> {
 	console.log("✅ Prisma progress + stamp_added after first scan");
 
 	for (let i = 2; i <= 10; i += 1) {
-		const nextScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-			method: "POST",
-			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue, stampTypeId }),
-		});
-		const nextBody = (await nextScan.json()) as {
-			stampsAdded?: { campaignId?: string; current: number; completed: boolean }[];
-		};
+		const nextScan = await postStaffScan(
+			apexBaseUrl,
+			ownerHeaders,
+			campaignScanBody(qrValue, campaignId),
+		);
+		const campaignStamp = findStampAddedOutcome(nextScan.body.outcomes, campaignId);
 
-		const campaignStamp = nextBody.stampsAdded?.find((stamp) => stamp.campaignId === campaignId);
-
-		if (!nextScan.ok || campaignStamp?.current !== i) {
-			console.error(`❌ scan ${i}/10:`, nextScan.status, nextBody);
+		if (nextScan.status !== 200 || campaignStamp?.current !== i) {
+			console.error(`❌ scan ${i}/10:`, nextScan.status, nextScan.body);
 			process.exit(1);
 		}
 	}
@@ -192,21 +176,18 @@ async function main(): Promise<void> {
 
 	console.log("✅ ten scans complete campaign");
 
-	const afterCompleted = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue, stampTypeId }),
-	});
-	const afterCompletedBody = (await afterCompleted.json()) as {
-		stampsAdded?: { campaignId?: string }[];
-	};
-
-	const afterCompletedStamp = afterCompletedBody.stampsAdded?.find(
-		(stamp) => stamp.campaignId === campaignId,
+	const afterCompleted = await postStaffScan(
+		apexBaseUrl,
+		ownerHeaders,
+		campaignScanBody(qrValue, campaignId),
 	);
 
-	if (!afterCompleted.ok || afterCompletedStamp) {
-		console.error("❌ scan after completed should not add stamps:", afterCompleted.status, afterCompletedBody);
+	if (
+		afterCompleted.status !== 200 ||
+		!hasStaffScanOutcome(afterCompleted.body.outcomes, "card_already_completed") ||
+		hasStaffScanOutcome(afterCompleted.body.outcomes, "stamp_added")
+	) {
+		console.error("❌ scan after completed should not add stamps:", afterCompleted.status, afterCompleted.body);
 		process.exit(1);
 	}
 
@@ -254,26 +235,14 @@ async function main(): Promise<void> {
 	const inactiveCustomerId = registerInactiveBody.customer.id;
 	const inactiveQr = registerInactiveBody.customer.qrValue;
 
-	const inactiveScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: ownerHeaders,
-		body: JSON.stringify({ qrValue: inactiveQr, stampTypeId }),
-	});
-	const inactiveScanBody = (await inactiveScan.json()) as {
-		stampsAdded?: { campaignId?: string }[];
-	};
-
-	if (!inactiveScan.ok) {
-		console.error("❌ inactive campaign scan:", inactiveScan.status, inactiveScanBody);
-		process.exit(1);
-	}
-
-	const inactiveCampaignStamp = inactiveScanBody.stampsAdded?.find(
-		(stamp) => stamp.campaignId === campaignId,
+	const inactiveScan = await postStaffScan(
+		apexBaseUrl,
+		ownerHeaders,
+		campaignScanBody(inactiveQr, campaignId),
 	);
 
-	if (inactiveCampaignStamp) {
-		console.error("❌ inactive campaign should not add stamps:", inactiveScanBody);
+	if (inactiveScan.status !== 400 || inactiveScan.body.error?.type !== "InvalidStampScan") {
+		console.error("❌ inactive campaign scan expected 400:", inactiveScan.status, inactiveScan.body);
 		process.exit(1);
 	}
 
@@ -286,7 +255,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log("✅ inactive campaign does not add stamps");
+	console.log("✅ inactive campaign target → 400 InvalidStampScan");
 
 	await prisma.loyaltyTransaction.deleteMany({
 		where: { customerId: { in: [customerId, inactiveCustomerId] } },
