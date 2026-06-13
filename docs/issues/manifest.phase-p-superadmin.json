@@ -1,23 +1,18 @@
-{
-  "repo": "3urega/fidelization",
-  "sourceDoc": "docs/superadmin.md",
-  "issues": [
-    {
-      "title": "Phase P11: Platform admin gamification games library (foundation)",
-      "bodyFile": "docs/issues/platform-admin-gamification-library.md"
-    },
-    {
-      "title": "Phase P12: Platform admin communication center (email and push stub)",
-      "bodyFile": "docs/issues/platform-admin-communications-center.md"
-    },
-    {
-      "title": "Phase P13: Platform admin moderation queue (foundation)",
-      "bodyFile": "docs/issues/platform-admin-moderation-foundation.md"
-    },
-    {
-      "title": "Phase P14: Platform admin system settings (platform branding and integrations)",
-      "bodyFile": "docs/issues/platform-admin-system-settings.md"
-    }
-  ]
-}
-
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/superadmin.md",
+  "issues": [
+    {
+      "title": "Phase P12: Platform admin communication center (email and push stub)",
+      "bodyFile": "docs/issues/platform-admin-communications-center.md"
+    },
+    {
+      "title": "Phase P13: Platform admin moderation queue (foundation)",
+      "bodyFile": "docs/issues/platform-admin-moderation-foundation.md"
+    },
+    {
+      "title": "Phase P14: Platform admin system settings (platform branding and integrations)",
+      "bodyFile": "docs/issues/platform-admin-system-settings.md"
+    }
+  ]
+}

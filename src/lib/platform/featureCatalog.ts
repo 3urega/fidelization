@@ -21,7 +21,7 @@ export const PLATFORM_PLAN_FEATURE_CATALOG: PlatformFeatureCatalogEntry[] = [
 	{
 		key: "gamification",
 		label: "Gamificación",
-		description: "Juegos / ruleta (motor pendiente, P11)",
+		description: "Juegos / ruleta (biblioteca P11; motor pendiente)",
 		enforced: false,
 	},
 	{
