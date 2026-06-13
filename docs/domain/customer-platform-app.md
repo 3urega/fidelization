@@ -7,7 +7,7 @@ Este documento define la **app móvil de plataforma** (Capacitor → App Store /
 **Decisiones clave:**
 
 1. **Un solo tipo de cuenta** (`users`) — no hay `ConsumerUser` separado del owner.
-2. **Home de la app** — tres acciones: Registrarse · Registrar negocio · Login.
+2. **Home de la app** — landing orientada a recompensas: **Empezar** (cliente) · **Registrar negocio** (secundario) · **Iniciar sesión** (siempre visible).
 3. **Owner y cliente comparten auth** — «Registrar negocio» empieza por registrarse o iniciar sesión; el paso 2 es crear el perfil del negocio.
 4. **Dashboard adaptativo** — el owner ve sus negocio(s); el cliente ve locales con los que tiene relación; puede explorar otros y ver solo sus promos activas hasta que interactúe.
 
@@ -35,28 +35,34 @@ Objetivo:
 
 ## Home de la app (pantalla pública)
 
-Pantalla inicial antes de autenticación (`/` en app nativa o apex móvil):
+Pantalla inicial antes de autenticación (`/` en app nativa o apex móvil). Vende recompensas (sellos, premios, locales), no el proceso de registro. Spec: [`rediseño-home.md`](../rediseño-home.md).
 
 ```
 ┌─────────────────────────────────┐
-│         [Logo plataforma]       │
-│                                 │
+│            FIDELI               │
+│  Tus cafés favoritos te         │
+│         recompensan             │
+│  [Hero visual: tarjeta/sellos]  │
+│  ☕ Acumula sellos              │
+│  🎁 Consigue premios            │
+│  ❤️ Descubre nuevos locales     │
 │   ┌─────────────────────────┐   │
-│   │      Registrarse        │   │  → flujo cliente
+│   │       Empezar           │   │  → flujo cliente
 │   └─────────────────────────┘   │
-│   ┌─────────────────────────┐   │
-│   │   Registrar negocio     │   │  → flujo owner (auth + tenant)
-│   └─────────────────────────┘   │
-│                                 │
 │   ¿Ya tienes cuenta? Iniciar sesión
+│   ── o continúa con Google ──   │
+│   ¿Tienes un negocio?           │
+│   ┌─────────────────────────┐   │
+│   │   Registrar negocio     │   │  → flujo owner (secundario)
+│   └─────────────────────────┘   │
 └─────────────────────────────────┘
 ```
 
 | Acción | Destino |
 |--------|---------|
-| **Registrarse** | Formulario email/contraseña o Google → dashboard de **cliente** |
-| **Registrar negocio** | Paso 1: registrarse o login → Paso 2: crear negocio → dashboard de **owner** |
-| **Iniciar sesión** | Email/contraseña o Google → dashboard según relaciones del usuario |
+| **Empezar** | `/register` — formulario email/contraseña o Google → dashboard de **cliente** |
+| **Registrar negocio** | `/business/register` — paso 1: registrarse o login → paso 2: crear negocio → dashboard de **owner** |
+| **Iniciar sesión** | `/login` — email/contraseña o Google → dashboard según relaciones del usuario |
 
 ---
 
@@ -87,9 +93,9 @@ flowchart TB
 
 ---
 
-## Flujo A — Registrarse (cliente)
+## Flujo A — Empezar (cliente)
 
-1. Usuario pulsa **Registrarse**.
+1. Usuario pulsa **Empezar** en `/`.
 2. Completa email/contraseña o **Continuar con Google**.
 3. Sesión de plataforma (`userId`).
 4. Llega al **dashboard cliente** (vacío al principio).
@@ -287,7 +293,7 @@ Registrar negocio (tras auth):
 
 | Ruta | Quién | Descripción |
 |------|-------|-------------|
-| `/` | Público | Home: Registrarse · Registrar negocio · Login |
+| `/` | Público | Home: Empezar · Registrar negocio · Iniciar sesión |
 | `/register` | Público | Email/Google (flujo A) |
 | `/login` | Público | Sesión existente |
 | `/register/business` | Auth opcional | Paso 1 auth → paso 2 tenant (`/business/register/tenant`) |
@@ -334,8 +340,8 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 
 ## Criterios de aceptación (target)
 
-- [ ] Home app muestra Registrarse, Registrar negocio e Iniciar sesión.
-- [ ] Registrarse (email o Google) crea `users` y lleva al dashboard cliente.
+- [ ] Home app muestra Empezar, Registrar negocio e Iniciar sesión.
+- [ ] Empezar (→ `/register`, email o Google) crea `users` y lleva al dashboard cliente.
 - [ ] Registrar negocio exige auth (registro o login) y luego crea tenant + membership owner.
 - [ ] Mismo email puede ser owner de N negocios y cliente en M locales.
 - [ ] Dashboard owner lista sus negocios; dashboard cliente lista locales con interacción.
@@ -383,7 +389,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | # | Título | Body file |
 |---|--------|-----------|
 | 38 | Platform app: unified user auth + session kind user (domain + API) | **Closed** (2026-06-09) — [issue #38](https://github.com/3urega/fidelization/issues/38) |
-| 39 | Platform app: public home UI (Registrarse / Registrar negocio / Login) | **Closed** (2026-06-09) — [issue #39](https://github.com/3urega/fidelization/issues/39) |
+| 39 | Platform app: public home UI (Empezar / Registrar negocio / Iniciar sesión) | **Closed** (2026-06-09) — [issue #39](https://github.com/3urega/fidelization/issues/39); rediseño 2026-06 — [`rediseño-home.md`](../rediseño-home.md) |
 | 40 | Platform app: register business flow (auth + create tenant) | **Closed** (2026-06-09) — [issue #40](https://github.com/3urega/fidelization/issues/40) |
 | 41 | Platform app: unified dashboard (mis negocios + mis locales) | **Closed** (2026-06-09) — [issue #41](https://github.com/3urega/fidelization/issues/41) |
 | 42 | Platform app: join establishment + customer user_id link | **Closed** (2026-06-09) — [issue #42](https://github.com/3urega/fidelization/issues/42) |

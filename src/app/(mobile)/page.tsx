@@ -1,43 +1,36 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 
 import { PlatformGoogleOAuthEnabledMarker } from "../_components/platform-app/PlatformGoogleOAuthEnabledMarker";
 import { PlatformPublicHomeActions } from "../_components/platform-app/PlatformPublicHomeActions";
-import { platformRoutes } from "../../lib/platform/routes";
+import { PlatformPublicHomeBenefits } from "../_components/platform-app/PlatformPublicHomeBenefits";
+import { PlatformPublicHomeHeroVisual } from "../_components/platform-app/PlatformPublicHomeHeroVisual";
+import { PlatformPublicHomeLogo } from "../_components/platform-app/PlatformPublicHomeLogo";
 
 export const metadata: Metadata = {
-	title: "App — Fidelización",
-	description: "Regístrate, descubre locales o crea tu negocio en la plataforma de fidelización.",
+	title: "Fideli — Tus cafés favoritos te recompensan",
+	description:
+		"Acumula sellos, consigue premios y descubre promociones exclusivas en tus locales favoritos.",
 };
 
 export default function PlatformAppPublicHomePage(): React.ReactElement {
 	return (
-		<main className="flex flex-1 flex-col justify-center gap-10 py-6">
+		<main className="flex flex-1 flex-col gap-6 py-2">
 			<PlatformGoogleOAuthEnabledMarker />
 			<header className="flex flex-col items-center gap-3 text-center">
-				<div
-					aria-hidden
-					className="flex h-16 w-16 items-center justify-center rounded-theme border border-border bg-background text-xl font-semibold text-primary"
-				>
-					3
-				</div>
+				<PlatformPublicHomeLogo />
 				<div className="flex flex-col gap-1">
-					<p className="text-sm font-medium text-primary">3urega</p>
-					<h1 className="text-2xl font-semibold text-foreground">Tu fidelización, en un solo lugar</h1>
+					<h1 className="text-2xl font-semibold text-foreground">
+						Tus cafés favoritos te recompensan
+					</h1>
 					<p className="text-sm text-muted">
-						Acumula puntos en tus locales favoritos o gestiona el programa de tu negocio.
+						Acumula sellos, consigue premios y disfruta de ventajas exclusivas.
 					</p>
 				</div>
 			</header>
 
+			<PlatformPublicHomeHeroVisual />
+			<PlatformPublicHomeBenefits />
 			<PlatformPublicHomeActions />
-
-			<p className="text-center text-sm text-muted">
-				¿Ya tienes cuenta?{" "}
-				<Link href={platformRoutes.login} className="font-medium text-primary hover:opacity-80">
-					Iniciar sesión
-				</Link>
-			</p>
 		</main>
 	);
 }

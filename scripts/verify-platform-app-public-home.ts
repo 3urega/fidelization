@@ -35,11 +35,21 @@ async function main(): Promise<void> {
 	}
 
 	const homeHtml = await homePublic.text();
-	for (const text of ["Registrarse", "Registrar negocio", "Iniciar sesión"]) {
+	for (const text of [
+		"Tus cafés favoritos te recompensan",
+		"Empezar",
+		"Registrar negocio",
+		"Iniciar sesión",
+	]) {
 		if (!homeHtml.includes(text)) {
 			console.error(`❌ GET /: expected "${text}" in HTML`);
 			process.exit(1);
 		}
+	}
+
+	if (!homeHtml.includes("/register")) {
+		console.error("❌ GET /: expected link to /register (Empezar)");
+		process.exit(1);
 	}
 
 	if (!homeHtml.includes("/business/register")) {
