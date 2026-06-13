@@ -50,6 +50,8 @@
     "verify:platform-admin-billing": "tsx scripts/verify-platform-admin-billing.ts",
     "verify:platform-admin-features-use-case": "tsx scripts/verify-platform-admin-features-use-case.ts",
     "verify:platform-admin-features": "tsx scripts/verify-platform-admin-features.ts",
+    "verify:platform-admin-analytics-use-case": "tsx scripts/verify-platform-admin-analytics-use-case.ts",
+    "verify:platform-admin-analytics": "tsx scripts/verify-platform-admin-analytics.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",
     "verify:business-onboarding": "tsx scripts/verify-business-onboarding.ts",
     "verify:format-tenant-host": "tsx scripts/verify-format-tenant-host.ts",

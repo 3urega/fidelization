@@ -18,5 +18,5 @@ export const platformNav: readonly PlatformNavItem[] = [
 	{ href: "/platform/plans", label: "Planes", icon: "plans" },
 	{ href: "/platform/billing", label: "Facturación", icon: "billing" },
 	{ href: "/platform/features", label: "Feature flags", icon: "flags" },
-	{ href: "/platform/analytics", label: "Analítica", icon: "chart", comingSoon: true },
+	{ href: "/platform/analytics", label: "Analítica", icon: "chart" },
 ] as const;

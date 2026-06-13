@@ -126,6 +126,8 @@ class MutableTenantRepository extends TenantRepository {
 }
 
 async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "0";
+
 	const billingRepository = new MutableBillingRepository([planBasic, planPro]);
 	const listPlans = new ListPlatformPlanFeatures(
 		new ListPlatformSubscriptionPlans(billingRepository),

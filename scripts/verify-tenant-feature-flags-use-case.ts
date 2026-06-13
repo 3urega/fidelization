@@ -315,6 +315,8 @@ async function verifyListPromotionsGuard(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "0";
+
 	await verifyFeatureGuards();
 	await verifyTenantOverrides();
 	await verifyEmployeeLimit();

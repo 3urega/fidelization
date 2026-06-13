@@ -511,8 +511,8 @@ Publicadas en GitHub · manifest: [`manifest.phase-p-superadmin.json`](issues/ma
 | P4 | [#74](https://github.com/3urega/fidelization/issues/74) ✅ **Implemented** (2026-06-13) | Comerciantes |
 | P5 | [#75](https://github.com/3urega/fidelization/issues/75) ✅ **Implemented** (2026-06-13) | Planes Basic/Pro/Premium |
 | P6 | [#76](https://github.com/3urega/fidelization/issues/76) ✅ **Implemented** (2026-06-13) | Facturación / MRR |
-| P7 | [#77](https://github.com/3urega/fidelization/issues/77) | Feature flags |
-| P8 | [#78](https://github.com/3urega/fidelization/issues/78) | Analítica |
+| P7 | [#77](https://github.com/3urega/fidelization/issues/77) ✅ **Implemented** (2026-06-13) | Feature flags |
+| P8 | [#78](https://github.com/3urega/fidelization/issues/78) ✅ **Implemented** (2026-06-13) | Analítica |
 | P9 | [#79](https://github.com/3urega/fidelization/issues/79) | Usuarios app |
 | P10 | [#80](https://github.com/3urega/fidelization/issues/80) | Plantillas campañas |
 | P11 | [#81](https://github.com/3urega/fidelization/issues/81) | Biblioteca juegos |

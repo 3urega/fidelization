@@ -3,14 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P7: Platform admin feature flags editor (plan and tenant)",
-      "bodyFile": "docs/issues/platform-admin-feature-flags-editor.md"
-    },
-    {
-      "title": "Phase P8: Platform admin analytics (top tenants and loyalty metrics)",
-      "bodyFile": "docs/issues/platform-admin-analytics.md"
-    },
-    {
       "title": "Phase P9: Platform admin end users list and activity filters",
       "bodyFile": "docs/issues/platform-admin-end-users-list.md"
     },

@@ -165,3 +165,29 @@ export function buildStampScanGlobalWindows(
 		last7Days: { start: last7Start, end: todayEnd },
 	};
 }
+
+/** Rolling calendar window: N days inclusive ending at end of reference day in timezone. */
+export function buildZonedRollingPeriodWindow(
+	referenceDate: Date,
+	timeZone: string,
+	periodDays: number,
+): TimeWindowBounds {
+	if (!Number.isInteger(periodDays) || periodDays < 1) {
+		throw new Error("periodDays must be a positive integer");
+	}
+
+	const periodEnd = endOfZonedDayUtc(referenceDate, timeZone);
+	const refParts = getPartsInTimeZone(referenceDate, timeZone);
+	const startParts = addCalendarDays(refParts.year, refParts.month, refParts.day, -(periodDays - 1));
+	const periodStart = zonedLocalToUtc(
+		startParts.year,
+		startParts.month,
+		startParts.day,
+		0,
+		0,
+		0,
+		timeZone,
+	);
+
+	return { start: periodStart, end: periodEnd };
+}
