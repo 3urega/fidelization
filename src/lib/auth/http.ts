@@ -22,6 +22,7 @@ import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
 import type { CustomerPromotionSummary } from "../../contexts/loyalty/promotions/domain/CustomerPromotionSummary";
 import type { PlatformDashboardMetrics } from "../../contexts/platform/domain/PlatformDashboardMetrics";
+import type { PlatformTenantDetail } from "../../contexts/platform/domain/PlatformTenantDetail";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
@@ -94,6 +95,25 @@ export function platformDashboardMetricsToJson(
 		})),
 		generatedAt: metrics.generatedAt.toISOString(),
 		timezone: metrics.timezone,
+	};
+}
+
+export function platformTenantDetailToJson(
+	detail: PlatformTenantDetail,
+): Record<string, unknown> {
+	return {
+		tenant: platformTenantToJson(detail.tenant),
+		owners: detail.owners.map((owner) => ({
+			userId: owner.userId,
+			name: owner.name,
+			email: owner.email,
+		})),
+		activity: {
+			customersCount: detail.activity.customersCount,
+			staffCount: detail.activity.staffCount,
+			qrScansCount: detail.activity.qrScansCount,
+		},
+		availablePlans: detail.availablePlans.map((plan) => subscriptionPlanToJson(plan)),
 	};
 }
 

@@ -10,6 +10,7 @@ import { Tenant } from "../domain/Tenant";
 import type { ListDiscoverableEstablishmentsParams } from "../domain/TenantRepository";
 import { TenantBrandingUpdate } from "../domain/TenantBrandingUpdate";
 import { TenantProfileUpdate } from "../domain/TenantProfileUpdate";
+import type { TenantPlatformProfileUpdate } from "../domain/TenantPlatformProfileUpdate";
 import { TenantRepository } from "../domain/TenantRepository";
 import { TenantStatus } from "../domain/TenantStatus";
 import { discoveryTagsFromPrisma, tenantFromPrismaRow } from "./tenantFromPrismaRow";
@@ -119,6 +120,25 @@ export class PrismaTenantRepository extends TenantRepository {
 					...(branding.secondaryColor !== undefined
 						? { secondaryColor: branding.secondaryColor }
 						: {}),
+				},
+			});
+
+			return tenantFromPrismaRow(row);
+		} catch {
+			return null;
+		}
+	}
+
+	async updatePlatformProfile(
+		tenantId: string,
+		profile: TenantPlatformProfileUpdate,
+	): Promise<Tenant | null> {
+		try {
+			const row = await prisma.tenant.update({
+				where: { id: tenantId },
+				data: {
+					...(profile.name !== undefined ? { name: profile.name } : {}),
+					...(profile.slug !== undefined ? { slug: profile.slug } : {}),
 				},
 			});
 

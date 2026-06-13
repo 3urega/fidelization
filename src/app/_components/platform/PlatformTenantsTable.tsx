@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { Button } from "../ui/Button";
@@ -168,7 +169,14 @@ export function PlatformTenantsTable(): ReactElement {
 
 							return (
 								<tr key={tenant.id} className="border-b border-border last:border-b-0">
-									<td className="px-6 py-3 font-medium text-foreground">{tenant.name}</td>
+									<td className="px-6 py-3 font-medium text-foreground">
+										<Link
+											href={`/platform/tenants/${tenant.id}`}
+											className="text-primary hover:opacity-80"
+										>
+											{tenant.name}
+										</Link>
+									</td>
 									<td className="px-6 py-3 text-muted">
 										<code className="text-xs">{tenant.slug}</code>
 									</td>
