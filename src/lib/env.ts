@@ -1,3 +1,5 @@
+import { parseGeocodingProvider, type GeocodingProviderId } from "../contexts/shared/geocoding/domain/GeocodingProvider";
+
 function requireEnv(name: string, minLength?: number): string {
 	const value = process.env[name]?.trim();
 
@@ -97,6 +99,21 @@ export const env = {
 
 	get stripeWebhookSecret(): string | undefined {
 		return optionalEnv("STRIPE_WEBHOOK_SECRET");
+	},
+
+	/** Active geocoding provider (default mapbox). */
+	get geocodingProvider(): GeocodingProviderId {
+		return parseGeocodingProvider(optionalEnv("GEOCODING_PROVIDER"));
+	},
+
+	/** Mapbox secret access token (server-side geocoding). */
+	get mapboxAccessToken(): string | undefined {
+		return optionalEnv("MAPBOX_ACCESS_TOKEN");
+	},
+
+	/** Google Maps Geocoding API key (server-side). */
+	get googleMapsGeocodingApiKey(): string | undefined {
+		return optionalEnv("GOOGLE_MAPS_GEOCODING_API_KEY");
 	},
 
 	/** Warn in production boot when critical vars are missing (non-throwing). */

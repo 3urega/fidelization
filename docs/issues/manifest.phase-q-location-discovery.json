@@ -10,10 +10,6 @@
   },
   "issues": [
     {
-      "title": "Phase Q1: Geocoding gateway port (Mapbox dev + Google Maps infra)",
-      "bodyFile": "docs/issues/geocoding-gateway-port.md"
-    },
-    {
       "title": "Phase Q2: Tenant geocoding on profile save (coordinates persistence)",
       "bodyFile": "docs/issues/tenant-geocoding-on-profile-save.md"
     },

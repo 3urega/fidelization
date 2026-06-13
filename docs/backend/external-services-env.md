@@ -1,6 +1,6 @@
 # Servicios externos — claves y variables de entorno
 
-Guía rápida de qué credenciales necesitas fuera del repo para **Google Sign-In** y **Stripe**, y cómo configurarlas en `.env`.
+Guía rápida de qué credenciales necesitas fuera del repo para **Google Sign-In**, **Stripe** y **Geocoding**, y cómo configurarlas en `.env`.
 
 Referencia de plantilla: [`.env.example`](../../.env.example). Acceso tipado en servidor: [`src/lib/env.ts`](../../src/lib/env.ts).
 
@@ -14,6 +14,7 @@ Referencia de plantilla: [`.env.example`](../../.env.example). Acceso tipado en 
 | `DATABASE_URL` | **Sí** (E2E, Prisma) | Postgres |
 | `GOOGLE_CLIENT_ID` + `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | No | Botón «Continuar con Google» en la app personal |
 | `STRIPE_*` | No | Checkout Pro/Premium y webhooks de suscripción |
+| `MAPBOX_ACCESS_TOKEN` / `GOOGLE_MAPS_GEOCODING_API_KEY` | No | Geocoding al guardar dirección del negocio (Phase Q) |
 | `DISABLE_TENANT_PLAN_GATES=1` | No | Dev/staging: promociones Pro+, límites empleados, etc. sin asignar plan (ignorado en producción) |
 
 Sin Google ni Stripe la app arranca y puedes usar registro/login por email, plan Basic gratis y el resto del MVP.
@@ -139,6 +140,49 @@ npm run verify:onboarding-plan-selection   # E2E con dev server + DATABASE_URL
 
 ---
 
+## Geocoding (Mapbox / Google Maps)
+
+Convierte la **dirección del negocio** en coordenadas al guardar el perfil (`PATCH /api/tenant/profile`). En dev se usa **Mapbox** por defecto; el adaptador **Google Geocoding API** está listo para producción.
+
+### Variables en `.env`
+
+```env
+GEOCODING_PROVIDER=mapbox
+MAPBOX_ACCESS_TOKEN=pk.eyJ...
+# GOOGLE_MAPS_GEOCODING_API_KEY=AIza...
+```
+
+| Variable | Para qué |
+|----------|----------|
+| `GEOCODING_PROVIDER` | `mapbox` (default) o `google` — selecciona el adaptador activo en servidor |
+| `MAPBOX_ACCESS_TOKEN` | Token **secreto** de Mapbox (Geocoding API v5) |
+| `GOOGLE_MAPS_GEOCODING_API_KEY` | API key con Geocoding API habilitada (distinto del OAuth Client ID) |
+
+### Mapbox (recomendado en dev)
+
+1. Cuenta en [Mapbox](https://account.mapbox.com/).
+2. Crear un **secret access token** con scope de Geocoding.
+3. Pegar en `MAPBOX_ACCESS_TOKEN`.
+
+### Google Maps (prod o alternativa)
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → habilitar **Geocoding API**.
+2. Crear **API key** restringida (IP servidor / referrers según despliegue).
+3. `GEOCODING_PROVIDER=google` + `GOOGLE_MAPS_GEOCODING_API_KEY`.
+
+### Comportamiento si no está configurado
+
+- La app **arranca** sin tokens.
+- Al geocodificar (Q2+), el gateway activo lanza `GeocodingNotConfigured` si falta la clave del proveedor seleccionado.
+
+### Verificación
+
+```bash
+npm run verify:geocoding-gateway-use-case
+```
+
+---
+
 ## Checklist `.env` mínimo para probar todo
 
 ```env
@@ -158,6 +202,10 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_PRO_MONTHLY=price_...
 STRIPE_PRICE_PREMIUM_MONTHLY=price_...
+
+# Geocoding (opcional — Q2+ al guardar dirección del negocio)
+GEOCODING_PROVIDER=mapbox
+MAPBOX_ACCESS_TOKEN=pk.eyJ...
 ```
 
 Copia `.env.example` → `.env` y sustituye los placeholders.

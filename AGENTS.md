@@ -19,6 +19,7 @@ npm run verify:platform-app-dashboard-use-case  # issue #41 — ListUserRelation
 npm run verify:platform-app-dashboard  # issue #41 — /home dashboard + business shell E2E (dev + DATABASE_URL)
 npm run verify:platform-app-discover-establishments-use-case  # Phase I — ListDiscoverableEstablishments (domain stub)
 npm run verify:platform-app-discover-establishments  # Phase I — GET /api/user/establishments grid E2E (dev server)
+npm run verify:geocoding-gateway-use-case  # Phase Q1 #85 — GeocodeAddressString + GeocodingGateway port (domain stub)
 npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAsCustomer (domain stub)
 npm run verify:platform-app-customer-join  # issue #42 — join by slug + deep link E2E (dev + DATABASE_URL)
 npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEstablishmentDetailForUser (domain stub)

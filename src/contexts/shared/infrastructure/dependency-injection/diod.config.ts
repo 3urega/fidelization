@@ -28,6 +28,11 @@ import { UpdateSubscriptionPlan } from "../../../billing/subscriptions/applicati
 import { StripeCheckoutGateway } from "../../../billing/stripe/domain/StripeCheckoutGateway";
 import { StripeWebhookGateway } from "../../../billing/stripe/domain/StripeWebhookGateway";
 import { StripeCheckoutGatewayStripe } from "../../../billing/stripe/infrastructure/StripeCheckoutGatewayStripe";
+import { GeocodeAddressString } from "../../geocoding/application/geocode/GeocodeAddressString";
+import { GeocodingGateway } from "../../geocoding/domain/GeocodingGateway";
+import { GeocodingGatewayGoogle } from "../../geocoding/infrastructure/GeocodingGatewayGoogle";
+import { GeocodingGatewayMapbox } from "../../geocoding/infrastructure/GeocodingGatewayMapbox";
+import { env } from "../../../../lib/env";
 import { StripeWebhookGatewayStripe } from "../../../billing/stripe/infrastructure/StripeWebhookGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
 import { UserAuthenticator } from "../../../identity/users/application/authenticate/UserAuthenticator";
@@ -367,5 +372,14 @@ builder.registerAndUse(GetPlatformTenantFeatures);
 builder.registerAndUse(UpdatePlatformTenantFeatures);
 builder.registerAndUse(AssertTenantPlanFeature);
 builder.registerAndUse(AssertTenantEmployeeLimit);
+
+builder.registerAndUse(GeocodingGatewayMapbox);
+builder.registerAndUse(GeocodingGatewayGoogle);
+if (env.geocodingProvider === "google") {
+	builder.register(GeocodingGateway).use(GeocodingGatewayGoogle);
+} else {
+	builder.register(GeocodingGateway).use(GeocodingGatewayMapbox);
+}
+builder.registerAndUse(GeocodeAddressString);
 
 export const container = builder.build();

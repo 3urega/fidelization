@@ -115,6 +115,7 @@
     "verify:stripe-checkout-use-case": "tsx scripts/verify-stripe-checkout-use-case.ts",
     "verify:stripe-webhook-checkout-use-case": "tsx scripts/verify-stripe-webhook-checkout-use-case.ts",
     "verify:stripe-webhooks-use-case": "tsx scripts/verify-stripe-webhooks-use-case.ts",
+    "verify:geocoding-gateway-use-case": "tsx scripts/verify-geocoding-gateway-use-case.ts",
     "verify:tenant-feature-flags-use-case": "tsx scripts/verify-tenant-feature-flags-use-case.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "test": "jest --testPathIgnorePatterns=.*\\.ci\\.test\\.ts$",
