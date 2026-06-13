@@ -21,6 +21,7 @@ import { StampType } from "../../contexts/loyalty/stamp_types/domain/StampType";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
 import type { CustomerPromotionSummary } from "../../contexts/loyalty/promotions/domain/CustomerPromotionSummary";
+import type { PlatformDashboardMetrics } from "../../contexts/platform/domain/PlatformDashboardMetrics";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
@@ -70,6 +71,29 @@ export function platformTenantToJson(tenant: Tenant): Record<string, string> {
 	return {
 		...tenantToJson(tenant),
 		createdAt: primitives.createdAt,
+	};
+}
+
+export function platformDashboardMetricsToJson(
+	metrics: PlatformDashboardMetrics,
+): Record<string, unknown> {
+	return {
+		tenantsActive: metrics.tenantsActive,
+		tenantsSuspended: metrics.tenantsSuspended,
+		usersRegistered: metrics.usersRegistered,
+		qrScansToday: metrics.qrScansToday,
+		stampsToday: metrics.stampsToday,
+		activePromotions: metrics.activePromotions,
+		subscriptionsPastDue: metrics.subscriptionsPastDue,
+		recentTenants: metrics.recentTenants.map((tenant) => ({
+			id: tenant.id,
+			name: tenant.name,
+			slug: tenant.slug,
+			status: tenant.status,
+			createdAt: tenant.createdAt.toISOString(),
+		})),
+		generatedAt: metrics.generatedAt.toISOString(),
+		timezone: metrics.timezone,
 	};
 }
 

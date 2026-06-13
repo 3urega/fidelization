@@ -36,6 +36,8 @@
     "verify:platform-login": "tsx scripts/verify-platform-login-flow.ts",
     "verify:platform-isolation": "tsx scripts/verify-platform-isolation.ts",
     "verify:platform-tenants": "tsx scripts/verify-platform-tenants.ts",
+    "verify:platform-admin-dashboard-use-case": "tsx scripts/verify-platform-admin-dashboard-use-case.ts",
+    "verify:platform-admin-dashboard": "tsx scripts/verify-platform-admin-dashboard.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",
     "verify:business-onboarding": "tsx scripts/verify-business-onboarding.ts",
     "verify:format-tenant-host": "tsx scripts/verify-format-tenant-host.ts",

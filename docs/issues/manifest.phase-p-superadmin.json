@@ -1,0 +1,58 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/superadmin.md",
+  "issues": [
+    {
+      "title": "Phase P2: Platform admin tenant detail and plan assignment",
+      "bodyFile": "docs/issues/platform-admin-tenant-detail.md"
+    },
+    {
+      "title": "Phase P3: Platform admin impersonate tenant owner (audit + security)",
+      "bodyFile": "docs/issues/platform-admin-impersonate-tenant.md"
+    },
+    {
+      "title": "Phase P4: Platform admin owners (comerciantes) list",
+      "bodyFile": "docs/issues/platform-admin-owners-list.md"
+    },
+    {
+      "title": "Phase P5: Platform admin subscription plans catalog UI",
+      "bodyFile": "docs/issues/platform-admin-plans-catalog-ui.md"
+    },
+    {
+      "title": "Phase P6: Platform admin billing overview (MRR, subscriptions, failed payments)",
+      "bodyFile": "docs/issues/platform-admin-billing-overview.md"
+    },
+    {
+      "title": "Phase P7: Platform admin feature flags editor (plan and tenant)",
+      "bodyFile": "docs/issues/platform-admin-feature-flags-editor.md"
+    },
+    {
+      "title": "Phase P8: Platform admin analytics (top tenants and loyalty metrics)",
+      "bodyFile": "docs/issues/platform-admin-analytics.md"
+    },
+    {
+      "title": "Phase P9: Platform admin end users list and activity filters",
+      "bodyFile": "docs/issues/platform-admin-end-users-list.md"
+    },
+    {
+      "title": "Phase P10: Platform admin global stamp campaign templates",
+      "bodyFile": "docs/issues/platform-admin-campaign-templates.md"
+    },
+    {
+      "title": "Phase P11: Platform admin gamification games library (foundation)",
+      "bodyFile": "docs/issues/platform-admin-gamification-library.md"
+    },
+    {
+      "title": "Phase P12: Platform admin communication center (email and push stub)",
+      "bodyFile": "docs/issues/platform-admin-communications-center.md"
+    },
+    {
+      "title": "Phase P13: Platform admin moderation queue (foundation)",
+      "bodyFile": "docs/issues/platform-admin-moderation-foundation.md"
+    },
+    {
+      "title": "Phase P14: Platform admin system settings (platform branding and integrations)",
+      "bodyFile": "docs/issues/platform-admin-system-settings.md"
+    }
+  ]
+}
