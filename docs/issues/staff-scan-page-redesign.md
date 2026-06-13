@@ -22,6 +22,7 @@ Phase M — requiere M2 + M3. Sustituye [`StaffScanForm`](../../src/app/_compone
 | `stamp_added` | **«¡Producto anotado! {current} de {required} completados»** |
 | `point_recorded` | «Punto anotado» |
 | `card_completed` | «¡Has completado la tarjeta!» |
+| `card_already_completed` | «La tarjeta ya está completada» |
 | `promotion_applied` | «Promoción aplicada» |
 | `promotion_exhausted` | «¡La promoción ya ha sido agotada!» |
 

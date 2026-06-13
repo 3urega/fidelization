@@ -57,6 +57,7 @@ npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campai
 npm run verify:stamp-types-use-case  # Phase H1 — stamp_types catalog (domain stub)
 npm run verify:stamp-types           # Phase H1 — stamp types API + Prisma (dev + DATABASE_URL)
 npm run verify:customer-stamp-scan-targeted-use-case  # Phase H3 — typed scan filters campaigns (domain stub)
+npm run verify:staff-scan-flow-spec-use-case  # Phase M1 #65 — staff scan target/outcome types (domain)
 npm run verify:customer-stamp-scan-targeted  # Phase H3 — café/menú E2E scan (dev + DATABASE_URL)
 npm run verify:rewards-use-case      # issue #24 — Create/List/Update rewards (domain stub)
 npm run verify:rewards               # issue #24 — POST/GET/PATCH rewards + Prisma (dev + DATABASE_URL)

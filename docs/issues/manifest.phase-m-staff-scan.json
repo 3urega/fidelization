@@ -3,10 +3,6 @@
   "sourceDoc": "docs/domain/staff-scan-flow.md",
   "issues": [
     {
-      "title": "Phase M1: Staff scan flow spec and outcome types",
-      "bodyFile": "docs/issues/staff-scan-flow-spec.md"
-    },
-    {
       "title": "Phase M2: List staff scan targets API (GET /api/loyalty/scan/targets)",
       "bodyFile": "docs/issues/staff-scan-targets-api.md"
     },
@@ -19,8 +15,12 @@
       "bodyFile": "docs/issues/staff-scan-page-redesign.md"
     },
     {
-      "title": "Phase M5: Staff scan verify scripts and E2E",
+      "title": "Phase M5: Staff scan verify scripts and full regression",
       "bodyFile": "docs/issues/staff-scan-verify-e2e.md"
+    },
+    {
+      "title": "Phase M6: Staff scan docs cleanup and Phase H supersede",
+      "bodyFile": "docs/issues/staff-scan-docs-cleanup.md"
     }
   ]
 }

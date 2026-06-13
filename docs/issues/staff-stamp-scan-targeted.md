@@ -1,3 +1,5 @@
+> **Superseded by Phase M** ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70)). El scan ya no filtra por `stampTypeId`; el empleado elige una tarjeta concreta. Ver [`staff-scan-flow.md`](../domain/staff-scan-flow.md).
+
 ## Objetivo
 
 El empleado elige el tipo al escanear; el sello solo avanza en la campaña correspondiente.

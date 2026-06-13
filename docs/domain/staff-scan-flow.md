@@ -1,6 +1,16 @@
 # Staff scan flow (target-first)
 
-**Status:** Planned — Phase M (issues #65–#69, actualizado 2026-06-13).
+**Status:** Phase M in progress — **M1 implemented** ([#65](https://github.com/3urega/fidelization/issues/65), 2026-06-13). M2–M6 pending.
+
+## Implementation status (M1)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Target types + parser | [`StaffScanTarget.ts`](../../src/contexts/loyalty/customers/domain/StaffScanTarget.ts) |
+| Outcome union + messages | [`StaffScanOutcome.ts`](../../src/contexts/loyalty/customers/domain/StaffScanOutcome.ts) |
+| Domain verify | `npm run verify:staff-scan-flow-spec-use-case` |
+
+**Pendiente M3:** eliminar `stampTypeId` en `POST /api/loyalty/scan`, `addStampsForActiveCampaigns` en [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts), y sustituir `stampsAdded[]` por `outcomes[]`.
 
 ## Invariante de negocio (no negociable)
 
@@ -47,7 +57,17 @@ Multiple lines may appear (e.g. punto + producto anotado; producto anotado + tar
 - `GET /api/loyalty/scan/targets` — lista tarjetas activas + promos activas para el picker.
 - `POST /api/loyalty/scan` — body `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }`.
 
-`outcomes[]` discriminated union: `point_recorded`, `stamp_added`, `card_completed`, `promotion_applied`, `promotion_exhausted`.
+`outcomes[]` discriminated union: `point_recorded`, `stamp_added`, `card_completed`, `card_already_completed`, `promotion_applied`, `promotion_exhausted`.
+
+## Edge cases (dominio)
+
+| Caso | Comportamiento |
+|------|----------------|
+| Tarjeta ya completada | `point_recorded` + `card_already_completed`; sin sello |
+| Promo límite agotado | `point_recorded` + `promotion_exhausted`; sin uso extra |
+| Platform user QR sin customer | Auto-join en **tarjeta y promo** (misma resolución) |
+| Tenant sin campañas | Picker vacío; scan bloqueado en UI |
+| `POST …/promotions/[id]/use` | Delega al use case unificado o 410 (documentar en M3/M6) |
 
 ## Eliminaciones (no deprecación suave)
 
@@ -60,10 +80,11 @@ Multiple lines may appear (e.g. punto + producto anotado; producto anotado + tar
 
 | # | Slice | Issue |
 |---|-------|-------|
-| [#65](https://github.com/3urega/fidelization/issues/65) | M1 | Domain spec + outcome types |
+| [#65](https://github.com/3urega/fidelization/issues/65) | M1 | Domain spec + outcome types — **Closed** (2026-06-13) |
 | [#66](https://github.com/3urega/fidelization/issues/66) | M2 | List scan targets API |
 | [#67](https://github.com/3urega/fidelization/issues/67) | M3 | Record scan by target + outcomes |
 | [#68](https://github.com/3urega/fidelization/issues/68) | M4 | `/scan` page redesign |
-| [#69](https://github.com/3urega/fidelization/issues/69) | M5 | Verify E2E |
+| [#69](https://github.com/3urega/fidelization/issues/69) | M5 | Verify E2E (todos los scripts scan) |
+| [#70](https://github.com/3urega/fidelization/issues/70) | M6 | Docs + cleanup Phase H |
 
 Manifest: [`manifest.phase-m-staff-scan.json`](../issues/manifest.phase-m-staff-scan.json).
