@@ -111,6 +111,7 @@ import { UpdatePlatformCampaignTemplate } from "../../../platform/application/ca
 import { CreatePlatformGame } from "../../../platform/application/games/CreatePlatformGame";
 import { ListPlatformGames } from "../../../platform/application/games/ListPlatformGames";
 import { UpdatePlatformGame } from "../../../platform/application/games/UpdatePlatformGame";
+import { ListAvailablePlatformGamesForTenant } from "../../../platform/application/games/ListAvailablePlatformGamesForTenant";
 import { GetPlatformAppUserDetail } from "../../../platform/application/users/GetPlatformAppUserDetail";
 import { ListPlatformAppUsers } from "../../../platform/application/users/ListPlatformAppUsers";
 import { ListPlatformOwners } from "../../../platform/application/owners/ListPlatformOwners";
@@ -240,6 +241,7 @@ builder.registerAndUse(PrismaPlatformGameRepository);
 builder.registerAndUse(ListPlatformGames);
 builder.registerAndUse(CreatePlatformGame);
 builder.registerAndUse(UpdatePlatformGame);
+builder.registerAndUse(ListAvailablePlatformGamesForTenant);
 builder.register(PlatformBillingReadRepository).use(PrismaPlatformBillingReadRepository);
 builder.registerAndUse(PrismaPlatformBillingReadRepository);
 builder.registerAndUse(GetPlatformBillingOverview);

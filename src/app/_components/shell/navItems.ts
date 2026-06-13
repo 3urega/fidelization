@@ -10,6 +10,7 @@ export type TenantAdminNavIcon =
 	| "customers"
 	| "stamps"
 	| "promotions"
+	| "games"
 	| "team"
 	| "store";
 
@@ -28,6 +29,7 @@ export const tenantAdminNav: readonly TenantAdminNavItem[] = [
 	{ href: "/settings/profile", label: "Datos del negocio", icon: "store", ownerOnly: true },
 	{ href: "/settings/stamps", label: "Sellos", icon: "stamps", ownerOnly: true },
 	{ href: "/settings/promotions", label: "Promociones", icon: "promotions", ownerOnly: true },
+	{ href: "/settings/games", label: "Juegos", icon: "games", ownerOnly: true },
 	{ href: "/settings/team", label: "Equipo", icon: "team", ownerOnly: true },
 	{ href: "/profile", label: "Perfil", icon: "user" },
 ] as const;
