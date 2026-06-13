@@ -53,6 +53,7 @@ export function PlatformTenantsTable(): ReactElement {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [togglingId, setTogglingId] = useState<string | null>(null);
+	const [enteringId, setEnteringId] = useState<string | null>(null);
 	const [actionError, setActionError] = useState<string | null>(null);
 
 	const load = useCallback(async () => {
@@ -81,6 +82,34 @@ export function PlatformTenantsTable(): ReactElement {
 	useEffect(() => {
 		void load();
 	}, [load]);
+
+	async function enterAsTenant(tenant: PlatformTenantRow): Promise<void> {
+		setEnteringId(tenant.id);
+		setActionError(null);
+
+		try {
+			const response = await fetch(`/api/platform/tenants/${tenant.id}/impersonate`, {
+				method: "POST",
+				credentials: "include",
+			});
+			const data = (await response.json()) as {
+				redirectUrl?: string;
+				error?: { description?: string };
+			};
+
+			if (!response.ok) {
+				setActionError(data.error?.description ?? `Error al entrar (${response.status})`);
+
+				return;
+			}
+
+			window.location.assign(data.redirectUrl ?? "/panel");
+		} catch {
+			setActionError("No se pudo conectar con el servidor");
+		} finally {
+			setEnteringId(null);
+		}
+	}
 
 	async function toggleStatus(tenant: PlatformTenantRow): Promise<void> {
 		const nextStatus = tenant.status === "active" ? "suspended" : "active";
@@ -166,6 +195,7 @@ export function PlatformTenantsTable(): ReactElement {
 						{tenants.map((tenant) => {
 							const isActive = tenant.status === "active";
 							const busy = togglingId === tenant.id;
+							const entering = enteringId === tenant.id;
 
 							return (
 								<tr key={tenant.id} className="border-b border-border last:border-b-0">
@@ -186,15 +216,26 @@ export function PlatformTenantsTable(): ReactElement {
 									</td>
 									<td className="px-6 py-3 text-muted">{formatCreatedAt(tenant.createdAt)}</td>
 									<td className="px-6 py-3">
-										<Button
-											type="button"
-											variant="secondary"
-											className="text-xs"
-											disabled={busy || togglingId !== null}
-											onClick={() => void toggleStatus(tenant)}
-										>
-											{busy ? "Guardando…" : isActive ? "Suspender" : "Activar"}
-										</Button>
+										<div className="flex flex-wrap gap-2">
+											<Button
+												type="button"
+												variant="secondary"
+												className="text-xs"
+												disabled={entering || busy || togglingId !== null || enteringId !== null}
+												onClick={() => void enterAsTenant(tenant)}
+											>
+												{entering ? "Entrando…" : "Entrar"}
+											</Button>
+											<Button
+												type="button"
+												variant="secondary"
+												className="text-xs"
+												disabled={busy || entering || togglingId !== null || enteringId !== null}
+												onClick={() => void toggleStatus(tenant)}
+											>
+												{busy ? "Guardando…" : isActive ? "Suspender" : "Activar"}
+											</Button>
+										</div>
 									</td>
 								</tr>
 							);

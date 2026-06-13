@@ -33,6 +33,7 @@ export function PlatformTenantDetailPanel({ tenantId }: PlatformTenantDetailPane
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [togglingStatus, setTogglingStatus] = useState(false);
+	const [impersonating, setImpersonating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [actionError, setActionError] = useState<string | null>(null);
 	const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -100,6 +101,35 @@ export function PlatformTenantDetailPanel({ tenantId }: PlatformTenantDetailPane
 			setActionError("No se pudo conectar con el servidor");
 		} finally {
 			setSaving(false);
+		}
+	}
+
+	async function impersonateTenant(): Promise<void> {
+		setImpersonating(true);
+		setActionError(null);
+		setSavedMessage(null);
+
+		try {
+			const response = await fetch(`/api/platform/tenants/${tenantId}/impersonate`, {
+				method: "POST",
+				credentials: "include",
+			});
+			const data = (await response.json()) as {
+				redirectUrl?: string;
+				error?: { description?: string };
+			};
+
+			if (!response.ok) {
+				setActionError(data.error?.description ?? `Error al entrar (${response.status})`);
+
+				return;
+			}
+
+			window.location.assign(data.redirectUrl ?? "/panel");
+		} catch {
+			setActionError("No se pudo conectar con el servidor");
+		} finally {
+			setImpersonating(false);
 		}
 	}
 
@@ -211,13 +241,21 @@ export function PlatformTenantDetailPanel({ tenantId }: PlatformTenantDetailPane
 					</label>
 
 					<div className="flex flex-wrap gap-2">
-						<Button type="submit" disabled={saving || togglingStatus}>
+						<Button type="submit" disabled={saving || togglingStatus || impersonating}>
 							{saving ? "Guardando…" : "Guardar cambios"}
 						</Button>
 						<Button
 							type="button"
 							variant="secondary"
-							disabled={saving || togglingStatus}
+							disabled={saving || togglingStatus || impersonating}
+							onClick={() => void impersonateTenant()}
+						>
+							{impersonating ? "Entrando…" : "Entrar como comercio"}
+						</Button>
+						<Button
+							type="button"
+							variant="secondary"
+							disabled={saving || togglingStatus || impersonating}
 							onClick={() => void toggleStatus()}
 						>
 							{togglingStatus ? "Actualizando…" : isActive ? "Suspender" : "Reactivar"}

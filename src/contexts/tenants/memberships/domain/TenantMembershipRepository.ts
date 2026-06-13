@@ -7,6 +7,10 @@ export type StaffMembership = {
 	role: TenantRole;
 };
 
+export type OwnerStaffMembership = StaffMembership & {
+	userId: string;
+};
+
 /** @deprecated Use StaffMembership */
 export type OwnerMembership = StaffMembership;
 
@@ -18,6 +22,10 @@ export abstract class TenantMembershipRepository {
 	abstract findOwnerMembershipByUserId(userId: string): Promise<StaffMembership | null>;
 
 	abstract listOwnerMembershipsByUserId(userId: string): Promise<StaffMembership[]>;
+
+	async findFirstOwnerMembershipByTenantId(_tenantId: string): Promise<OwnerStaffMembership | null> {
+		return null;
+	}
 
 	abstract findById(tenantId: string): Promise<Tenant | null>;
 

@@ -20,12 +20,13 @@ export function Sidebar({ mobileOpen, onNavigate }: SidebarProps): ReactElement 
 
 	const tenantName = session?.tenant.name ?? "Fidelización";
 	const logoUrl = session?.tenant.logoUrl.trim();
+	const impersonating = Boolean(session?.impersonation?.active);
 
 	return (
 		<aside
 			id="tenant-admin-sidebar"
 			className={[
-				"fixed bottom-0 left-0 top-14 z-40 flex w-64 flex-col border-r border-border bg-background transition-transform duration-200 md:translate-x-0",
+				`fixed bottom-0 left-0 ${impersonating ? "top-24" : "top-14"} z-40 flex w-64 flex-col border-r border-border bg-background transition-transform duration-200 md:translate-x-0`,
 				mobileOpen ? "translate-x-0" : "-translate-x-full",
 			].join(" ")}
 			aria-label="Menú principal"

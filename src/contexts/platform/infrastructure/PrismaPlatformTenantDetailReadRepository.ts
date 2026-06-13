@@ -38,7 +38,7 @@ export class PrismaPlatformTenantDetailReadRepository extends PlatformTenantDeta
 			prisma.$queryRaw<QrScanCountRow[]>`
 				SELECT COUNT(*) AS qr_scans_count
 				FROM loyalty_transactions lt
-				WHERE lt.tenant_id = ${tenantId}::uuid
+				WHERE lt.tenant_id = ${tenantId}
 				AND lt.type = 'points_earned'::"LoyaltyTransactionType"
 				AND lt.metadata->>'source' = 'staff_scan'
 			`,

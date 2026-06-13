@@ -8,7 +8,11 @@ import {
 	CreateStaffMembershipParams,
 	TenantEmployee,
 } from "../domain/TenantEmployee";
-import { StaffMembership, TenantMembershipRepository } from "../domain/TenantMembershipRepository";
+import {
+	type OwnerStaffMembership,
+	StaffMembership,
+	TenantMembershipRepository,
+} from "../domain/TenantMembershipRepository";
 import { isStaffRole, TenantRole } from "../domain/TenantRole";
 
 const STAFF_ROLES = ["owner", "employee", "admin"] as const;
@@ -66,6 +70,23 @@ export class PrismaTenantMembershipRepository extends TenantMembershipRepository
 		});
 
 		return memberships.map((membership) => this.toStaffMembership(membership));
+	}
+
+	async findFirstOwnerMembershipByTenantId(tenantId: string): Promise<OwnerStaffMembership | null> {
+		const membership = await prisma.tenantMembership.findFirst({
+			where: { tenantId, role: "owner" },
+			include: { tenant: true },
+			orderBy: { user: { name: "asc" } },
+		});
+
+		if (!membership) {
+			return null;
+		}
+
+		return {
+			...this.toStaffMembership(membership),
+			userId: membership.userId,
+		};
 	}
 
 	async findById(tenantId: string): Promise<Tenant | null> {

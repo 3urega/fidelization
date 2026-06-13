@@ -10,6 +10,7 @@ import { UserDoesNotExist } from "../../../contexts/identity/users/domain/UserDo
 import { container } from "../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { handleAuthDomainError, tenantToJson, userToJson } from "../../../lib/auth/http";
 import { requireTenantSession } from "../../../lib/auth/requireTenantSession";
+import { isImpersonatingTenantSession } from "../../../lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,16 @@ export async function GET(request: Request): Promise<Response> {
 			tenant: tenantToJson(auth.membership.tenant),
 			role: auth.session.role,
 			planFeatures: enabledFeatures(plan.features),
+			...(isImpersonatingTenantSession(auth.session)
+				? {
+						impersonation: {
+							active: true,
+							tenantSlug: auth.membership.tenant.slug,
+							platformUserId: auth.session.impersonatedBy,
+							tenantStatus: auth.membership.tenant.status,
+						},
+					}
+				: {}),
 		});
 	} catch (error) {
 		if (error instanceof UserDoesNotExist) {

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 
-import { PlatformTenantDetailPanel } from "../../../_components/platform/PlatformTenantDetailPanel";
-import { PageHeader } from "../../../_components/shell/PageHeader";
+import { PlatformTenantDetailPanel } from "../../../../_components/platform/PlatformTenantDetailPanel";
+import { PageHeader } from "../../../../_components/shell/PageHeader";
 
 type PlatformTenantDetailPageProps = {
 	params: { tenantId: string };

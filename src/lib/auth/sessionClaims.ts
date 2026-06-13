@@ -5,6 +5,7 @@ export type TenantSessionClaims = {
 	userId: string;
 	tenantId: string;
 	role: string;
+	impersonatedBy?: string;
 };
 
 export type PlatformSessionClaims = {
@@ -53,6 +54,10 @@ export function isCustomerSession(session: SessionClaims): session is CustomerSe
 	return session.kind === "customer";
 }
 
+export function isImpersonatingTenantSession(session: SessionClaims): session is TenantSessionClaims {
+	return isTenantSession(session) && typeof session.impersonatedBy === "string";
+}
+
 export function isUserSession(session: SessionClaims): session is UserSessionClaims {
 	return session.kind === "user";
 }
@@ -96,8 +101,15 @@ export function parseSessionPayload(payload: Record<string, unknown>): SessionCl
 
 	const tenantId = payload.tenantId;
 	const role = payload.role;
+	const impersonatedBy = payload.impersonatedBy;
 	if (typeof tenantId === "string" && typeof role === "string") {
-		return { kind: "tenant", userId: subjectId, tenantId, role };
+		return {
+			kind: "tenant",
+			userId: subjectId,
+			tenantId,
+			role,
+			...(typeof impersonatedBy === "string" ? { impersonatedBy } : {}),
+		};
 	}
 
 	return null;

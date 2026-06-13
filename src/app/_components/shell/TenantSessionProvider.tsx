@@ -37,11 +37,19 @@ export type TenantSessionTenant = {
 	discoveryTags: string[];
 };
 
+export type TenantSessionImpersonation = {
+	active: boolean;
+	tenantSlug: string;
+	platformUserId: string;
+	tenantStatus: string;
+};
+
 export type TenantSessionData = {
 	user: TenantSessionUser;
 	tenant: TenantSessionTenant;
 	role: string;
 	planFeatures: string[];
+	impersonation?: TenantSessionImpersonation;
 };
 
 type TenantSessionContextValue = {
@@ -80,6 +88,7 @@ export function TenantSessionProvider({ children }: { children: ReactNode }): Re
 		setSession({
 			...data,
 			planFeatures: data.planFeatures ?? [],
+			impersonation: data.impersonation,
 		});
 		setError(null);
 		applyTheme({

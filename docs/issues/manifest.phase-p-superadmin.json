@@ -3,10 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P2: Platform admin tenant detail and plan assignment",
-      "bodyFile": "docs/issues/platform-admin-tenant-detail.md"
-    },
-    {
       "title": "Phase P3: Platform admin impersonate tenant owner (audit + security)",
       "bodyFile": "docs/issues/platform-admin-impersonate-tenant.md"
     },

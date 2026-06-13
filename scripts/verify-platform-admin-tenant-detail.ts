@@ -197,7 +197,7 @@ async function main(): Promise<void> {
 	});
 	const detailHtml = await detailPage.text();
 
-	if (detailPage.status !== 200 || !detailHtml.includes("Propietarios")) {
+	if (detailPage.status !== 200 || !detailHtml.includes("Detalle del negocio")) {
 		console.error("❌ GET /platform/tenants/[id] page", detailPage.status);
 		process.exit(1);
 	}

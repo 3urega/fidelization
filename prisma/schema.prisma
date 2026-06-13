@@ -106,8 +106,21 @@ model Tenant {
   coupons            Coupon[]
   notifications      Notification[]
   subscriptions      Subscription[]
+  impersonationEvents PlatformImpersonationEvent[]
 
   @@map("tenants")
+}
+
+model PlatformImpersonationEvent {
+  id                 String   @id @default(uuid())
+  platformUserId     String   @map("platform_user_id")
+  tenantId           String   @map("tenant_id")
+  impersonatedUserId String   @map("impersonated_user_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+  @@map("platform_impersonation_events")
 }
 
 model TenantMembership {

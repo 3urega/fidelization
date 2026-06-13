@@ -19,6 +19,7 @@ export {
 	type SessionClaims,
 	type TenantSessionClaims,
 	type UserSessionClaims,
+	isImpersonatingTenantSession,
 } from "./sessionClaims";
 
 const COOKIE_NAME = SESSION_COOKIE_NAME;
@@ -51,6 +52,9 @@ export async function createSessionToken(claims: SessionClaims): Promise<string>
 								sub: claims.userId,
 								tenantId: claims.tenantId,
 								role: claims.role,
+								...(claims.impersonatedBy
+									? { impersonatedBy: claims.impersonatedBy }
+									: {}),
 							};
 
 	return new SignJWT(payload)
