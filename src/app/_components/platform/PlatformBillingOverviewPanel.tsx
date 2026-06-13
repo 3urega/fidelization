@@ -46,7 +46,7 @@ export function PlatformBillingOverviewPanel(): ReactElement {
 		return (
 			<Card>
 				<h2 className="font-medium text-foreground">Facturación</h2>
-				<p className="mt-2 text-sm text-muted">Cargando métricas…</p>
+				<p className="mt-2 text-sm text-muted">Cargando MRR estimado y Suscripciones…</p>
 			</Card>
 		);
 	}

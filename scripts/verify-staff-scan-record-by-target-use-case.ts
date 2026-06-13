@@ -331,7 +331,8 @@ function buildUseCase(
 	const tenantRepository = new StubTenantRepository(baseTenant);
 	const billingRepository = new InMemoryTenantBillingRepository([planPro]);
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 	const resolveCustomer = new ResolveCustomerByQrForStaffScan(customerRepository, userRepository);
 
 	return new RecordStaffScanByTarget(

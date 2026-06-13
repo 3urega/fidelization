@@ -2,7 +2,7 @@
 import "dotenv/config";
 
 import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
-import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { ResolveTenantEffectivePlanFeatures } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
@@ -313,7 +313,8 @@ async function main(): Promise<void> {
 		tenantRepository,
 		new StubTenantBillingRepository(),
 	);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 	const resolveCustomer = new ResolveCustomerByQrForStaffScan(
 		customerRepository,
 		new StubUserRepository(),

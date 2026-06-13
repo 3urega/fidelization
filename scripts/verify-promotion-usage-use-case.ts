@@ -282,7 +282,8 @@ function buildStack(promotion: Promotion) {
 	const tenantRepository = new MutableStubTenantRepository(baseTenant());
 	const billingRepository = new InMemoryTenantBillingRepository([planBasic, planPro]);
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 	const promotionRepository = new InMemoryPromotionRepository([promotion]);
 	const usageRepository = new InMemoryCustomerPromotionUsageRepository();
 	const customer = Customer.fromPrimitives({

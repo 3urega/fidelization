@@ -3,6 +3,7 @@ import "dotenv/config";
 
 import { AssertTenantEmployeeLimit } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantEmployeeLimit";
 import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantEffectivePlanFeatures } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { ListPromotions } from "../src/contexts/loyalty/promotions/application/list/ListPromotions";
 import { Promotion } from "../src/contexts/loyalty/promotions/domain/Promotion";
@@ -16,7 +17,9 @@ import {
 import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { TenantPlanLimitExceeded } from "../src/contexts/billing/subscriptions/domain/TenantPlanLimitExceeded";
-import { isPlanFeatureEnabled } from "../src/contexts/billing/subscriptions/domain/TenantPlanFeature";
+import {
+	type TenantFeatureOverrides,
+} from "../src/contexts/billing/subscriptions/domain/TenantFeatureOverrides";
 import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 import { TenantEmployee } from "../src/contexts/tenants/memberships/domain/TenantEmployee";
 import { TenantMembershipRepository } from "../src/contexts/tenants/memberships/domain/TenantMembershipRepository";
@@ -76,8 +79,22 @@ class InMemoryPromotionRepository extends PromotionRepository {
 }
 
 class MutableStubTenantRepository extends TenantRepository {
-	constructor(public tenant: Tenant | null) {
+	constructor(
+		public tenant: Tenant | null,
+		private featureOverrides: TenantFeatureOverrides | null = null,
+	) {
 		super();
+	}
+
+	async findFeatureOverrides(_tenantId: string): Promise<TenantFeatureOverrides | null> {
+		return this.featureOverrides;
+	}
+
+	async updateFeatureOverrides(
+		_tenantId: string,
+		overrides: TenantFeatureOverrides | null,
+	): Promise<void> {
+		this.featureOverrides = overrides;
 	}
 
 	async findAll(): Promise<Tenant[]> {
@@ -205,18 +222,24 @@ async function expectError<T extends Error>(
 	console.log(`✅ ${label} → ${Expected.name}`);
 }
 
-function buildStack(plan: SubscriptionPlan, employees: TenantEmployee[] = []) {
+function buildStack(
+	plan: SubscriptionPlan,
+	employees: TenantEmployee[] = [],
+	featureOverrides: TenantFeatureOverrides | null = null,
+) {
 	const tenantRepository = new MutableStubTenantRepository(
 		baseTenant(plan.id, plan.name),
+		featureOverrides,
 	);
 	const billingRepository = new InMemoryTenantBillingRepository([planBasic, planPro, planPremium]);
 	const membershipRepository = new InMemoryTenantMembershipRepository(employees);
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 	const assertEmployeeLimit = new AssertTenantEmployeeLimit(resolvePlan, membershipRepository);
 	const listPromotions = new ListPromotions(tenantRepository, new InMemoryPromotionRepository(), assertFeature);
 
-	return { assertFeature, assertEmployeeLimit, listPromotions, resolvePlan };
+	return { assertFeature, assertEmployeeLimit, listPromotions, resolvePlan, resolveEffective, tenantRepository };
 }
 
 async function verifyFeatureGuards(): Promise<void> {
@@ -236,14 +259,26 @@ async function verifyFeatureGuards(): Promise<void> {
 
 	const premiumStack = buildStack(planPremium);
 	await premiumStack.assertFeature.execute({ tenantId, feature: "promotions" });
-	const premiumPlan = await premiumStack.resolvePlan.execute(tenantId);
+	const premiumResolved = await premiumStack.resolveEffective.execute(tenantId);
 
-	if (!isPlanFeatureEnabled(premiumPlan.features, "referrals")) {
+	if (!premiumResolved.effectiveFeatures.referrals) {
 		console.error("❌ Premium plan should include referrals feature flag");
 		process.exit(1);
 	}
 
 	console.log("✅ Premium tenant includes referrals feature flag");
+}
+
+async function verifyTenantOverrides(): Promise<void> {
+	const basicWithPromo = buildStack(planBasic, [], { promotions: true });
+	await basicWithPromo.assertFeature.execute({ tenantId, feature: "promotions" });
+	console.log("✅ Basic tenant override enables promotions");
+
+	const proWithoutPromo = buildStack(planPro, [], { promotions: false });
+	await expectError("Pro tenant override disables promotions", () =>
+		proWithoutPromo.assertFeature.execute({ tenantId, feature: "promotions" }),
+		PlanFeatureNotAvailable,
+	);
 }
 
 async function verifyEmployeeLimit(): Promise<void> {
@@ -281,6 +316,7 @@ async function verifyListPromotionsGuard(): Promise<void> {
 
 async function main(): Promise<void> {
 	await verifyFeatureGuards();
+	await verifyTenantOverrides();
 	await verifyEmployeeLimit();
 	await verifyListPromotionsGuard();
 	console.log("✅ verify:tenant-feature-flags-use-case passed");

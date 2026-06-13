@@ -260,7 +260,8 @@ async function main(): Promise<void> {
 	}
 
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepo, billingRepo);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepo);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 
 	await assertFeature.execute({ tenantId, feature: "promotions" });
 	console.log("✅ AssignPlatformTenantSubscriptionPlan enables plan features (promotions)");

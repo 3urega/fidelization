@@ -197,7 +197,8 @@ function buildStack(plan: SubscriptionPlan) {
 	const billingRepository = new InMemoryTenantBillingRepository([planBasic, planPro, planPremium]);
 	const promotionRepository = new InMemoryPromotionRepository();
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 
 	return {
 		create: new CreatePromotion(tenantRepository, promotionRepository, assertFeature),

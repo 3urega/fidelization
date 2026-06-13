@@ -23,7 +23,7 @@ export function PlatformDashboardAlerts({ metrics }: PlatformDashboardAlertsProp
 	if (metrics.subscriptionsPastDue > 0) {
 		alerts.push({
 			message: `${metrics.subscriptionsPastDue} suscripción(es) con pago pendiente.`,
-			href: "/platform/tenants",
+			href: "/platform/billing",
 		});
 	}
 
@@ -38,7 +38,7 @@ export function PlatformDashboardAlerts({ metrics }: PlatformDashboardAlertsProp
 					<p className="text-sm text-foreground">
 						{alert.message}{" "}
 						<Link href={alert.href} className="font-medium text-primary hover:opacity-80">
-							Ver negocios
+							{alert.href === "/platform/billing" ? "Ver facturación" : "Ver negocios"}
 						</Link>
 					</p>
 				</Card>

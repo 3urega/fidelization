@@ -3,10 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P6: Platform admin billing overview (MRR, subscriptions, failed payments)",
-      "bodyFile": "docs/issues/platform-admin-billing-overview.md"
-    },
-    {
       "title": "Phase P7: Platform admin feature flags editor (plan and tenant)",
       "bodyFile": "docs/issues/platform-admin-feature-flags-editor.md"
     },

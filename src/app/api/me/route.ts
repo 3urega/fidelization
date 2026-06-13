@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 import { UserFinder } from "../../../contexts/identity/users/application/find/UserFinder";
 import { UserProfileUpdater } from "../../../contexts/identity/users/application/update_profile/UserProfileUpdater";
-import { ResolveTenantSubscriptionPlan } from "../../../contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { ResolveTenantEffectivePlanFeatures } from "../../../contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { enabledFeatures } from "../../../contexts/billing/subscriptions/domain/TenantPlanFeature";
 import { UserDoesNotExist } from "../../../contexts/identity/users/domain/UserDoesNotExist";
 import { container } from "../../../contexts/shared/infrastructure/dependency-injection/diod.config";
@@ -22,13 +22,15 @@ export async function GET(request: Request): Promise<Response> {
 
 	try {
 		const user = await container.get(UserFinder).find(auth.session.userId);
-		const plan = await container.get(ResolveTenantSubscriptionPlan).execute(auth.session.tenantId);
+		const resolved = await container
+			.get(ResolveTenantEffectivePlanFeatures)
+			.execute(auth.session.tenantId);
 
 		return NextResponse.json({
 			user: userToJson(user),
 			tenant: tenantToJson(auth.membership.tenant),
 			role: auth.session.role,
-			planFeatures: enabledFeatures(plan.features),
+			planFeatures: enabledFeatures(resolved.effectiveFeatures),
 			...(isImpersonatingTenantSession(auth.session)
 				? {
 						impersonation: {

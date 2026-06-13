@@ -1,3 +1,4 @@
+import type { TenantFeatureOverrides } from "../../../billing/subscriptions/domain/TenantFeatureOverrides";
 import { DiscoverableEstablishmentsPage } from "./DiscoverableEstablishment";
 import { Tenant } from "./Tenant";
 import { TenantBrandingUpdate } from "./TenantBrandingUpdate";
@@ -45,4 +46,13 @@ export abstract class TenantRepository {
 	async updateCoverImageUrl(_tenantId: string, _coverImageUrl: string): Promise<Tenant | null> {
 		return null;
 	}
+
+	async findFeatureOverrides(_tenantId: string): Promise<TenantFeatureOverrides | null> {
+		return null;
+	}
+
+	async updateFeatureOverrides(
+		_tenantId: string,
+		_overrides: TenantFeatureOverrides | null,
+	): Promise<void> {}
 }

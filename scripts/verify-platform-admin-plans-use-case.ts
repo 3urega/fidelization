@@ -2,6 +2,7 @@
 import "dotenv/config";
 
 import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantEffectivePlanFeatures } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { ListPlatformSubscriptionPlans } from "../src/contexts/billing/subscriptions/application/list/ListPlatformSubscriptionPlans";
 import { UpdateSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/update/UpdateSubscriptionPlan";
@@ -148,11 +149,10 @@ async function main(): Promise<void> {
 		createdAt: "2026-06-01T10:00:00.000Z",
 	});
 
-	const resolvePlan = new ResolveTenantSubscriptionPlan(
-		new StubTenantRepository(tenant),
-		billingRepository,
-	);
-	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const tenantRepo = new StubTenantRepository(tenant);
+	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepo, billingRepository);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepo);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 
 	await assertFeature.execute({ tenantId, feature: "gamification" });
 

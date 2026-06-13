@@ -3,7 +3,7 @@ import { Service } from "diod";
 import { PlanFeatureNotAvailable } from "../../domain/PlanFeatureNotAvailable";
 import { SubscriptionPlan } from "../../domain/SubscriptionPlan";
 import { isPlanFeatureEnabled, type TenantPlanFeature } from "../../domain/TenantPlanFeature";
-import { ResolveTenantSubscriptionPlan } from "../resolve/ResolveTenantSubscriptionPlan";
+import { ResolveTenantEffectivePlanFeatures } from "../resolve/ResolveTenantEffectivePlanFeatures";
 
 export type AssertTenantPlanFeatureParams = {
 	tenantId: string;
@@ -12,15 +12,15 @@ export type AssertTenantPlanFeatureParams = {
 
 @Service()
 export class AssertTenantPlanFeature {
-	constructor(private readonly resolveTenantSubscriptionPlan: ResolveTenantSubscriptionPlan) {}
+	constructor(private readonly resolveTenantEffectivePlanFeatures: ResolveTenantEffectivePlanFeatures) {}
 
 	async execute(params: AssertTenantPlanFeatureParams): Promise<SubscriptionPlan> {
-		const plan = await this.resolveTenantSubscriptionPlan.execute(params.tenantId);
+		const resolved = await this.resolveTenantEffectivePlanFeatures.execute(params.tenantId);
 
-		if (!isPlanFeatureEnabled(plan.features, params.feature)) {
+		if (!isPlanFeatureEnabled(resolved.effectiveFeatures, params.feature)) {
 			throw new PlanFeatureNotAvailable(params.tenantId, params.feature);
 		}
 
-		return plan;
+		return resolved.plan;
 	}
 }

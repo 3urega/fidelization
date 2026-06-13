@@ -11,6 +11,10 @@ import type { ListDiscoverableEstablishmentsParams } from "../domain/TenantRepos
 import { TenantBrandingUpdate } from "../domain/TenantBrandingUpdate";
 import { TenantProfileUpdate } from "../domain/TenantProfileUpdate";
 import type { TenantPlatformProfileUpdate } from "../domain/TenantPlatformProfileUpdate";
+import {
+	parseTenantFeatureOverrides,
+	type TenantFeatureOverrides,
+} from "../../../billing/subscriptions/domain/TenantFeatureOverrides";
 import { TenantRepository } from "../domain/TenantRepository";
 import { TenantStatus } from "../domain/TenantStatus";
 import { discoveryTagsFromPrisma, tenantFromPrismaRow } from "./tenantFromPrismaRow";
@@ -178,5 +182,28 @@ export class PrismaTenantRepository extends TenantRepository {
 		} catch {
 			return null;
 		}
+	}
+
+	async findFeatureOverrides(tenantId: string): Promise<TenantFeatureOverrides | null> {
+		const row = await prisma.tenant.findUnique({
+			where: { id: tenantId },
+			select: { features: true },
+		});
+
+		if (!row) {
+			return null;
+		}
+
+		return parseTenantFeatureOverrides(row.features);
+	}
+
+	async updateFeatureOverrides(
+		tenantId: string,
+		overrides: TenantFeatureOverrides | null,
+	): Promise<void> {
+		await prisma.tenant.update({
+			where: { id: tenantId },
+			data: { features: overrides ?? Prisma.JsonNull },
+		});
 	}
 }

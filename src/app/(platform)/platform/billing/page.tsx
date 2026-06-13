@@ -8,7 +8,7 @@ export default function PlatformBillingPage(): ReactElement {
 		<div className="flex flex-col gap-6">
 			<PageHeader
 				title="Facturación"
-				description="MRR estimado, suscripciones Stripe y problemas de cobro."
+				description="MRR estimado, Suscripciones Stripe y problemas de cobro."
 			/>
 			<PlatformBillingOverviewPanel />
 		</div>
