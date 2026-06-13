@@ -1,6 +1,6 @@
 # Staff scan flow (target-first)
 
-**Status:** Phase M in progress — **M1 implemented** ([#65](https://github.com/3urega/fidelization/issues/65), 2026-06-13). M2–M6 pending.
+**Status:** Phase M in progress — **M1 implemented** ([#65](https://github.com/3urega/fidelization/issues/65), 2026-06-13), **M2 implemented** ([#66](https://github.com/3urega/fidelization/issues/66), 2026-06-13). M3–M6 pending.
 
 ## Implementation status (M1)
 
@@ -9,6 +9,17 @@
 | Target types + parser | [`StaffScanTarget.ts`](../../src/contexts/loyalty/customers/domain/StaffScanTarget.ts) |
 | Outcome union + messages | [`StaffScanOutcome.ts`](../../src/contexts/loyalty/customers/domain/StaffScanOutcome.ts) |
 | Domain verify | `npm run verify:staff-scan-flow-spec-use-case` |
+
+## Implementation status (M2)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Read models | [`StaffScanTargets.ts`](../../src/contexts/loyalty/customers/domain/StaffScanTargets.ts) |
+| Staff-only guard | [`StaffScanForbidden.ts`](../../src/contexts/loyalty/customers/domain/StaffScanForbidden.ts) |
+| List use case | [`ListStaffScanTargets.ts`](../../src/contexts/loyalty/customers/application/scan/ListStaffScanTargets.ts) |
+| API route | [`GET /api/loyalty/scan/targets`](../../src/app/api/loyalty/scan/targets/route.ts) |
+| Domain verify | `npm run verify:staff-scan-targets-use-case` |
+| E2E verify | `npm run verify:staff-scan-targets` (dev + `DATABASE_URL`) |
 
 **Pendiente M3:** eliminar `stampTypeId` en `POST /api/loyalty/scan`, `addStampsForActiveCampaigns` en [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts), y sustituir `stampsAdded[]` por `outcomes[]`.
 
@@ -81,7 +92,7 @@ Multiple lines may appear (e.g. punto + producto anotado; producto anotado + tar
 | # | Slice | Issue |
 |---|-------|-------|
 | [#65](https://github.com/3urega/fidelization/issues/65) | M1 | Domain spec + outcome types — **Closed** (2026-06-13) |
-| [#66](https://github.com/3urega/fidelization/issues/66) | M2 | List scan targets API |
+| [#66](https://github.com/3urega/fidelization/issues/66) | M2 | List scan targets API — **Closed** (2026-06-13) |
 | [#67](https://github.com/3urega/fidelization/issues/67) | M3 | Record scan by target + outcomes |
 | [#68](https://github.com/3urega/fidelization/issues/68) | M4 | `/scan` page redesign |
 | [#69](https://github.com/3urega/fidelization/issues/69) | M5 | Verify E2E (todos los scripts scan) |

@@ -4,6 +4,11 @@ import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import type {
+	StaffScanCampaignTarget,
+	StaffScanPromotionTarget,
+	StaffScanTargets,
+} from "../../contexts/loyalty/customers/domain/StaffScanTargets";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import type { CustomerDetailView } from "../../contexts/loyalty/customers/domain/analytics/CustomerDetail";
 import type { CustomerInsightsSummary } from "../../contexts/loyalty/customers/domain/analytics/CustomerInsightsSummary";
@@ -341,6 +346,38 @@ export function stampProgressToJson(
 	};
 }
 
+export function staffScanCampaignTargetToJson(
+	target: StaffScanCampaignTarget,
+): Record<string, string | number> {
+	return {
+		id: target.id,
+		name: target.name,
+		requiredStamps: target.requiredStamps,
+		visualTemplate: target.visualTemplate,
+		cardBackgroundVariant: target.cardBackgroundVariant,
+		stampTypeLabel: target.stampTypeLabel,
+		conditions: target.conditions,
+	};
+}
+
+export function staffScanPromotionTargetToJson(
+	target: StaffScanPromotionTarget,
+): Record<string, string | number | null> {
+	return {
+		id: target.id,
+		title: target.title,
+		description: target.description,
+		maxUsesPerUser: target.maxUsesPerUser,
+	};
+}
+
+export function staffScanTargetsToJson(targets: StaffScanTargets): Record<string, unknown> {
+	return {
+		stampCampaigns: targets.stampCampaigns.map(staffScanCampaignTargetToJson),
+		promotions: targets.promotions.map(staffScanPromotionTargetToJson),
+	};
+}
+
 export function customerAuthResponseToJson(
 	customer: Customer,
 	session: CustomerSessionClaims,
@@ -472,6 +509,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "InvalidStampScan") {
 		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "StaffScanForbidden") {
+		return HttpNextResponse.domainError(error, 403);
 	}
 	if (error.type === "RewardForbidden") {
 		return HttpNextResponse.domainError(error, 403);

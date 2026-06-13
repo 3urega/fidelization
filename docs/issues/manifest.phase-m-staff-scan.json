@@ -3,10 +3,6 @@
   "sourceDoc": "docs/domain/staff-scan-flow.md",
   "issues": [
     {
-      "title": "Phase M2: List staff scan targets API (GET /api/loyalty/scan/targets)",
-      "bodyFile": "docs/issues/staff-scan-targets-api.md"
-    },
-    {
       "title": "Phase M3: Record staff scan by target with typed outcomes",
       "bodyFile": "docs/issues/staff-scan-record-by-target.md"
     },
