@@ -20,6 +20,7 @@ type Body = {
 	stampTypeId?: string | null;
 	visualTemplate?: string;
 	cardBackgroundVariant?: string;
+	conditions?: unknown;
 };
 
 export async function GET(request: Request): Promise<Response> {

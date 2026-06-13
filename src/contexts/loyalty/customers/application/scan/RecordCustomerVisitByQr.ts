@@ -41,6 +41,7 @@ export type StampAddedSummary = {
 	stampTypeLabel: string;
 	visualTemplate: string;
 	cardBackgroundVariant: string;
+	conditions: string;
 };
 
 export type RecordCustomerVisitByQrResult = {
@@ -210,6 +211,7 @@ export class RecordCustomerVisitByQr {
 				stampTypeLabel: params.stampTypeLabel ?? GENERIC_STAMP_VISIT_LABEL,
 				visualTemplate: campaign.visualTemplate,
 				cardBackgroundVariant: campaign.cardBackgroundVariant,
+				conditions: campaign.conditions,
 			});
 		}
 

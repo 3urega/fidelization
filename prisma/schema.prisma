@@ -28,6 +28,7 @@ enum LoyaltyTransactionType {
   points_redeemed
   stamp_added
   reward_redeemed
+  promotion_used
   manual_adjustment
 }
 
@@ -101,6 +102,7 @@ model Tenant {
   stampCampaigns     StampCampaign[]
   stampProgress      CustomerStampProgress[]
   promotions         Promotion[]
+  promotionUsages    CustomerPromotionUsage[]
   coupons            Coupon[]
   notifications      Notification[]
   subscriptions      Subscription[]
@@ -136,6 +138,7 @@ model Customer {
   user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   loyaltyTransactions LoyaltyTransaction[]
   stampProgress CustomerStampProgress[]
+  promotionUsages CustomerPromotionUsage[]
 
   @@unique([userId, tenantId])
   @@index([tenantId])
@@ -202,6 +205,7 @@ model StampCampaign {
   stampTypeId           String?  @map("stamp_type_id")
   visualTemplate        String   @default("generic") @map("visual_template")
   cardBackgroundVariant String   @default("coffee-photo") @map("card_background_variant")
+  conditions            String   @default("")
   isActive              Boolean  @default(true) @map("is_active")
   createdAt      DateTime @default(now()) @map("created_at")
   tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -232,20 +236,38 @@ model CustomerStampProgress {
 }
 
 model Promotion {
-  id          String        @id @default(uuid())
-  tenantId    String        @map("tenant_id")
-  title       String
-  description String        @default("")
-  type        PromotionType
-  startDate   DateTime?     @map("start_date")
-  endDate     DateTime?     @map("end_date")
-  isActive    Boolean       @default(true) @map("is_active")
-  conditions  Json?
-  createdAt   DateTime      @default(now()) @map("created_at")
-  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id               String                    @id @default(uuid())
+  tenantId         String                    @map("tenant_id")
+  title            String
+  description      String                    @default("")
+  type             PromotionType
+  startDate        DateTime?                 @map("start_date")
+  endDate          DateTime?                 @map("end_date")
+  isActive         Boolean                   @default(true) @map("is_active")
+  maxUsesPerUser   Int?                      @map("max_uses_per_user")
+  conditions       Json?
+  createdAt        DateTime                  @default(now()) @map("created_at")
+  tenant           Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerUsages   CustomerPromotionUsage[]
 
   @@index([tenantId])
   @@map("promotions")
+}
+
+model CustomerPromotionUsage {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  customerId  String    @map("customer_id")
+  promotionId String    @map("promotion_id")
+  usedCount   Int       @default(0) @map("used_count")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, promotionId])
+  @@index([tenantId])
+  @@map("customer_promotion_usages")
 }
 
 model Coupon {

@@ -200,6 +200,30 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ Prisma isActive false after PATCH");
+
+	const remove = await fetch(
+		`${brandingVerifyBaseUrl}/api/loyalty/stamp-campaigns/${campaignId}`,
+		{
+			method: "DELETE",
+			headers: { cookie: headers.cookie },
+		},
+	);
+
+	if (remove.status !== 204) {
+		console.error("❌ DELETE campaign:", remove.status, await remove.text());
+		process.exit(1);
+	}
+
+	const rowAfterDelete = await prisma.stampCampaign.findFirst({
+		where: { id: campaignId, tenantId },
+	});
+
+	if (rowAfterDelete) {
+		console.error("❌ Prisma row should be deleted after DELETE:", rowAfterDelete);
+		process.exit(1);
+	}
+
+	console.log("✅ DELETE inactive campaign → row removed from Prisma");
 	console.log("✅ verify:stamp-campaigns passed");
 }
 

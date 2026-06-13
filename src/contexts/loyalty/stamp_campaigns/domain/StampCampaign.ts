@@ -14,6 +14,7 @@ export type StampCampaignPrimitives = {
 	stampTypeId: string | null;
 	visualTemplate: StampCampaignVisualTemplate;
 	cardBackgroundVariant: StampCampaignCardBackgroundVariant;
+	conditions: string;
 	isActive: boolean;
 };
 
@@ -24,6 +25,7 @@ export type StampCampaignCreateParams = {
 	stampTypeId?: string | null;
 	visualTemplate?: StampCampaignVisualTemplate;
 	cardBackgroundVariant?: StampCampaignCardBackgroundVariant;
+	conditions?: string;
 };
 
 export class StampCampaign {
@@ -36,6 +38,7 @@ export class StampCampaign {
 		public readonly stampTypeId: string | null,
 		public readonly visualTemplate: StampCampaignVisualTemplate,
 		public readonly cardBackgroundVariant: StampCampaignCardBackgroundVariant,
+		public readonly conditions: string,
 		public readonly isActive: boolean,
 	) {}
 
@@ -49,6 +52,7 @@ export class StampCampaign {
 			params.stampTypeId ?? null,
 			params.visualTemplate ?? "generic",
 			params.cardBackgroundVariant ?? "coffee-photo",
+			params.conditions?.trim() ?? "",
 			true,
 		);
 	}
@@ -63,6 +67,7 @@ export class StampCampaign {
 			primitives.stampTypeId,
 			primitives.visualTemplate,
 			primitives.cardBackgroundVariant,
+			primitives.conditions ?? "",
 			primitives.isActive,
 		);
 	}
@@ -77,6 +82,7 @@ export class StampCampaign {
 			stampTypeId: this.stampTypeId,
 			visualTemplate: this.visualTemplate,
 			cardBackgroundVariant: this.cardBackgroundVariant,
+			conditions: this.conditions,
 			isActive: this.isActive,
 		};
 	}
@@ -95,6 +101,7 @@ export class StampCampaign {
 			this.stampTypeId,
 			this.visualTemplate,
 			this.cardBackgroundVariant,
+			this.conditions,
 			false,
 		);
 	}

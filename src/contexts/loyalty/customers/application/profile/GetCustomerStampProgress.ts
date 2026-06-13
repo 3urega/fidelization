@@ -48,6 +48,7 @@ export class GetCustomerStampProgress {
 					: GENERIC_STAMP_VISIT_LABEL,
 				visualTemplate: campaign.visualTemplate,
 				cardBackgroundVariant: campaign.cardBackgroundVariant,
+				conditions: campaign.conditions,
 			});
 		}
 

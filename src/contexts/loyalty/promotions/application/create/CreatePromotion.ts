@@ -20,6 +20,7 @@ export type CreatePromotionParams = {
 		type?: string;
 		startDate?: string;
 		endDate?: string;
+		maxUsesPerUser?: unknown;
 	};
 };
 
@@ -50,6 +51,7 @@ export class CreatePromotion {
 			type: parsed.type,
 			startDate: parsed.startDate,
 			endDate: parsed.endDate,
+			maxUsesPerUser: parsed.maxUsesPerUser,
 		});
 
 		await this.promotionRepository.save(promotion);

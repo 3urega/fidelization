@@ -5,6 +5,7 @@ import {
 } from "./StampCampaignVisualAssets";
 
 const MAX_NAME_LENGTH = 120;
+const MAX_CONDITIONS_LENGTH = 500;
 
 export type StampCampaignCreateInput = {
 	name: string;
@@ -12,7 +13,24 @@ export type StampCampaignCreateInput = {
 	stampTypeId: string;
 	visualTemplate: ReturnType<typeof parseStampCampaignVisualTemplate>;
 	cardBackgroundVariant: ReturnType<typeof parseStampCampaignCardBackgroundVariant>;
+	conditions: string;
 };
+
+function parseOptionalConditions(value: unknown): string {
+	if (value === undefined || value === null) {
+		return "";
+	}
+
+	const conditions = String(value).trim();
+
+	if (conditions.length > MAX_CONDITIONS_LENGTH) {
+		throw new InvalidStampCampaign(
+			`conditions must be at most ${MAX_CONDITIONS_LENGTH} characters`,
+		);
+	}
+
+	return conditions;
+}
 
 export function parseStampCampaignCreate(input: {
 	name?: string;
@@ -20,6 +38,7 @@ export function parseStampCampaignCreate(input: {
 	stampTypeId?: string | null;
 	visualTemplate?: unknown;
 	cardBackgroundVariant?: unknown;
+	conditions?: unknown;
 }): StampCampaignCreateInput {
 	const name = input.name?.trim() ?? "";
 
@@ -61,5 +80,6 @@ export function parseStampCampaignCreate(input: {
 		stampTypeId,
 		visualTemplate: parseStampCampaignVisualTemplate(input.visualTemplate),
 		cardBackgroundVariant: parseStampCampaignCardBackgroundVariant(input.cardBackgroundVariant),
+		conditions: parseOptionalConditions(input.conditions),
 	};
 }

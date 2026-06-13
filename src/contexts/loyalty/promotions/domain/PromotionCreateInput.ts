@@ -10,7 +10,22 @@ export type PromotionCreateInput = {
 	type: PromotionType;
 	startDate: Date | null;
 	endDate: Date | null;
+	maxUsesPerUser: number | null;
 };
+
+function parseOptionalMaxUsesPerUser(value: unknown): number | null {
+	if (value === undefined || value === null || value === "") {
+		return null;
+	}
+
+	const parsed = typeof value === "number" ? value : Number(value);
+
+	if (!Number.isInteger(parsed) || parsed < 1) {
+		throw new InvalidPromotion("maxUsesPerUser must be a positive integer");
+	}
+
+	return parsed;
+}
 
 function parseOptionalDate(value: string | undefined, field: string): Date | null {
 	if (value === undefined || value === null || value.trim() === "") {
@@ -32,6 +47,7 @@ export function parsePromotionCreate(input: {
 	type?: string;
 	startDate?: string;
 	endDate?: string;
+	maxUsesPerUser?: unknown;
 }): PromotionCreateInput {
 	const title = input.title?.trim() ?? "";
 
@@ -62,5 +78,6 @@ export function parsePromotionCreate(input: {
 		type,
 		startDate,
 		endDate,
+		maxUsesPerUser: parseOptionalMaxUsesPerUser(input.maxUsesPerUser),
 	};
 }

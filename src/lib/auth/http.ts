@@ -8,6 +8,7 @@ import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/Sta
 import { StampType } from "../../contexts/loyalty/stamp_types/domain/StampType";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
+import type { CustomerPromotionSummary } from "../../contexts/loyalty/promotions/domain/CustomerPromotionSummary";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
@@ -101,6 +102,7 @@ export function stampCampaignToJson(
 		stampTypeId: primitives.stampTypeId,
 		visualTemplate: primitives.visualTemplate,
 		cardBackgroundVariant: primitives.cardBackgroundVariant,
+		conditions: primitives.conditions,
 	};
 }
 
@@ -136,7 +138,7 @@ export function rewardToJson(
 
 export function promotionToJson(
 	promotion: Promotion,
-): Record<string, string | boolean | null> {
+): Record<string, string | boolean | number | null> {
 	const primitives = promotion.toPrimitives();
 
 	return {
@@ -147,6 +149,23 @@ export function promotionToJson(
 		startDate: primitives.startDate,
 		endDate: primitives.endDate,
 		isActive: primitives.isActive,
+		maxUsesPerUser: primitives.maxUsesPerUser,
+	};
+}
+
+export function customerPromotionSummaryToJson(
+	summary: CustomerPromotionSummary,
+): Record<string, string | boolean | number | null> {
+	return {
+		id: summary.id,
+		title: summary.title,
+		description: summary.description,
+		type: summary.type,
+		startDate: summary.startDate,
+		endDate: summary.endDate,
+		isActive: summary.isActive,
+		maxUsesPerUser: summary.maxUsesPerUser,
+		usedCount: summary.usedCount,
 	};
 }
 
@@ -197,6 +216,7 @@ export function stampProgressToJson(
 		stampTypeLabel: summary.stampTypeLabel,
 		visualTemplate: summary.visualTemplate,
 		cardBackgroundVariant: summary.cardBackgroundVariant,
+		conditions: summary.conditions ?? "",
 	};
 }
 
@@ -314,6 +334,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "StampCampaignNotFound") {
 		return HttpNextResponse.domainError(error, 404);
 	}
+	if (error.type === "StampCampaignActiveCannotBeDeleted") {
+		return HttpNextResponse.domainError(error, 400);
+	}
 	if (error.type === "StampTypeForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
@@ -349,6 +372,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "PromotionNotFound") {
 		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "PromotionUsageLimitReached") {
+		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "TenantBillingForbidden") {
 		return HttpNextResponse.domainError(error, 403);

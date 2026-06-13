@@ -60,6 +60,9 @@ export function StampCampaignCards({
 											{row.stampTypeLabel ? (
 												<span className="text-xs text-muted">{row.stampTypeLabel}</span>
 											) : null}
+											{row.conditions?.trim() ? (
+												<p className="mt-1 text-xs text-muted">{row.conditions.trim()}</p>
+											) : null}
 										</div>
 										{completed ? (
 											<span className="shrink-0 font-medium text-primary">Completada</span>

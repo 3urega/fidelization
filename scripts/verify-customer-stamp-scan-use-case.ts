@@ -122,6 +122,8 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 		this.campaigns.set(campaign.id, campaign);
 	}
 
+	async deleteCampaign(): Promise<void> {}
+
 	async searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null> {
 		const campaign = this.campaigns.get(id);
 

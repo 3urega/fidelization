@@ -4,6 +4,8 @@ import { StampCampaign } from "./StampCampaign";
 export abstract class StampCampaignRepository {
 	abstract saveCampaign(campaign: StampCampaign): Promise<void>;
 
+	abstract deleteCampaign(tenantId: string, campaignId: string): Promise<void>;
+
 	abstract searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null>;
 
 	abstract listByTenant(tenantId: string): Promise<StampCampaign[]>;

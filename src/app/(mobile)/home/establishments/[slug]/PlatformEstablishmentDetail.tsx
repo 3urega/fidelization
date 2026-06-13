@@ -75,10 +75,12 @@ function PromotionsSection({
 	title,
 	promotions,
 	emptyMessage,
+	mode,
 }: {
 	title: string;
 	promotions: PromotionRow[];
 	emptyMessage: string;
+	mode: "discovery" | "interaction";
 }): ReactElement {
 	if (promotions.length === 0) {
 		return (
@@ -92,14 +94,35 @@ function PromotionsSection({
 		<section className="flex flex-col gap-3">
 			<h2 className="text-lg font-semibold text-foreground">{title}</h2>
 			<ul className="flex flex-col gap-3">
-				{promotions.map((promotion) => (
-					<li key={promotion.id}>
-						<Card>
-							<p className="font-medium text-foreground">{promotion.title}</p>
-							<p className="text-sm text-muted">{promotion.description}</p>
-						</Card>
-					</li>
-				))}
+				{promotions.map((promotion) => {
+					const maxUses = promotion.maxUsesPerUser;
+					const usedCount = promotion.usedCount ?? 0;
+					const exhausted = maxUses != null && usedCount >= maxUses;
+
+					return (
+						<li key={promotion.id}>
+							<Card>
+								<div className="flex items-start justify-between gap-2">
+									<p className="font-medium text-foreground">{promotion.title}</p>
+									{mode === "interaction" && exhausted ? (
+										<span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+											Agotada
+										</span>
+									) : null}
+								</div>
+								<p className="text-sm text-muted">{promotion.description}</p>
+								{mode === "discovery" && maxUses != null ? (
+									<p className="mt-1 text-xs text-muted">Hasta {maxUses} usos por persona</p>
+								) : null}
+								{mode === "interaction" && maxUses != null ? (
+									<p className="mt-1 text-xs text-muted">
+										{usedCount} / {maxUses} usos
+									</p>
+								) : null}
+							</Card>
+						</li>
+					);
+				})}
 			</ul>
 		</section>
 	);
@@ -233,6 +256,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 						title="Promociones"
 						promotions={detail.promotions}
 						emptyMessage="Este local no tiene promociones activas ahora."
+						mode="discovery"
 					/>
 				</>
 			) : (
@@ -258,6 +282,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 						title="Promociones"
 						promotions={detail.promotions}
 						emptyMessage="Este local no tiene promociones activas ahora."
+						mode="interaction"
 					/>
 				</>
 			)}

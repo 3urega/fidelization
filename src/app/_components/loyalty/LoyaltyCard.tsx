@@ -18,6 +18,7 @@ export type StampProgressRow = {
 	stampTypeLabel?: string;
 	visualTemplate?: string | null;
 	cardBackgroundVariant?: LoyaltyCardBackgroundVariant | string | null;
+	conditions?: string;
 };
 
 export type RewardRow = {
@@ -38,6 +39,8 @@ export type PromotionRow = {
 	startDate: string | null;
 	endDate: string | null;
 	isActive: boolean;
+	maxUsesPerUser?: number | null;
+	usedCount?: number;
 };
 
 const PROMOTION_TYPE_LABELS: Record<string, string> = {
@@ -48,6 +51,30 @@ const PROMOTION_TYPE_LABELS: Record<string, string> = {
 
 function formatPromotionType(type: string): string {
 	return PROMOTION_TYPE_LABELS[type] ?? type;
+}
+
+function formatPromotionUsageLine(
+	maxUsesPerUser: number | null | undefined,
+	usedCount: number | null | undefined,
+): string | null {
+	if (maxUsesPerUser == null) {
+		return null;
+	}
+
+	const used = usedCount ?? 0;
+
+	return `${used} / ${maxUsesPerUser} usos`;
+}
+
+function isPromotionExhausted(
+	maxUsesPerUser: number | null | undefined,
+	usedCount: number | null | undefined,
+): boolean {
+	if (maxUsesPerUser == null) {
+		return false;
+	}
+
+	return (usedCount ?? 0) >= maxUsesPerUser;
 }
 
 function formatPromotionDates(startDate: string | null, endDate: string | null): string | null {
@@ -148,15 +175,33 @@ export function LoyaltyCard({
 					<ul className="flex flex-col gap-3">
 						{promotions.map((promotion) => {
 							const dateRange = formatPromotionDates(promotion.startDate, promotion.endDate);
+							const usageLine = formatPromotionUsageLine(
+								promotion.maxUsesPerUser,
+								promotion.usedCount,
+							);
+							const exhausted = isPromotionExhausted(
+								promotion.maxUsesPerUser,
+								promotion.usedCount,
+							);
 
 							return (
 								<li key={promotion.id} className="flex flex-col gap-0.5 text-sm">
-									<span className="font-medium text-foreground">{promotion.title}</span>
+									<div className="flex items-start justify-between gap-2">
+										<span className="font-medium text-foreground">{promotion.title}</span>
+										{exhausted ? (
+											<span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+												Agotada
+											</span>
+										) : null}
+									</div>
 									<span className="text-muted">{promotion.description}</span>
 									<span className="text-xs text-muted">
 										{formatPromotionType(promotion.type)}
 										{dateRange ? ` · ${dateRange}` : null}
 									</span>
+									{usageLine ? (
+										<span className="text-xs text-muted">{usageLine}</span>
+									) : null}
 								</li>
 							);
 						})}

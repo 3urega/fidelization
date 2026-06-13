@@ -59,6 +59,14 @@ export function StampSettingsPanel(): ReactElement {
 		setInitialTabSet(true);
 	}, [activeTypesCount, initialTabSet, typesLoading]);
 
+	const handleTypesChanged = useCallback((): void => {
+		void refreshActiveTypesCount();
+	}, [refreshActiveTypesCount]);
+
+	const handleGoToTypesTab = useCallback((): void => {
+		setActiveTab("types");
+	}, []);
+
 	if (error) {
 		return <p className="text-sm text-error">{error}</p>;
 	}
@@ -107,15 +115,11 @@ export function StampSettingsPanel(): ReactElement {
 
 			<div role="tabpanel">
 				{activeTab === "types" ? (
-					<StampTypesForm
-						onTypesChanged={() => {
-							void refreshActiveTypesCount();
-						}}
-					/>
+					<StampTypesForm onTypesChanged={handleTypesChanged} />
 				) : (
 					<StampCampaignsForm
 						hasActiveTypes={activeTypesCount > 0}
-						onGoToTypesTab={() => setActiveTab("types")}
+						onGoToTypesTab={handleGoToTypesTab}
 					/>
 				)}
 			</div>

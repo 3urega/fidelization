@@ -21,6 +21,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 				stampTypeId: p.stampTypeId,
 				visualTemplate: p.visualTemplate,
 				cardBackgroundVariant: p.cardBackgroundVariant,
+				conditions: p.conditions,
 				isActive: p.isActive,
 			},
 			update: {
@@ -30,8 +31,15 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 				stampTypeId: p.stampTypeId,
 				visualTemplate: p.visualTemplate,
 				cardBackgroundVariant: p.cardBackgroundVariant,
+				conditions: p.conditions,
 				isActive: p.isActive,
 			},
+		});
+	}
+
+	async deleteCampaign(tenantId: string, campaignId: string): Promise<void> {
+		await prisma.stampCampaign.deleteMany({
+			where: { id: campaignId, tenantId },
 		});
 	}
 
@@ -115,6 +123,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 		stampTypeId: string | null;
 		visualTemplate: string;
 		cardBackgroundVariant: string;
+		conditions: string;
 		isActive: boolean;
 	}): StampCampaign {
 		return StampCampaign.fromPrimitives({
@@ -126,6 +135,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 			stampTypeId: row.stampTypeId,
 			visualTemplate: row.visualTemplate as StampCampaign["visualTemplate"],
 			cardBackgroundVariant: row.cardBackgroundVariant as StampCampaign["cardBackgroundVariant"],
+			conditions: row.conditions,
 			isActive: row.isActive,
 		});
 	}

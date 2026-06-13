@@ -2,10 +2,12 @@
 import "dotenv/config";
 
 import { CreateStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/application/create/CreateStampCampaign";
+import { DeleteStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/application/delete/DeleteStampCampaign";
 import { ListStampCampaigns } from "../src/contexts/loyalty/stamp_campaigns/application/list/ListStampCampaigns";
 import { UpdateStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/application/update/UpdateStampCampaign";
 import { InvalidStampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/InvalidStampCampaign";
 import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
+import { StampCampaignActiveCannotBeDeleted } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignActiveCannotBeDeleted";
 import { StampCampaignForbidden } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignForbidden";
 import { StampCampaignNotFound } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignNotFound";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -59,6 +61,13 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 
 	async saveCampaign(campaign: StampCampaign): Promise<void> {
 		this.campaigns.set(campaign.id, campaign);
+	}
+
+	async deleteCampaign(tenantId: string, campaignId: string): Promise<void> {
+		const campaign = this.campaigns.get(campaignId);
+		if (campaign && campaign.tenantId === tenantId) {
+			this.campaigns.delete(campaignId);
+		}
 	}
 
 	async searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null> {
@@ -158,6 +167,7 @@ async function main(): Promise<void> {
 	const create = new CreateStampCampaign(tenantRepository, stampRepository, stampTypeRepository);
 	const list = new ListStampCampaigns(tenantRepository, stampRepository);
 	const update = new UpdateStampCampaign(tenantRepository, stampRepository);
+	const remove = new DeleteStampCampaign(tenantRepository, stampRepository);
 
 	await expectForbidden("CreateStampCampaign employee", () =>
 		create.execute({
@@ -338,6 +348,54 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ UpdateStampCampaign deactivate");
+
+	try {
+		await remove.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			campaignId: typed.id,
+		});
+		console.error("❌ expected StampCampaignActiveCannotBeDeleted for active campaign");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof StampCampaignActiveCannotBeDeleted)) {
+			console.error("❌ wrong error for delete active campaign", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ delete active campaign → StampCampaignActiveCannotBeDeleted");
+
+	await remove.execute({
+		tenantId,
+		role: TenantRole.Owner,
+		campaignId: created.id,
+	});
+
+	const afterDelete = await stampRepository.searchCampaignById(tenantId, created.id);
+	if (afterDelete) {
+		console.error("❌ campaign row should be deleted", afterDelete.toPrimitives());
+		process.exit(1);
+	}
+
+	console.log("✅ DeleteStampCampaign inactive campaign");
+
+	try {
+		await remove.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			campaignId: "missing-id",
+		});
+		console.error("❌ expected StampCampaignNotFound for delete");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof StampCampaignNotFound)) {
+			console.error("❌ wrong error for delete missing campaign", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ delete missing campaign → StampCampaignNotFound");
 
 	const missingTenantCreate = new CreateStampCampaign(
 		new StubTenantRepository(null),

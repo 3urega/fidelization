@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { NextResponse } from "next/server";
 
 import { UpdateStampCampaign } from "../../../../../contexts/loyalty/stamp_campaigns/application/update/UpdateStampCampaign";
+import { DeleteStampCampaign } from "../../../../../contexts/loyalty/stamp_campaigns/application/delete/DeleteStampCampaign";
 import { DomainError } from "../../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
@@ -40,6 +41,36 @@ export async function PATCH(request: Request, context: RouteContext): Promise<Re
 		});
 
 		return NextResponse.json({ campaign: stampCampaignToJson(campaign) });
+	} catch (error) {
+		if (error instanceof DomainError) {
+			const response = handleAuthDomainError(error);
+			if (response) {
+				return response;
+			}
+		}
+
+		if (error instanceof TenantNotFound) {
+			return HttpNextResponse.domainError(error, 404);
+		}
+
+		throw error;
+	}
+}
+
+export async function DELETE(request: Request, context: RouteContext): Promise<Response> {
+	const auth = await requireTenantSession(request);
+	if (auth instanceof NextResponse) {
+		return auth;
+	}
+
+	try {
+		await container.get(DeleteStampCampaign).execute({
+			tenantId: auth.session.tenantId,
+			role: auth.session.role as TenantRole,
+			campaignId: context.params.campaignId,
+		});
+
+		return new NextResponse(null, { status: 204 });
 	} catch (error) {
 		if (error instanceof DomainError) {
 			const response = handleAuthDomainError(error);

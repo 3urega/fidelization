@@ -114,6 +114,8 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 
 	async saveCampaign(): Promise<void> {}
 
+	async deleteCampaign(): Promise<void> {}
+
 	async searchCampaignById(): Promise<null> {
 		return null;
 	}

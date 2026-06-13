@@ -11,6 +11,7 @@ export type PromotionPrimitives = {
 	startDate: string | null;
 	endDate: string | null;
 	isActive: boolean;
+	maxUsesPerUser: number | null;
 };
 
 export type PromotionCreateParams = {
@@ -20,6 +21,7 @@ export type PromotionCreateParams = {
 	type: PromotionType;
 	startDate: Date | null;
 	endDate: Date | null;
+	maxUsesPerUser?: number | null;
 };
 
 export class Promotion {
@@ -32,6 +34,7 @@ export class Promotion {
 		public readonly startDate: Date | null,
 		public readonly endDate: Date | null,
 		public readonly isActive: boolean,
+		public readonly maxUsesPerUser: number | null,
 	) {}
 
 	static create(params: PromotionCreateParams): Promotion {
@@ -44,6 +47,7 @@ export class Promotion {
 			params.startDate,
 			params.endDate,
 			true,
+			params.maxUsesPerUser ?? null,
 		);
 	}
 
@@ -57,6 +61,7 @@ export class Promotion {
 			primitives.startDate ? new Date(primitives.startDate) : null,
 			primitives.endDate ? new Date(primitives.endDate) : null,
 			primitives.isActive,
+			primitives.maxUsesPerUser,
 		);
 	}
 
@@ -74,6 +79,7 @@ export class Promotion {
 			this.startDate,
 			this.endDate,
 			false,
+			this.maxUsesPerUser,
 		);
 	}
 
@@ -87,6 +93,7 @@ export class Promotion {
 			startDate: this.startDate?.toISOString() ?? null,
 			endDate: this.endDate?.toISOString() ?? null,
 			isActive: this.isActive,
+			maxUsesPerUser: this.maxUsesPerUser,
 		};
 	}
 }

@@ -44,6 +44,7 @@ import { GetCustomerActiveRewards } from "../../../loyalty/customers/application
 import { GetEstablishmentDetailForUser } from "../../../loyalty/customers/application/profile/GetEstablishmentDetailForUser";
 import { GetCustomerStampProgress } from "../../../loyalty/customers/application/profile/GetCustomerStampProgress";
 import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
+import { RecordPromotionUse } from "../../../loyalty/customers/application/promotions/RecordPromotionUse";
 import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
 import { JoinTenantAsCustomer } from "../../../loyalty/customers/application/join/JoinTenantAsCustomer";
@@ -55,11 +56,14 @@ import { PrismaLoyaltyTransactionRepository } from "../../../loyalty/loyalty_tra
 import { NotificationRepository } from "../../../loyalty/notifications/domain/NotificationRepository";
 import { PrismaNotificationRepository } from "../../../loyalty/notifications/infrastructure/PrismaNotificationRepository";
 import { PromotionRepository } from "../../../loyalty/promotions/domain/PromotionRepository";
+import { CustomerPromotionUsageRepository } from "../../../loyalty/promotions/domain/CustomerPromotionUsageRepository";
+import { PrismaCustomerPromotionUsageRepository } from "../../../loyalty/promotions/infrastructure/PrismaCustomerPromotionUsageRepository";
 import { PrismaPromotionRepository } from "../../../loyalty/promotions/infrastructure/PrismaPromotionRepository";
 import { CreateReward } from "../../../loyalty/rewards/application/create/CreateReward";
 import { ListRewards } from "../../../loyalty/rewards/application/list/ListRewards";
 import { UpdateReward } from "../../../loyalty/rewards/application/update/UpdateReward";
 import { ListActivePromotionsForCustomer } from "../../../loyalty/promotions/application/list/ListActivePromotionsForCustomer";
+import { ListCustomerPromotionSummaries } from "../../../loyalty/promotions/application/list/ListCustomerPromotionSummaries";
 import { ListUserCrossTenantPromotions } from "../../../loyalty/promotions/application/list/ListUserCrossTenantPromotions";
 import { ListPromotions } from "../../../loyalty/promotions/application/list/ListPromotions";
 import { CreatePromotion } from "../../../loyalty/promotions/application/create/CreatePromotion";
@@ -70,6 +74,7 @@ import { StampCampaignRepository } from "../../../loyalty/stamp_campaigns/domain
 import { CreateStampCampaign } from "../../../loyalty/stamp_campaigns/application/create/CreateStampCampaign";
 import { ListStampCampaigns } from "../../../loyalty/stamp_campaigns/application/list/ListStampCampaigns";
 import { UpdateStampCampaign } from "../../../loyalty/stamp_campaigns/application/update/UpdateStampCampaign";
+import { DeleteStampCampaign } from "../../../loyalty/stamp_campaigns/application/delete/DeleteStampCampaign";
 import { PrismaStampCampaignRepository } from "../../../loyalty/stamp_campaigns/infrastructure/PrismaStampCampaignRepository";
 import { StampTypeRepository } from "../../../loyalty/stamp_types/domain/StampTypeRepository";
 import { CreateStampType } from "../../../loyalty/stamp_types/application/create/CreateStampType";
@@ -193,6 +198,7 @@ builder.registerAndUse(GetCustomerStampProgress);
 builder.registerAndUse(GetCustomerActiveRewards);
 builder.registerAndUse(RedeemCustomerReward);
 builder.registerAndUse(RecordCustomerVisitByQr);
+builder.registerAndUse(RecordPromotionUse);
 builder.registerAndUse(AuthenticateCustomerByQr);
 builder.registerAndUse(CustomerSessionVerifier);
 
@@ -204,6 +210,7 @@ builder.registerAndUse(PrismaStampCampaignRepository);
 builder.registerAndUse(CreateStampCampaign);
 builder.registerAndUse(ListStampCampaigns);
 builder.registerAndUse(UpdateStampCampaign);
+builder.registerAndUse(DeleteStampCampaign);
 
 builder.register(StampTypeRepository).use(PrismaStampTypeRepository);
 builder.registerAndUse(PrismaStampTypeRepository);
@@ -220,12 +227,15 @@ builder.registerAndUse(UpdateReward);
 
 builder.registerAndUse(ListPromotions);
 builder.registerAndUse(ListActivePromotionsForCustomer);
+builder.registerAndUse(ListCustomerPromotionSummaries);
 builder.registerAndUse(ListUserCrossTenantPromotions);
 builder.registerAndUse(CreatePromotion);
 builder.registerAndUse(UpdatePromotion);
 
 builder.register(PromotionRepository).use(PrismaPromotionRepository);
 builder.registerAndUse(PrismaPromotionRepository);
+builder.register(CustomerPromotionUsageRepository).use(PrismaCustomerPromotionUsageRepository);
+builder.registerAndUse(PrismaCustomerPromotionUsageRepository);
 
 builder.register(CouponRepository).use(PrismaCouponRepository);
 builder.registerAndUse(PrismaCouponRepository);

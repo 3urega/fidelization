@@ -8,9 +8,9 @@ import { container } from "../../../../../contexts/shared/infrastructure/depende
 import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { TenantNotFound } from "../../../../../contexts/tenants/tenants/domain/TenantNotFound";
 import {
+	customerPromotionSummaryToJson,
 	customerToJson,
 	handleAuthDomainError,
-	promotionToJson,
 	rewardToJson,
 	stampProgressToJson,
 } from "../../../../../lib/auth/http";
@@ -62,7 +62,7 @@ export async function GET(request: Request, context: RouteContext): Promise<Resp
 		return NextResponse.json({
 			mode: detail.mode,
 			tenant: detail.tenant,
-			promotions: detail.promotions.map((promotion) => promotionToJson(promotion)),
+			promotions: detail.promotions.map((promotion) => customerPromotionSummaryToJson(promotion)),
 			customer: detail.customer ? customerToJson(detail.customer) : null,
 			stampProgress: detail.stampProgress.map((row) => stampProgressToJson(row)),
 			rewards: detail.rewards.map((reward) => rewardToJson(reward)),
@@ -71,7 +71,7 @@ export async function GET(request: Request, context: RouteContext): Promise<Resp
 				tenantId: group.tenantId,
 				tenantName: group.tenantName,
 				tenantSlug: group.tenantSlug,
-				promotions: group.promotions.map((promotion) => promotionToJson(promotion)),
+				promotions: group.promotions.map((promotion) => customerPromotionSummaryToJson(promotion)),
 			})),
 		});
 	} catch (error) {

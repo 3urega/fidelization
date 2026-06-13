@@ -208,6 +208,8 @@ function buildStack(plan: SubscriptionPlan) {
 }
 
 async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "0";
+
 	const basicStack = buildStack(planBasic);
 
 	await expectError(
@@ -244,10 +246,16 @@ async function main(): Promise<void> {
 			title: "2x1 cafés",
 			description: "Válido entre semana",
 			type: "bundle",
+			maxUsesPerUser: 2,
 		},
 	});
 
-	if (!created.isActive || created.type !== "bundle" || created.title !== "2x1 cafés") {
+	if (
+		!created.isActive ||
+		created.type !== "bundle" ||
+		created.title !== "2x1 cafés" ||
+		created.maxUsesPerUser !== 2
+	) {
 		console.error("❌ CreatePromotion owner", created.toPrimitives());
 		process.exit(1);
 	}

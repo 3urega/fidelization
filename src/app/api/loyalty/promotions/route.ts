@@ -20,6 +20,7 @@ type Body = {
 	type?: string;
 	startDate?: string;
 	endDate?: string;
+	maxUsesPerUser?: number | null;
 };
 
 export async function GET(request: Request): Promise<Response> {

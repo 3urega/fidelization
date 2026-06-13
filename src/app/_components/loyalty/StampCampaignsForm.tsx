@@ -27,6 +27,7 @@ type CampaignPayload = {
 	stampTypeId?: string | null;
 	visualTemplate?: string;
 	cardBackgroundVariant?: string;
+	conditions?: string;
 };
 
 type StampTypePayload = {
@@ -48,6 +49,9 @@ type StampCampaignsFormProps = {
 	onGoToTypesTab: () => void;
 };
 
+const TEXTAREA_CLASS =
+	"block w-full rounded-theme border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary disabled:opacity-60 min-h-[5rem] resize-y";
+
 export function StampCampaignsForm({
 	hasActiveTypes,
 	onGoToTypesTab,
@@ -57,6 +61,7 @@ export function StampCampaignsForm({
 	const [stampTypes, setStampTypes] = useState<StampTypePayload[]>([]);
 	const [listLoading, setListLoading] = useState(true);
 	const [name, setName] = useState("");
+	const [conditions, setConditions] = useState("");
 	const [requiredStamps, setRequiredStamps] = useState("10");
 	const [stampTypeId, setStampTypeId] = useState("");
 	const [visualTemplate, setVisualTemplate] = useState<LoyaltyVisualTemplate>("generic");
@@ -66,6 +71,7 @@ export function StampCampaignsForm({
 	const [success, setSuccess] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
 
 	const loadStampTypes = useCallback(async (): Promise<void> => {
 		try {
@@ -181,6 +187,7 @@ export function StampCampaignsForm({
 					stampTypeId: stampTypeId.trim(),
 					visualTemplate,
 					cardBackgroundVariant,
+					...(conditions.trim() ? { conditions: conditions.trim() } : {}),
 				}),
 			});
 
@@ -197,6 +204,7 @@ export function StampCampaignsForm({
 					`Campaña creada: «${body.campaign.name}» · ${body.campaign.requiredStamps} sellos para completar.`,
 				);
 				setName("");
+				setConditions("");
 				setRequiredStamps("10");
 				setVisualTemplate("generic");
 				setCardBackgroundVariant("coffee-photo");
@@ -242,6 +250,42 @@ export function StampCampaignsForm({
 		}
 	}
 
+	async function handleDelete(campaignId: string, campaignName: string): Promise<void> {
+		if (
+			!window.confirm(
+				`¿Eliminar la campaña «${campaignName}»? Esta acción no se puede deshacer.`,
+			)
+		) {
+			return;
+		}
+
+		setSubmitError(null);
+		setSuccess(null);
+		setDeletingId(campaignId);
+
+		try {
+			const response = await fetch(`/api/loyalty/stamp-campaigns/${campaignId}`, {
+				method: "DELETE",
+				credentials: "include",
+			});
+
+			if (response.status === 204) {
+				setSuccess("Campaña eliminada.");
+				await loadCampaigns();
+
+				return;
+			}
+
+			const body = (await response.json()) as CampaignsResponse;
+
+			setSubmitError(body.error?.description ?? "No se pudo eliminar la campaña.");
+		} catch {
+			setSubmitError("Error de red al eliminar la campaña.");
+		} finally {
+			setDeletingId(null);
+		}
+	}
+
 	return (
 		<div className="flex flex-col gap-6">
 			<Card>
@@ -259,7 +303,10 @@ export function StampCampaignsForm({
 							>
 								<div>
 									<p className="text-sm font-medium text-foreground">{campaign.name}</p>
-									<p className="text-sm text-muted">
+									{campaign.conditions?.trim() ? (
+										<p className="mt-1 text-sm text-muted">{campaign.conditions.trim()}</p>
+									) : null}
+									<p className="mt-1 text-sm text-muted">
 										{campaign.requiredStamps} sellos
 										{campaign.stampTypeId
 											? ` · ${stampTypes.find((type) => type.id === campaign.stampTypeId)?.label ?? "Tipo"}`
@@ -288,7 +335,17 @@ export function StampCampaignsForm({
 										>
 											{deactivatingId === campaign.id ? "Desactivando…" : "Desactivar"}
 										</Button>
-									) : null}
+									) : (
+										<Button
+											type="button"
+											variant="secondary"
+											disabled={deletingId === campaign.id}
+											onClick={() => void handleDelete(campaign.id, campaign.name)}
+											className="shrink-0"
+										>
+											{deletingId === campaign.id ? "Eliminando…" : "Eliminar"}
+										</Button>
+									)}
 								</div>
 							</li>
 						))}
@@ -312,6 +369,20 @@ export function StampCampaignsForm({
 							/>
 							<p className="mt-1 text-xs text-muted">
 								Describe la promoción. Ejemplo: compra 10 veces y obtén un café gratis.
+							</p>
+						</Field>
+
+						<Field label="Condiciones (opcional)">
+							<textarea
+								name="conditions"
+								value={conditions}
+								onChange={(event) => setConditions(event.target.value)}
+								placeholder="Válido de lunes a viernes. No acumulable con otras promociones."
+								maxLength={500}
+								className={TEXTAREA_CLASS}
+							/>
+							<p className="mt-1 text-xs text-muted">
+								Texto visible para el cliente en la tarjeta de sellos (requisitos, validez, etc.).
 							</p>
 						</Field>
 
@@ -374,6 +445,9 @@ export function StampCampaignsForm({
 									<p className="text-sm font-medium text-foreground">
 										{name.trim() || "Tu campaña"}
 									</p>
+									{conditions.trim() ? (
+										<p className="text-xs text-muted">{conditions.trim()}</p>
+									) : null}
 									<LoyaltyProgress
 										template={visualTemplate}
 										current={3}

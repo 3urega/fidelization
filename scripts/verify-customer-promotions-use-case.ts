@@ -8,7 +8,9 @@ import {
 } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanFeatures";
 import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
-import { ListActivePromotionsForCustomer } from "../src/contexts/loyalty/promotions/application/list/ListActivePromotionsForCustomer";
+import { ListCustomerPromotionSummaries } from "../src/contexts/loyalty/promotions/application/list/ListCustomerPromotionSummaries";
+import { CustomerPromotionUsage } from "../src/contexts/loyalty/promotions/domain/CustomerPromotionUsage";
+import { CustomerPromotionUsageRepository } from "../src/contexts/loyalty/promotions/domain/CustomerPromotionUsageRepository";
 import { Promotion } from "../src/contexts/loyalty/promotions/domain/Promotion";
 import { PromotionRepository } from "../src/contexts/loyalty/promotions/domain/PromotionRepository";
 import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";
@@ -18,6 +20,7 @@ import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantR
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
 
 const tenantId = "00000000-0000-4000-8000-0000000000p2";
+const customerId = "00000000-0000-4000-8000-0000000000c1";
 const planBasicId = "00000000-0000-4000-8000-000000000004";
 const planProId = "00000000-0000-4000-8000-000000000006";
 const fixedAt = new Date("2026-06-15T12:00:00.000Z");
@@ -172,20 +175,55 @@ function promotionFixture(overrides: {
 		startDate: overrides.startDate ?? null,
 		endDate: overrides.endDate ?? null,
 		isActive: overrides.isActive ?? true,
+		maxUsesPerUser: null,
 	});
+}
+
+class InMemoryCustomerPromotionUsageRepository extends CustomerPromotionUsageRepository {
+	constructor(private readonly usages: CustomerPromotionUsage[] = []) {
+		super();
+	}
+
+	async searchUsage(
+		tenantIdParam: string,
+		customerIdParam: string,
+		promotionId: string,
+	): Promise<CustomerPromotionUsage | null> {
+		return (
+			this.usages.find(
+				(usage) =>
+					usage.tenantId === tenantIdParam &&
+					usage.customerId === customerIdParam &&
+					usage.promotionId === promotionId,
+			) ?? null
+		);
+	}
+
+	async saveUsage(usage: CustomerPromotionUsage): Promise<void> {
+		const index = this.usages.findIndex(
+			(row) => row.customerId === usage.customerId && row.promotionId === usage.promotionId,
+		);
+		if (index >= 0) {
+			this.usages[index] = usage;
+		} else {
+			this.usages.push(usage);
+		}
+	}
 }
 
 function buildUseCase(
 	tenant: Tenant | null,
 	promotions: Promotion[] = [],
-): ListActivePromotionsForCustomer {
+	usages: CustomerPromotionUsage[] = [],
+): ListCustomerPromotionSummaries {
 	const tenantRepository = new MutableStubTenantRepository(tenant);
 	const billingRepository = new InMemoryTenantBillingRepository([planBasic, planPro]);
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
 
-	return new ListActivePromotionsForCustomer(
+	return new ListCustomerPromotionSummaries(
 		tenantRepository,
 		new InMemoryPromotionRepository(promotions),
+		new InMemoryCustomerPromotionUsageRepository(usages),
 		resolvePlan,
 	);
 }
@@ -210,6 +248,8 @@ async function expectError<T extends Error>(
 }
 
 async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "0";
+
 	const basicResult = await buildUseCase(baseTenant(planBasicId, "basic"), [
 		promotionFixture({ id: "ignored-on-basic" }),
 	]).execute({ tenantId });
@@ -264,11 +304,35 @@ async function main(): Promise<void> {
 	});
 	global.Date = originalDate;
 
-	if (useCaseResults.length !== 1 || useCaseResults[0]?.id !== "active-promo") {
+	if (
+		useCaseResults.length !== 1 ||
+		useCaseResults[0]?.id !== "active-promo" ||
+		useCaseResults[0]?.usedCount !== 0
+	) {
 		console.error("❌ Pro tenant should return only active in-range promo", useCaseResults);
 		process.exit(1);
 	}
 	console.log("✅ Pro tenant → active in-range promo only");
+
+	const withUsage = await buildUseCase(
+		baseTenant(planProId, "pro"),
+		[promotionFixture({ id: "active-promo" })],
+		[
+			CustomerPromotionUsage.fromPrimitives({
+				id: "usage-1",
+				tenantId,
+				customerId,
+				promotionId: "active-promo",
+				usedCount: 1,
+			}),
+		],
+	).execute({ tenantId, customerId });
+
+	if (withUsage.length !== 1 || withUsage[0]?.usedCount !== 1) {
+		console.error("❌ customer summaries should include usedCount", withUsage);
+		process.exit(1);
+	}
+	console.log("✅ customerId → usedCount from usage repo");
 
 	await expectError(
 		"missing tenant",

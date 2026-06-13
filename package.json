@@ -66,6 +66,7 @@
     "verify:rewards-use-case": "tsx scripts/verify-rewards-use-case.ts",
     "verify:rewards": "tsx scripts/verify-rewards.ts",
     "verify:promotions-use-case": "tsx scripts/verify-promotions-use-case.ts",
+    "verify:promotion-usage-use-case": "tsx scripts/verify-promotion-usage-use-case.ts",
     "verify:promotions": "tsx scripts/verify-promotions.ts",
     "verify:customer-promotions-use-case": "tsx scripts/verify-customer-promotions-use-case.ts",
     "verify:customer-promotions": "tsx scripts/verify-customer-promotions.ts",

@@ -5,8 +5,8 @@ import {
 	CrossTenantPromotionGroup,
 	ListUserCrossTenantPromotions,
 } from "../../../promotions/application/list/ListUserCrossTenantPromotions";
-import { ListActivePromotionsForCustomer } from "../../../promotions/application/list/ListActivePromotionsForCustomer";
-import { Promotion } from "../../../promotions/domain/Promotion";
+import { ListCustomerPromotionSummaries } from "../../../promotions/application/list/ListCustomerPromotionSummaries";
+import { CustomerPromotionSummary } from "../../../promotions/domain/CustomerPromotionSummary";
 import { Reward } from "../../../rewards/domain/Reward";
 import { GENERIC_STAMP_VISIT_LABEL } from "../../../stamp_types/domain/StampType";
 import { StampTypeRepository } from "../../../stamp_types/domain/StampTypeRepository";
@@ -45,7 +45,7 @@ export type GetEstablishmentDetailForUserParams = {
 export type EstablishmentDetailResult = {
 	mode: EstablishmentDetailMode;
 	tenant: EstablishmentDetailTenant;
-	promotions: Promotion[];
+	promotions: CustomerPromotionSummary[];
 	customer: Customer | null;
 	stampProgress: StampAddedSummary[];
 	rewards: Reward[];
@@ -58,7 +58,7 @@ export class GetEstablishmentDetailForUser {
 	constructor(
 		private readonly tenantRepository: TenantRepository,
 		private readonly customerRepository: CustomerRepository,
-		private readonly listActivePromotionsForCustomer: ListActivePromotionsForCustomer,
+		private readonly listCustomerPromotionSummaries: ListCustomerPromotionSummaries,
 		private readonly getCustomerStampProgress: GetCustomerStampProgress,
 		private readonly getCustomerActiveRewards: GetCustomerActiveRewards,
 		private readonly listUserCrossTenantPromotions: ListUserCrossTenantPromotions,
@@ -87,8 +87,9 @@ export class GetEstablishmentDetailForUser {
 			tenant.id,
 		);
 
-		const promotions = await this.listActivePromotionsForCustomer.execute({
+		const promotions = await this.listCustomerPromotionSummaries.execute({
 			tenantId: tenant.id,
+			customerId: customer?.id ?? null,
 		});
 
 		const primitives = tenant.toPrimitives();
@@ -163,6 +164,7 @@ export class GetEstablishmentDetailForUser {
 				: GENERIC_STAMP_VISIT_LABEL,
 			visualTemplate: campaign.visualTemplate,
 			cardBackgroundVariant: campaign.cardBackgroundVariant,
+			conditions: campaign.conditions,
 		}));
 	}
 

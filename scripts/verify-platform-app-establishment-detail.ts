@@ -30,7 +30,12 @@ function sessionHeaders(session: string): { cookie: string } {
 type DetailResponse = {
 	mode?: string;
 	tenant?: { coverImageUrl?: string | null };
-	promotions?: { title: string }[];
+	promotions?: {
+		id?: string;
+		title: string;
+		maxUsesPerUser?: number | null;
+		usedCount?: number;
+	}[];
 	customer?: { id: string; pointsBalance: number };
 	userQrValue?: string | null;
 	stampProgress?: { campaignName: string; current: number; required: number }[];
@@ -91,16 +96,19 @@ async function createBusiness(cookie: string, businessName: string): Promise<str
 	return body.tenant.slug;
 }
 
-async function assignProAndCreatePromotion(tenantId: string, title: string): Promise<void> {
-	await prisma.promotion.create({
+async function assignProAndCreatePromotion(tenantId: string, title: string): Promise<string> {
+	const promotion = await prisma.promotion.create({
 		data: {
 			tenantId,
 			title,
 			description: "Verify promo",
 			type: "discount",
 			isActive: true,
+			maxUsesPerUser: 2,
 		},
 	});
+
+	return promotion.id;
 }
 
 async function main(): Promise<void> {
@@ -117,7 +125,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	await assignProAndCreatePromotion(tenantA.id, "Promo Cafe A");
+	const promoIdA = await assignProAndCreatePromotion(tenantA.id, "Promo Cafe A");
 	const campaignIdA = await createActiveStampCampaign(tenantA.id, "Verify Detail Stamp A");
 	const campaignIdB = await createActiveStampCampaign(tenantA.id, "Verify Detail Stamp B");
 	await prisma.tenant.update({
@@ -150,7 +158,12 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	if (discoveryBody.promotions?.length !== 1 || discoveryBody.promotions[0]?.title !== "Promo Cafe A") {
+	if (
+		discoveryBody.promotions?.length !== 1 ||
+		discoveryBody.promotions[0]?.title !== "Promo Cafe A" ||
+		discoveryBody.promotions[0]?.maxUsesPerUser !== 2 ||
+		discoveryBody.promotions[0]?.usedCount !== 0
+	) {
 		console.error("❌ discovery promos missing", discoveryBody.promotions);
 		process.exit(1);
 	}
@@ -266,13 +279,67 @@ async function main(): Promise<void> {
 	if (
 		!interactionBody.promotions ||
 		interactionBody.promotions.length < 1 ||
-		interactionBody.promotions[0]?.title !== "Promo Cafe A"
+		interactionBody.promotions[0]?.title !== "Promo Cafe A" ||
+		interactionBody.promotions[0]?.maxUsesPerUser !== 2 ||
+		interactionBody.promotions[0]?.usedCount !== 0
 	) {
 		console.error("❌ interaction tenant promos missing", interactionBody.promotions);
 		process.exit(1);
 	}
 
 	console.log("✅ interaction mode with user QR, stamp split and tenant promos");
+
+	const enterOwner = await fetch(`${baseUrl}/api/user/businesses/${slugA}/enter`, {
+		method: "POST",
+		headers: sessionHeaders(ownerA.cookie),
+	});
+	const enterOwnerBody = (await enterOwner.json()) as { kind?: string };
+	const ownerTenantCookie = parseSessionCookie(enterOwner.headers.get("set-cookie"));
+
+	if (enterOwner.status !== 200 || enterOwnerBody.kind !== "tenant" || !ownerTenantCookie) {
+		console.error("❌ owner enter tenant failed", enterOwner.status, enterOwnerBody);
+		process.exit(1);
+	}
+
+	const recordUse = await fetch(`${baseUrl}/api/loyalty/promotions/${promoIdA}/use`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			...sessionHeaders(ownerTenantCookie),
+		},
+		body: JSON.stringify({ qrValue: interactionBody.userQrValue }),
+	});
+	const recordUseBody = (await recordUse.json()) as {
+		promotion?: { usedCount?: number; maxUsesPerUser?: number | null };
+		error?: { description?: string };
+	};
+
+	if (
+		recordUse.status !== 200 ||
+		recordUseBody.promotion?.usedCount !== 1 ||
+		recordUseBody.promotion?.maxUsesPerUser !== 2
+	) {
+		console.error("❌ POST promotion use failed", recordUse.status, recordUseBody);
+		process.exit(1);
+	}
+
+	console.log("✅ staff recorded promotion use via QR");
+
+	const afterUse = await fetch(`${baseUrl}/api/user/establishments/${slugA}`, {
+		headers: sessionHeaders(client.cookie),
+	});
+	const afterUseBody = (await afterUse.json()) as DetailResponse;
+
+	if (
+		!afterUse.ok ||
+		afterUseBody.promotions?.[0]?.usedCount !== 1 ||
+		afterUseBody.promotions?.[0]?.maxUsesPerUser !== 2
+	) {
+		console.error("❌ interaction promos should show usage counter", afterUseBody.promotions);
+		process.exit(1);
+	}
+
+	console.log("✅ interaction promos show usedCount/maxUsesPerUser after staff use");
 
 	const other = interactionBody.otherPromotions ?? [];
 	if (
@@ -324,6 +391,7 @@ async function main(): Promise<void> {
 		...ownerARow.memberships.map((row) => row.tenantId),
 		...ownerBRow.memberships.map((row) => row.tenantId),
 	];
+	await prisma.customerPromotionUsage.deleteMany({ where: { tenantId: { in: tenantIds } } });
 	await prisma.promotion.deleteMany({ where: { tenantId: { in: tenantIds } } });
 	await prisma.customerStampProgress.deleteMany({ where: { customerId: clientRow.id } });
 	await prisma.stampCampaign.deleteMany({ where: { id: { in: [campaignIdA, campaignIdB] } } });

@@ -55,14 +55,13 @@ export function StampTypesForm({ onTypesChanged }: StampTypesFormProps): ReactEl
 			}
 
 			setTypes(body.types ?? []);
-			onTypesChanged?.();
 		} catch {
 			setSubmitError("Error de red al cargar los tipos.");
 			setTypes([]);
 		} finally {
 			setListLoading(false);
 		}
-	}, [onTypesChanged]);
+	}, []);
 
 	useEffect(() => {
 		if (!session || session.role !== "owner") {

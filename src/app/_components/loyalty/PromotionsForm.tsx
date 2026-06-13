@@ -20,6 +20,7 @@ type PromotionPayload = {
 	startDate: string | null;
 	endDate: string | null;
 	isActive: boolean;
+	maxUsesPerUser?: number | null;
 };
 
 type PromotionsResponse = {
@@ -67,6 +68,7 @@ export function PromotionsForm(): ReactElement {
 	const [type, setType] = useState<PromotionType>("discount");
 	const [startDate, setStartDate] = useState("");
 	const [endDate, setEndDate] = useState("");
+	const [maxUsesPerUser, setMaxUsesPerUser] = useState("");
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
@@ -172,6 +174,9 @@ export function PromotionsForm(): ReactElement {
 					type,
 					...(startDate ? { startDate } : {}),
 					...(endDate ? { endDate } : {}),
+					...(maxUsesPerUser.trim()
+						? { maxUsesPerUser: Number.parseInt(maxUsesPerUser.trim(), 10) }
+						: {}),
 				}),
 			});
 
@@ -190,6 +195,7 @@ export function PromotionsForm(): ReactElement {
 				setType("discount");
 				setStartDate("");
 				setEndDate("");
+				setMaxUsesPerUser("");
 				await loadPromotions();
 			}
 		} catch {
@@ -255,6 +261,9 @@ export function PromotionsForm(): ReactElement {
 										<p className="mt-1 text-xs text-muted">
 											{formatPromotionType(promotion.type)}
 											{dateRange ? ` · ${dateRange}` : null}
+											{promotion.maxUsesPerUser != null
+												? ` · ${promotion.maxUsesPerUser} usos/cliente`
+												: null}
 										</p>
 									</div>
 									<div className="flex items-center gap-3">
@@ -347,6 +356,18 @@ export function PromotionsForm(): ReactElement {
 							/>
 						</Field>
 					</div>
+
+					<Field label="Usos por cliente (opcional)">
+						<Input
+							type="number"
+							name="maxUsesPerUser"
+							min={1}
+							step={1}
+							value={maxUsesPerUser}
+							onChange={(event) => setMaxUsesPerUser(event.target.value)}
+							placeholder="Sin límite"
+						/>
+					</Field>
 
 					{submitError ? <p className="text-sm text-error">{submitError}</p> : null}
 					{success ? <p className="text-sm text-foreground">{success}</p> : null}

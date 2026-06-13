@@ -5,6 +5,7 @@ export type LoyaltyTransactionType =
 	| "points_redeemed"
 	| "stamp_added"
 	| "reward_redeemed"
+	| "promotion_used"
 	| "manual_adjustment";
 
 export type LoyaltyTransactionPrimitives = {
@@ -77,6 +78,23 @@ export class LoyaltyTransaction {
 			points: params.points,
 			metadata: params.metadata ?? null,
 			createdByUserId: null,
+		});
+	}
+
+	static recordPromotionUsed(params: {
+		tenantId: string;
+		customerId: string;
+		createdByUserId: string;
+		metadata?: Record<string, unknown> | null;
+	}): LoyaltyTransaction {
+		return LoyaltyTransaction.fromPrimitives({
+			id: randomUUID(),
+			tenantId: params.tenantId,
+			customerId: params.customerId,
+			type: "promotion_used",
+			points: null,
+			metadata: params.metadata ?? null,
+			createdByUserId: params.createdByUserId,
 		});
 	}
 

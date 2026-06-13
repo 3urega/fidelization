@@ -2,9 +2,9 @@
 import "dotenv/config";
 
 import { GetEstablishmentDetailForUser } from "../src/contexts/loyalty/customers/application/profile/GetEstablishmentDetailForUser";
-import { ListActivePromotionsForCustomer } from "../src/contexts/loyalty/promotions/application/list/ListActivePromotionsForCustomer";
+import { ListCustomerPromotionSummaries } from "../src/contexts/loyalty/promotions/application/list/ListCustomerPromotionSummaries";
+import { customerPromotionSummaryFromPromotion } from "../src/contexts/loyalty/promotions/domain/CustomerPromotionSummary";
 import { ListUserCrossTenantPromotions } from "../src/contexts/loyalty/promotions/application/list/ListUserCrossTenantPromotions";
-import { Promotion } from "../src/contexts/loyalty/promotions/domain/Promotion";
 import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
 import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
@@ -132,9 +132,28 @@ class InMemoryCustomerRepository extends CustomerRepository {
 	}
 }
 
-class StubListActivePromotions {
-	async execute(): Promise<Promotion[]> {
-		return [];
+class StubListCustomerPromotionSummaries {
+	async execute(params: { customerId?: string | null }) {
+		const usedCount = params.customerId ? 1 : 0;
+
+		return [
+			customerPromotionSummaryFromPromotion(
+				{
+					toPrimitives: () => ({
+						id: "promo-detail",
+						tenantId: "tenant-detail",
+						title: "Detail Promo",
+						description: "Verify",
+						type: "discount" as const,
+						startDate: null,
+						endDate: null,
+						isActive: true,
+						maxUsesPerUser: 2,
+					}),
+				} as never,
+				usedCount,
+			),
+		];
 	}
 }
 
@@ -169,6 +188,8 @@ class InMemoryStampCampaignRepository extends StampCampaignRepository {
 	async saveCampaign(campaign: StampCampaign): Promise<void> {
 		this.campaigns.set(campaign.id, campaign);
 	}
+
+	async deleteCampaign(): Promise<void> {}
 
 	async searchCampaignById(tenantId: string, id: string): Promise<StampCampaign | null> {
 		const campaign = this.campaigns.get(id);
@@ -270,7 +291,7 @@ const customerRepo = new InMemoryCustomerRepository(
 const getDetail = new GetEstablishmentDetailForUser(
 	tenantRepo,
 	customerRepo,
-	new StubListActivePromotions() as unknown as ListActivePromotionsForCustomer,
+	new StubListCustomerPromotionSummaries() as unknown as ListCustomerPromotionSummaries,
 	new StubGetCustomerStampProgress() as never,
 	new StubGetCustomerActiveRewards() as never,
 	new StubListUserCrossTenantPromotions() as unknown as ListUserCrossTenantPromotions,

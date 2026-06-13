@@ -1,8 +1,8 @@
 import { Service } from "diod";
 
 import { CustomerRepository } from "../../../customers/domain/CustomerRepository";
-import { Promotion } from "../../domain/Promotion";
-import { ListActivePromotionsForCustomer } from "./ListActivePromotionsForCustomer";
+import { CustomerPromotionSummary } from "../../domain/CustomerPromotionSummary";
+import { ListCustomerPromotionSummaries } from "./ListCustomerPromotionSummaries";
 
 export const MAX_CROSS_TENANT_PROMOTIONS = 5;
 
@@ -10,7 +10,7 @@ export type CrossTenantPromotionGroup = {
 	tenantId: string;
 	tenantName: string;
 	tenantSlug: string;
-	promotions: Promotion[];
+	promotions: CustomerPromotionSummary[];
 };
 
 export type ListUserCrossTenantPromotionsParams = {
@@ -22,7 +22,7 @@ export type ListUserCrossTenantPromotionsParams = {
 export class ListUserCrossTenantPromotions {
 	constructor(
 		private readonly customerRepository: CustomerRepository,
-		private readonly listActivePromotionsForCustomer: ListActivePromotionsForCustomer,
+		private readonly listCustomerPromotionSummaries: ListCustomerPromotionSummaries,
 	) {}
 
 	async execute(params: ListUserCrossTenantPromotionsParams): Promise<CrossTenantPromotionGroup[]> {
@@ -40,8 +40,9 @@ export class ListUserCrossTenantPromotions {
 				continue;
 			}
 
-			const promotions = await this.listActivePromotionsForCustomer.execute({
+			const promotions = await this.listCustomerPromotionSummaries.execute({
 				tenantId: establishment.tenantId,
+				customerId: establishment.customerId,
 			});
 
 			if (promotions.length === 0) {

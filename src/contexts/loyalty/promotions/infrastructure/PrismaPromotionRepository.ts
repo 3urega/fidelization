@@ -20,6 +20,7 @@ export class PrismaPromotionRepository extends PromotionRepository {
 				startDate: p.startDate ? new Date(p.startDate) : null,
 				endDate: p.endDate ? new Date(p.endDate) : null,
 				isActive: p.isActive,
+				maxUsesPerUser: p.maxUsesPerUser,
 			},
 			update: {
 				title: p.title,
@@ -28,6 +29,7 @@ export class PrismaPromotionRepository extends PromotionRepository {
 				startDate: p.startDate ? new Date(p.startDate) : null,
 				endDate: p.endDate ? new Date(p.endDate) : null,
 				isActive: p.isActive,
+				maxUsesPerUser: p.maxUsesPerUser,
 			},
 		});
 	}
@@ -78,6 +80,7 @@ export class PrismaPromotionRepository extends PromotionRepository {
 		startDate: Date | null;
 		endDate: Date | null;
 		isActive: boolean;
+		maxUsesPerUser: number | null;
 	}): Promotion {
 		return Promotion.fromPrimitives({
 			id: row.id,
@@ -88,6 +91,7 @@ export class PrismaPromotionRepository extends PromotionRepository {
 			startDate: row.startDate?.toISOString() ?? null,
 			endDate: row.endDate?.toISOString() ?? null,
 			isActive: row.isActive,
+			maxUsesPerUser: row.maxUsesPerUser,
 		});
 	}
 }
