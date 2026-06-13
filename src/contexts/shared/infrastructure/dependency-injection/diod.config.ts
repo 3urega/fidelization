@@ -29,6 +29,7 @@ import { UserAuthenticator } from "../../../identity/users/application/authentic
 import { AuthenticateGoogleUser } from "../../../identity/users/application/authenticate/AuthenticateGoogleUser";
 import { EnterPlatformUserFromTenantSession } from "../../../identity/users/application/authenticate/EnterPlatformUserFromTenantSession";
 import { LoginPlatformUser } from "../../../identity/users/application/authenticate/LoginPlatformUser";
+import { EnsureUserQrValue } from "../../../identity/users/application/profile/EnsureUserQrValue";
 import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
@@ -167,6 +168,7 @@ builder.registerAndUse(RegisterBusinessOwnerUser);
 builder.registerAndUse(CreateOwnerBusiness);
 builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
+builder.registerAndUse(EnsureUserQrValue);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(AuthenticateGoogleUser);
 builder.registerAndUse(LoginPlatformUser);

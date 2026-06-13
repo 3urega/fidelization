@@ -235,6 +235,8 @@ class StubUserRepository extends UserRepository {
 
 	async updatePasswordHash(): Promise<void> {}
 
+	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
 	async isPlatformSuperadmin(): Promise<boolean> {
 		return false;
 	}

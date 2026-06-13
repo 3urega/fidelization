@@ -10,6 +10,7 @@ npm run verify:tenant-resolution   # issue #5 — extractSubdomain + mock slug m
 npm run verify:tenant-auth   # issue #6 — staff roles, TenantStaffLogin, cross-tenant session
 npm run verify:platform-auth   # superadmin — JWT kind platform/tenant, PlatformAuthenticator
 npm run verify:platform-app-auth-use-case  # issue #38 — RegisterPlatformUser + LoginPlatformUser + kind user (domain stub)
+npm run verify:platform-app-ensure-user-qr-use-case  # lazy-assign users.qr_value on GET /api/user/me
 npm run verify:platform-app-public-home  # issue #39 — / home + register/login UI + middleware (dev server)
 npm run verify:platform-app-register-business  # issue #40 — /business/register + POST /api/user/businesses + enter panel (dev + DATABASE_URL)
 npm run verify:platform-app-enter-tenant-use-case  # EnterTenantStaffFromUserSession (domain stub)
@@ -141,7 +142,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Promotions owner API (#35):** owner Pro+ `GET/POST /api/loyalty/promotions`, `PATCH …/[id]`; employee GET only. `verify:promotions-use-case`, `verify:promotions` (dev + `DATABASE_URL`).
 - **Promotions owner UI (#36):** owner en `/settings/promotions` → crear/listar/desactivar promos; nav owner-only; checklist «Crea tu primera promoción» en `/home` (Pro+); Basic → upsell `/onboarding/plan`. `planFeatures` en sesión tenant.
 - **Customer promotions (#37):** cliente en `/app/card` ve promos activas; `GET /api/loyalty/me` incluye `promotions[]`; Basic → `[]` sin error. `verify:customer-promotions-use-case`, `verify:customer-promotions` (dev + `DATABASE_URL`).
-- **Platform app auth (#38):** registro/login unificado persona en apex (`POST /api/auth/register/user`, `POST /api/auth/login/user`); sesión JWT `kind: user`; `GET /api/user/me`; `users.qr_value` + `customers.user_id` migrados. `verify:platform-app-auth-use-case`.
+- **Platform app auth (#38):** registro/login unificado persona en apex (`POST /api/auth/register/user`, `POST /api/auth/login/user`); sesión JWT `kind: user`; `GET /api/user/me` (lazy-assign `users.qr_value` si falta); `users.qr_value` + `customers.user_id` migrados. `verify:platform-app-auth-use-case`, `verify:platform-app-ensure-user-qr-use-case`.
 - **Platform app home UI (#39):** home pública `/` (Empezar → `/register` · Registrar negocio · Iniciar sesión); formularios `/register`, `/login` host-aware → `/home`; guards middleware `kind: user`; legacy `/u/*` → 308. Spec: `docs/rediseño-home.md`. `verify:platform-app-public-home`.
 - **Platform app register business (#40):** `/business/register` (auth gate) → `/business/register/tenant`; `POST /api/user/businesses` con sesión `kind: user`; «Mis negocios» en `/home`; `POST /api/user/businesses/[slug]/enter` emite sesión `kind: tenant` y abre `/panel` sin re-login; desde el panel del negocio, «App personal» → `POST /api/user/enter` vuelve a sesión `kind: user` en `/home`. `verify:platform-app-register-business`, `verify:platform-app-enter-tenant-use-case`, `verify:platform-app-enter-user-use-case`.
 - **Platform app dashboard (#41):** `/home` unificado (Mis negocios + Mis locales), botón «Mostrar mi QR» (modal), `/home/business/[slug]`, `GET /api/user/me/relationships`. `verify:platform-app-dashboard`, `verify:platform-app-dashboard-use-case`.

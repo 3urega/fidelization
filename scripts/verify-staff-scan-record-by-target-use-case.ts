@@ -7,6 +7,7 @@ import { PRO_PLAN_FEATURES } from "../src/contexts/billing/subscriptions/domain/
 import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { User } from "../src/contexts/identity/users/domain/User";
+import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
 import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
@@ -172,8 +173,30 @@ class InMemoryUserRepository extends UserRepository {
 		super();
 	}
 
+	async save(): Promise<void> {}
+
+	async search(): Promise<null> {
+		return null;
+	}
+
+	async searchByEmail(): Promise<null> {
+		return null;
+	}
+
 	async searchByQrValue(qrValue: string): Promise<User | null> {
 		return this.usersByQr.get(qrValue) ?? null;
+	}
+
+	async searchByOAuthSubject(): Promise<null> {
+		return null;
+	}
+
+	async updatePasswordHash(): Promise<void> {}
+
+	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
+	async isPlatformSuperadmin(): Promise<boolean> {
+		return false;
 	}
 }
 

@@ -76,6 +76,10 @@ export class PostgresUserRepository extends PostgresRepository<User> implements 
 		return false;
 	}
 
+	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {
+		// Legacy starter.users table has no qr_value column.
+	}
+
 	async searchByQrValue(_qrValue: string): Promise<User | null> {
 		return null;
 	}

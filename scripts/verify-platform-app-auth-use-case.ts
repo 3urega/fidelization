@@ -59,6 +59,8 @@ class InMemoryUserRepository extends UserRepository {
 		}
 	}
 
+	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
 	async isPlatformSuperadmin(userId: string): Promise<boolean> {
 		for (const row of this.users.values()) {
 			if (row.user.id.value === userId) {

@@ -92,6 +92,13 @@ export class PrismaUserRepository extends UserRepository {
 		});
 	}
 
+	async assignQrValueIfAbsent(userId: UserId, qrValue: string): Promise<void> {
+		await prisma.user.updateMany({
+			where: { id: userId.value, qrValue: null },
+			data: { qrValue },
+		});
+	}
+
 	async isPlatformSuperadmin(userId: string): Promise<boolean> {
 		const row = await prisma.user.findUnique({
 			where: { id: userId },

@@ -19,5 +19,8 @@ export abstract class UserRepository {
 
 	abstract updatePasswordHash(userId: UserId, passwordHash: string): Promise<void>;
 
+	/** Sets qr_value only when currently null (idempotent, safe for concurrent lazy assign). */
+	abstract assignQrValueIfAbsent(userId: UserId, qrValue: string): Promise<void>;
+
 	abstract isPlatformSuperadmin(userId: string): Promise<boolean>;
 }

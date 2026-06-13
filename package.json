@@ -13,6 +13,7 @@
     "verify:tenant-auth": "tsx scripts/verify-tenant-auth.ts",
     "verify:platform-auth": "tsx scripts/verify-platform-auth.ts",
     "verify:platform-app-auth-use-case": "tsx scripts/verify-platform-app-auth-use-case.ts",
+    "verify:platform-app-ensure-user-qr-use-case": "tsx scripts/verify-platform-app-ensure-user-qr-use-case.ts",
     "verify:platform-app-public-home": "tsx scripts/verify-platform-app-public-home.ts",
     "verify:platform-app-register-business": "tsx scripts/verify-platform-app-register-business.ts",
     "verify:platform-app-enter-tenant-use-case": "tsx scripts/verify-platform-app-enter-tenant-use-case.ts",

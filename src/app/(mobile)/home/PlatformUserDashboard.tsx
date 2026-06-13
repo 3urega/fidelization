@@ -12,6 +12,7 @@ import { EstablishmentDiscoverGrid } from "../../_components/platform-app/Establ
 import { EstablishmentSummaryCard } from "../../_components/platform-app/PlatformRelationshipCards";
 import { Button } from "../../_components/ui/Button";
 import { Card } from "../../_components/ui/Card";
+import { HoverTooltip } from "../../_components/ui/HoverTooltip";
 import { PlatformDiscoverJoinForm } from "./discover/PlatformDiscoverJoinForm";
 
 type UserMeResponse = {
@@ -150,6 +151,11 @@ export function PlatformUserDashboard({
 	const displayName = user?.name ?? "…";
 	const displayEmail = user?.email ?? "";
 	const qrValue = user?.qrValue ?? null;
+	const qrDisabledReason = loading
+		? "Cargando tu código QR…"
+		: !qrValue
+			? "No se pudo cargar tu código QR. Recarga la página o vuelve a iniciar sesión."
+			: null;
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
@@ -159,16 +165,18 @@ export function PlatformUserDashboard({
 				{displayEmail ? <p className="text-sm text-muted">{displayEmail}</p> : null}
 			</header>
 
-			<Button
-				type="button"
-				className="w-full"
-				disabled={loading || !qrValue}
-				onClick={() => {
-					setQrModalOpen(true);
-				}}
-			>
-				Mostrar mi QR
-			</Button>
+			<HoverTooltip message={qrDisabledReason} className="w-full">
+				<Button
+					type="button"
+					className="w-full"
+					disabled={loading || !qrValue}
+					onClick={() => {
+						setQrModalOpen(true);
+					}}
+				>
+					Mostrar mi QR
+				</Button>
+			</HoverTooltip>
 
 			{user ? (
 				<PlatformUserQrModal

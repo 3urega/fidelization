@@ -44,6 +44,10 @@ class StubUserRepository extends UserRepository {
 	async updatePasswordHash(): Promise<void> {
 		return;
 	}
+
+	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {
+		return;
+	}
 }
 
 class StubUserFinder extends UserFinder {

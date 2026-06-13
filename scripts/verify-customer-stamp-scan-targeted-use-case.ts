@@ -4,6 +4,7 @@ import "dotenv/config";
 import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
 import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
+import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
 import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
@@ -92,8 +93,30 @@ class StubTenantBillingRepository extends TenantBillingRepository {
 }
 
 class StubUserRepository extends UserRepository {
+	async save(): Promise<void> {}
+
+	async search(): Promise<null> {
+		return null;
+	}
+
+	async searchByEmail(): Promise<null> {
+		return null;
+	}
+
 	async searchByQrValue(): Promise<null> {
 		return null;
+	}
+
+	async searchByOAuthSubject(): Promise<null> {
+		return null;
+	}
+
+	async updatePasswordHash(): Promise<void> {}
+
+	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
+	async isPlatformSuperadmin(): Promise<boolean> {
+		return false;
 	}
 }
 
