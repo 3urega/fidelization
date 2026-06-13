@@ -42,6 +42,8 @@
     "verify:platform-admin-tenant-detail": "tsx scripts/verify-platform-admin-tenant-detail.ts",
     "verify:platform-admin-impersonate-use-case": "tsx scripts/verify-platform-admin-impersonate-use-case.ts",
     "verify:platform-admin-impersonate": "tsx scripts/verify-platform-admin-impersonate.ts",
+    "verify:platform-admin-owners-use-case": "tsx scripts/verify-platform-admin-owners-use-case.ts",
+    "verify:platform-admin-owners": "tsx scripts/verify-platform-admin-owners.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",
     "verify:business-onboarding": "tsx scripts/verify-business-onboarding.ts",
     "verify:format-tenant-host": "tsx scripts/verify-format-tenant-host.ts",
