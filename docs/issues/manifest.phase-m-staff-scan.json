@@ -1,0 +1,26 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/staff-scan-flow.md",
+  "issues": [
+    {
+      "title": "Phase M1: Staff scan flow spec and outcome types",
+      "bodyFile": "docs/issues/staff-scan-flow-spec.md"
+    },
+    {
+      "title": "Phase M2: List staff scan targets API (GET /api/loyalty/scan/targets)",
+      "bodyFile": "docs/issues/staff-scan-targets-api.md"
+    },
+    {
+      "title": "Phase M3: Record staff scan by target with typed outcomes",
+      "bodyFile": "docs/issues/staff-scan-record-by-target.md"
+    },
+    {
+      "title": "Phase M4: Staff scan page redesign (/scan)",
+      "bodyFile": "docs/issues/staff-scan-page-redesign.md"
+    },
+    {
+      "title": "Phase M5: Staff scan verify scripts and E2E",
+      "bodyFile": "docs/issues/staff-scan-verify-e2e.md"
+    }
+  ]
+}

@@ -43,6 +43,8 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-k-stamp-dashboard.json
 # Phase L — zona clientes owner (publicado)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-l-customer-zone.json
+# Phase M — staff scan target-first (publicado)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-m-staff-scan.json
 ```
 
 ## After close on GitHub
