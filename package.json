@@ -55,6 +55,7 @@
     "verify:platform-admin-app-users-use-case": "tsx scripts/verify-platform-admin-app-users-use-case.ts",
     "verify:platform-admin-app-users": "tsx scripts/verify-platform-admin-app-users.ts",
     "verify:platform-admin-campaign-templates-use-case": "tsx scripts/verify-platform-admin-campaign-templates-use-case.ts",
+    "verify:platform-admin-campaign-templates": "tsx scripts/verify-platform-admin-campaign-templates.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",
     "verify:business-onboarding": "tsx scripts/verify-business-onboarding.ts",
     "verify:format-tenant-host": "tsx scripts/verify-format-tenant-host.ts",

@@ -2,7 +2,7 @@
  * Static navigation for the platform admin shell.
  * To add a module: append an entry with href, label, and icon key; create the page under (platform)/platform/.
  */
-export type PlatformNavIcon = "home" | "building" | "users" | "clients" | "plans" | "billing" | "flags" | "chart";
+export type PlatformNavIcon = "home" | "building" | "users" | "clients" | "templates" | "plans" | "billing" | "flags" | "chart";
 
 export type PlatformNavItem = {
 	href: string;
@@ -16,6 +16,7 @@ export const platformNav: readonly PlatformNavItem[] = [
 	{ href: "/platform/tenants", label: "Negocios", icon: "building" },
 	{ href: "/platform/owners", label: "Comerciantes", icon: "users" },
 	{ href: "/platform/users", label: "Clientes", icon: "clients" },
+	{ href: "/platform/campaign-templates", label: "Plantillas", icon: "templates" },
 	{ href: "/platform/plans", label: "Planes", icon: "plans" },
 	{ href: "/platform/billing", label: "Facturación", icon: "billing" },
 	{ href: "/platform/features", label: "Feature flags", icon: "flags" },
