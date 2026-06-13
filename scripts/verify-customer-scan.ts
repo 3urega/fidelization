@@ -14,6 +14,12 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	hasStaffScanOutcome,
+	postStaffScan,
+	resolveStampCampaignTargetId,
+} from "./lib/staff-scan-verify-helpers";
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -25,7 +31,7 @@ function tenantHeaders(extra: Record<string, string> = {}): Record<string, strin
 
 /**
  * E2E: staff session → POST /api/loyalty/scan → customer points + loyalty_transactions row.
- * Legacy path: customers.qr_value (tenant subdomain / headers). User global QR: verify:platform-app-global-qr-scan.
+ * Legacy customers.qr_value path. User global QR: verify:platform-app-global-qr-scan.
  */
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) {
@@ -59,36 +65,35 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
+	const ownerHeaders = tenantHeaders({
+		"Content-Type": "application/json",
+		cookie: `session=${ownerCookie}`,
+	});
+
+	const campaignId = await resolveStampCampaignTargetId(
+		apexBaseUrl,
+		ownerHeaders,
+		"Customer scan verify",
+	);
+
 	const before = await prisma.customer.findUnique({ where: { id: customerId } });
 	if (!before) {
 		console.error("❌ customer row missing");
 		process.exit(1);
 	}
 
-	const scanOptionsRes = await fetch(`${apexBaseUrl}/api/loyalty/stamp-types`, {
-		headers: tenantHeaders({ cookie: `session=${ownerCookie}` }),
-	});
-	const scanOptionsBody = (await scanOptionsRes.json()) as { selectionRequired?: boolean };
-	const scanPayload =
-		scanOptionsBody.selectionRequired === true
-			? { qrValue, stampTypeId: null }
-			: { qrValue };
+	const scan = await postStaffScan(
+		apexBaseUrl,
+		ownerHeaders,
+		campaignScanBody(qrValue, campaignId),
+	);
 
-	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: tenantHeaders({
-			"Content-Type": "application/json",
-			cookie: `session=${ownerCookie}`,
-		}),
-		body: JSON.stringify(scanPayload),
-	});
-	const scanBody = (await scan.json()) as {
-		customer?: { pointsBalance: number; visitsCount: number; name: string };
-		error?: { description?: string };
-	};
-
-	if (!scan.ok || scanBody.customer?.pointsBalance !== before.pointsBalance + 1) {
-		console.error("❌ POST /api/loyalty/scan:", scan.status, scanBody);
+	if (
+		scan.status !== 200 ||
+		!hasStaffScanOutcome(scan.body.outcomes, "point_recorded") ||
+		scan.body.customer?.pointsBalance !== before.pointsBalance + 1
+	) {
+		console.error("❌ POST /api/loyalty/scan:", scan.status, scan.body);
 		process.exit(1);
 	}
 
@@ -120,6 +125,7 @@ async function main(): Promise<void> {
 	console.log("✅ customer session cannot call staff scan → 401");
 
 	await prisma.loyaltyTransaction.deleteMany({ where: { customerId } });
+	await prisma.customerStampProgress.deleteMany({ where: { customerId } });
 	await prisma.customer.deleteMany({ where: { id: customerId } });
 
 	console.log("✅ verify:customer-scan passed");

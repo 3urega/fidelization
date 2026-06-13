@@ -16,6 +16,12 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	hasStaffScanOutcome,
+	postStaffScan,
+	resolveStampCampaignTargetId,
+} from "./lib/staff-scan-verify-helpers";
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -31,7 +37,7 @@ function sessionHeaders(session: string): { cookie: string } {
 
 /**
  * E2E issue #44: platform user global QR → staff scan → points in joined tenant.
- * Legacy path covered by verify:customer-scan.
+ * Legacy customers.qr_value path covered by verify:customer-scan.
  */
 async function main(): Promise<void> {
 	if (!process.env.DATABASE_URL) {
@@ -102,25 +108,30 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: tenantHeaders({
-			"Content-Type": "application/json",
-			cookie: `session=${ownerCookie}`,
-		}),
-		body: JSON.stringify({ qrValue: userGlobalQr }),
+	const ownerHeaders = tenantHeaders({
+		"Content-Type": "application/json",
+		cookie: `session=${ownerCookie}`,
 	});
-	const scanBody = (await scan.json()) as {
-		customer?: { id: string; pointsBalance: number; visitsCount: number };
-		error?: { type?: string; description?: string };
-	};
+
+	const campaignId = await resolveStampCampaignTargetId(
+		apexBaseUrl,
+		ownerHeaders,
+		"Global QR scan verify",
+	);
+
+	const scan = await postStaffScan(
+		apexBaseUrl,
+		ownerHeaders,
+		campaignScanBody(userGlobalQr, campaignId),
+	);
 
 	if (
-		!scan.ok ||
-		scanBody.customer?.id !== customerId ||
-		scanBody.customer.pointsBalance !== before.pointsBalance + 1
+		scan.status !== 200 ||
+		scan.body.customer?.id !== customerId ||
+		scan.body.customer?.pointsBalance !== before.pointsBalance + 1 ||
+		!hasStaffScanOutcome(scan.body.outcomes, "point_recorded")
 	) {
-		console.error("❌ POST /api/loyalty/scan with user QR:", scan.status, scanBody);
+		console.error("❌ POST /api/loyalty/scan with user QR:", scan.status, scan.body);
 		process.exit(1);
 	}
 
@@ -152,31 +163,26 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const orphanScan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: tenantHeaders({
-			"Content-Type": "application/json",
-			cookie: `session=${ownerCookie}`,
-		}),
-		body: JSON.stringify({ qrValue: orphanBody.user.qrValue }),
-	});
-	const orphanScanBody = (await orphanScan.json()) as {
-		customer?: { id: string; pointsBalance: number; visitsCount: number };
-	};
+	const orphanScan = await postStaffScan(
+		apexBaseUrl,
+		ownerHeaders,
+		campaignScanBody(orphanBody.user.qrValue, campaignId),
+	);
 
 	if (
-		!orphanScan.ok ||
-		orphanScanBody.customer?.pointsBalance !== 1 ||
-		orphanScanBody.customer.visitsCount !== 1
+		orphanScan.status !== 200 ||
+		orphanScan.body.customer?.pointsBalance !== 1 ||
+		orphanScan.body.customer.visitsCount !== 1 ||
+		!hasStaffScanOutcome(orphanScan.body.outcomes, "point_recorded")
 	) {
-		console.error("❌ orphan user first scan expected auto-join + point:", orphanScan.status, orphanScanBody);
+		console.error("❌ orphan user first scan expected auto-join + point:", orphanScan.status, orphanScan.body);
 		process.exit(1);
 	}
 
 	const orphanCustomer = await prisma.customer.findFirst({
 		where: { userId: orphanBody.user.id, tenantId: DEMO_TENANT_ID },
 	});
-	if (!orphanCustomer || orphanCustomer.id !== orphanScanBody.customer?.id) {
+	if (!orphanCustomer || orphanCustomer.id !== orphanScan.body.customer?.id) {
 		console.error("❌ auto-join customer row missing in Prisma");
 		process.exit(1);
 	}
@@ -187,6 +193,9 @@ async function main(): Promise<void> {
 	await prisma.customer.deleteMany({ where: { id: customerId } });
 	await prisma.loyaltyTransaction.deleteMany({
 		where: { customerId: orphanCustomer.id },
+	});
+	await prisma.customerStampProgress.deleteMany({
+		where: { customerId: { in: [customerId, orphanCustomer.id] } },
 	});
 	await prisma.customer.deleteMany({ where: { id: orphanCustomer.id } });
 	await prisma.user.deleteMany({

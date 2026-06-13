@@ -16,6 +16,12 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	hasStaffScanOutcome,
+	postStaffScan,
+	resolveStampCampaignTargetId,
+} from "./lib/staff-scan-verify-helpers";
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -158,15 +164,21 @@ async function main(): Promise<void> {
 
 	console.log("✅ POST redeem without points → 400 InsufficientCustomerPoints");
 
-	for (let i = 0; i < 3; i += 1) {
-		const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-			method: "POST",
-			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue }),
-		});
+	const campaignId = await resolveStampCampaignTargetId(
+		apexBaseUrl,
+		ownerHeaders,
+		"Reward redeem verify",
+	);
 
-		if (!scan.ok) {
-			console.error(`❌ scan ${i + 1}/3:`, scan.status, await scan.json());
+	for (let i = 0; i < 3; i += 1) {
+		const scan = await postStaffScan(
+			apexBaseUrl,
+			ownerHeaders,
+			campaignScanBody(qrValue, campaignId),
+		);
+
+		if (scan.status !== 200 || !hasStaffScanOutcome(scan.body.outcomes, "point_recorded")) {
+			console.error(`❌ scan ${i + 1}/3:`, scan.status, scan.body);
 			process.exit(1);
 		}
 	}
@@ -250,6 +262,7 @@ async function main(): Promise<void> {
 	console.log("✅ inactive reward hidden from GET me");
 
 	await prisma.loyaltyTransaction.deleteMany({ where: { customerId } });
+	await prisma.customerStampProgress.deleteMany({ where: { customerId } });
 	await prisma.customer.delete({ where: { id: customerId } });
 	await prisma.reward.update({
 		where: { id: rewardId },

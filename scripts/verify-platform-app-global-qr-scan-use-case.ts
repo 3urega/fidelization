@@ -1,15 +1,21 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
+import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
-import { RecordCustomerVisitByQr } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
-import { ResolveStampScanOptions } from "../src/contexts/loyalty/stamp_types/application/scan/ResolveStampScanOptions";
-import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
-import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
+import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
+import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
+import type { StaffScanOutcome } from "../src/contexts/loyalty/customers/domain/StaffScanOutcome";
 import { LoyaltyTransactionRepository } from "../src/contexts/loyalty/loyalty_transactions/domain/LoyaltyTransactionRepository";
+import { CustomerPromotionUsageRepository } from "../src/contexts/loyalty/promotions/domain/CustomerPromotionUsageRepository";
+import { PromotionRepository } from "../src/contexts/loyalty/promotions/domain/PromotionRepository";
+import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
+import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
 import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
@@ -19,6 +25,7 @@ import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatu
 const tenantId = "00000000-0000-4000-8000-0000000000e1";
 const staffUserId = "00000000-0000-4000-8000-0000000000e2";
 const platformUserId = "00000000-0000-4000-8000-0000000000e3";
+const campaignId = "00000000-0000-4000-8000-0000000000c1";
 const userGlobalQr = "platform-user-global-qr-verify";
 
 const baseTenant = Tenant.fromPrimitives({
@@ -32,6 +39,19 @@ const baseTenant = Tenant.fromPrimitives({
 	subscriptionPlanId: null,
 	status: TenantStatus.Active,
 	createdAt: new Date().toISOString(),
+});
+
+const scanCampaign = StampCampaign.fromPrimitives({
+	id: campaignId,
+	tenantId,
+	name: "Global QR verify campaign",
+	requiredStamps: 10,
+	rewardId: null,
+	stampTypeId: null,
+	visualTemplate: "generic",
+	cardBackgroundVariant: "coffee-photo",
+	conditions: "",
+	isActive: true,
 });
 
 class StubTenantRepository extends TenantRepository {
@@ -58,6 +78,36 @@ class StubTenantRepository extends TenantRepository {
 	async updateBranding(): Promise<Tenant | null> {
 		return null;
 	}
+}
+
+class StubTenantBillingRepository extends TenantBillingRepository {
+	async savePlan(): Promise<void> {}
+
+	async searchPlanByName(): Promise<null> {
+		return null;
+	}
+
+	async searchPlanById(): Promise<null> {
+		return null;
+	}
+
+	async listActivePlans(): Promise<never[]> {
+		return [];
+	}
+
+	async saveSubscription(): Promise<void> {}
+
+	async searchActiveSubscription(): Promise<null> {
+		return null;
+	}
+
+	async searchSubscriptionByStripeId(): Promise<null> {
+		return null;
+	}
+
+	async updateSubscriptionStatus(): Promise<void> {}
+
+	async linkTenantPlan(): Promise<void> {}
 }
 
 class InMemoryUserRepository extends UserRepository {
@@ -91,8 +141,11 @@ class InMemoryUserRepository extends UserRepository {
 }
 
 class InMemoryCustomerRepository extends CustomerRepository {
-	constructor(private readonly customers: Customer[]) {
+	private customers: Customer[];
+
+	constructor(initial: Customer[]) {
 		super();
+		this.customers = [...initial];
 	}
 
 	async save(customer: Customer): Promise<void> {
@@ -108,18 +161,18 @@ class InMemoryCustomerRepository extends CustomerRepository {
 		return null;
 	}
 
-	async searchByQrValue(tenantId: string, qrValue: string): Promise<Customer | null> {
+	async searchByQrValue(tenantIdValue: string, qrValue: string): Promise<Customer | null> {
 		return (
 			this.customers.find(
-				(customer) => customer.tenantId === tenantId && customer.qrValue === qrValue,
+				(customer) => customer.tenantId === tenantIdValue && customer.qrValue === qrValue,
 			) ?? null
 		);
 	}
 
-	async searchByUserIdAndTenantId(userId: string, tenantId: string): Promise<Customer | null> {
+	async searchByUserIdAndTenantId(userId: string, tenantIdValue: string): Promise<Customer | null> {
 		return (
 			this.customers.find(
-				(customer) => customer.userId === userId && customer.tenantId === tenantId,
+				(customer) => customer.userId === userId && customer.tenantId === tenantIdValue,
 			) ?? null
 		);
 	}
@@ -137,12 +190,59 @@ class NoopLoyaltyTransactionRepository extends LoyaltyTransactionRepository {
 	}
 }
 
-class NoopStampCampaignRepository extends StampCampaignRepository {
+class InMemoryStampCampaignRepository extends StampCampaignRepository {
+	private progress = new Map<string, CustomerStampProgress>();
+
+	constructor(private readonly campaigns: StampCampaign[]) {
+		super();
+	}
+
 	async saveCampaign(): Promise<void> {}
 
 	async deleteCampaign(): Promise<void> {}
 
-	async searchCampaignById(): Promise<null> {
+	async searchCampaignById(tenantIdValue: string, id: string): Promise<StampCampaign | null> {
+		const campaign = this.campaigns.find((row) => row.id === id);
+
+		return campaign && campaign.tenantId === tenantIdValue ? campaign : null;
+	}
+
+	async listByTenant(): Promise<StampCampaign[]> {
+		return this.campaigns;
+	}
+
+	async listActiveByTenant(tenantIdValue: string): Promise<StampCampaign[]> {
+		return this.campaigns.filter(
+			(campaign) => campaign.tenantId === tenantIdValue && campaign.isActive,
+		);
+	}
+
+	async hasActiveGenericCampaigns(): Promise<boolean> {
+		return this.campaigns.some(
+			(campaign) =>
+				campaign.tenantId === tenantId && campaign.isActive && campaign.stampTypeId === null,
+		);
+	}
+
+	async saveProgress(progress: CustomerStampProgress): Promise<void> {
+		this.progress.set(`${progress.customerId}:${progress.campaignId}`, progress);
+	}
+
+	async searchProgress(
+		tenantIdValue: string,
+		customerId: string,
+		campaignIdValue: string,
+	): Promise<CustomerStampProgress | null> {
+		const row = this.progress.get(`${customerId}:${campaignIdValue}`);
+
+		return row && row.tenantId === tenantIdValue ? row : null;
+	}
+}
+
+class StubPromotionRepository extends PromotionRepository {
+	async save(): Promise<void> {}
+
+	async searchById(): Promise<null> {
 		return null;
 	}
 
@@ -150,50 +250,26 @@ class NoopStampCampaignRepository extends StampCampaignRepository {
 		return [];
 	}
 
-	async listActiveByTenant(): Promise<never[]> {
+	async listActiveByTenantAt(): Promise<never[]> {
 		return [];
 	}
+}
 
-	async hasActiveGenericCampaigns(): Promise<boolean> {
-		return false;
-	}
+class StubCustomerPromotionUsageRepository extends CustomerPromotionUsageRepository {
+	async saveUsage(): Promise<void> {}
 
-	async saveProgress(): Promise<void> {}
-
-	async searchProgress(): Promise<null> {
+	async searchUsage(): Promise<null> {
 		return null;
 	}
 }
 
-class InMemoryStampTypeRepository extends StampTypeRepository {
-	async save(_stampType: StampType): Promise<void> {}
-
-	async searchById(): Promise<null> {
-		return null;
-	}
-
-	async searchBySlug(): Promise<null> {
-		return null;
-	}
-
-	async listByTenant(): Promise<StampType[]> {
-		return [];
-	}
-
-	async listActiveByTenant(): Promise<StampType[]> {
-		return [];
-	}
-
-	async countActiveByTenant(): Promise<number> {
-		return 0;
-	}
-
-	async maxSortOrder(): Promise<number> {
-		return 0;
-	}
+function hasKind(outcomes: StaffScanOutcome[], kind: StaffScanOutcome["kind"]): boolean {
+	return outcomes.some((outcome) => outcome.kind === kind);
 }
 
 async function main(): Promise<void> {
+	process.env.DISABLE_TENANT_PLAN_GATES = "1";
+
 	const legacyCustomer = Customer.register({
 		tenantId,
 		name: "Legacy Web Customer",
@@ -217,31 +293,43 @@ async function main(): Promise<void> {
 	const tenantRepository = new StubTenantRepository(baseTenant);
 	const customerRepository = new InMemoryCustomerRepository([legacyCustomer, linkedCustomer]);
 	const userRepository = new InMemoryUserRepository(usersByQr);
-	const stampRepository = new NoopStampCampaignRepository();
-	const stampTypeRepository = new InMemoryStampTypeRepository();
-	const resolveStampScanOptions = new ResolveStampScanOptions(
+	const stampRepository = new InMemoryStampCampaignRepository([scanCampaign]);
+	const resolvePlan = new ResolveTenantSubscriptionPlan(
 		tenantRepository,
-		stampTypeRepository,
-		stampRepository,
+		new StubTenantBillingRepository(),
 	);
-	const useCase = new RecordCustomerVisitByQr(
+	const assertFeature = new AssertTenantPlanFeature(resolvePlan);
+	const resolveCustomer = new ResolveCustomerByQrForStaffScan(customerRepository, userRepository);
+
+	const useCase = new RecordStaffScanByTarget(
 		tenantRepository,
 		customerRepository,
-		userRepository,
+		resolveCustomer,
 		new NoopLoyaltyTransactionRepository(),
 		stampRepository,
-		stampTypeRepository,
-		resolveStampScanOptions,
+		new StubPromotionRepository(),
+		new StubCustomerPromotionUsageRepository(),
+		assertFeature,
 	);
 
-	const legacyResult = await useCase.execute({
+	const scanParams = {
 		tenantId,
-		qrValue: legacyCustomer.qrValue,
+		targetType: "stamp_campaign" as const,
+		targetId: campaignId,
 		createdByUserId: staffUserId,
 		staffRole: TenantRole.Owner,
+	};
+
+	const legacyResult = await useCase.execute({
+		...scanParams,
+		qrValue: legacyCustomer.qrValue,
 	});
 
-	if (legacyResult.customer.id !== legacyCustomer.id || legacyResult.customer.pointsBalance !== 1) {
+	if (
+		legacyResult.customer.id !== legacyCustomer.id ||
+		legacyResult.customer.pointsBalance !== 1 ||
+		!hasKind(legacyResult.outcomes, "point_recorded")
+	) {
 		console.error("❌ legacy customer QR path failed", legacyResult.customer.toPrimitives());
 		process.exit(1);
 	}
@@ -249,13 +337,15 @@ async function main(): Promise<void> {
 	console.log("✅ legacy customers.qr_value scan still works");
 
 	const globalResult = await useCase.execute({
-		tenantId,
+		...scanParams,
 		qrValue: userGlobalQr,
-		createdByUserId: staffUserId,
-		staffRole: TenantRole.Owner,
 	});
 
-	if (globalResult.customer.id !== linkedCustomer.id || globalResult.customer.pointsBalance !== 1) {
+	if (
+		globalResult.customer.id !== linkedCustomer.id ||
+		globalResult.customer.pointsBalance !== 1 ||
+		!hasKind(globalResult.outcomes, "point_recorded")
+	) {
 		console.error("❌ users.qr_value → linked customer failed", globalResult.customer.toPrimitives());
 		process.exit(1);
 	}
@@ -274,16 +364,15 @@ async function main(): Promise<void> {
 	usersByQr.set(orphanUserQr, orphanUser);
 
 	const orphanResult = await useCase.execute({
-		tenantId,
+		...scanParams,
 		qrValue: orphanUserQr,
-		createdByUserId: staffUserId,
-		staffRole: TenantRole.Owner,
 	});
 
 	if (
 		orphanResult.customer.userId !== orphanUserId ||
 		orphanResult.customer.pointsBalance !== 1 ||
-		orphanResult.customer.visitsCount !== 1
+		orphanResult.customer.visitsCount !== 1 ||
+		!hasKind(orphanResult.outcomes, "point_recorded")
 	) {
 		console.error("❌ auto-join on first scan failed", orphanResult.customer.toPrimitives());
 		process.exit(1);

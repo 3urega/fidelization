@@ -16,6 +16,11 @@ import {
 	brandingVerifyBaseUrl,
 	loginOwnerForBrandingVerify,
 } from "./lib/tenant-branding-verify-helpers";
+import {
+	campaignScanBody,
+	findStampAddedOutcome,
+	postStaffScan,
+} from "./lib/staff-scan-verify-helpers";
 
 type InsightsResponse = {
 	vipCount?: number;
@@ -186,18 +191,15 @@ async function main(): Promise<void> {
 	const scanCount = 9;
 
 	for (let i = 0; i < scanCount; i += 1) {
-		const scan = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/scan`, {
-			method: "POST",
-			headers: ownerHeaders,
-			body: JSON.stringify({ qrValue, stampTypeId }),
-		});
-		const scanBody = (await scan.json()) as {
-			stampsAdded?: { campaignId?: string; current: number }[];
-		};
-		const stamp = scanBody.stampsAdded?.find((row) => row.campaignId === campaignId);
+		const scan = await postStaffScan(
+			brandingVerifyBaseUrl,
+			ownerHeaders,
+			campaignScanBody(qrValue, campaignId),
+		);
+		const stamp = findStampAddedOutcome(scan.body.outcomes, campaignId);
 
-		if (!scan.ok || stamp?.current !== i + 1) {
-			console.error(`❌ scan ${i + 1}:`, scan.status, scanBody);
+		if (scan.status !== 200 || stamp?.current !== i + 1) {
+			console.error(`❌ scan ${i + 1}:`, scan.status, scan.body);
 			process.exit(1);
 		}
 	}

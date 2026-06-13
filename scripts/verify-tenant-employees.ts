@@ -16,6 +16,12 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	hasStaffScanOutcome,
+	postStaffScan,
+	resolveStampCampaignTargetId,
+} from "./lib/staff-scan-verify-helpers";
 
 const DEMO_QR_VALUE = "demo-qr-cafe-demo";
 
@@ -172,20 +178,27 @@ async function main(): Promise<void> {
 
 	const beforePoints = demoCustomer.pointsBalance;
 
-	const scan = await fetch(`${apexBaseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: tenantHeaders({
+	const campaignId = await resolveStampCampaignTargetId(
+		apexBaseUrl,
+		ownerHeaders,
+		"Tenant employees verify",
+	);
+
+	const scan = await postStaffScan(
+		apexBaseUrl,
+		tenantHeaders({
 			"Content-Type": "application/json",
 			cookie: employeeSession,
 		}),
-		body: JSON.stringify({ qrValue: DEMO_QR_VALUE }),
-	});
-	const scanBody = (await scan.json()) as {
-		customer?: { pointsBalance: number };
-	};
+		campaignScanBody(DEMO_QR_VALUE, campaignId),
+	);
 
-	if (!scan.ok || scanBody.customer?.pointsBalance !== beforePoints + 1) {
-		console.error("❌ employee POST /api/loyalty/scan:", scan.status, scanBody);
+	if (
+		scan.status !== 200 ||
+		!hasStaffScanOutcome(scan.body.outcomes, "point_recorded") ||
+		scan.body.customer?.pointsBalance !== beforePoints + 1
+	) {
+		console.error("❌ employee POST /api/loyalty/scan:", scan.status, scan.body);
 		process.exit(1);
 	}
 

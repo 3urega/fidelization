@@ -22,7 +22,7 @@ npm run verify:platform-app-customer-join-use-case  # issue #42 — JoinTenantAs
 npm run verify:platform-app-customer-join  # issue #42 — join by slug + deep link E2E (dev + DATABASE_URL)
 npm run verify:platform-app-establishment-detail-use-case  # issue #43 — GetEstablishmentDetailForUser (domain stub)
 npm run verify:platform-app-establishment-detail  # issue #43 — establishment detail + cross-promos E2E (dev + DATABASE_URL)
-npm run verify:platform-app-global-qr-scan-use-case  # issue #44 — RecordCustomerVisitByQr user QR lookup (domain stub)
+npm run verify:platform-app-global-qr-scan-use-case  # issue #44 — ResolveCustomerByQrForStaffScan + RecordStaffScanByTarget (domain stub)
 npm run verify:platform-app-global-qr-scan  # issue #44 — user QR staff scan E2E (dev + DATABASE_URL)
 npm run verify:platform-app-google-oauth-use-case  # issue #45 — AuthenticateGoogleUser (domain stub)
 npm run verify:platform-app-google-oauth  # issue #45 — Google UI + OAuth API E2E (dev server)
@@ -43,7 +43,7 @@ npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.
 npm run verify:customer-use-case   # issue #18 — RegisterCustomer + AuthenticateCustomerByQr + DI
 npm run verify:customer-loyalty-api  # issue #18 — loyalty APIs (x-tenant headers on apex)
 npm run verify:customer-qr-session   # issue #20 — E2E tenant host → register → /app/card + Prisma (dev + DATABASE_URL)
-npm run verify:customer-scan         # staff scan → points + loyalty_transactions (dev + DATABASE_URL)
+npm run verify:customer-scan         # staff scan target-first → points + loyalty_transactions (dev + DATABASE_URL)
 npm run verify:customer-stamp-scan-use-case  # issue #22 — scan adds stamp per active campaign (domain stub)
 npm run verify:customer-stamp-scan   # issue #22 — scan + stamp progress E2E (dev + DATABASE_URL)
 npm run verify:customer-stamp-progress-use-case  # issue #23 — GET me stampProgress[] (domain stub)
@@ -128,8 +128,8 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Tenant profile:** owner en `/settings/profile` → dirección (recomendada) + descripción opcionales; checklist «Añade la dirección» en `/panel`. API: `PATCH /api/tenant/profile`. Visible en detalle del local (app personal). `verify:tenant-profile-use-case`, `verify:tenant-profile`.
 - **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me` (incl. `stampProgress[]` desde #23, `rewards[]` desde #25). `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
 - **Customer stamp progress (#23):** en `/app/card`, sección «Sellos» con progreso por campaña activa (`0/N`, «Completada»). `verify:customer-stamp-progress-use-case`, `verify:customer-stamp-progress`.
-- **Staff scan:** owner/empleado en `/scan` → `POST /api/loyalty/scan` con `qrValue` → +1 punto, +1 sello por campaña activa, filas en `loyalty_transactions` (`points_earned`, `stamp_added`). Enlace para clientes en checklist `/home`. `verify:customer-scan`, `verify:customer-stamp-scan`.
-- **Stamp campaigns (#21):** owner en `/settings/stamps` → tipos de consumición (Phase H) + campañas (`GET/POST /api/loyalty/stamp-types`, `GET/POST/PATCH /api/loyalty/stamp-campaigns`). Empleado en `/scan` elige tipo antes de escanear. `verify:stamp-types*`, `verify:stamp-campaigns*`, `verify:customer-stamp-scan-targeted*`.
+- **Staff scan (Phase M):** owner/empleado en `/scan` elige **una tarjeta o promo** → `POST /api/loyalty/scan` `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }` (+1 punto siempre; sello/promo según target). `verify:staff-scan-*`, `verify:customer-scan`, `verify:customer-stamp-scan*`.
+- **Stamp campaigns (#21):** owner en `/settings/stamps` → tipos de consumición + campañas (`GET/POST /api/loyalty/stamp-types`, `GET/POST/PATCH /api/loyalty/stamp-campaigns`). Empleado en `/scan` elige tarjeta concreta antes de escanear. `verify:stamp-types*`, `verify:stamp-campaigns*`, `verify:customer-stamp-scan-targeted*`.
 - **Rewards (#24):** owner API `GET/POST /api/loyalty/rewards`, `PATCH …/[id]` (owner-only; sin UI aún). `verify:rewards-use-case`, `verify:rewards`.
 - **Customer reward redeem (#25):** en `/app/card`, sección «Recompensas» con catálogo activo; `POST /api/loyalty/rewards/redeem` descuenta puntos y crea `reward_redeemed`. `verify:customer-reward-redeem-use-case`, `verify:customer-reward-redeem`.
 - **Tenant employees (#26–#27):** owner en `/settings/team` invita empleados (`GET/POST /api/tenant/employees`); empleado inicia sesión en subdominio tenant y usa `/scan`. Checklist «Invita a tu empleado» en `/home`. `verify:tenant-employees-use-case`, `verify:tenant-employees`.
@@ -149,7 +149,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Phase J visual assets:** [`docs/domain/visual-assets-system.md`](docs/domain/visual-assets-system.md) — sellos SVG dinámicos, `LoyaltyProgress`, fondos campaña (`fondos.png`); `verify:loyalty-visual-assets`, `verify:loyalty-progress-component`; issues #49–#54 (**Phase J complete**).
 - **Platform app join establishment (#42):** `POST /api/user/establishments/join` `{ slug }`, `JoinTenantAsCustomer`, formulario en `/home/discover`, deep link `/join/[slug]`. Join explícito cuenta como interacción en «Mis locales». `verify:platform-app-customer-join`, `verify:platform-app-customer-join-use-case`.
 - **Platform app establishment detail (#43):** `GET /api/user/establishments/[slug]` (`discovery` \| `interaction`), `/home/establishments/[slug]`, `LoyaltyCard` + redeem user-scoped, cross-promos, `/home/qr`. `verify:platform-app-establishment-detail`, `verify:platform-app-establishment-detail-use-case`.
-- **Platform app global QR scan (#44):** `RecordCustomerVisitByQr` resuelve `customers.qr_value` (legacy) luego `users.qr_value` → `customers(user_id, tenant_id)`; **auto-join en primer escaneo** si no hay fila customer. Dashboard: botón «Mostrar mi QR» (modal). `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.
+- **Platform app global QR scan (#44):** `ResolveCustomerByQrForStaffScan` + `RecordStaffScanByTarget` resuelven `customers.qr_value` (legacy) luego `users.qr_value`; **auto-join en primer escaneo** si no hay fila customer. Dashboard: botón «Mostrar mi QR» (modal). `verify:platform-app-global-qr-scan`, `verify:platform-app-global-qr-scan-use-case`; regresión legacy en `verify:customer-scan`.
 - **Platform app Google OAuth (#45):** `POST /api/auth/oauth/google` + botones GIS en `/`, `/register`, `/login`. Capacitor: `fidelization://join/{slug}` → `/join/[slug]`, `platformFetch` + `NEXT_PUBLIC_API_URL`. Env: `GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `CAPACITOR_SERVER_URL` (dev). `verify:platform-app-google-oauth`, `verify:platform-app-google-oauth-use-case`, `verify:platform-app-capacitor-config`, `verify:platform-app-e2e`, `npm run build:capacitor`.
 
 # Architecture

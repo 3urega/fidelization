@@ -16,6 +16,12 @@ import {
 	tenantId,
 	tenantSlug,
 } from "./lib/customer-verify-helpers";
+import {
+	campaignScanBody,
+	hasStaffScanOutcome,
+	postStaffScan,
+	resolveStampCampaignTargetId,
+} from "./lib/staff-scan-verify-helpers";
 
 const baseUrl = apexBaseUrl;
 
@@ -165,24 +171,30 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const scan = await fetch(`${baseUrl}/api/loyalty/scan`, {
-		method: "POST",
-		headers: tenantHeaders({
-			"Content-Type": "application/json",
-			cookie: `session=${ownerCookie}`,
-		}),
-		body: JSON.stringify({ qrValue: meBody.user.qrValue }),
+	const ownerHeaders = tenantHeaders({
+		"Content-Type": "application/json",
+		cookie: `session=${ownerCookie}`,
 	});
-	const scanBody = (await scan.json()) as {
-		customer?: { id: string; pointsBalance: number };
-	};
+
+	const campaignId = await resolveStampCampaignTargetId(
+		baseUrl,
+		ownerHeaders,
+		"Platform E2E verify",
+	);
+
+	const scan = await postStaffScan(
+		baseUrl,
+		ownerHeaders,
+		campaignScanBody(meBody.user.qrValue, campaignId),
+	);
 
 	if (
-		!scan.ok ||
-		scanBody.customer?.id !== demoCustomer.id ||
-		scanBody.customer.pointsBalance !== demoCustomer.pointsBalance + 1
+		scan.status !== 200 ||
+		scan.body.customer?.id !== demoCustomer.id ||
+		scan.body.customer.pointsBalance !== demoCustomer.pointsBalance + 1 ||
+		!hasStaffScanOutcome(scan.body.outcomes, "point_recorded")
 	) {
-		console.error("❌ staff scan with user QR failed", scan.status, scanBody);
+		console.error("❌ staff scan with user QR failed", scan.status, scan.body);
 		process.exit(1);
 	}
 
@@ -200,6 +212,18 @@ async function main(): Promise<void> {
 	console.log("✅ /join/[slug] route OK");
 
 	await prisma.loyaltyTransaction.deleteMany({
+		where: {
+			customerId: {
+				in: (
+					await prisma.customer.findMany({
+						where: { userId: client.userId },
+						select: { id: true },
+					})
+				).map((row) => row.id),
+			},
+		},
+	});
+	await prisma.customerStampProgress.deleteMany({
 		where: {
 			customerId: {
 				in: (

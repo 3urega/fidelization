@@ -3,10 +3,6 @@
   "sourceDoc": "docs/domain/staff-scan-flow.md",
   "issues": [
     {
-      "title": "Phase M5: Staff scan verify scripts and full regression",
-      "bodyFile": "docs/issues/staff-scan-verify-e2e.md"
-    },
-    {
       "title": "Phase M6: Staff scan docs cleanup and Phase H supersede",
       "bodyFile": "docs/issues/staff-scan-docs-cleanup.md"
     }

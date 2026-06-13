@@ -1,6 +1,6 @@
 # Staff scan flow (target-first)
 
-**Status:** Phase M in progress — **M1 implemented** ([#65](https://github.com/3urega/fidelization/issues/65), 2026-06-13), **M2 implemented** ([#66](https://github.com/3urega/fidelization/issues/66), 2026-06-13), **M3 implemented** ([#67](https://github.com/3urega/fidelization/issues/67), 2026-06-13), **M4 implemented** ([#68](https://github.com/3urega/fidelization/issues/68), 2026-06-13). M5–M6 pending.
+**Status:** Phase M in progress — **M1 implemented** ([#65](https://github.com/3urega/fidelization/issues/65), 2026-06-13), **M2 implemented** ([#66](https://github.com/3urega/fidelization/issues/66), 2026-06-13), **M3 implemented** ([#67](https://github.com/3urega/fidelization/issues/67), 2026-06-13), **M4 implemented** ([#68](https://github.com/3urega/fidelization/issues/68), 2026-06-13), **M5 implemented** ([#69](https://github.com/3urega/fidelization/issues/69), 2026-06-13). M6 pending.
 
 ## Implementation status (M1)
 
@@ -29,7 +29,7 @@
 | Record use case | [`RecordStaffScanByTarget.ts`](../../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget.ts) |
 | API route | [`POST /api/loyalty/scan`](../../src/app/api/loyalty/scan/route.ts) — `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }` |
 | Promo use delegation | [`POST /api/loyalty/promotions/[id]/use`](../../src/app/api/loyalty/promotions/[promotionId]/use/route.ts) → `RecordStaffScanByTarget` |
-| Legacy (sin ruta scan) | [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts) — pendiente borrado en M5 |
+| Legacy (sin ruta scan) | [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts) — pendiente borrado en M6 |
 | Domain verify | `npm run verify:staff-scan-record-by-target-use-case` |
 | E2E verify | `npm run verify:staff-scan-record-by-target` (dev + `DATABASE_URL`) |
 
@@ -42,7 +42,13 @@
 | Scan form | [`StaffScanForm.tsx`](../../src/app/_components/loyalty/StaffScanForm.tsx) |
 | Page | [`/scan`](../../src/app/(app)/scan/page.tsx) |
 
-**Pendiente M5:** migrar verifies legacy al contrato target-first.
+## Implementation status (M5)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Verify helpers | [`scripts/lib/staff-scan-verify-helpers.ts`](../../scripts/lib/staff-scan-verify-helpers.ts) |
+| Regresión E2E | Todos los `verify:*` que llaman `POST /api/loyalty/scan` usan `{ qrValue, targetType, targetId }` + `outcomes[]` |
+| Legacy use case | [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts) — pendiente borrado en M6 |
 
 ## Invariante de negocio (no negociable)
 
