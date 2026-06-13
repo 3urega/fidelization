@@ -30,7 +30,7 @@ export function LoyaltyCardBackground({
 			aria-label={`Fondo tarjeta: ${config.label}`}
 		>
 			{withOverlay ? (
-				<div className="absolute inset-0 bg-surface/85 backdrop-blur-[1px]" aria-hidden />
+				<div className="absolute inset-0 bg-surface/95 backdrop-blur-sm" aria-hidden />
 			) : null}
 			<div className="relative z-10 p-4">{children}</div>
 		</div>

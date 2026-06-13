@@ -28,14 +28,32 @@ function main(): void {
 			"filled",
 			"empty",
 			"empty",
-			"reward",
+			"empty",
 		],
 	);
 
 	assertSlots(
 		"completed campaign",
 		buildLoyaltyProgressSlots({ current: 0, required: 5, completed: true }),
-		["filled", "filled", "filled", "filled", "reward"],
+		["filled", "filled", "filled", "filled", "filled", "reward"],
+	);
+
+	assertSlots(
+		"all stamps earned",
+		buildLoyaltyProgressSlots({ current: 10, required: 10 }),
+		[
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"filled",
+			"reward",
+		],
 	);
 
 	if (parseLoyaltyVisualTemplate("invalid") !== "generic") {

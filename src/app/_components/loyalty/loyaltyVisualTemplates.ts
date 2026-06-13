@@ -27,11 +27,44 @@ export function parseLoyaltyVisualTemplate(value: string | null | undefined): Lo
 	return "generic";
 }
 
+export type StampSpriteRenderMode = "svg-mask" | "raster";
+
+export type StampSpriteAsset = {
+	url: string;
+	renderMode: StampSpriteRenderMode;
+};
+
+/** Shared reward sprite for every visual template. */
+export const LOYALTY_REWARD_SPRITE_URL = "/assets/loyalty/coffee/price.png";
+
+const COFFEE_STAMP_SPRITES: Record<Exclude<LoyaltyStampSpriteState, "reward">, string> = {
+	empty: "/assets/loyalty/coffee/coffe-empty.png",
+	filled: "/assets/loyalty/coffee/coffe-filled.png",
+};
+
+export function resolveStampSprite(
+	template: LoyaltyVisualTemplate,
+	state: LoyaltyStampSpriteState,
+): StampSpriteAsset {
+	if (state === "reward") {
+		return { url: LOYALTY_REWARD_SPRITE_URL, renderMode: "raster" };
+	}
+
+	if (template === "coffee") {
+		return { url: COFFEE_STAMP_SPRITES[state], renderMode: "raster" };
+	}
+
+	return {
+		url: `/assets/loyalty/${template}/${template}-${state}.svg`,
+		renderMode: "svg-mask",
+	};
+}
+
 export function getStampSpriteUrl(
 	template: LoyaltyVisualTemplate,
 	state: LoyaltyStampSpriteState,
 ): string {
-	return `/assets/loyalty/${template}/${template}-${state}.svg`;
+	return resolveStampSprite(template, state).url;
 }
 
 export function resolveLoyaltyVisualTemplate(
