@@ -2,6 +2,7 @@
 import "dotenv/config";
 
 import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantEffectivePlanFeatures } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { PlanFeatureNotAvailable } from "../src/contexts/billing/subscriptions/domain/PlanFeatureNotAvailable";
 import {
@@ -355,14 +356,21 @@ async function main(): Promise<void> {
 
 	console.log("✅ ListPromotions includes inactive promotion");
 
+	const missingTenantRepo = new MutableStubTenantRepository(null);
+	const missingBillingRepository = new InMemoryTenantBillingRepository([
+		planBasic,
+		planPro,
+		planPremium,
+	]);
+	const missingResolvePlan = new ResolveTenantSubscriptionPlan(
+		missingTenantRepo,
+		missingBillingRepository,
+	);
 	const missingTenantCreate = new CreatePromotion(
-		new MutableStubTenantRepository(null),
+		missingTenantRepo,
 		new InMemoryPromotionRepository(),
 		new AssertTenantPlanFeature(
-			new ResolveTenantSubscriptionPlan(
-				new MutableStubTenantRepository(null),
-				new InMemoryTenantBillingRepository([planBasic, planPro, planPremium]),
-			),
+			new ResolveTenantEffectivePlanFeatures(missingResolvePlan, missingTenantRepo),
 		),
 	);
 

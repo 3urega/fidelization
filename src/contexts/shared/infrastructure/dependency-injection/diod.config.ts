@@ -12,7 +12,10 @@ import { TenantBillingRepository } from "../../../billing/subscriptions/domain/T
 import { AssignTenantSubscriptionPlan } from "../../../billing/subscriptions/application/assign/AssignTenantSubscriptionPlan";
 import { AssertTenantEmployeeLimit } from "../../../billing/subscriptions/application/guard/AssertTenantEmployeeLimit";
 import { AssertTenantPlanFeature } from "../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantEffectivePlanFeatures } from "../../../billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { ResolveTenantSubscriptionPlan } from "../../../billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { ListPlatformPlanFeatures, UpdatePlatformPlanFeatures } from "../../../platform/application/features/PlatformPlanFeatures";
+import { GetPlatformTenantFeatures, UpdatePlatformTenantFeatures } from "../../../platform/application/features/PlatformTenantFeatures";
 import { CreateStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CreateStripeCheckoutSession";
 import { CompleteStripeCheckoutSession } from "../../../billing/subscriptions/application/checkout/CompleteStripeCheckoutSession";
 import { SyncTenantSubscriptionFromStripe } from "../../../billing/subscriptions/application/sync/SyncTenantSubscriptionFromStripe";
@@ -319,6 +322,11 @@ builder.registerAndUse(CompleteStripeCheckoutSession);
 builder.registerAndUse(SyncTenantSubscriptionFromStripe);
 builder.registerAndUse(ProcessStripeWebhook);
 builder.registerAndUse(ResolveTenantSubscriptionPlan);
+builder.registerAndUse(ResolveTenantEffectivePlanFeatures);
+builder.registerAndUse(ListPlatformPlanFeatures);
+builder.registerAndUse(UpdatePlatformPlanFeatures);
+builder.registerAndUse(GetPlatformTenantFeatures);
+builder.registerAndUse(UpdatePlatformTenantFeatures);
 builder.registerAndUse(AssertTenantPlanFeature);
 builder.registerAndUse(AssertTenantEmployeeLimit);
 
