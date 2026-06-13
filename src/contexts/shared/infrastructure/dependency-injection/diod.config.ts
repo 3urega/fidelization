@@ -108,6 +108,9 @@ import { ImpersonateTenantOwnerFromPlatformSession } from "../../../platform/app
 import { CreatePlatformCampaignTemplate } from "../../../platform/application/campaign_templates/CreatePlatformCampaignTemplate";
 import { ListPlatformCampaignTemplates } from "../../../platform/application/campaign_templates/ListPlatformCampaignTemplates";
 import { UpdatePlatformCampaignTemplate } from "../../../platform/application/campaign_templates/UpdatePlatformCampaignTemplate";
+import { CreatePlatformGame } from "../../../platform/application/games/CreatePlatformGame";
+import { ListPlatformGames } from "../../../platform/application/games/ListPlatformGames";
+import { UpdatePlatformGame } from "../../../platform/application/games/UpdatePlatformGame";
 import { GetPlatformAppUserDetail } from "../../../platform/application/users/GetPlatformAppUserDetail";
 import { ListPlatformAppUsers } from "../../../platform/application/users/ListPlatformAppUsers";
 import { ListPlatformOwners } from "../../../platform/application/owners/ListPlatformOwners";
@@ -116,6 +119,7 @@ import { ListPlatformTenants } from "../../../platform/application/tenants/ListP
 import { UpdatePlatformTenant } from "../../../platform/application/tenants/UpdatePlatformTenant";
 import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
 import { PlatformCampaignTemplateRepository } from "../../../platform/domain/PlatformCampaignTemplateRepository";
+import { PlatformGameRepository } from "../../../platform/domain/PlatformGameRepository";
 import { PlatformAppUsersReadRepository } from "../../../platform/domain/PlatformAppUsersReadRepository";
 import { PlatformAnalyticsReadRepository } from "../../../platform/domain/PlatformAnalyticsReadRepository";
 import { PlatformBillingReadRepository } from "../../../platform/domain/PlatformBillingReadRepository";
@@ -124,6 +128,7 @@ import { PlatformDashboardReadRepository } from "../../../platform/domain/Platfo
 import { PlatformImpersonationEventRepository } from "../../../platform/domain/PlatformImpersonationEventRepository";
 import { PlatformTenantDetailReadRepository } from "../../../platform/domain/PlatformTenantDetailReadRepository";
 import { PrismaPlatformCampaignTemplateRepository } from "../../../platform/infrastructure/PrismaPlatformCampaignTemplateRepository";
+import { PrismaPlatformGameRepository } from "../../../platform/infrastructure/PrismaPlatformGameRepository";
 import { PrismaPlatformAppUsersReadRepository } from "../../../platform/infrastructure/PrismaPlatformAppUsersReadRepository";
 import { PrismaPlatformAnalyticsReadRepository } from "../../../platform/infrastructure/PrismaPlatformAnalyticsReadRepository";
 import { PrismaPlatformBillingReadRepository } from "../../../platform/infrastructure/PrismaPlatformBillingReadRepository";
@@ -230,6 +235,11 @@ builder.registerAndUse(PrismaPlatformCampaignTemplateRepository);
 builder.registerAndUse(ListPlatformCampaignTemplates);
 builder.registerAndUse(CreatePlatformCampaignTemplate);
 builder.registerAndUse(UpdatePlatformCampaignTemplate);
+builder.register(PlatformGameRepository).use(PrismaPlatformGameRepository);
+builder.registerAndUse(PrismaPlatformGameRepository);
+builder.registerAndUse(ListPlatformGames);
+builder.registerAndUse(CreatePlatformGame);
+builder.registerAndUse(UpdatePlatformGame);
 builder.register(PlatformBillingReadRepository).use(PrismaPlatformBillingReadRepository);
 builder.registerAndUse(PrismaPlatformBillingReadRepository);
 builder.registerAndUse(GetPlatformBillingOverview);

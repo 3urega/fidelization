@@ -24,6 +24,9 @@ const SUPERADMIN_USER_ID = "00000000-0000-4000-8000-000000000010";
 const DEMO_TEMPLATE_COFFEE_ID = "00000000-0000-4000-8000-000000000020";
 const DEMO_TEMPLATE_CROISSANT_ID = "00000000-0000-4000-8000-000000000021";
 const DEMO_TEMPLATE_MATCHA_ID = "00000000-0000-4000-8000-000000000022";
+const DEMO_GAME_RULETA_ID = "00000000-0000-4000-8000-000000000030";
+const DEMO_GAME_RASCA_ID = "00000000-0000-4000-8000-000000000031";
+const DEMO_GAME_CAJA_ID = "00000000-0000-4000-8000-000000000032";
 
 async function main(): Promise<void> {
 	const superadminEmail = (process.env.SUPERADMIN_EMAIL ?? "superadmin@platform.local").toLowerCase().trim();
@@ -300,8 +303,72 @@ async function main(): Promise<void> {
 		},
 	});
 
+	await prisma.platformGame.upsert({
+		where: { id: DEMO_GAME_RULETA_ID },
+		update: {
+			slug: "ruleta",
+			label: "Ruleta",
+			description: "Gira la ruleta y gana premios al azar.",
+			status: "active",
+			requiredFeature: "gamification",
+			sortOrder: 1,
+		},
+		create: {
+			id: DEMO_GAME_RULETA_ID,
+			slug: "ruleta",
+			label: "Ruleta",
+			description: "Gira la ruleta y gana premios al azar.",
+			status: "active",
+			requiredFeature: "gamification",
+			sortOrder: 1,
+		},
+	});
+
+	await prisma.platformGame.upsert({
+		where: { id: DEMO_GAME_RASCA_ID },
+		update: {
+			slug: "rasca",
+			label: "Rasca y gana",
+			description: "Rasca tarjetas virtuales para descubrir recompensas.",
+			status: "beta",
+			requiredFeature: "gamification",
+			sortOrder: 2,
+		},
+		create: {
+			id: DEMO_GAME_RASCA_ID,
+			slug: "rasca",
+			label: "Rasca y gana",
+			description: "Rasca tarjetas virtuales para descubrir recompensas.",
+			status: "beta",
+			requiredFeature: "gamification",
+			sortOrder: 2,
+		},
+	});
+
+	await prisma.platformGame.upsert({
+		where: { id: DEMO_GAME_CAJA_ID },
+		update: {
+			slug: "caja-misteriosa",
+			label: "Caja misteriosa",
+			description: "Abre una caja sorpresa con premios exclusivos.",
+			status: "draft",
+			requiredFeature: "gamification",
+			sortOrder: 3,
+		},
+		create: {
+			id: DEMO_GAME_CAJA_ID,
+			slug: "caja-misteriosa",
+			label: "Caja misteriosa",
+			description: "Abre una caja sorpresa con premios exclusivos.",
+			status: "draft",
+			requiredFeature: "gamification",
+			sortOrder: 3,
+		},
+	});
+
 	console.log("Seed: demo owner + plans basic/pro/premium + customer QR (demo-qr-cafe-demo)");
 	console.log("Seed: 3 platform campaign templates (coffee, croissant, matcha)");
+	console.log("Seed: 3 platform games (ruleta active, rasca beta, caja-misteriosa draft)");
 	console.log(`Seed: superadmin ${superadminEmail} (no tenant membership)`);
 }
 

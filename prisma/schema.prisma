@@ -371,3 +371,18 @@ model PlatformCampaignTemplate {
   @@index([isActive, sortOrder])
   @@map("platform_campaign_templates")
 }
+
+model PlatformGame {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  label           String
+  description     String   @default("")
+  status          String   @default("draft")
+  requiredFeature String   @default("gamification") @map("required_feature")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([status, sortOrder])
+  @@map("platform_games")
+}
