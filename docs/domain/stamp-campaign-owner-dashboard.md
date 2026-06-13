@@ -1,6 +1,6 @@
 # Dashboard owner: métricas de escaneos por campaña de sellos
 
-**Status:** Target — issues Phase K (draft en [`manifest.phase-k-stamp-dashboard.json`](../issues/manifest.phase-k-stamp-dashboard.json)).
+**Status:** **Implemented** — Phase K completo (#55–#58, 2026-06-11).
 
 ## Objetivo de producto
 
@@ -126,10 +126,10 @@ Reutilizar `StampCampaignRepository.listByTenant` o método `listActiveByTenant`
 
 | Componente | Ubicación | Notas |
 |------------|-----------|-------|
-| `OwnerHomeTabs` | refactor de [`HomeDashboard`](../../src/app/(app)/panel/HomeDashboard.tsx) | Tabs Dashboard · Configuración; swipe mobile |
-| `OwnerConfigurationPanel` | extract checklist actual | Contenido tab Configuración |
-| `StampCampaignDashboardPanel` | nuevo | Fetch API + tarjetas por campaña |
-| `useSwipeableTabs` | `_components/ui/` o `shell/` | Reutilizable; umbral ~50px horizontal |
+| `OwnerHomeTabs` | [`OwnerHomeTabs.tsx`](../../src/app/(app)/panel/OwnerHomeTabs.tsx) | Tabs Dashboard · Configuración; swipe mobile — **Implemented #57** (2026-06-11) |
+| `OwnerConfigurationPanel` | [`OwnerConfigurationPanel.tsx`](../../src/app/(app)/panel/OwnerConfigurationPanel.tsx) | Contenido tab Configuración — **Implemented #57** |
+| `StampCampaignDashboardPanel` | [`StampCampaignDashboardPanel.tsx`](../../src/app/_components/loyalty/StampCampaignDashboardPanel.tsx) | Fetch API + tarjetas por campaña — **Implemented #58** (2026-06-11) |
+| `useSwipeableTabs` | [`useSwipeableTabs.ts`](../../src/app/_components/shell/useSwipeableTabs.ts) | Reutilizable; umbral ~50px horizontal — **Implemented #57** |
 
 Patrón de referencia: pestañas en [`PlatformUserDashboard`](../../src/app/(mobile)/home/PlatformUserDashboard.tsx) (`?tab=` + `role="tablist"`).
 
@@ -139,8 +139,8 @@ Patrón de referencia: pestañas en [`PlatformUserDashboard`](../../src/app/(mob
 |-------|-------|--------|
 | **K1** | Dominio + repo agregación + ventanas temporales | `verify:stamp-campaign-dashboard-use-case` |
 | **K2** | API owner + JSON + E2E con escaneos reales | `verify:stamp-campaign-dashboard` |
-| **K3** | `/panel` tabs + swipe + mover checklist a Configuración | Manual + regresión `verify:owner-login` |
-| **K4** | UI métricas (tarjetas, empty state, link a `/settings/stamps`) | Incluido en verify K2 |
+| **K3** | `/panel` tabs + swipe + mover checklist a Configuración | Manual + regresión `verify:owner-login` — **Implemented #57** (2026-06-11) |
+| **K4** | UI métricas (tarjetas, empty state, link a `/settings/stamps`) | `verify:stamp-campaign-dashboard` + `verify:owner-login` — **Implemented #58** (2026-06-11) |
 
 ## Fuera de alcance (Phase K)
 
@@ -156,10 +156,10 @@ Patrón de referencia: pestañas en [`PlatformUserDashboard`](../../src/app/(mob
 |---|-------|--------|
 | [#55](https://github.com/3urega/fidelization/issues/55) | K1 | Domain + aggregation repository | **Closed** (2026-06-13) |
 | [#56](https://github.com/3urega/fidelization/issues/56) | K2 | API + verify E2E | **Closed** (2026-06-13) |
-| [#57](https://github.com/3urega/fidelization/issues/57) | K3 | `/panel` tabs + swipe |
-| [#58](https://github.com/3urega/fidelization/issues/58) | K4 | Dashboard UI |
+| [#57](https://github.com/3urega/fidelization/issues/57) | K3 | `/panel` tabs + swipe | **Closed** (2026-06-11) |
+| [#58](https://github.com/3urega/fidelization/issues/58) | K4 | Dashboard UI | **Closed** (2026-06-11) |
 
-Publicado 2026-06-11 — manifest [`manifest.phase-k-stamp-dashboard.json`](../issues/manifest.phase-k-stamp-dashboard.json)
+Publicado 2026-06-11 — issues #55–#58 (Phase K).
 
 ## Referencias
 

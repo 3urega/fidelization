@@ -5,15 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
 import { LoyaltyAppLinkCard } from "../../_components/loyalty/LoyaltyAppLinkCard";
-import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
-import { hasTenantAddress } from "../../../lib/tenant/hasTenantAddress";
-import { hasTenantDiscoveryTags } from "../../../lib/tenant/hasTenantDiscoveryTags";
-import { hasTenantChosenPlan } from "../../../lib/tenant/hasTenantChosenPlan";
-import { PageHeader } from "../../_components/shell/PageHeader";
 import { tenantHasFeature } from "../../_components/shell/planFeatures";
 import { useTenantSession } from "../../_components/shell/TenantSessionProvider";
 import { Button } from "../../_components/ui/Button";
 import { Card } from "../../_components/ui/Card";
+import { hasTenantAddress } from "../../../lib/tenant/hasTenantAddress";
+import { hasTenantChosenPlan } from "../../../lib/tenant/hasTenantChosenPlan";
+import { hasTenantDiscoveryTags } from "../../../lib/tenant/hasTenantDiscoveryTags";
+import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
+import { ownerPanelTabUrl } from "../../../lib/tenant/ownerPanelRoutes";
 
 type StampCampaignsResponse = {
 	campaigns?: { isActive: boolean }[];
@@ -27,10 +27,10 @@ type PromotionsResponse = {
 	promotions?: { isActive: boolean }[];
 };
 
-export function HomeDashboard(): ReactElement {
+export function OwnerConfigurationPanel(): ReactElement {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const { session, loading, error, refresh } = useTenantSession();
+	const { session, refresh } = useTenantSession();
 	const [checkoutNotice, setCheckoutNotice] = useState(false);
 	const [stampsDone, setStampsDone] = useState(false);
 	const [stampsLoading, setStampsLoading] = useState(true);
@@ -46,7 +46,7 @@ export function HomeDashboard(): ReactElement {
 
 		setCheckoutNotice(true);
 		void refresh();
-		router.replace("/panel");
+		router.replace(ownerPanelTabUrl("config"));
 	}, [searchParams, refresh, router]);
 
 	useEffect(() => {
@@ -172,11 +172,7 @@ export function HomeDashboard(): ReactElement {
 		};
 	}, [session]);
 
-	if (error) {
-		return <p className="text-sm text-error">{error}</p>;
-	}
-
-	if (loading || !session) {
+	if (!session) {
 		return <p className="text-sm text-muted">Cargando…</p>;
 	}
 
@@ -190,15 +186,8 @@ export function HomeDashboard(): ReactElement {
 	const promotionsComplete = isOwner ? promotionsDone : false;
 	const showPromotionsChecklist = isOwner && tenantHasFeature(session, "promotions");
 
-	const placeholders = [{ title: "Clientes", description: "Próximamente" }];
-
 	return (
 		<div className="flex flex-col gap-6">
-			<PageHeader
-				title={`Hola, ${session.user.name}`}
-				description={`Panel del negocio · ${session.tenant.name}`}
-			/>
-
 			{checkoutNotice ? (
 				<Card className="border-border bg-muted/30">
 					<p className="text-sm text-foreground">
@@ -491,15 +480,6 @@ export function HomeDashboard(): ReactElement {
 					</li>
 				</ul>
 			</Card>
-
-			<div className="grid gap-4 sm:grid-cols-2">
-				{placeholders.map((item) => (
-					<Card key={item.title} className="opacity-70">
-						<h2 className="font-medium text-foreground">{item.title}</h2>
-						<p className="mt-1 text-sm text-muted">{item.description}</p>
-					</Card>
-				))}
-			</div>
 
 			<Button type="button" variant="secondary" disabled className="w-full sm:w-auto">
 				Más funciones en la siguiente fase

@@ -482,7 +482,7 @@ Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanb
 
 ## Phase K — Dashboard owner: escaneos por campaña de sellos
 
-**Status:** **Target** — spec [`stamp-campaign-owner-dashboard.md`](stamp-campaign-owner-dashboard.md).
+**Status:** **Implemented** — Phase K completo (#55–#58, 2026-06-11). Spec [`stamp-campaign-owner-dashboard.md`](stamp-campaign-owner-dashboard.md).
 
 **Goal:** En `/panel`, pestaña **Dashboard** (owner): campañas de sellos activas + escaneos hoy / ayer / 7 días / desde inicio. Checklist actual → pestaña **Configuración**. Swipe + clic entre tabs.
 
@@ -490,16 +490,14 @@ Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanb
 |-------|-------|--------|
 | **K1** | `ListStampCampaignDashboard` + agregación `loyalty_transactions` | `verify:stamp-campaign-dashboard-use-case` |
 | **K2** | `GET /api/loyalty/stamp-campaigns/dashboard` | `verify:stamp-campaign-dashboard` |
-| **K3** | Tabs `/panel` + swipe mobile | `verify:owner-login` |
-| **K4** | UI tarjetas métricas | (K2 E2E) |
+| **K3** | Tabs `/panel` + swipe mobile | `verify:owner-login` — **Implemented #57** |
+| **K4** | UI tarjetas métricas | `verify:stamp-campaign-dashboard` — **Implemented #58** |
 
 ### GitHub issues (published 2026-06-11)
 
-| # | Slice | Body file |
-|---|-------|-----------|
-| [#55](https://github.com/3urega/fidelization/issues/55) | K1 | [`stamp-campaign-dashboard-domain.md`](../issues/stamp-campaign-dashboard-domain.md) | **Closed** (2026-06-13) |
-| [#56](https://github.com/3urega/fidelization/issues/56) | K2 | [`stamp-campaign-dashboard-api.md`](../issues/stamp-campaign-dashboard-api.md) | **Closed** (2026-06-13) |
-| [#57](https://github.com/3urega/fidelization/issues/57) | K3 | [`owner-panel-tabs-dashboard.md`](../issues/owner-panel-tabs-dashboard.md) |
-| [#58](https://github.com/3urega/fidelization/issues/58) | K4 | [`stamp-campaign-dashboard-ui.md`](../issues/stamp-campaign-dashboard-ui.md) |
-
-Manifest: [`manifest.phase-k-stamp-dashboard.json`](../issues/manifest.phase-k-stamp-dashboard.json)
+| # | Slice | Status |
+|---|-------|--------|
+| [#55](https://github.com/3urega/fidelization/issues/55) | K1 | **Closed** (2026-06-13) |
+| [#56](https://github.com/3urega/fidelization/issues/56) | K2 | **Closed** (2026-06-13) |
+| [#57](https://github.com/3urega/fidelization/issues/57) | K3 | **Closed** (2026-06-11) |
+| [#58](https://github.com/3urega/fidelization/issues/58) | K4 | **Closed** (2026-06-11) |
