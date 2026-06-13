@@ -240,6 +240,15 @@ export function PlatformTenantDetailPanel({ tenantId }: PlatformTenantDetailPane
 						</select>
 					</label>
 
+					<p className="text-sm">
+						<Link
+							href={`/platform/features?tenant=${encodeURIComponent(detail.tenant.slug)}`}
+							className="text-primary underline-offset-2 hover:underline"
+						>
+							Editar feature flags de este negocio
+						</Link>
+					</p>
+
 					<div className="flex flex-wrap gap-2">
 						<Button type="submit" disabled={saving || togglingStatus || impersonating}>
 							{saving ? "Guardando…" : "Guardar cambios"}

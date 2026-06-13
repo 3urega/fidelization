@@ -6,7 +6,9 @@ import { subscriptionPlanToJson } from "../auth/http";
 import { PLATFORM_FEATURE_PRECEDENCE } from "./featureCatalog";
 import type { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 
-export type PlatformPlanFeaturesResponse = ListPlatformPlanFeaturesResult;
+export type PlatformPlanFeaturesResponse = ListPlatformPlanFeaturesResult & {
+	precedence: string;
+};
 
 export type PlatformTenantFeaturesResponse = Omit<PlatformTenantFeaturesView, "featureCatalog"> & {
 	featureCatalog: PlatformTenantFeaturesView["featureCatalog"];

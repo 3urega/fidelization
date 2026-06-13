@@ -35,7 +35,9 @@ Revenue is based on recurring subscriptions plus optional add-ons.
 | gamification, referrals | no | no | yes | Flags in plan JSON; APIs TBD |
 | `limits.employees` | 3 | 10 | 50 | `InviteTenantEmployee` |
 
-**Conclusion:** tenant plan **features and employee limits** are enforced via `ResolveTenantSubscriptionPlan` + guards. Remaining commercial items (add-ons, usage metering) are still target-only.
+**Conclusion:** tenant plan **features and employee limits** are enforced via `ResolveTenantEffectivePlanFeatures` (plan + optional `tenants.features` override) + guards. Remaining commercial items (add-ons, usage metering) are still target-only.
+
+**Precedence:** when `tenants.features` sets a key, it overrides the plan catalog for that tenant; unset keys inherit from plan.
 
 ---
 
