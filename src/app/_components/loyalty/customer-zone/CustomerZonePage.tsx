@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 
 import { CustomerSegmentSection } from "./CustomerSegmentSection";
+import { CustomerZoneAllCustomersTable } from "./CustomerZoneAllCustomersTable";
 import { CustomerZoneInsights } from "./CustomerZoneInsights";
 
 export function CustomerZonePage(): ReactElement {
@@ -34,6 +35,8 @@ export function CustomerZonePage(): ReactElement {
 				variant="near_reward"
 				emptyMessage="Nadie a un sello del premio."
 			/>
+
+			<CustomerZoneAllCustomersTable />
 		</div>
 	);
 }

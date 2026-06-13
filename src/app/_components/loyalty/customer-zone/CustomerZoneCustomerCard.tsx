@@ -2,11 +2,11 @@ import type { ReactElement } from "react";
 
 import {
 	type CustomerZoneListCustomer,
-	formatCustomerZoneStatus,
 	formatDaysSinceLastVisit,
 	formatRelativeLastVisit,
 } from "../../../lib/loyalty/customerZone";
 import { Card } from "../../ui/Card";
+import { CustomerZoneStatusBadge } from "./CustomerZoneStatusBadge";
 
 export type CustomerZoneCustomerCardVariant = "featured" | "at_risk" | "near_reward";
 
@@ -44,9 +44,7 @@ export function CustomerZoneCustomerCard({
 		<Card className="p-4">
 			<div className="flex flex-wrap items-start justify-between gap-2">
 				<h3 className="font-medium text-foreground">{customer.name}</h3>
-				<span className="rounded-theme border border-border px-2 py-0.5 text-xs text-muted">
-					{formatCustomerZoneStatus(customer.status)}
-				</span>
+				<CustomerZoneStatusBadge status={customer.status} />
 			</div>
 
 			{variant === "featured" ? (
