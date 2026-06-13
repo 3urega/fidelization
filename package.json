@@ -67,6 +67,8 @@
     "verify:staff-scan-flow-spec-use-case": "tsx scripts/verify-staff-scan-flow-spec-use-case.ts",
     "verify:staff-scan-targets-use-case": "tsx scripts/verify-staff-scan-targets-use-case.ts",
     "verify:staff-scan-targets": "tsx scripts/verify-staff-scan-targets.ts",
+    "verify:staff-scan-record-by-target-use-case": "tsx scripts/verify-staff-scan-record-by-target-use-case.ts",
+    "verify:staff-scan-record-by-target": "tsx scripts/verify-staff-scan-record-by-target.ts",
     "verify:customer-stamp-scan-targeted": "tsx scripts/verify-customer-stamp-scan-targeted.ts",
     "verify:customer-stamp-progress-use-case": "tsx scripts/verify-customer-stamp-progress-use-case.ts",
     "verify:customer-stamp-progress": "tsx scripts/verify-customer-stamp-progress.ts",

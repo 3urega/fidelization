@@ -4,6 +4,7 @@ import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import type { StaffScanOutcome } from "../../contexts/loyalty/customers/domain/StaffScanOutcome";
 import type {
 	StaffScanCampaignTarget,
 	StaffScanPromotionTarget,
@@ -376,6 +377,52 @@ export function staffScanTargetsToJson(targets: StaffScanTargets): Record<string
 		stampCampaigns: targets.stampCampaigns.map(staffScanCampaignTargetToJson),
 		promotions: targets.promotions.map(staffScanPromotionTargetToJson),
 	};
+}
+
+export function staffScanOutcomeToJson(outcome: StaffScanOutcome): Record<string, string | number | null> {
+	switch (outcome.kind) {
+		case "point_recorded":
+			return { kind: outcome.kind, pointsBalance: outcome.pointsBalance };
+		case "stamp_added":
+			return {
+				kind: outcome.kind,
+				campaignId: outcome.campaignId,
+				campaignName: outcome.campaignName,
+				current: outcome.current,
+				required: outcome.required,
+			};
+		case "card_completed":
+		case "card_already_completed":
+			return {
+				kind: outcome.kind,
+				campaignId: outcome.campaignId,
+				campaignName: outcome.campaignName,
+			};
+		case "promotion_applied":
+			return {
+				kind: outcome.kind,
+				promotionId: outcome.promotionId,
+				promotionTitle: outcome.promotionTitle,
+				usedCount: outcome.usedCount,
+				maxUsesPerUser: outcome.maxUsesPerUser,
+			};
+		case "promotion_exhausted":
+			return {
+				kind: outcome.kind,
+				promotionId: outcome.promotionId,
+				promotionTitle: outcome.promotionTitle,
+				maxUsesPerUser: outcome.maxUsesPerUser,
+			};
+		default: {
+			const exhaustive: never = outcome;
+
+			return exhaustive;
+		}
+	}
+}
+
+export function staffScanOutcomesToJson(outcomes: StaffScanOutcome[]): Record<string, unknown>[] {
+	return outcomes.map(staffScanOutcomeToJson);
 }
 
 export function customerAuthResponseToJson(

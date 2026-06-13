@@ -2,7 +2,8 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { RecordCustomerVisitByQr } from "../../../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import { RecordStaffScanByTarget } from "../../../../contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
+import { InvalidStampScan } from "../../../../contexts/loyalty/customers/domain/InvalidStampScan";
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
@@ -11,7 +12,7 @@ import { TenantRole } from "../../../../contexts/tenants/memberships/domain/Tena
 import {
 	customerToJson,
 	handleAuthDomainError,
-	stampAddedSummaryToJson,
+	staffScanOutcomesToJson,
 } from "../../../../lib/auth/http";
 import { requireTenantSession } from "../../../../lib/auth/requireTenantSession";
 
@@ -19,7 +20,9 @@ export const dynamic = "force-dynamic";
 
 type Body = {
 	qrValue?: string;
-	stampTypeId?: string | null;
+	targetType?: unknown;
+	targetId?: unknown;
+	stampTypeId?: unknown;
 };
 
 export async function POST(request: Request): Promise<Response> {
@@ -33,20 +36,26 @@ export async function POST(request: Request): Promise<Response> {
 		return NextResponse.json({ error: { description: "qrValue is required" } }, { status: 400 });
 	}
 
+	if (body.stampTypeId !== undefined) {
+		return HttpNextResponse.domainError(
+			new InvalidStampScan("stampTypeId is no longer supported; use targetType and targetId"),
+			400,
+		);
+	}
+
 	try {
-		const result = await container.get(RecordCustomerVisitByQr).execute({
+		const result = await container.get(RecordStaffScanByTarget).execute({
 			tenantId: auth.session.tenantId,
 			qrValue: body.qrValue,
+			targetType: body.targetType,
+			targetId: body.targetId,
 			createdByUserId: auth.session.userId,
 			staffRole: auth.session.role as TenantRole,
-			stampTypeId: body.stampTypeId,
 		});
 
 		return NextResponse.json({
 			customer: customerToJson(result.customer),
-			stampsAdded: result.stampsAdded.map((summary) => stampAddedSummaryToJson(summary)),
-			selectedStampTypeId: result.selectedStampTypeId,
-			selectedStampTypeLabel: result.selectedStampTypeLabel,
+			outcomes: staffScanOutcomesToJson(result.outcomes),
 		});
 	} catch (error) {
 		if (error instanceof DomainError) {

@@ -2,7 +2,9 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { RecordPromotionUse } from "../../../../../../contexts/loyalty/customers/application/promotions/RecordPromotionUse";
+import { RecordStaffScanByTarget } from "../../../../../../contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
+import { customerPromotionSummaryFromPromotion } from "../../../../../../contexts/loyalty/promotions/domain/CustomerPromotionSummary";
+import { PromotionRepository } from "../../../../../../contexts/loyalty/promotions/domain/PromotionRepository";
 import { DomainError } from "../../../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
@@ -12,6 +14,7 @@ import {
 	customerPromotionSummaryToJson,
 	customerToJson,
 	handleAuthDomainError,
+	staffScanOutcomesToJson,
 } from "../../../../../../lib/auth/http";
 import { requireTenantSession } from "../../../../../../lib/auth/requireTenantSession";
 
@@ -37,17 +40,74 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
 	}
 
 	try {
-		const result = await container.get(RecordPromotionUse).execute({
+		const result = await container.get(RecordStaffScanByTarget).execute({
 			tenantId: auth.session.tenantId,
-			promotionId: context.params.promotionId,
 			qrValue: body.qrValue,
+			targetType: "promotion",
+			targetId: context.params.promotionId,
 			createdByUserId: auth.session.userId,
 			staffRole: auth.session.role as TenantRole,
 		});
 
+		const applied = result.outcomes.find((outcome) => outcome.kind === "promotion_applied");
+		if (applied) {
+			const promotion = await container
+				.get(PromotionRepository)
+				.searchById(auth.session.tenantId, applied.promotionId);
+
+			const summary = promotion
+				? customerPromotionSummaryFromPromotion(promotion, applied.usedCount)
+				: {
+						id: applied.promotionId,
+						tenantId: auth.session.tenantId,
+						title: applied.promotionTitle,
+						description: "",
+						type: "discount" as const,
+						startDate: null,
+						endDate: null,
+						isActive: true,
+						maxUsesPerUser: applied.maxUsesPerUser,
+						usedCount: applied.usedCount,
+					};
+
+			return NextResponse.json({
+				customer: customerToJson(result.customer),
+				promotion: customerPromotionSummaryToJson(summary),
+			});
+		}
+
+		const exhausted = result.outcomes.find((outcome) => outcome.kind === "promotion_exhausted");
+		if (exhausted) {
+			const promotion = await container
+				.get(PromotionRepository)
+				.searchById(auth.session.tenantId, exhausted.promotionId);
+
+			const usedCount = exhausted.maxUsesPerUser ?? 0;
+			const summary = promotion
+				? customerPromotionSummaryFromPromotion(promotion, usedCount)
+				: {
+						id: exhausted.promotionId,
+						tenantId: auth.session.tenantId,
+						title: exhausted.promotionTitle,
+						description: "",
+						type: "discount" as const,
+						startDate: null,
+						endDate: null,
+						isActive: true,
+						maxUsesPerUser: exhausted.maxUsesPerUser,
+						usedCount,
+					};
+
+			return NextResponse.json({
+				customer: customerToJson(result.customer),
+				promotion: customerPromotionSummaryToJson(summary),
+				outcomes: staffScanOutcomesToJson(result.outcomes),
+			});
+		}
+
 		return NextResponse.json({
 			customer: customerToJson(result.customer),
-			promotion: customerPromotionSummaryToJson(result.summary),
+			outcomes: staffScanOutcomesToJson(result.outcomes),
 		});
 	} catch (error) {
 		if (error instanceof DomainError) {

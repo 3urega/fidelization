@@ -51,6 +51,8 @@ import { PrismaTenantCustomerAnalyticsRepository } from "../../../loyalty/custom
 import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
 import { RecordPromotionUse } from "../../../loyalty/customers/application/promotions/RecordPromotionUse";
 import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import { ResolveCustomerByQrForStaffScan } from "../../../loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
+import { RecordStaffScanByTarget } from "../../../loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { ListStaffScanTargets } from "../../../loyalty/customers/application/scan/ListStaffScanTargets";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
 import { JoinTenantAsCustomer } from "../../../loyalty/customers/application/join/JoinTenantAsCustomer";
@@ -210,6 +212,8 @@ builder.registerAndUse(GetTenantCustomerDetail);
 builder.registerAndUse(GetCustomerActiveRewards);
 builder.registerAndUse(RedeemCustomerReward);
 builder.registerAndUse(RecordCustomerVisitByQr);
+builder.registerAndUse(ResolveCustomerByQrForStaffScan);
+builder.registerAndUse(RecordStaffScanByTarget);
 builder.registerAndUse(ListStaffScanTargets);
 builder.registerAndUse(RecordPromotionUse);
 builder.registerAndUse(AuthenticateCustomerByQr);
