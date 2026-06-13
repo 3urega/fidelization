@@ -125,6 +125,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 		cardBackgroundVariant: string;
 		conditions: string;
 		isActive: boolean;
+		createdAt: Date;
 	}): StampCampaign {
 		return StampCampaign.fromPrimitives({
 			id: row.id,
@@ -137,6 +138,7 @@ export class PrismaStampCampaignRepository extends StampCampaignRepository {
 			cardBackgroundVariant: row.cardBackgroundVariant as StampCampaign["cardBackgroundVariant"],
 			conditions: row.conditions,
 			isActive: row.isActive,
+			createdAt: row.createdAt,
 		});
 	}
 

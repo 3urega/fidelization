@@ -16,6 +16,7 @@ export type StampCampaignPrimitives = {
 	cardBackgroundVariant: StampCampaignCardBackgroundVariant;
 	conditions: string;
 	isActive: boolean;
+	createdAt?: Date | null;
 };
 
 export type StampCampaignCreateParams = {
@@ -40,6 +41,7 @@ export class StampCampaign {
 		public readonly cardBackgroundVariant: StampCampaignCardBackgroundVariant,
 		public readonly conditions: string,
 		public readonly isActive: boolean,
+		public readonly createdAt: Date | null,
 	) {}
 
 	static create(params: StampCampaignCreateParams): StampCampaign {
@@ -54,6 +56,7 @@ export class StampCampaign {
 			params.cardBackgroundVariant ?? "coffee-photo",
 			params.conditions?.trim() ?? "",
 			true,
+			null,
 		);
 	}
 
@@ -69,6 +72,7 @@ export class StampCampaign {
 			primitives.cardBackgroundVariant,
 			primitives.conditions ?? "",
 			primitives.isActive,
+			primitives.createdAt ?? null,
 		);
 	}
 
@@ -84,6 +88,7 @@ export class StampCampaign {
 			cardBackgroundVariant: this.cardBackgroundVariant,
 			conditions: this.conditions,
 			isActive: this.isActive,
+			createdAt: this.createdAt,
 		};
 	}
 
@@ -103,6 +108,7 @@ export class StampCampaign {
 			this.cardBackgroundVariant,
 			this.conditions,
 			false,
+			this.createdAt,
 		);
 	}
 }

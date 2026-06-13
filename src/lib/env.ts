@@ -86,6 +86,11 @@ export const env = {
 		return !env.isProduction && process.env.DISABLE_TENANT_PLAN_GATES === "1";
 	},
 
+	/** Calendar day boundaries for owner analytics (IANA timezone). */
+	get appTimezone(): string {
+		return optionalEnv("APP_TIMEZONE") ?? "Europe/Madrid";
+	},
+
 	get stripeSecretKey(): string {
 		return requireEnv("STRIPE_SECRET_KEY");
 	},

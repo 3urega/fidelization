@@ -160,6 +160,7 @@ model LoyaltyTransaction {
 
   @@index([tenantId])
   @@index([customerId])
+  @@index([tenantId, type, createdAt])
   @@map("loyalty_transactions")
 }
 
