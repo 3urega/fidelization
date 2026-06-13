@@ -41,6 +41,7 @@ import { CouponRepository } from "../../../loyalty/coupons/domain/CouponReposito
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
 import { AuthenticateCustomerByQr } from "../../../loyalty/customers/application/authenticate/AuthenticateCustomerByQr";
 import { GetCustomerActiveRewards } from "../../../loyalty/customers/application/profile/GetCustomerActiveRewards";
+import { GetCustomerStampProgress } from "../../../loyalty/customers/application/profile/GetCustomerStampProgress";
 import { GetEstablishmentDetailForUser } from "../../../loyalty/customers/application/profile/GetEstablishmentDetailForUser";
 import { GetTenantCustomerDetail } from "../../../loyalty/customers/application/analytics/GetTenantCustomerDetail";
 import { GetTenantCustomerInsights } from "../../../loyalty/customers/application/analytics/GetTenantCustomerInsights";

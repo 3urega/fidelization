@@ -5,6 +5,11 @@ import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/Http
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
+import type { CustomerDetailView } from "../../contexts/loyalty/customers/domain/analytics/CustomerDetail";
+import type { CustomerInsightsSummary } from "../../contexts/loyalty/customers/domain/analytics/CustomerInsightsSummary";
+import type { CustomerListRow } from "../../contexts/loyalty/customers/domain/analytics/CustomerListRow";
+import type { CustomerNearRewardProgress } from "../../contexts/loyalty/customers/domain/analytics/CustomerNearRewardProgress";
+import type { ListTenantCustomersBySegmentResult } from "../../contexts/loyalty/customers/application/analytics/ListTenantCustomersBySegment";
 import type { ListStampCampaignDashboardResult } from "../../contexts/loyalty/stamp_campaigns/application/dashboard/ListStampCampaignDashboard";
 import { StampType } from "../../contexts/loyalty/stamp_types/domain/StampType";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
@@ -118,6 +123,99 @@ export function stampTypeToJson(
 		slug: primitives.slug,
 		sortOrder: primitives.sortOrder,
 		isActive: primitives.isActive,
+	};
+}
+
+function customerZoneNearRewardToJson(
+	nearReward: CustomerNearRewardProgress,
+): Record<string, string | number> {
+	return {
+		campaignId: nearReward.campaignId,
+		campaignName: nearReward.campaignName,
+		current: nearReward.current,
+		required: nearReward.required,
+	};
+}
+
+export function customerZoneListRowToJson(
+	row: CustomerListRow,
+): Record<string, string | number | null | Record<string, string | number>> {
+	const json: Record<string, string | number | null | Record<string, string | number>> = {
+		id: row.id,
+		name: row.name,
+		lastVisitAt: row.lastVisitAt?.toISOString() ?? null,
+		visitsThisMonth: row.visitsThisMonth,
+		visitsCount: row.visitsCount,
+		totalStamps: row.totalStamps,
+		rewardsRedeemedCount: row.rewardsRedeemedCount,
+		status: row.status,
+	};
+
+	if (row.nearReward) {
+		json.nearReward = customerZoneNearRewardToJson(row.nearReward);
+	}
+
+	return json;
+}
+
+export function customerZoneInsightsToJson(
+	summary: CustomerInsightsSummary,
+): Record<string, string | number> {
+	return {
+		vipCount: summary.vipCount,
+		atRiskCount: summary.atRiskCount,
+		nearRewardCount: summary.nearRewardCount,
+		newThisMonthCount: summary.newThisMonthCount,
+		generatedAt: summary.generatedAt.toISOString(),
+		timezone: summary.timezone,
+	};
+}
+
+export function customerZoneListToJson(
+	result: ListTenantCustomersBySegmentResult,
+): Record<string, unknown> {
+	return {
+		segment: result.segment,
+		customers: result.customers.map(customerZoneListRowToJson),
+		generatedAt: result.generatedAt.toISOString(),
+		timezone: result.timezone,
+	};
+}
+
+export function customerZoneDetailToJson(
+	detail: CustomerDetailView,
+): Record<string, unknown> {
+	return {
+		id: detail.id,
+		name: detail.name,
+		email: detail.email ?? "",
+		phone: detail.phone ?? "",
+		customerSince: detail.customerSince.toISOString(),
+		visitsCount: detail.visitsCount,
+		pointsBalance: detail.pointsBalance,
+		status: detail.status,
+		stampProgress: detail.stampProgress.map((row) =>
+			stampProgressToJson({
+				campaignId: row.campaignId,
+				campaignName: row.campaignName,
+				current: row.current,
+				required: row.required,
+				completed: row.completed,
+				stampTypeId: null,
+				stampTypeLabel: row.stampTypeLabel,
+				visualTemplate: "",
+				cardBackgroundVariant: "",
+				conditions: "",
+			}),
+		),
+		recentActivity: detail.recentActivity.map((row) => ({
+			occurredAt: row.occurredAt.toISOString(),
+			label: row.label,
+		})),
+		rewardsRedeemed: detail.rewardsRedeemed.map((row) => ({
+			rewardName: row.rewardName,
+			redeemedAt: row.redeemedAt.toISOString(),
+		})),
 	};
 }
 
@@ -349,6 +447,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 		return HttpNextResponse.domainError(error, 401);
 	}
 	if (error.type === "StampCampaignForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "CustomerZoneForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
 	if (error.type === "InvalidStampCampaign") {
