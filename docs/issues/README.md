@@ -47,6 +47,8 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-m-staff-scan.json
 # Phase P — superadmin platform admin (publicado #71-#84)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-p-superadmin.json
+# Phase Q — location discovery / geocoding
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-q-location-discovery.json
 ```
 
 ## After close on GitHub

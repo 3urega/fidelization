@@ -1,0 +1,29 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/localization.md",
+  "label": "location-discovery",
+  "published": {
+    "85": "https://github.com/3urega/fidelization/issues/85",
+    "86": "https://github.com/3urega/fidelization/issues/86",
+    "87": "https://github.com/3urega/fidelization/issues/87",
+    "88": "https://github.com/3urega/fidelization/issues/88"
+  },
+  "issues": [
+    {
+      "title": "Phase Q1: Geocoding gateway port (Mapbox dev + Google Maps infra)",
+      "bodyFile": "docs/issues/geocoding-gateway-port.md"
+    },
+    {
+      "title": "Phase Q2: Tenant geocoding on profile save (coordinates persistence)",
+      "bodyFile": "docs/issues/tenant-geocoding-on-profile-save.md"
+    },
+    {
+      "title": "Phase Q3: Discover establishments near filter (backend distance query)",
+      "bodyFile": "docs/issues/discover-establishments-near-filter.md"
+    },
+    {
+      "title": "Phase Q4: Discover grid Cerca de mi UI (user location + distance cards)",
+      "bodyFile": "docs/issues/discover-grid-cerca-de-mi-ui.md"
+    }
+  ]
+}
