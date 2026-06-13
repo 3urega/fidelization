@@ -2,6 +2,7 @@ import Link from "next/link";
 import { type ReactElement } from "react";
 
 import { resolveTenantDiscoveryTagLabel } from "../../../contexts/tenants/tenants/domain/TenantDiscoveryTag";
+import { formatDistanceKm } from "../../../lib/platform/formatDistanceKm";
 import { resolveTenantCoverImageUrl } from "../../../lib/platform/tenantDiscoveryAssets";
 import { platformRoutes } from "../../../lib/platform/routes";
 
@@ -12,6 +13,7 @@ export type DiscoverEstablishment = {
 	logoUrl: string | null;
 	coverImageUrl?: string | null;
 	tags?: string[];
+	distanceKm?: number;
 };
 
 type EstablishmentDiscoverCardProps = {
@@ -27,6 +29,8 @@ export function EstablishmentDiscoverCard({
 	const tags = establishment.tags ?? [];
 	const visibleTags = tags.slice(0, MAX_VISIBLE_TAGS);
 	const hiddenTagCount = tags.length - visibleTags.length;
+	const distanceLabel =
+		establishment.distanceKm !== undefined ? formatDistanceKm(establishment.distanceKm) : null;
 
 	return (
 		<Link
@@ -56,6 +60,14 @@ export function EstablishmentDiscoverCard({
 							</li>
 						) : null}
 					</ul>
+				) : null}
+
+				{distanceLabel ? (
+					<div className="absolute right-2 top-2 z-10">
+						<span className="rounded-full bg-black/85 px-2 py-0.5 text-[10px] font-medium text-white">
+							{distanceLabel}
+						</span>
+					</div>
 				) : null}
 
 				<div className="absolute inset-x-0 bottom-0 z-10 p-2">
