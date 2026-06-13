@@ -1,9 +1,9 @@
 ---
 name: kanban-board
 description: >-
-  Manage the kanban board for 3urega/fidelization: list, read, plan (vertical slicing),
-  implement, close GitHub issues, and clean up matching docs/issues drafts when closed.
-  Use for /kanban-board or when closing an issue after implementation.
+  Manage the kanban board for 3urega/fidelization: list, read, plan with DDD/architecture
+  review (not literal issue copy), vertical slicing, implement, close GitHub issues, and
+  clean up docs/issues drafts when closed. Use for /kanban-board or when closing an issue.
 ---
 
 # Kanban Board
@@ -39,14 +39,69 @@ List all open issues and show a summary to the user.
 
 ### With an issue ID as argument (e.g. `/kanban-board 42`)
 
-1. **Read** the issue using `gh issue view <id>`.
-2. **Analyze** the description, acceptance criteria, and labels.
-3. **Present an implementation plan** to the user (see **Vertical slicing** below) with:
-   - Summary of what the issue asks for.
-   - Slices (VS1, VS2, …) with user-visible value per slice.
-   - Main files / layers touched per slice.
-   - Potential risks or open questions.
-   - Manual verification checklist before closing.
+**No traduzcas la issue a un plan mecánico.** Primero entiende el contexto y diseña la mejor solución; después presenta el plan (con mejoras propuestas si las hay).
+
+#### Fase 1 — Leer la issue (punto de partida, no verdad absoluta)
+
+```bash
+gh issue view <id> --repo 3urega/fidelization
+```
+
+Extrae: objetivo, criterios de aceptación, dependencias, verifies mencionados y **fuera de alcance** explícito.
+
+#### Fase 2 — Contexto y arquitectura (obligatorio antes del plan)
+
+Dedica tiempo a investigar **antes** de proponer slices. No basta con leer la issue.
+
+1. **`AGENTS.md`** — producto, convenciones, verifies, mapa «Cuándo leer cada doc».
+2. **Docs de arquitectura** (según el tipo de issue; leer solo lo relevante):
+   - API / casos de uso: [`docs/backend/thin-api-routes.md`](../../../docs/backend/thin-api-routes.md), [`hexagonal-architecture.md`](../../../docs/backend/hexagonal-architecture.md), [`dependency-injection-diod.md`](../../../docs/backend/dependency-injection-diod.md), [`api-routes-reflect-metadata.md`](../../../docs/backend/api-routes-reflect-metadata.md)
+   - Dominio / reglas: [`docs/business-rules.md`](../../../docs/business-rules.md), [`docs/domain/saas-architecture.md`](../../../docs/domain/saas-architecture.md)
+   - Datos / Prisma: [`docs/database/data-model.md`](../../../docs/database/data-model.md), skill [prisma](../prisma/SKILL.md)
+   - Auth / tenant: [`docs/teenant-resolution.md`](../../../docs/teenant-resolution.md), [`session-cookies-localhost-dev.md`](../../../docs/backend/session-cookies-localhost-dev.md)
+   - UI: [`docs/frontend/style-guidelines.md`](../../../docs/frontend/style-guidelines.md)
+   - `sourceDoc` del manifest o **Referencias** en el body de la issue (p. ej. `docs/domain/*.md`)
+3. **Código existente** — buscar patrones ya implementados en el mismo bounded context (`src/contexts/…`), rutas API hermanas, componentes UI similares, verifies de la misma fase.
+4. **Estado real vs issue** — ¿la issue asume tablas/APIs que ya existen? ¿Hay deuda (duplicación, nombres legacy, índices faltantes) que conviene resolver en el mismo PR?
+
+#### Fase 3 — Diseño senior (DDD + mejoras)
+
+Con el contexto cargado, **diseña** la implementación (no copies la issue):
+
+- **Bounded context** y capa correcta (dominio / aplicación / infra / presentación).
+- **Puertos y casos de uso** reutilizables vs lógica en route o componente.
+- **Read models vs agregados** — consultas analíticas no fuerzan entidades de dominio si el proyecto ya usa repos de lectura.
+- **Consistencia** con convenciones del repo (naming Prisma, thin routes, DI `@Service()`, verifies `npm run verify:*`).
+- **Riesgos**: timezone, multi-tenant, plan gates, cookies host-only, N+1 en agregaciones.
+
+**Mejoras y cambios propuestos** (cuando aporten valor y encajen en el alcance del issue):
+
+| Tipo | Ejemplo | Acción |
+|------|---------|--------|
+| Refactor menor colindante | Extraer VO ya repetido en 2 archivos | Incluir en plan si es barato |
+| Índice / migración | Query lenta en agregación | Proponer en K1, no postergar silenciosamente |
+| Ajuste de API | Campo extra útil para UI sin inflar scope | Proponer al usuario |
+| Desviación de la issue | Cambiar URL, renombrar use case, ampliar scope | **Preguntar al usuario** antes de implementar |
+| Fuera de alcance | Feature adicional no pedida | Marcar explícitamente «no incluir» |
+
+Si propones cambios respecto al texto de la issue, sepáralos en una sección **Propuestas / desvíos** con: qué cambia, por qué (arquitectura o producto), impacto en otras issues del batch.
+
+#### Fase 4 — Plan de implementación (entregar al usuario)
+
+Presentar en este orden:
+
+1. **Resumen** — qué pide la issue y qué vas a construir realmente (1–2 párrafos).
+2. **Contexto encontrado** — archivos/patrones/docs relevantes (bullets breves).
+3. **Propuestas / desvíos** (si hay) — mejoras recomendadas; preguntas abiertas.
+4. **Slices verticales** (VS1, VS2, …) — ver **Vertical slicing** abajo.
+5. **Riesgos y mitigaciones**.
+6. **Checklist de verificación** manual + `npm run verify:*` antes de cerrar.
+
+**Espera confirmación del usuario** si hay desvíos material respecto a la issue o propuestas que amplíen scope. Si el usuario dice «implementa», ejecuta el plan acordado (o el literal de la issue si rechaza las propuestas).
+
+#### Fase 5 — Implementación
+
+Completar y verificar **un slice antes del siguiente**, salvo que el usuario pida paralelizar.
 
 ### After completing work on an issue
 
@@ -123,9 +178,10 @@ Incluir una tabla o lista con columnas equivalentes a:
 
 Reglas adicionales:
 
+- **Investigar antes de planificar** — Fases 2–3 son obligatorias; el plan (Fase 4) refleja el diseño acordado, no un volcado de la issue.
 - Ordenar slices de **menor a mayor** dependencia; el primero suele ser el “tracer bullet” (flujo mínimo demostrable).
 - Marcar explícitamente **fuera de alcance** del issue para no inflar slices.
-- Si el issue es trivial (un bug de una línea), **un solo slice** basta; no forzar VS1–VS4.
+- Si el issue es trivial (un bug de una línea), **un solo slice** basta; no forzar VS1–VS4 (pero sí revisar contexto si el bug toca auth/tenant).
 - Al implementar, completar y verificar **un slice antes de pasar al siguiente**, salvo que el usuario pida paralelizar.
 - Respetar `AGENTS.md` y `docs/` al tocar infraestructura, API o casos de uso.
 - New batches: use [plan-to-issues](../plan-to-issues/SKILL.md) before GitHub publish.

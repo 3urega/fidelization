@@ -1,0 +1,23 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/stamp-campaign-owner-dashboard.md",
+  "label": "phase-k-stamp-dashboard",
+  "issues": [
+    {
+      "title": "Phase K1: Stamp campaign scan stats domain + aggregation repository",
+      "bodyFile": "docs/issues/stamp-campaign-dashboard-domain.md"
+    },
+    {
+      "title": "Phase K2: GET /api/loyalty/stamp-campaigns/dashboard + verify E2E",
+      "bodyFile": "docs/issues/stamp-campaign-dashboard-api.md"
+    },
+    {
+      "title": "Phase K3: Owner /panel tabs Dashboard and Configuracion + mobile swipe",
+      "bodyFile": "docs/issues/owner-panel-tabs-dashboard.md"
+    },
+    {
+      "title": "Phase K4: Stamp campaign dashboard UI on owner panel",
+      "bodyFile": "docs/issues/stamp-campaign-dashboard-ui.md"
+    }
+  ]
+}

@@ -477,3 +477,29 @@ Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanb
 | G1–G8 | Ver vertical slices en [`customer-platform-app.md`](customer-platform-app.md) | Auth unificado + tenant onboarding + dashboards + QR global |
 
 **Issues draft:** [`manifest.platform-app.json`](../issues/manifest.platform-app.json) — **Published** [#38–#45](https://github.com/3urega/fidelization/issues/38).
+
+---
+
+## Phase K — Dashboard owner: escaneos por campaña de sellos
+
+**Status:** **Target** — spec [`stamp-campaign-owner-dashboard.md`](stamp-campaign-owner-dashboard.md).
+
+**Goal:** En `/panel`, pestaña **Dashboard** (owner): campañas de sellos activas + escaneos hoy / ayer / 7 días / desde inicio. Checklist actual → pestaña **Configuración**. Swipe + clic entre tabs.
+
+| Slice | Valor | Verify |
+|-------|-------|--------|
+| **K1** | `ListStampCampaignDashboard` + agregación `loyalty_transactions` | `verify:stamp-campaign-dashboard-use-case` |
+| **K2** | `GET /api/loyalty/stamp-campaigns/dashboard` | `verify:stamp-campaign-dashboard` |
+| **K3** | Tabs `/panel` + swipe mobile | `verify:owner-login` |
+| **K4** | UI tarjetas métricas | (K2 E2E) |
+
+### GitHub issues (published 2026-06-11)
+
+| # | Slice | Body file |
+|---|-------|-----------|
+| [#55](https://github.com/3urega/fidelization/issues/55) | K1 | [`stamp-campaign-dashboard-domain.md`](../issues/stamp-campaign-dashboard-domain.md) |
+| [#56](https://github.com/3urega/fidelization/issues/56) | K2 | [`stamp-campaign-dashboard-api.md`](../issues/stamp-campaign-dashboard-api.md) |
+| [#57](https://github.com/3urega/fidelization/issues/57) | K3 | [`owner-panel-tabs-dashboard.md`](../issues/owner-panel-tabs-dashboard.md) |
+| [#58](https://github.com/3urega/fidelization/issues/58) | K4 | [`stamp-campaign-dashboard-ui.md`](../issues/stamp-campaign-dashboard-ui.md) |
+
+Manifest: [`manifest.phase-k-stamp-dashboard.json`](../issues/manifest.phase-k-stamp-dashboard.json)
