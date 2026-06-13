@@ -63,15 +63,6 @@ function StampCampaignDashboardCard({
 	);
 }
 
-function ClientesPlaceholderCard(): ReactElement {
-	return (
-		<Card className="opacity-70">
-			<h2 className="font-medium text-foreground">Clientes</h2>
-			<p className="mt-1 text-sm text-muted">Próximamente</p>
-		</Card>
-	);
-}
-
 export function StampCampaignDashboardPanel({
 	isActive = true,
 }: StampCampaignDashboardPanelProps): ReactElement {
@@ -121,47 +112,39 @@ export function StampCampaignDashboardPanel({
 
 	if (loading) {
 		return (
-			<div className="flex flex-col gap-6">
-				<Card>
-					<h2 className="font-medium text-foreground">Sellos</h2>
-					<p className="mt-2 text-sm text-muted">Cargando métricas…</p>
-				</Card>
-			</div>
+			<Card>
+				<h2 className="font-medium text-foreground">Sellos</h2>
+				<p className="mt-2 text-sm text-muted">Cargando métricas…</p>
+			</Card>
 		);
 	}
 
 	if (error) {
 		return (
-			<div className="flex flex-col gap-6">
-				<Card>
-					<h2 className="font-medium text-foreground">Sellos</h2>
-					<p className="mt-2 text-sm text-error">{error}</p>
-					<Button type="button" variant="secondary" className="mt-4" onClick={() => void load()}>
-						Reintentar
-					</Button>
-				</Card>
-				<ClientesPlaceholderCard />
-			</div>
+			<Card>
+				<h2 className="font-medium text-foreground">Sellos</h2>
+				<p className="mt-2 text-sm text-error">{error}</p>
+				<Button type="button" variant="secondary" className="mt-4" onClick={() => void load()}>
+					Reintentar
+				</Button>
+			</Card>
 		);
 	}
 
 	if (campaigns.length === 0) {
 		return (
-			<div className="flex flex-col gap-6">
-				<Card>
-					<h2 className="font-medium text-foreground">Sin campañas activas</h2>
-					<p className="mt-1 text-sm text-muted">
-						Crea una campaña de sellos para empezar a ver escaneos aquí.
-					</p>
-					<Link
-						href="/settings/stamps"
-						className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
-					>
-						Configurar sellos
-					</Link>
-				</Card>
-				<ClientesPlaceholderCard />
-			</div>
+			<Card>
+				<h2 className="font-medium text-foreground">Sin campañas activas</h2>
+				<p className="mt-1 text-sm text-muted">
+					Crea una campaña de sellos para empezar a ver escaneos aquí.
+				</p>
+				<Link
+					href="/settings/stamps"
+					className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
+				>
+					Configurar sellos
+				</Link>
+			</Card>
 		);
 	}
 
@@ -178,8 +161,6 @@ export function StampCampaignDashboardPanel({
 					{timezone ?? null}
 				</p>
 			) : null}
-
-			<ClientesPlaceholderCard />
 		</div>
 	);
 }

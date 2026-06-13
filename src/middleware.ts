@@ -94,6 +94,8 @@ function isTenantAppPath(pathname: string): boolean {
 		pathname === platformRoutes.tenantPanel ||
 		pathname === "/profile" ||
 		pathname === "/scan" ||
+		pathname === "/customers" ||
+		pathname.startsWith("/customers/") ||
 		pathname.startsWith("/onboarding/") ||
 		pathname.startsWith("/settings/")
 	);

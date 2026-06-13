@@ -53,6 +53,7 @@
     "verify:customer-scan": "tsx scripts/verify-customer-scan.ts",
     "verify:stamp-campaigns-use-case": "tsx scripts/verify-stamp-campaigns-use-case.ts",
     "verify:stamp-campaign-dashboard-use-case": "tsx scripts/verify-stamp-campaign-dashboard-use-case.ts",
+    "verify:customer-zone-use-case": "tsx scripts/verify-customer-zone-use-case.ts",
     "verify:stamp-campaign-dashboard": "tsx scripts/verify-stamp-campaign-dashboard.ts",
     "verify:stamp-campaigns": "tsx scripts/verify-stamp-campaigns.ts",
     "verify:loyalty-visual-assets": "tsx scripts/verify-loyalty-visual-assets.ts",

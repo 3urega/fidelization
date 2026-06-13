@@ -7,6 +7,7 @@ export type TenantAdminNavIcon =
 	| "user"
 	| "palette"
 	| "scan"
+	| "customers"
 	| "stamps"
 	| "promotions"
 	| "team"
@@ -22,6 +23,7 @@ export type TenantAdminNavItem = {
 export const tenantAdminNav: readonly TenantAdminNavItem[] = [
 	{ href: "/panel", label: "Inicio", icon: "home" },
 	{ href: "/scan", label: "Escanear QR", icon: "scan" },
+	{ href: "/customers", label: "Clientes", icon: "customers", ownerOnly: true },
 	{ href: "/settings/branding", label: "Branding", icon: "palette", ownerOnly: true },
 	{ href: "/settings/profile", label: "Datos del negocio", icon: "store", ownerOnly: true },
 	{ href: "/settings/stamps", label: "Sellos", icon: "stamps", ownerOnly: true },

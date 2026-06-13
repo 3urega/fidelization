@@ -42,7 +42,11 @@ import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/
 import { AuthenticateCustomerByQr } from "../../../loyalty/customers/application/authenticate/AuthenticateCustomerByQr";
 import { GetCustomerActiveRewards } from "../../../loyalty/customers/application/profile/GetCustomerActiveRewards";
 import { GetEstablishmentDetailForUser } from "../../../loyalty/customers/application/profile/GetEstablishmentDetailForUser";
-import { GetCustomerStampProgress } from "../../../loyalty/customers/application/profile/GetCustomerStampProgress";
+import { GetTenantCustomerDetail } from "../../../loyalty/customers/application/analytics/GetTenantCustomerDetail";
+import { GetTenantCustomerInsights } from "../../../loyalty/customers/application/analytics/GetTenantCustomerInsights";
+import { ListTenantCustomersBySegment } from "../../../loyalty/customers/application/analytics/ListTenantCustomersBySegment";
+import { TenantCustomerAnalyticsRepository } from "../../../loyalty/customers/domain/analytics/TenantCustomerAnalyticsRepository";
+import { PrismaTenantCustomerAnalyticsRepository } from "../../../loyalty/customers/infrastructure/PrismaTenantCustomerAnalyticsRepository";
 import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
 import { RecordPromotionUse } from "../../../loyalty/customers/application/promotions/RecordPromotionUse";
 import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
@@ -198,6 +202,9 @@ builder.registerAndUse(RegisterCustomer);
 builder.registerAndUse(JoinTenantAsCustomer);
 builder.registerAndUse(GetEstablishmentDetailForUser);
 builder.registerAndUse(GetCustomerStampProgress);
+builder.registerAndUse(GetTenantCustomerInsights);
+builder.registerAndUse(ListTenantCustomersBySegment);
+builder.registerAndUse(GetTenantCustomerDetail);
 builder.registerAndUse(GetCustomerActiveRewards);
 builder.registerAndUse(RedeemCustomerReward);
 builder.registerAndUse(RecordCustomerVisitByQr);
@@ -207,6 +214,9 @@ builder.registerAndUse(CustomerSessionVerifier);
 
 builder.register(LoyaltyTransactionRepository).use(PrismaLoyaltyTransactionRepository);
 builder.registerAndUse(PrismaLoyaltyTransactionRepository);
+
+builder.register(TenantCustomerAnalyticsRepository).use(PrismaTenantCustomerAnalyticsRepository);
+builder.registerAndUse(PrismaTenantCustomerAnalyticsRepository);
 
 builder.register(StampCampaignRepository).use(PrismaStampCampaignRepository);
 builder.registerAndUse(PrismaStampCampaignRepository);

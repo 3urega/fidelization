@@ -105,6 +105,32 @@ export function endOfZonedDayUtc(referenceDate: Date, timeZone: string): Date {
 	return zonedLocalToUtc(nextDay.year, nextDay.month, nextDay.day, 0, 0, 0, timeZone);
 }
 
+function addCalendarMonths(
+	year: number,
+	month: number,
+	delta: number,
+): { year: number; month: number } {
+	const shifted = new Date(Date.UTC(year, month - 1 + delta, 1));
+
+	return {
+		year: shifted.getUTCFullYear(),
+		month: shifted.getUTCMonth() + 1,
+	};
+}
+
+export function startOfZonedMonthUtc(referenceDate: Date, timeZone: string): Date {
+	const parts = getPartsInTimeZone(referenceDate, timeZone);
+
+	return zonedLocalToUtc(parts.year, parts.month, 1, 0, 0, 0, timeZone);
+}
+
+export function endOfZonedMonthUtc(referenceDate: Date, timeZone: string): Date {
+	const parts = getPartsInTimeZone(referenceDate, timeZone);
+	const nextMonth = addCalendarMonths(parts.year, parts.month, 1);
+
+	return zonedLocalToUtc(nextMonth.year, nextMonth.month, 1, 0, 0, 0, timeZone);
+}
+
 export function buildStampScanGlobalWindows(
 	referenceDate: Date,
 	timeZone: string,
