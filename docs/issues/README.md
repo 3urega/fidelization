@@ -39,8 +39,10 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 # Phase I — explorar locales (publicado, cerrado)
 # Phase J — loyalty visual templates (draft)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-j-loyalty-visual.json
-# Phase K — owner stamp campaign dashboard (draft)
+# Phase K — owner stamp campaign dashboard (publicado, cerrado)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-k-stamp-dashboard.json
+# Phase L — zona clientes owner (publicado)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-l-customer-zone.json
 ```
 
 ## After close on GitHub

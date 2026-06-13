@@ -263,3 +263,18 @@ Si construyes la primera versión de esta zona, yo priorizaría:
 4. Tabla completa
 
 Porque esos cuatro bloques aportan mucho más valor al comerciante que una simple lista de clientes.
+
+---
+
+## GitHub issues (Phase L — published 2026-06-11)
+
+| # | Slice | Título |
+|---|-------|--------|
+| [#59](https://github.com/3urega/fidelization/issues/59) | L1 | Customer zone analytics domain and read repository |
+| [#60](https://github.com/3urega/fidelization/issues/60) | L2 | Customer zone API insights list and detail |
+| [#61](https://github.com/3urega/fidelization/issues/61) | L3 | Customer zone nav entry and remove dashboard placeholder |
+| [#62](https://github.com/3urega/fidelization/issues/62) | L4 | Customer zone UI insights and segment sections |
+| [#63](https://github.com/3urega/fidelization/issues/63) | L5 | Customer zone UI all customers table |
+| [#64](https://github.com/3urega/fidelization/issues/64) | L6 | Customer zone UI customer detail page |
+
+Manifest: [`manifest.phase-l-customer-zone.json`](issues/manifest.phase-l-customer-zone.json)
