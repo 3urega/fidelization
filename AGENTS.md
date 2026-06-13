@@ -50,6 +50,7 @@ npm run verify:customer-stamp-progress-use-case  # issue #23 — GET me stampPro
 npm run verify:customer-stamp-progress   # issue #23 — register → scan → GET me stampProgress E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaigns-use-case  # issue #21 — Create/List/Update stamp campaigns (domain stub)
 npm run verify:stamp-campaign-dashboard-use-case  # Phase K1 #55 — ListStampCampaignDashboard (domain stub)
+npm run verify:stamp-campaign-dashboard  # Phase K2 #56 — GET stamp-campaigns/dashboard E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaigns       # issue #21 — POST/GET/PATCH stamp campaigns + Prisma (dev + DATABASE_URL)
 npm run verify:stamp-types-use-case  # Phase H1 — stamp_types catalog (domain stub)
 npm run verify:stamp-types           # Phase H1 — stamp types API + Prisma (dev + DATABASE_URL)

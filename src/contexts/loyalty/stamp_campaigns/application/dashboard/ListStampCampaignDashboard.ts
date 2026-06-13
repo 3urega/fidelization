@@ -3,11 +3,13 @@ import { Service } from "diod";
 import { env } from "../../../../../lib/env";
 import { GENERIC_STAMP_VISIT_LABEL } from "../../../stamp_types/domain/StampType";
 import { StampTypeRepository } from "../../../stamp_types/domain/StampTypeRepository";
+import { TenantRole } from "../../../../tenants/memberships/domain/TenantRole";
 import { TenantAccessSuspended } from "../../../../tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";
 import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepository";
 import { TenantStatus } from "../../../../tenants/tenants/domain/TenantStatus";
 import { StampCampaignDashboardRow } from "../../domain/StampCampaignDashboardRow";
+import { StampCampaignForbidden } from "../../domain/StampCampaignForbidden";
 import { emptyStampCampaignScanCounts } from "../../domain/StampCampaignScanCounts";
 import { StampCampaignRepository } from "../../domain/StampCampaignRepository";
 import { StampCampaignScanStatsRepository } from "../../domain/StampCampaignScanStatsRepository";
@@ -15,6 +17,7 @@ import { StampScanTimeWindows } from "../../domain/StampScanTimeWindows";
 
 export type ListStampCampaignDashboardParams = {
 	tenantId: string;
+	role: TenantRole;
 	referenceDate?: Date;
 };
 
@@ -34,6 +37,10 @@ export class ListStampCampaignDashboard {
 	) {}
 
 	async execute(params: ListStampCampaignDashboardParams): Promise<ListStampCampaignDashboardResult> {
+		if (params.role !== TenantRole.Owner) {
+			throw new StampCampaignForbidden(params.role);
+		}
+
 		await this.assertTenantAllowsLoyalty(params.tenantId);
 
 		const referenceDate = params.referenceDate ?? new Date();

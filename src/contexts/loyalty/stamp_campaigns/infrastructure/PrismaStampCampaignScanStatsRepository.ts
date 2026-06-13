@@ -54,8 +54,8 @@ export class PrismaStampCampaignScanStatsRepository extends StampCampaignScanSta
 			LEFT JOIN loyalty_transactions lt
 				ON lt.tenant_id = c.tenant_id
 				AND lt.type = 'stamp_added'::"LoyaltyTransactionType"
-				AND lt.metadata->>'campaignId' = c.id::text
-			WHERE c.tenant_id = ${tenantId}::uuid
+				AND lt.metadata->>'campaignId' = c.id
+			WHERE c.tenant_id = ${tenantId}
 				AND c.is_active = true
 			GROUP BY c.id, c.created_at
 		`;

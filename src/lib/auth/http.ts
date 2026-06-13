@@ -5,6 +5,7 @@ import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/Http
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { StampCampaign } from "../../contexts/loyalty/stamp_campaigns/domain/StampCampaign";
+import type { ListStampCampaignDashboardResult } from "../../contexts/loyalty/stamp_campaigns/application/dashboard/ListStampCampaignDashboard";
 import { StampType } from "../../contexts/loyalty/stamp_types/domain/StampType";
 import { Reward } from "../../contexts/loyalty/rewards/domain/Reward";
 import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
@@ -117,6 +118,28 @@ export function stampTypeToJson(
 		slug: primitives.slug,
 		sortOrder: primitives.sortOrder,
 		isActive: primitives.isActive,
+	};
+}
+
+export function stampCampaignDashboardToJson(
+	result: ListStampCampaignDashboardResult,
+): Record<string, unknown> {
+	return {
+		campaigns: result.campaigns.map((row) => ({
+			id: row.campaignId,
+			name: row.name,
+			stampTypeLabel: row.stampTypeLabel,
+			requiredStamps: row.requiredStamps,
+			createdAt: row.createdAt.toISOString(),
+			scans: {
+				today: row.scans.today,
+				yesterday: row.scans.yesterday,
+				last7Days: row.scans.last7Days,
+				sinceStart: row.scans.sinceStart,
+			},
+		})),
+		generatedAt: result.generatedAt.toISOString(),
+		timezone: result.timezone,
 	};
 }
 

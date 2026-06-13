@@ -14,6 +14,7 @@ import {
 } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignScanCounts";
 import { StampType } from "../src/contexts/loyalty/stamp_types/domain/StampType";
 import { StampTypeRepository } from "../src/contexts/loyalty/stamp_types/domain/StampTypeRepository";
+import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantNotFound } from "../src/contexts/tenants/tenants/domain/TenantNotFound";
@@ -250,7 +251,11 @@ async function main(): Promise<void> {
 		new InMemoryStampTypeRepository([cafeType]),
 	);
 
-	const emptyResult = await emptyDashboard.execute({ tenantId, referenceDate });
+	const emptyResult = await emptyDashboard.execute({
+		tenantId,
+		role: TenantRole.Owner,
+		referenceDate,
+	});
 	if (emptyResult.campaigns.length !== 0) {
 		console.error("❌ expected empty dashboard when no active campaigns", emptyResult);
 		process.exit(1);
@@ -258,7 +263,11 @@ async function main(): Promise<void> {
 
 	console.log("✅ no active campaigns → empty dashboard");
 
-	const result = await listDashboard.execute({ tenantId, referenceDate });
+	const result = await listDashboard.execute({
+		tenantId,
+		role: TenantRole.Owner,
+		referenceDate,
+	});
 	if (result.timezone !== timezone) {
 		console.error("❌ unexpected timezone", result.timezone);
 		process.exit(1);
@@ -300,7 +309,11 @@ async function main(): Promise<void> {
 	);
 
 	try {
-		await suspendedDashboard.execute({ tenantId, referenceDate });
+		await suspendedDashboard.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			referenceDate,
+		});
 		console.error("❌ expected TenantAccessSuspended");
 		process.exit(1);
 	} catch (error) {
@@ -320,7 +333,11 @@ async function main(): Promise<void> {
 	);
 
 	try {
-		await missingTenantDashboard.execute({ tenantId, referenceDate });
+		await missingTenantDashboard.execute({
+			tenantId,
+			role: TenantRole.Owner,
+			referenceDate,
+		});
 		console.error("❌ expected TenantNotFound");
 		process.exit(1);
 	} catch (error) {

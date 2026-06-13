@@ -155,7 +155,7 @@ Patrón de referencia: pestañas en [`PlatformUserDashboard`](../../src/app/(mob
 | # | Slice | Título |
 |---|-------|--------|
 | [#55](https://github.com/3urega/fidelization/issues/55) | K1 | Domain + aggregation repository | **Closed** (2026-06-13) |
-| [#56](https://github.com/3urega/fidelization/issues/56) | K2 | API + verify E2E |
+| [#56](https://github.com/3urega/fidelization/issues/56) | K2 | API + verify E2E | **Closed** (2026-06-13) |
 | [#57](https://github.com/3urega/fidelization/issues/57) | K3 | `/panel` tabs + swipe |
 | [#58](https://github.com/3urega/fidelization/issues/58) | K4 | Dashboard UI |
 
