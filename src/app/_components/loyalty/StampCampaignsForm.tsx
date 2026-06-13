@@ -44,6 +44,48 @@ type CampaignsResponse = {
 	};
 };
 
+type PlatformTemplatePayload = {
+	id: string;
+	name: string;
+	description: string;
+	requiredStamps: number;
+	suggestedStampTypeLabel: string;
+	visualTemplate: string;
+	cardBackgroundVariant: string;
+	conditions: string;
+};
+
+type TemplatesResponse = {
+	templates?: PlatformTemplatePayload[];
+	error?: { description?: string };
+};
+
+function resolveStampTypeIdForTemplate(
+	types: StampTypePayload[],
+	suggestedLabel: string,
+): string {
+	if (types.length === 0) {
+		return "";
+	}
+
+	const normalized = suggestedLabel.trim().toLowerCase();
+	if (!normalized) {
+		return types[0]?.id ?? "";
+	}
+
+	const exact = types.find((type) => type.label.trim().toLowerCase() === normalized);
+	if (exact) {
+		return exact.id;
+	}
+
+	const partial = types.find((type) => type.label.trim().toLowerCase().includes(normalized));
+	if (partial) {
+		return partial.id;
+	}
+
+	return types[0]?.id ?? "";
+}
+
 type StampCampaignsFormProps = {
 	hasActiveTypes: boolean;
 	onGoToTypesTab: () => void;
@@ -72,6 +114,10 @@ export function StampCampaignsForm({
 	const [saving, setSaving] = useState(false);
 	const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
 	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [platformTemplates, setPlatformTemplates] = useState<PlatformTemplatePayload[]>([]);
+	const [templatesLoading, setTemplatesLoading] = useState(true);
+	const [templateStampTypeIds, setTemplateStampTypeIds] = useState<Record<string, string>>({});
+	const [adoptingTemplateId, setAdoptingTemplateId] = useState<string | null>(null);
 
 	const loadStampTypes = useCallback(async (): Promise<void> => {
 		try {
@@ -85,6 +131,27 @@ export function StampCampaignsForm({
 			}
 		} catch {
 			setStampTypes([]);
+		}
+	}, []);
+
+	const loadPlatformTemplates = useCallback(async (): Promise<void> => {
+		setTemplatesLoading(true);
+
+		try {
+			const response = await fetch("/api/loyalty/campaign-templates", {
+				credentials: "include",
+			});
+			const body = (await response.json()) as TemplatesResponse;
+
+			if (response.ok) {
+				setPlatformTemplates(body.templates ?? []);
+			} else {
+				setPlatformTemplates([]);
+			}
+		} catch {
+			setPlatformTemplates([]);
+		} finally {
+			setTemplatesLoading(false);
 		}
 	}, []);
 
@@ -120,7 +187,29 @@ export function StampCampaignsForm({
 
 		void loadCampaigns();
 		void loadStampTypes();
-	}, [session, loadCampaigns, loadStampTypes]);
+		void loadPlatformTemplates();
+	}, [session, loadCampaigns, loadStampTypes, loadPlatformTemplates]);
+
+	useEffect(() => {
+		if (stampTypes.length === 0 || platformTemplates.length === 0) {
+			return;
+		}
+
+		setTemplateStampTypeIds((current) => {
+			const next = { ...current };
+
+			for (const template of platformTemplates) {
+				if (!next[template.id]) {
+					next[template.id] = resolveStampTypeIdForTemplate(
+						stampTypes,
+						template.suggestedStampTypeLabel,
+					);
+				}
+			}
+
+			return next;
+		});
+	}, [stampTypes, platformTemplates]);
 
 	useEffect(() => {
 		if (stampTypes.length === 0) {
@@ -286,6 +375,56 @@ export function StampCampaignsForm({
 		}
 	}
 
+	async function handleAdoptTemplate(template: PlatformTemplatePayload): Promise<void> {
+		setSubmitError(null);
+		setSuccess(null);
+
+		if (!hasActiveTypes) {
+			setSubmitError("Crea al menos un tipo de consumición antes de usar plantillas.");
+
+			return;
+		}
+
+		const selectedStampTypeId = templateStampTypeIds[template.id]?.trim();
+		if (!selectedStampTypeId) {
+			setSubmitError("Elige un tipo de consumición para la plantilla.");
+
+			return;
+		}
+
+		setAdoptingTemplateId(template.id);
+
+		try {
+			const response = await fetch("/api/loyalty/stamp-campaigns/adopt-template", {
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					templateId: template.id,
+					stampTypeId: selectedStampTypeId,
+				}),
+			});
+			const body = (await response.json()) as CampaignsResponse;
+
+			if (!response.ok) {
+				setSubmitError(body.error?.description ?? "No se pudo adoptar la plantilla.");
+
+				return;
+			}
+
+			if (body.campaign) {
+				setSuccess(
+					`Campaña creada desde plantilla: «${body.campaign.name}» · ${body.campaign.requiredStamps} sellos.`,
+				);
+				await loadCampaigns();
+			}
+		} catch {
+			setSubmitError("Error de red al adoptar la plantilla.");
+		} finally {
+			setAdoptingTemplateId(null);
+		}
+	}
+
 	return (
 		<div className="flex flex-col gap-6">
 			<Card>
@@ -352,6 +491,89 @@ export function StampCampaignsForm({
 					</ul>
 				)}
 			</Card>
+
+			{hasActiveTypes ? (
+				<Card>
+					<h2 className="font-medium text-foreground">Usar plantilla</h2>
+					<p className="mt-1 text-sm text-muted">
+						Adopta una campaña predefinida de la plataforma y ajústala a tu negocio.
+					</p>
+					{templatesLoading ? (
+						<p className="mt-3 text-sm text-muted">Cargando plantillas…</p>
+					) : platformTemplates.length === 0 ? (
+						<p className="mt-3 text-sm text-muted">No hay plantillas disponibles ahora mismo.</p>
+					) : (
+						<ul className="mt-4 flex flex-col gap-4">
+							{platformTemplates.map((template) => {
+								const selectedTypeId = templateStampTypeIds[template.id] ?? "";
+								const adopting = adoptingTemplateId === template.id;
+
+								return (
+									<li
+										key={template.id}
+										className="rounded-theme border border-border p-4"
+									>
+										<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+											<div className="min-w-0 flex-1">
+												<p className="font-medium text-foreground">{template.name}</p>
+												{template.description ? (
+													<p className="mt-1 text-sm text-muted">{template.description}</p>
+												) : null}
+												<p className="mt-2 text-sm text-muted">
+													{template.requiredStamps} sellos
+													{template.suggestedStampTypeLabel
+														? ` · sugerido: ${template.suggestedStampTypeLabel}`
+														: ""}
+													{` · ${resolveLoyaltyVisualTemplate(template.visualTemplate).label}`}
+												</p>
+												<div className="mt-3 max-w-md">
+													<LoyaltyProgress
+														template={
+															resolveLoyaltyVisualTemplate(template.visualTemplate).id
+														}
+														current={Math.min(
+															3,
+															Math.max(1, template.requiredStamps - 1),
+														)}
+														required={template.requiredStamps}
+													/>
+												</div>
+											</div>
+											<div className="flex w-full flex-col gap-3 lg:w-64">
+												<Field label="Tipo de consumición">
+													<select
+														value={selectedTypeId}
+														onChange={(event) =>
+															setTemplateStampTypeIds((current) => ({
+																...current,
+																[template.id]: event.target.value,
+															}))
+														}
+														className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+													>
+														{stampTypes.map((type) => (
+															<option key={type.id} value={type.id}>
+																{type.label}
+															</option>
+														))}
+													</select>
+												</Field>
+												<Button
+													type="button"
+													disabled={adoptingTemplateId !== null}
+													onClick={() => void handleAdoptTemplate(template)}
+												>
+													{adopting ? "Creando…" : "Usar plantilla"}
+												</Button>
+											</div>
+										</div>
+									</li>
+								);
+							})}
+						</ul>
+					)}
+				</Card>
+			) : null}
 
 			{hasActiveTypes ? (
 				<Card>
