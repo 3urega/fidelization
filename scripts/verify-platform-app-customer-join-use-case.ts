@@ -9,7 +9,7 @@ import { JoinTenantAsCustomer } from "../src/contexts/loyalty/customers/applicat
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { GetCustomerStampProgress } from "../src/contexts/loyalty/customers/application/profile/GetCustomerStampProgress";
-import { StampAddedSummary } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import type { StampAddedSummary } from "../src/contexts/loyalty/customers/domain/StampProgressSummary";
 import { ListUserRelationships } from "../src/contexts/tenants/memberships/application/list/ListUserRelationships";
 import { TenantMembershipRepository } from "../src/contexts/tenants/memberships/domain/TenantMembershipRepository";
 import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";

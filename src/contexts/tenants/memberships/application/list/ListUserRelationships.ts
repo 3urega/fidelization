@@ -1,7 +1,7 @@
 import { Service } from "diod";
 
 import { GetCustomerStampProgress } from "../../../../loyalty/customers/application/profile/GetCustomerStampProgress";
-import { StampAddedSummary } from "../../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import type { StampAddedSummary } from "../../../../loyalty/customers/domain/StampProgressSummary";
 import { CustomerRepository } from "../../../../loyalty/customers/domain/CustomerRepository";
 import { CustomerEstablishmentSummary } from "../../../../loyalty/customers/domain/CustomerEstablishmentSummary";
 import { TenantMembershipRepository } from "../../domain/TenantMembershipRepository";

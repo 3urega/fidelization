@@ -2,7 +2,7 @@ import { Service } from "diod";
 
 import { GENERIC_STAMP_VISIT_LABEL } from "../../../stamp_types/domain/StampType";
 import { StampTypeRepository } from "../../../stamp_types/domain/StampTypeRepository";
-import { StampAddedSummary } from "../scan/RecordCustomerVisitByQr";
+import type { StampAddedSummary } from "../../domain/StampProgressSummary";
 import { StampCampaignRepository } from "../../../stamp_campaigns/domain/StampCampaignRepository";
 import { TenantAccessSuspended } from "../../../../tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";

@@ -1,6 +1,6 @@
 # Staff scan flow (target-first)
 
-**Status:** Phase M in progress — **M1 implemented** ([#65](https://github.com/3urega/fidelization/issues/65), 2026-06-13), **M2 implemented** ([#66](https://github.com/3urega/fidelization/issues/66), 2026-06-13), **M3 implemented** ([#67](https://github.com/3urega/fidelization/issues/67), 2026-06-13), **M4 implemented** ([#68](https://github.com/3urega/fidelization/issues/68), 2026-06-13), **M5 implemented** ([#69](https://github.com/3urega/fidelization/issues/69), 2026-06-13). M6 pending.
+**Status:** **Phase M complete** ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70), 2026-06-13).
 
 ## Implementation status (M1)
 
@@ -29,7 +29,6 @@
 | Record use case | [`RecordStaffScanByTarget.ts`](../../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget.ts) |
 | API route | [`POST /api/loyalty/scan`](../../src/app/api/loyalty/scan/route.ts) — `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }` |
 | Promo use delegation | [`POST /api/loyalty/promotions/[id]/use`](../../src/app/api/loyalty/promotions/[promotionId]/use/route.ts) → `RecordStaffScanByTarget` |
-| Legacy (sin ruta scan) | [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts) — pendiente borrado en M6 |
 | Domain verify | `npm run verify:staff-scan-record-by-target-use-case` |
 | E2E verify | `npm run verify:staff-scan-record-by-target` (dev + `DATABASE_URL`) |
 
@@ -48,14 +47,21 @@
 |-----------|------|
 | Verify helpers | [`scripts/lib/staff-scan-verify-helpers.ts`](../../scripts/lib/staff-scan-verify-helpers.ts) |
 | Regresión E2E | Todos los `verify:*` que llaman `POST /api/loyalty/scan` usan `{ qrValue, targetType, targetId }` + `outcomes[]` |
-| Legacy use case | [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts) — pendiente borrado en M6 |
+
+## Implementation status (M6)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Docs + cleanup | `AGENTS.md`, roadmaps Phase H/M, settings copy |
+| Legacy removed | `RecordCustomerVisitByQr`, `ResolveStampScanOptions`; `StampProgressSummary` en dominio |
+| `GET stamp-types` | Solo catálogo owner (`types[]`); sin `selectionRequired` |
 
 ## Invariante de negocio (no negociable)
 
 > **Un escaneo afecta exactamente a un target: una tarjeta concreta o una promoción concreta.**  
 > Nunca a varias tarjetas a la vez, aunque compartan el mismo `stampTypeId`.
 
-El comportamiento actual (`stampTypeId` → sello en **todas** las campañas del tipo) es un **bug de diseño** que Phase M elimina por completo.
+El comportamiento legacy (`stampTypeId` → sello en **todas** las campañas del tipo) fue eliminado en Phase M ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70)).
 
 ## Problem
 
@@ -122,7 +128,7 @@ Multiple lines may appear (e.g. punto + producto anotado; producto anotado + tar
 | [#66](https://github.com/3urega/fidelization/issues/66) | M2 | List scan targets API — **Closed** (2026-06-13) |
 | [#67](https://github.com/3urega/fidelization/issues/67) | M3 | Record scan by target + outcomes — **Closed** (2026-06-13) |
 | [#68](https://github.com/3urega/fidelization/issues/68) | M4 | `/scan` page redesign — **Closed** (2026-06-13) |
-| [#69](https://github.com/3urega/fidelization/issues/69) | M5 | Verify E2E (todos los scripts scan) |
-| [#70](https://github.com/3urega/fidelization/issues/70) | M6 | Docs + cleanup Phase H |
+| [#69](https://github.com/3urega/fidelization/issues/69) | M5 | Verify E2E (todos los scripts scan) — **Closed** (2026-06-13) |
+| [#70](https://github.com/3urega/fidelization/issues/70) | M6 | Docs + cleanup Phase H — **Closed** (2026-06-13) |
 
 Manifest: [`manifest.phase-m-staff-scan.json`](../issues/manifest.phase-m-staff-scan.json).

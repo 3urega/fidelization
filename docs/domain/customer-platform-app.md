@@ -314,7 +314,7 @@ Web legacy (`(app)`, `(loyalty)`, `(auth)`) coexiste; la app nativa es el shell 
 | **G4** | Detalle local con interacción (tarjeta + promos) | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `/home/establishments/[slug]`, cross-promos, `/home/qr` |
 | **G5** | Detalle local sin interacción (solo promos) | Promotions list pública por slug |
 | **G6** | «Otras promos activas» en detalle | **Implemented** [#43](https://github.com/3urega/fidelization/issues/43) (2026-06-09) — `ListUserCrossTenantPromotions` |
-| **G7** | QR global + scan staff | **Implemented** [#44](https://github.com/3urega/fidelization/issues/44) (2026-06-09) — `users.qr_value`, `RecordCustomerVisitByQr` dual lookup |
+| **G7** | QR global + scan staff | **Implemented** [#44](https://github.com/3urega/fidelization/issues/44) (2026-06-09), Phase M [#67](https://github.com/3urega/fidelization/issues/67) — `ResolveCustomerByQrForStaffScan` + `RecordStaffScanByTarget` |
 | **G8** | Google OAuth + Capacitor | **Implemented** [#45](https://github.com/3urega/fidelization/issues/45) (2026-06-09) — GIS + `POST /api/auth/oauth/google`, `fidelization://join/{slug}`, `build:capacitor` |
 
 **Dependencias:** Phase F (promociones owner CRUD) alimenta G5–G6 con datos reales.

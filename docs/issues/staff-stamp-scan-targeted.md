@@ -1,4 +1,4 @@
-> **Superseded by Phase M** ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70)). El scan ya no filtra por `stampTypeId`; el empleado elige una tarjeta concreta. Ver [`staff-scan-flow.md`](../domain/staff-scan-flow.md).
+> **Superseded by Phase M** ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70)). El scan ya no filtra por `stampTypeId`; el empleado elige una tarjeta concreta (`targetType`/`targetId`). Los verifies `verify:customer-stamp-scan-targeted*` siguen activos como regresión target-first. Ver [`staff-scan-flow.md`](../domain/staff-scan-flow.md).
 
 ## Objetivo
 

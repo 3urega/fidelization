@@ -6,7 +6,7 @@ export default function StampSettingsPage(): React.ReactElement {
 		<>
 			<PageHeader
 				title="Tarjeta de sellos"
-				description="Primero define tipos de consumición; después crea campañas ligadas a cada tipo."
+				description="Los tipos etiquetan las campañas aquí; en /scan el empleado elige la tarjeta concreta."
 			/>
 			<StampSettingsPanel />
 		</>

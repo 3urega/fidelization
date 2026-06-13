@@ -85,7 +85,6 @@ async function main(): Promise<void> {
 	});
 	const listBody = (await list.json()) as {
 		types?: { id: string }[];
-		selectionRequired?: boolean;
 	};
 
 	if (!list.ok || !listBody.types?.some((type) => type.id === stampTypeId)) {
@@ -93,12 +92,7 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	if (listBody.selectionRequired !== true) {
-		console.error("❌ expected selectionRequired true when types exist", listBody);
-		process.exit(1);
-	}
-
-	console.log("✅ GET /api/loyalty/stamp-types + selectionRequired");
+	console.log("✅ GET /api/loyalty/stamp-types lists created type");
 
 	const row = await prisma.stampType.findFirst({
 		where: { id: stampTypeId, tenantId },

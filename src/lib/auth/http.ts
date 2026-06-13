@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { DomainError } from "../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
-import { StampAddedSummary } from "../../contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import type { StampAddedSummary } from "../../contexts/loyalty/customers/domain/StampProgressSummary";
 import type { StaffScanOutcome } from "../../contexts/loyalty/customers/domain/StaffScanOutcome";
 import type {
 	StaffScanCampaignTarget,

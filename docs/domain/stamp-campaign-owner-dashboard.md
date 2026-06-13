@@ -22,7 +22,7 @@ Navegación entre pestañas: **clic** (desktop) y **clic + swipe horizontal** (m
 Cada sello otorgado en escaneo genera una fila en `loyalty_transactions`:
 
 - `type = stamp_added`
-- `metadata.campaignId` — UUID de la campaña (escrito por [`RecordCustomerVisitByQr`](../../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr.ts))
+- `metadata.campaignId` — UUID de la campaña (escrito por [`RecordStaffScanByTarget`](../../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget.ts))
 - `created_at` — instante del escaneo
 
 No hace falta nueva tabla de eventos; es un **read model** agregado sobre transacciones ya auditables.

@@ -50,7 +50,6 @@ import { TenantCustomerAnalyticsRepository } from "../../../loyalty/customers/do
 import { PrismaTenantCustomerAnalyticsRepository } from "../../../loyalty/customers/infrastructure/PrismaTenantCustomerAnalyticsRepository";
 import { RedeemCustomerReward } from "../../../loyalty/customers/application/redeem/RedeemCustomerReward";
 import { RecordPromotionUse } from "../../../loyalty/customers/application/promotions/RecordPromotionUse";
-import { RecordCustomerVisitByQr } from "../../../loyalty/customers/application/scan/RecordCustomerVisitByQr";
 import { ResolveCustomerByQrForStaffScan } from "../../../loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { RecordStaffScanByTarget } from "../../../loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { ListStaffScanTargets } from "../../../loyalty/customers/application/scan/ListStaffScanTargets";
@@ -90,7 +89,6 @@ import { PrismaStampCampaignScanStatsRepository } from "../../../loyalty/stamp_c
 import { StampTypeRepository } from "../../../loyalty/stamp_types/domain/StampTypeRepository";
 import { CreateStampType } from "../../../loyalty/stamp_types/application/create/CreateStampType";
 import { ListStampTypes } from "../../../loyalty/stamp_types/application/list/ListStampTypes";
-import { ResolveStampScanOptions } from "../../../loyalty/stamp_types/application/scan/ResolveStampScanOptions";
 import { UpdateStampType } from "../../../loyalty/stamp_types/application/update/UpdateStampType";
 import { PrismaStampTypeRepository } from "../../../loyalty/stamp_types/infrastructure/PrismaStampTypeRepository";
 import { PlatformAuthenticator } from "../../../platform/application/authenticate/PlatformAuthenticator";
@@ -211,7 +209,6 @@ builder.registerAndUse(ListTenantCustomersBySegment);
 builder.registerAndUse(GetTenantCustomerDetail);
 builder.registerAndUse(GetCustomerActiveRewards);
 builder.registerAndUse(RedeemCustomerReward);
-builder.registerAndUse(RecordCustomerVisitByQr);
 builder.registerAndUse(ResolveCustomerByQrForStaffScan);
 builder.registerAndUse(RecordStaffScanByTarget);
 builder.registerAndUse(ListStaffScanTargets);
@@ -240,7 +237,6 @@ builder.registerAndUse(PrismaStampTypeRepository);
 builder.registerAndUse(CreateStampType);
 builder.registerAndUse(ListStampTypes);
 builder.registerAndUse(UpdateStampType);
-builder.registerAndUse(ResolveStampScanOptions);
 
 builder.register(RewardRepository).use(PrismaRewardRepository);
 builder.registerAndUse(PrismaRewardRepository);

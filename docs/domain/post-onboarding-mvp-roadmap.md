@@ -146,7 +146,7 @@ flowchart LR
 | Item | Status |
 |------|--------|
 | **Owner link to `/app`** | ✅ Checklist en [`HomeDashboard.tsx`](../../src/app/(app)/home/HomeDashboard.tsx) + [`LoyaltyAppLinkCard`](../../src/app/_components/loyalty/LoyaltyAppLinkCard.tsx) |
-| **Employee QR scan** | ✅ `POST /api/loyalty/scan`, [`/scan`](../../src/app/(app)/scan/page.tsx), `RecordCustomerVisitByQr`, `verify:customer-scan` |
+| **Employee QR scan** | ✅ `POST /api/loyalty/scan` target-first, [`/scan`](../../src/app/(app)/scan/page.tsx), `RecordStaffScanByTarget`, `verify:customer-scan` |
 | **Staff scan + stamps** | ✅ #22 (2026-06-09) — +1 sello por campaña activa, `stamp_added`, `verify:customer-stamp-scan` |
 | **Customer stamp progress** | ✅ #23 (2026-06-09) — `GET /api/loyalty/me` + `stampProgress[]`, UI `/app/card`, `verify:customer-stamp-progress` |
 
@@ -277,18 +277,18 @@ Manifest: [`manifest.phase-f-promotions.json`](../issues/manifest.phase-f-promot
 
 ---
 
-## Phase H — Sellos tipados (empleado elige al escanear)
+## Phase H — Sellos tipados (catálogo owner + metadata campaña)
 
-**Status:** **Implemented** (2026-06-11).
+**Status:** **Implemented** (2026-06-11). **H3 scan tipado superseded by Phase M** ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70), 2026-06-13): el empleado ya no elige `stampTypeId` al escanear; elige una tarjeta concreta en `/scan`. Ver [`staff-scan-flow.md`](staff-scan-flow.md).
 
-**Goal:** Separar campañas por tipo de consumición (café ≠ menú). El empleado elige en `/scan`; campañas genéricas solo avanzan con «Visita general».
+**Goal:** Separar campañas por tipo de consumición (café ≠ menú) en **settings**; `stampTypeId` en campaña es metadata de owner, no router de scan.
 
 | In | Out |
 |----|-----|
 | Catálogo owner `stamp_types` + API | Opt-in del cliente / QR dinámico |
 | Campañas con `stampTypeId` opcional | Puntos diferenciados por tipo |
-| `POST /api/loyalty/scan` + `stampTypeId` | Cámara en `/scan` |
-| Selector staff en `/scan` + `/settings/stamps` | Canje automático al completar sello |
+| ~~`POST /api/loyalty/scan` + `stampTypeId`~~ → **Phase M** `targetType`/`targetId` | Cámara en `/scan` |
+| Owner `/settings/stamps` + staff `/scan` target picker | Canje automático al completar sello |
 | `stampProgress[]` con `stampTypeLabel` | POS / ticket import |
 
 ### Vertical slices
@@ -297,10 +297,26 @@ Manifest: [`manifest.phase-f-promotions.json`](../issues/manifest.phase-f-promot
 |-------|-------|--------|
 | **H1** | Owner define tipos (Café, Menú…) | `verify:stamp-types-use-case`, `verify:stamp-types` |
 | **H2** | Campaña ligada a tipo | `verify:stamp-campaigns*` (extendido) |
-| **H3** | Escaneo tipado en `/scan` | `verify:customer-stamp-scan-targeted*` |
+| **H3** | ~~Escaneo tipado en `/scan`~~ → **Phase M** | `verify:customer-stamp-scan-targeted*` (regresión por `targetId`) |
 | **H4** | Cliente ve etiqueta en tarjeta | `verify:customer-stamp-progress*` (extendido) |
 
 Manifest: [`manifest.phase-h-stamp-types.json`](../issues/manifest.phase-h-stamp-types.json)
+
+---
+
+## Phase M — Staff scan target-first
+
+**Status:** **Implemented** ([#65](https://github.com/3urega/fidelization/issues/65)–[#70](https://github.com/3urega/fidelization/issues/70), 2026-06-13).
+
+**Goal:** Un escaneo = una tarjeta o una promoción. Spec: [`staff-scan-flow.md`](staff-scan-flow.md).
+
+| Slice | Valor | Verify |
+|-------|-------|--------|
+| **M1–M4** | Dominio, API, UI `/scan` | `verify:staff-scan-*` |
+| **M5** | Regresión E2E scripts legacy | `verify:customer-scan`, `verify:platform-app-e2e`, … |
+| **M6** | Docs + cleanup Phase H | — |
+
+Manifest: [`manifest.phase-m-staff-scan.json`](../issues/manifest.phase-m-staff-scan.json)
 
 ---
 

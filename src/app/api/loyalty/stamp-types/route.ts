@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 
 import { CreateStampType } from "../../../../contexts/loyalty/stamp_types/application/create/CreateStampType";
 import { ListStampTypes } from "../../../../contexts/loyalty/stamp_types/application/list/ListStampTypes";
-import { ResolveStampScanOptions } from "../../../../contexts/loyalty/stamp_types/application/scan/ResolveStampScanOptions";
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
@@ -28,21 +27,13 @@ export async function GET(request: Request): Promise<Response> {
 	const role = auth.session.role as TenantRole;
 
 	try {
-		const [types, scanOptions] = await Promise.all([
-			container.get(ListStampTypes).execute({
-				tenantId: auth.session.tenantId,
-				role,
-			}),
-			container.get(ResolveStampScanOptions).execute({
-				tenantId: auth.session.tenantId,
-				role,
-			}),
-		]);
+		const types = await container.get(ListStampTypes).execute({
+			tenantId: auth.session.tenantId,
+			role,
+		});
 
 		return NextResponse.json({
 			types: types.map((stampType) => stampTypeToJson(stampType)),
-			hasGenericCampaigns: scanOptions.hasGenericCampaigns,
-			selectionRequired: scanOptions.selectionRequired,
 		});
 	} catch (error) {
 		if (error instanceof DomainError) {

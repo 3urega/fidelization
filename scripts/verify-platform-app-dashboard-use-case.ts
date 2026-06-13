@@ -2,7 +2,7 @@
 import "dotenv/config";
 
 import { GetCustomerStampProgress } from "../src/contexts/loyalty/customers/application/profile/GetCustomerStampProgress";
-import { StampAddedSummary } from "../src/contexts/loyalty/customers/application/scan/RecordCustomerVisitByQr";
+import type { StampAddedSummary } from "../src/contexts/loyalty/customers/domain/StampProgressSummary";
 import { ListUserRelationships } from "../src/contexts/tenants/memberships/application/list/ListUserRelationships";
 import { CustomerEstablishmentSummary } from "../src/contexts/loyalty/customers/domain/CustomerEstablishmentSummary";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";

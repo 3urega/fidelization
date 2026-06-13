@@ -21,7 +21,7 @@ import { InvalidStampScan } from "../../domain/InvalidStampScan";
 import { StaffScanForbidden } from "../../domain/StaffScanForbidden";
 import type { StaffScanOutcome } from "../../domain/StaffScanOutcome";
 import { parseStaffScanTargetInput } from "../../domain/StaffScanTarget";
-import { DEFAULT_POINTS_PER_VISIT } from "./RecordCustomerVisitByQr";
+import { DEFAULT_POINTS_PER_VISIT } from "../../domain/StampProgressSummary";
 import { ResolveCustomerByQrForStaffScan } from "./ResolveCustomerByQrForStaffScan";
 
 export type RecordStaffScanByTargetParams = {

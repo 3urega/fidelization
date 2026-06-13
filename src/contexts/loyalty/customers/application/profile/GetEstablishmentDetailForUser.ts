@@ -13,7 +13,7 @@ import { StampTypeRepository } from "../../../stamp_types/domain/StampTypeReposi
 import { StampCampaignRepository } from "../../../stamp_campaigns/domain/StampCampaignRepository";
 import { GetCustomerActiveRewards } from "./GetCustomerActiveRewards";
 import { GetCustomerStampProgress } from "./GetCustomerStampProgress";
-import { StampAddedSummary } from "../scan/RecordCustomerVisitByQr";
+import type { StampAddedSummary } from "../../domain/StampProgressSummary";
 import { TenantAccessSuspended } from "../../../../tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../../../../tenants/tenants/domain/TenantNotFound";
 import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepository";
