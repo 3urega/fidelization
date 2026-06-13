@@ -9,14 +9,20 @@ import {
 	type CustomerZoneListResponse,
 	formatCustomerZoneError,
 	formatRelativeLastVisit,
-} from "../../../lib/loyalty/customerZone";
+} from "../../../../lib/loyalty/customerZone";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 import { CustomerZoneStatusBadge } from "./CustomerZoneStatusBadge";
 
 const ALL_CUSTOMERS_LIST_LIMIT = 50;
 
-export function CustomerZoneAllCustomersTable(): ReactElement {
+type CustomerZoneAllCustomersTableProps = {
+	isActive?: boolean;
+};
+
+export function CustomerZoneAllCustomersTable({
+	isActive = true,
+}: CustomerZoneAllCustomersTableProps): ReactElement {
 	const router = useRouter();
 	const [customers, setCustomers] = useState<CustomerZoneListCustomer[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -49,8 +55,12 @@ export function CustomerZoneAllCustomersTable(): ReactElement {
 	}, []);
 
 	useEffect(() => {
+		if (!isActive) {
+			return;
+		}
+
 		void load();
-	}, [load]);
+	}, [isActive, load]);
 
 	const navigateToCustomer = (customerId: string): void => {
 		router.push(`/customers/${customerId}`);

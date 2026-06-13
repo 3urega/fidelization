@@ -7,7 +7,7 @@ import {
 	type CustomerZoneListResponse,
 	type CustomerZoneSegment,
 	formatCustomerZoneError,
-} from "../../../lib/loyalty/customerZone";
+} from "../../../../lib/loyalty/customerZone";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 import {

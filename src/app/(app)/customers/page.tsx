@@ -1,5 +1,7 @@
-import { PageHeader } from "../../_components/shell/PageHeader";
+import { Suspense } from "react";
+
 import { CustomerZonePage } from "../../_components/loyalty/customer-zone/CustomerZonePage";
+import { PageHeader } from "../../_components/shell/PageHeader";
 
 export default function CustomersPage(): React.ReactElement {
 	return (
@@ -8,7 +10,9 @@ export default function CustomersPage(): React.ReactElement {
 				title="Clientes"
 				description="Conoce a tus clientes fieles, detecta riesgo de abandono y quién está cerca de una recompensa."
 			/>
-			<CustomerZonePage />
+			<Suspense fallback={<p className="text-sm text-muted">Cargando…</p>}>
+				<CustomerZonePage />
+			</Suspense>
 		</div>
 	);
 }

@@ -45,6 +45,100 @@ export type CustomerZoneListResponse = {
 
 export type CustomerZoneSegment = "featured" | "at_risk" | "near_reward" | "all";
 
+export type CustomerZoneDetailStampProgress = {
+	campaignId: string;
+	campaignName: string;
+	current: number;
+	required: number;
+	completed: boolean;
+	stampTypeLabel: string;
+};
+
+export type CustomerZoneDetailActivity = {
+	occurredAt: string;
+	label: string;
+};
+
+export type CustomerZoneDetailReward = {
+	rewardName: string;
+	redeemedAt: string;
+};
+
+export type CustomerZoneDetailResponse = {
+	id?: string;
+	name?: string;
+	email?: string;
+	phone?: string;
+	customerSince?: string;
+	visitsCount?: number;
+	pointsBalance?: number;
+	status?: CustomerEngagementStatus;
+	stampProgress?: CustomerZoneDetailStampProgress[];
+	recentActivity?: CustomerZoneDetailActivity[];
+	rewardsRedeemed?: CustomerZoneDetailReward[];
+	error?: {
+		description?: string;
+		type?: string;
+	};
+};
+
+function capitalizeFirst(value: string): string {
+	if (!value) {
+		return value;
+	}
+
+	return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+export function formatCustomerSince(iso: string | undefined): string {
+	if (!iso) {
+		return "—";
+	}
+
+	const date = new Date(iso);
+
+	if (Number.isNaN(date.getTime())) {
+		return "—";
+	}
+
+	return capitalizeFirst(
+		date.toLocaleDateString("es-ES", {
+			month: "long",
+			year: "numeric",
+		}),
+	);
+}
+
+export function formatActivityDate(iso: string): string {
+	const date = new Date(iso);
+
+	if (Number.isNaN(date.getTime())) {
+		return iso;
+	}
+
+	return date
+		.toLocaleDateString("es-ES", {
+			day: "2-digit",
+			month: "short",
+		})
+		.replace(".", "");
+}
+
+export function formatRewardRedeemedDate(iso: string): string {
+	const date = new Date(iso);
+
+	if (Number.isNaN(date.getTime())) {
+		return iso;
+	}
+
+	return capitalizeFirst(
+		date.toLocaleDateString("es-ES", {
+			day: "numeric",
+			month: "long",
+		}),
+	);
+}
+
 function startOfLocalDay(date: Date): Date {
 	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }

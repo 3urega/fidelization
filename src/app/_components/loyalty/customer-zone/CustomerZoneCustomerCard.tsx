@@ -4,7 +4,7 @@ import {
 	type CustomerZoneListCustomer,
 	formatDaysSinceLastVisit,
 	formatRelativeLastVisit,
-} from "../../../lib/loyalty/customerZone";
+} from "../../../../lib/loyalty/customerZone";
 import { Card } from "../../ui/Card";
 import { CustomerZoneStatusBadge } from "./CustomerZoneStatusBadge";
 

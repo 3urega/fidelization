@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import {
 	type CustomerEngagementStatus,
 	formatCustomerZoneStatus,
-} from "../../../lib/loyalty/customerZone";
+} from "../../../../lib/loyalty/customerZone";
 
 type CustomerZoneStatusBadgeProps = {
 	status: CustomerEngagementStatus;

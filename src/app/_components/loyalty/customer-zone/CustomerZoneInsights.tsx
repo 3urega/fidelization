@@ -5,9 +5,9 @@ import { type ReactElement, useCallback, useEffect, useState } from "react";
 import {
 	type CustomerZoneInsightsResponse,
 	formatCustomerZoneError,
-} from "../../../lib/loyalty/customerZone";
-import { Button } from "../ui/Button";
-import { Card } from "../ui/Card";
+} from "../../../../lib/loyalty/customerZone";
+import { Button } from "../../ui/Button";
+import { Card } from "../../ui/Card";
 
 const INSIGHT_ITEMS: {
 	key: keyof Pick<
