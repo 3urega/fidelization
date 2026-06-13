@@ -6,6 +6,8 @@ import {
 	type DiscoverableEstablishment,
 	type DiscoverableEstablishmentsPage,
 } from "../domain/DiscoverableEstablishment";
+import type { DiscoverNearFilter } from "../domain/DiscoverNearFilter";
+import { roundDistanceKm } from "../domain/haversineDistanceKm";
 import { Tenant } from "../domain/Tenant";
 import type { ListDiscoverableEstablishmentsParams } from "../domain/TenantRepository";
 import { TenantBrandingUpdate } from "../domain/TenantBrandingUpdate";
@@ -17,7 +19,42 @@ import {
 } from "../../../billing/subscriptions/domain/TenantFeatureOverrides";
 import { TenantRepository } from "../domain/TenantRepository";
 import { TenantStatus } from "../domain/TenantStatus";
+import type { TenantDiscoveryTagId } from "../domain/TenantDiscoveryTag";
 import { discoveryTagsFromPrisma, tenantFromPrismaRow } from "./tenantFromPrismaRow";
+
+type DiscoverableNearRow = {
+	id: string;
+	name: string;
+	slug: string;
+	logo_url: string | null;
+	cover_image_url: string | null;
+	discovery_tags: unknown;
+	distance_km: number | string;
+};
+
+function buildDiscoverTagFilterSql(filterTags: TenantDiscoveryTagId[]): Prisma.Sql {
+	if (filterTags.length === 0) {
+		return Prisma.empty;
+	}
+
+	const conditions = filterTags.map(
+		(tag) => Prisma.sql`discovery_tags @> ${JSON.stringify([tag])}::jsonb`,
+	);
+
+	return Prisma.sql`AND (${Prisma.join(conditions, " OR ")})`;
+}
+
+function mapDiscoverableNearRow(row: DiscoverableNearRow): DiscoverableEstablishment {
+	return {
+		id: row.id,
+		name: row.name,
+		slug: row.slug,
+		logoUrl: row.logo_url?.trim() ? row.logo_url.trim() : null,
+		coverImageUrl: row.cover_image_url?.trim() ? row.cover_image_url.trim() : null,
+		tags: discoveryTagsFromPrisma(row.discovery_tags),
+		distanceKm: roundDistanceKm(Number(row.distance_km)),
+	};
+}
 
 @Service()
 export class PrismaTenantRepository extends TenantRepository {
@@ -32,6 +69,10 @@ export class PrismaTenantRepository extends TenantRepository {
 	async listDiscoverableActive(
 		params: ListDiscoverableEstablishmentsParams,
 	): Promise<DiscoverableEstablishmentsPage> {
+		if (params.near) {
+			return this.listDiscoverableActiveNear(params, params.near);
+		}
+
 		const limit = Math.min(Math.max(params.limit, 1), 50);
 		const offset = Math.max(params.offset, 0);
 		const skip = offset;
@@ -77,6 +118,55 @@ export class PrismaTenantRepository extends TenantRepository {
 		}));
 
 		return { establishments, hasMore };
+	}
+
+	private async listDiscoverableActiveNear(
+		params: ListDiscoverableEstablishmentsParams,
+		near: DiscoverNearFilter,
+	): Promise<DiscoverableEstablishmentsPage> {
+		const limit = Math.min(Math.max(params.limit, 1), 50);
+		const offset = Math.max(params.offset, 0);
+		const filterTags = params.tags ?? [];
+		const tagFilter = buildDiscoverTagFilterSql(filterTags);
+
+		const rows = await prisma.$queryRaw<DiscoverableNearRow[]>`
+			SELECT id, name, slug, logo_url, cover_image_url, discovery_tags, distance_km
+			FROM (
+				SELECT
+					id,
+					name,
+					slug,
+					logo_url,
+					cover_image_url,
+					discovery_tags,
+					(
+						6371 * acos(
+							LEAST(1.0, GREATEST(-1.0,
+								cos(radians(${near.latitude})) * cos(radians(latitude))
+									* cos(radians(longitude) - radians(${near.longitude}))
+								+ sin(radians(${near.latitude})) * sin(radians(latitude))
+							))
+						)
+					) AS distance_km
+				FROM tenants
+				WHERE status = ${TenantStatus.Active}
+					AND latitude IS NOT NULL
+					AND longitude IS NOT NULL
+					${tagFilter}
+			) AS near_tenants
+			WHERE distance_km <= ${near.radiusKm}
+			ORDER BY distance_km ASC, name ASC, id ASC
+			OFFSET ${offset}
+			LIMIT ${limit + 1}
+		`;
+
+		const hasMore = rows.length > limit;
+		const pageRows = hasMore ? rows.slice(0, limit) : rows;
+
+		return {
+			establishments: pageRows.map(mapDiscoverableNearRow),
+			hasMore,
+		};
 	}
 
 	async findById(tenantId: string): Promise<Tenant | null> {

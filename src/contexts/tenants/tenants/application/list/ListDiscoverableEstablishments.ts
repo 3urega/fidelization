@@ -1,6 +1,7 @@
 import { Service } from "diod";
 
 import { DiscoverableEstablishmentsPage } from "../../domain/DiscoverableEstablishment";
+import type { DiscoverNearFilter } from "../../domain/DiscoverNearFilter";
 import { TenantRepository } from "../../domain/TenantRepository";
 import type { TenantDiscoveryTagId } from "../../domain/TenantDiscoveryTag";
 
@@ -9,6 +10,7 @@ export type ListDiscoverableEstablishmentsParams = {
 	page?: number;
 	limit?: number;
 	tags?: TenantDiscoveryTagId[];
+	near?: DiscoverNearFilter;
 };
 
 const DEFAULT_LIMIT = 20;
@@ -28,6 +30,7 @@ export class ListDiscoverableEstablishments {
 			offset,
 			limit,
 			tags: params.tags,
+			near: params.near,
 		});
 	}
 }

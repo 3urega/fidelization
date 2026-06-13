@@ -6,6 +6,8 @@ import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
 import { ListDiscoverableEstablishments } from "../../../../contexts/tenants/tenants/application/list/ListDiscoverableEstablishments";
 import { InvalidDiscoverFilter } from "../../../../contexts/tenants/tenants/domain/InvalidDiscoverFilter";
+import { InvalidDiscoverNearFilter } from "../../../../contexts/tenants/tenants/domain/InvalidDiscoverNearFilter";
+import { parseDiscoverNearFilter } from "../../../../contexts/tenants/tenants/domain/DiscoverNearFilter";
 import { parseDiscoverFilterTags } from "../../../../contexts/tenants/tenants/domain/TenantDiscoveryTag";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { requireUserSession } from "../../../../lib/auth/requireUserSession";
@@ -82,6 +84,21 @@ export async function GET(request: Request): Promise<Response> {
 		throw error;
 	}
 
+	let near;
+	try {
+		near = parseDiscoverNearFilter(
+			searchParams.get("lat"),
+			searchParams.get("lng"),
+			searchParams.get("radiusKm"),
+		);
+	} catch (error) {
+		if (error instanceof InvalidDiscoverNearFilter) {
+			return HttpNextResponse.domainError(error, 400);
+		}
+
+		throw error;
+	}
+
 	const page = parseNonNegativeInt(searchParams.get("page"), 0);
 	const limit = parsePositiveInt(searchParams.get("limit"), 20, 50);
 	const offsetParam = searchParams.get("offset");
@@ -95,6 +112,7 @@ export async function GET(request: Request): Promise<Response> {
 			offset,
 			limit,
 			tags,
+			near,
 		});
 
 		return NextResponse.json(result);

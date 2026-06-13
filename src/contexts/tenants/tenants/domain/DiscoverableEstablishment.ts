@@ -5,6 +5,7 @@ export type DiscoverableEstablishment = {
 	logoUrl: string | null;
 	coverImageUrl: string | null;
 	tags: string[];
+	distanceKm?: number;
 };
 
 export type DiscoverableEstablishmentsPage = {

@@ -136,8 +136,8 @@ Manifest: [`docs/issues/manifest.phase-q-location-discovery.json`](issues/manife
 | # | Issue | Capas |
 |---|-------|-------|
 | [#85](https://github.com/3urega/fidelization/issues/85) | Q1: Geocoding gateway port (Mapbox + Google) — **Implemented** 2026-06-13 | domain port, infra, env, DI |
-| [#86](https://github.com/3urega/fidelization/issues/86) | Q2: Tenant geocoding on profile save | migración, UpdateTenantProfile |
-| [#87](https://github.com/3urega/fidelization/issues/87) | Q3: Discover near filter (lat/lng/radiusKm) | use case, repo Haversine, API |
+| [#86](https://github.com/3urega/fidelization/issues/86) | Q2: Tenant geocoding on profile save — **Implemented** 2026-06-13 | migración, UpdateTenantProfile |
+| [#87](https://github.com/3urega/fidelization/issues/87) | Q3: Discover near filter (lat/lng/radiusKm) — **Implemented** 2026-06-13 | use case, repo Haversine, API |
 | [#88](https://github.com/3urega/fidelization/issues/88) | Q4: Grid «Cerca de mí» + distancia en cards | hook geolocation, UI |
 
 *(Publicado 2026-06-13.)*

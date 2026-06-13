@@ -6,11 +6,13 @@ import { TenantProfileUpdate } from "./TenantProfileUpdate";
 import type { TenantPlatformProfileUpdate } from "./TenantPlatformProfileUpdate";
 import { TenantStatus } from "./TenantStatus";
 import type { TenantDiscoveryTagId } from "./TenantDiscoveryTag";
+import type { DiscoverNearFilter } from "./DiscoverNearFilter";
 
 export type ListDiscoverableEstablishmentsParams = {
 	offset: number;
 	limit: number;
 	tags?: TenantDiscoveryTagId[];
+	near?: DiscoverNearFilter;
 };
 
 export abstract class TenantRepository {

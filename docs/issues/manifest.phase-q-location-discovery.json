@@ -10,14 +10,6 @@
   },
   "issues": [
     {
-      "title": "Phase Q2: Tenant geocoding on profile save (coordinates persistence)",
-      "bodyFile": "docs/issues/tenant-geocoding-on-profile-save.md"
-    },
-    {
-      "title": "Phase Q3: Discover establishments near filter (backend distance query)",
-      "bodyFile": "docs/issues/discover-establishments-near-filter.md"
-    },
-    {
       "title": "Phase Q4: Discover grid Cerca de mi UI (user location + distance cards)",
       "bodyFile": "docs/issues/discover-grid-cerca-de-mi-ui.md"
     }
