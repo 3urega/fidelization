@@ -1,9 +1,12 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
+process.env.DISABLE_TENANT_PLAN_GATES = "0";
+
 import { ResolveTenantEffectivePlanFeatures } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import {
-	DEFAULT_SUBSCRIPTION_PLAN_FEATURES,
+	BASIC_PLAN_FEATURES,
+	PREMIUM_PLAN_FEATURES,
 	type SubscriptionPlanFeatures,
 } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanFeatures";
 import { ListAvailablePlatformGamesForTenant } from "../src/contexts/platform/application/games/ListAvailablePlatformGamesForTenant";
@@ -54,16 +57,6 @@ const draftCaja = PlatformGame.fromPrimitives({
 	sortOrder: 3,
 });
 
-const stampsOnlyGame = PlatformGame.fromPrimitives({
-	id: "game-stamps",
-	slug: "stamps-only",
-	label: "Stamps game",
-	description: "",
-	status: "active",
-	requiredFeature: "stamps",
-	sortOrder: 4,
-});
-
 class InMemoryPlatformGameRepository extends PlatformGameRepository {
 	constructor(private games: PlatformGame[]) {
 		super();
@@ -108,28 +101,21 @@ class InMemoryPlatformGameRepository extends PlatformGameRepository {
 	}
 }
 
-class StubResolveTenantEffectivePlanFeatures extends ResolveTenantEffectivePlanFeatures {
-	constructor(private readonly features: SubscriptionPlanFeatures) {
-		super({ execute: async () => ({}) } as never);
-	}
+class StubResolveTenantEffectivePlanFeatures {
+	constructor(private readonly features: SubscriptionPlanFeatures) {}
 
-	async execute(): Promise<{ effectiveFeatures: SubscriptionPlanFeatures }> {
+	async execute(_tenantId: string): Promise<{ effectiveFeatures: SubscriptionPlanFeatures }> {
 		return { effectiveFeatures: this.features };
 	}
 }
 
 async function verifyUseCaseStub(): Promise<void> {
-	const premiumFeatures: SubscriptionPlanFeatures = {
-		...DEFAULT_SUBSCRIPTION_PLAN_FEATURES,
-		gamification: true,
-	};
-
 	const listGames = new ListPlatformGames(
-		new InMemoryPlatformGameRepository([activeRuleta, betaRasca, draftCaja, stampsOnlyGame]),
+		new InMemoryPlatformGameRepository([activeRuleta, betaRasca, draftCaja]),
 	);
 	const premiumUseCase = new ListAvailablePlatformGamesForTenant(
 		listGames,
-		new StubResolveTenantEffectivePlanFeatures(premiumFeatures),
+		new StubResolveTenantEffectivePlanFeatures(PREMIUM_PLAN_FEATURES) as unknown as ResolveTenantEffectivePlanFeatures,
 	);
 
 	const premiumGames = await premiumUseCase.execute({ tenantId: "tenant-premium" });
@@ -144,15 +130,9 @@ async function verifyUseCaseStub(): Promise<void> {
 		process.exit(1);
 	}
 
-	const basicFeatures: SubscriptionPlanFeatures = {
-		...DEFAULT_SUBSCRIPTION_PLAN_FEATURES,
-		gamification: false,
-		stamps: true,
-	};
-
 	const basicUseCase = new ListAvailablePlatformGamesForTenant(
 		listGames,
-		new StubResolveTenantEffectivePlanFeatures(basicFeatures),
+		new StubResolveTenantEffectivePlanFeatures(BASIC_PLAN_FEATURES) as unknown as ResolveTenantEffectivePlanFeatures,
 	);
 	const basicGames = await basicUseCase.execute({ tenantId: "tenant-basic" });
 

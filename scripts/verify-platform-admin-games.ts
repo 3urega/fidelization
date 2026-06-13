@@ -39,14 +39,14 @@ async function main(): Promise<void> {
 	const platformCookie = { cookie: `session=${platformSession}` };
 
 	const list = await fetch(`${baseUrl}/api/platform/games`, { headers: platformCookie });
-	const listBody = (await list.json()) as {
-		games?: {
-			id?: string;
-			slug?: string;
-			label?: string;
-			status?: string;
-		}[];
-	};
+	const listText = await list.text();
+	let listBody: { games?: unknown[] };
+	try {
+		listBody = JSON.parse(listText) as { games?: unknown[] };
+	} catch {
+		console.error("❌ GET /api/platform/games invalid JSON", list.status, listText.slice(0, 300));
+		process.exit(1);
+	}
 
 	if (list.status !== 200 || !Array.isArray(listBody.games)) {
 		console.error("❌ GET /api/platform/games", list.status, listBody);
