@@ -51,6 +51,7 @@ npm run verify:platform-admin-analytics-use-case # issue #78 — GetPlatformAnal
 npm run verify:platform-admin-analytics # issue #78 — analytics summary E2E (dev + DATABASE_URL)
 npm run verify:platform-admin-app-users-use-case # issue #79 — List/GetPlatformAppUsers (domain stub)
 npm run verify:platform-admin-app-users # issue #79 — app users list + detail E2E (dev + DATABASE_URL)
+npm run verify:platform-admin-campaign-templates-use-case # issue #80 — platform campaign templates CRUD (domain stub)
 npm run verify:business-register   # issues #11–#12 — owner user step 1 (onboarding cookie, hash, no membership)
 npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /panel
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName

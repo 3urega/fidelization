@@ -1,4 +1,4 @@
-import { DomainError } from "../../../shared/domain/DomainError";
+import { DomainError } from "../../shared/domain/DomainError";
 
 export class InvalidPlatformCampaignTemplate extends DomainError {
 	readonly type = "InvalidPlatformCampaignTemplate";
