@@ -1,5 +1,6 @@
 import { InvalidTenantProfile } from "./InvalidTenantProfile";
 import { parseTenantDiscoveryTags, type TenantDiscoveryTagId } from "./TenantDiscoveryTag";
+import type { TenantGeolocation } from "./TenantGeolocation";
 
 export const TENANT_ADDRESS_MAX_LENGTH = 500;
 export const TENANT_DESCRIPTION_MAX_LENGTH = 2000;
@@ -8,6 +9,7 @@ export type TenantProfileUpdate = {
 	address?: string;
 	description?: string;
 	discoveryTags?: TenantDiscoveryTagId[];
+	geolocation?: TenantGeolocation | null;
 };
 
 export type TenantProfileUpdateInput = {

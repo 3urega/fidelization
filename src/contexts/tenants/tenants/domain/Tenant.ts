@@ -1,5 +1,6 @@
 import { TenantStatus } from "./TenantStatus";
 import type { TenantDiscoveryTagId } from "./TenantDiscoveryTag";
+import type { GeocodingProviderId } from "../../../shared/geocoding/domain/GeocodingProvider";
 
 export type TenantPrimitives = {
 	id: string;
@@ -16,6 +17,10 @@ export type TenantPrimitives = {
 	description?: string;
 	coverImageUrl?: string;
 	discoveryTags?: TenantDiscoveryTagId[];
+	latitude?: number | null;
+	longitude?: number | null;
+	geocodingProvider?: GeocodingProviderId | null;
+	geocodedAt?: string | null;
 };
 
 export class Tenant {
@@ -34,6 +39,10 @@ export class Tenant {
 		public readonly description: string,
 		public readonly coverImageUrl: string,
 		public readonly discoveryTags: TenantDiscoveryTagId[],
+		public readonly latitude: number | null,
+		public readonly longitude: number | null,
+		public readonly geocodingProvider: GeocodingProviderId | null,
+		public readonly geocodedAt: string | null,
 	) {}
 
 	static fromPrimitives(primitives: TenantPrimitives): Tenant {
@@ -52,6 +61,10 @@ export class Tenant {
 			primitives.description ?? "",
 			primitives.coverImageUrl ?? "",
 			primitives.discoveryTags ?? [],
+			primitives.latitude ?? null,
+			primitives.longitude ?? null,
+			primitives.geocodingProvider ?? null,
+			primitives.geocodedAt ?? null,
 		);
 	}
 
@@ -71,6 +84,10 @@ export class Tenant {
 			description: this.description,
 			coverImageUrl: this.coverImageUrl,
 			discoveryTags: this.discoveryTags,
+			latitude: this.latitude,
+			longitude: this.longitude,
+			geocodingProvider: this.geocodingProvider,
+			geocodedAt: this.geocodedAt,
 		};
 	}
 }

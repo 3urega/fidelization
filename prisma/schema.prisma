@@ -89,6 +89,10 @@ model Tenant {
   subscriptionPlanId String?            @map("subscription_plan_id")
   address            String             @default("")
   description          String             @default("")
+  latitude           Float?
+  longitude          Float?
+  geocodingProvider  String?            @map("geocoding_provider")
+  geocodedAt         DateTime?          @map("geocoded_at")
   coverImageUrl      String             @default("") @map("cover_image_url")
   discoveryTags      Json               @default("[]") @map("discovery_tags")
   createdAt          DateTime           @default(now()) @map("created_at")

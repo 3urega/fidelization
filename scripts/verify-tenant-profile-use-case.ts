@@ -2,6 +2,9 @@
 import "dotenv/config";
 
 import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
+import { GeocodeAddressString } from "../src/contexts/shared/geocoding/application/geocode/GeocodeAddressString";
+import { GeocodingGateway } from "../src/contexts/shared/geocoding/domain/GeocodingGateway";
+import { Coordinates } from "../src/contexts/shared/geocoding/domain/Coordinates";
 import { UpdateTenantProfile } from "../src/contexts/tenants/tenants/application/update/UpdateTenantProfile";
 import { InvalidTenantProfile } from "../src/contexts/tenants/tenants/domain/InvalidTenantProfile";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
@@ -16,6 +19,16 @@ import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantR
 import { TenantStatus } from "../src/contexts/tenants/tenants/domain/TenantStatus";
 
 const tenantId = "00000000-0000-4000-8000-0000000000d1";
+
+class NoopGeocodingGateway extends GeocodingGateway {
+	async geocodeAddress(_address: string): Promise<Coordinates> {
+		return Coordinates.fromPrimitives({ latitude: 40.4168, longitude: -3.7038 });
+	}
+}
+
+function profileUseCase(repository: TenantRepository): UpdateTenantProfile {
+	return new UpdateTenantProfile(repository, new GeocodeAddressString(new NoopGeocodingGateway()));
+}
 
 const baseTenant = Tenant.fromPrimitives({
 	id: tenantId,
@@ -80,7 +93,7 @@ class StubTenantRepository extends TenantRepository {
 }
 
 async function verifyForbidden(): Promise<void> {
-	const useCase = new UpdateTenantProfile(new StubTenantRepository(baseTenant, null));
+	const useCase = profileUseCase(new StubTenantRepository(baseTenant, null));
 
 	try {
 		await useCase.execute({
@@ -101,7 +114,7 @@ async function verifyForbidden(): Promise<void> {
 }
 
 async function verifyInvalidProfile(): Promise<void> {
-	const useCase = new UpdateTenantProfile(new StubTenantRepository(baseTenant, null));
+	const useCase = profileUseCase(new StubTenantRepository(baseTenant, null));
 
 	try {
 		await useCase.execute({
@@ -152,7 +165,7 @@ async function verifyInvalidProfile(): Promise<void> {
 }
 
 async function verifyTenantNotFound(): Promise<void> {
-	const useCase = new UpdateTenantProfile(new StubTenantRepository(null, null));
+	const useCase = profileUseCase(new StubTenantRepository(null, null));
 
 	try {
 		await useCase.execute({
@@ -178,7 +191,7 @@ async function verifyOwnerSuccessStub(): Promise<void> {
 		address: "Calle Mayor 1, Madrid",
 		description: "Café de barrio con tostadas artesanales.",
 	});
-	const useCase = new UpdateTenantProfile(new StubTenantRepository(baseTenant, updated));
+	const useCase = profileUseCase(new StubTenantRepository(baseTenant, updated));
 
 	const tenant = await useCase.execute({
 		tenantId,
@@ -203,7 +216,7 @@ async function verifyEmptyFieldsAllowed(): Promise<void> {
 		address: "",
 		description: "",
 	});
-	const useCase = new UpdateTenantProfile(new StubTenantRepository(baseTenant, cleared));
+	const useCase = profileUseCase(new StubTenantRepository(baseTenant, cleared));
 
 	const tenant = await useCase.execute({
 		tenantId,
@@ -224,7 +237,7 @@ async function verifyDiscoveryTags(): Promise<void> {
 		...baseTenant.toPrimitives(),
 		discoveryTags: ["desayunos", "brunch"],
 	});
-	const useCase = new UpdateTenantProfile(new StubTenantRepository(baseTenant, updated));
+	const useCase = profileUseCase(new StubTenantRepository(baseTenant, updated));
 
 	const tenant = await useCase.execute({
 		tenantId,

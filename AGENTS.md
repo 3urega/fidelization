@@ -66,6 +66,9 @@ npm run verify:session-cookie-prod # production cookie Domain + resolveTenantHom
 npm run verify:tenant-branding     # issue #17 — PATCH branding + GET /api/me + Prisma (dev server + DATABASE_URL)
 npm run verify:tenant-profile-use-case # tenant profile — UpdateTenantProfile domain stub
 npm run verify:tenant-profile      # PATCH /api/tenant/profile + GET /api/me + Prisma (dev server + DATABASE_URL)
+npm run verify:tenant-geocoding-use-case  # Phase Q2 #86 — geocode on profile save (domain stub)
+npm run verify:tenant-geocoding    # PATCH profile geocoding E2E (dev + DATABASE_URL; MAPBOX_ACCESS_TOKEN optional)
+npm run db:backfill-tenant-geocoding # backfill coords for tenants with address and no latitude
 npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.register (domain)
 npm run verify:customer-use-case   # issue #18 — RegisterCustomer + AuthenticateCustomerByQr + DI
 npm run verify:customer-loyalty-api  # issue #18 — loyalty APIs (x-tenant headers on apex)
@@ -153,7 +156,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 - **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
 - **Tenant branding (#16–#17):** owner en `/settings/branding` (shell nav) → logo URL + colores; checklist en `/panel`. API: `PATCH /api/tenant/branding`. `verify:tenant-branding` (E2E + Prisma).
-- **Tenant profile:** owner en `/settings/profile` → dirección (recomendada) + descripción opcionales; checklist «Añade la dirección» en `/panel`. API: `PATCH /api/tenant/profile`. Visible en detalle del local (app personal). `verify:tenant-profile-use-case`, `verify:tenant-profile`.
+- **Tenant profile:** owner en `/settings/profile` → dirección (recomendada) + descripción opcionales; checklist «Añade la dirección» en `/panel`. API: `PATCH /api/tenant/profile`. Geocoding al guardar dirección (Phase Q2): coords en `tenants` vía Mapbox/Google. Visible en detalle del local (app personal). `verify:tenant-profile-use-case`, `verify:tenant-profile`, `verify:tenant-geocoding*`.
 - **Customer loyalty `/app` (#18–#20):** cliente en `http://{slug}.localhost:3000/app` (p. ej. `cafe-demo.localhost`) → `/app/welcome` → tarjeta con QR. Sesión `kind: customer`. APIs: `POST /api/loyalty/customers/register`, `GET /api/loyalty/me` (incl. `stampProgress[]` desde #23, `rewards[]` desde #25). `verify:customer-qr-session` (E2E + Prisma). Apex `localhost/app` → `/app/unavailable`.
 - **Customer stamp progress (#23):** en `/app/card`, sección «Sellos» con progreso por campaña activa (`0/N`, «Completada»). `verify:customer-stamp-progress-use-case`, `verify:customer-stamp-progress`.
 - **Staff scan (Phase M #65–#70):** owner/empleado en `/scan` elige **una tarjeta o promo** → `GET /api/loyalty/scan/targets` + `POST /api/loyalty/scan` `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }`. `stampTypeId` en campaña = metadata owner (`/settings/stamps`), no router de scan. `POST /api/loyalty/promotions/[id]/use` delega al mismo use case. Verifies: `verify:staff-scan-*`, `verify:customer-scan`, `verify:customer-stamp-scan*`, `verify:customer-stamp-scan-targeted*`, `verify:platform-app-global-qr-scan*`, `verify:stamp-campaign-dashboard`, `verify:customer-zone`, `verify:tenant-employees`, `verify:platform-app-e2e`. Spec: [`docs/domain/staff-scan-flow.md`](docs/domain/staff-scan-flow.md).

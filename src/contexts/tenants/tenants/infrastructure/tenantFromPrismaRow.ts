@@ -4,6 +4,10 @@ import {
 	isTenantDiscoveryTagId,
 	type TenantDiscoveryTagId,
 } from "../domain/TenantDiscoveryTag";
+import {
+	isGeocodingProviderId,
+	type GeocodingProviderId,
+} from "../../../shared/geocoding/domain/GeocodingProvider";
 
 export type PrismaTenantRow = {
 	id: string;
@@ -18,6 +22,10 @@ export type PrismaTenantRow = {
 	createdAt: Date;
 	address: string;
 	description: string;
+	latitude?: number | null;
+	longitude?: number | null;
+	geocodingProvider?: string | null;
+	geocodedAt?: Date | null;
 	coverImageUrl: string;
 	discoveryTags: unknown;
 };
@@ -28,6 +36,14 @@ export function discoveryTagsFromPrisma(value: unknown): TenantDiscoveryTagId[] 
 	}
 
 	return value.filter((entry): entry is TenantDiscoveryTagId => typeof entry === "string" && isTenantDiscoveryTagId(entry));
+}
+
+function geocodingProviderFromPrisma(value: string | null): GeocodingProviderId | null {
+	if (value === null) {
+		return null;
+	}
+
+	return isGeocodingProviderId(value) ? value : null;
 }
 
 export function tenantFromPrismaRow(row: PrismaTenantRow): Tenant {
@@ -44,6 +60,10 @@ export function tenantFromPrismaRow(row: PrismaTenantRow): Tenant {
 		createdAt: row.createdAt.toISOString(),
 		address: row.address,
 		description: row.description,
+		latitude: row.latitude ?? null,
+		longitude: row.longitude ?? null,
+		geocodingProvider: geocodingProviderFromPrisma(row.geocodingProvider ?? null),
+		geocodedAt: row.geocodedAt?.toISOString() ?? null,
 		coverImageUrl: row.coverImageUrl,
 		discoveryTags: discoveryTagsFromPrisma(row.discoveryTags),
 	});

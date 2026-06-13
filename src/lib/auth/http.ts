@@ -46,7 +46,7 @@ export function userToJson(user: {
 	};
 }
 
-export function tenantToJson(tenant: Tenant): Record<string, string | null | string[]> {
+export function tenantToJson(tenant: Tenant): Record<string, string | number | null | string[]> {
 	const primitives = tenant.toPrimitives();
 
 	return {
@@ -63,6 +63,10 @@ export function tenantToJson(tenant: Tenant): Record<string, string | null | str
 		description: primitives.description ?? "",
 		coverImageUrl: primitives.coverImageUrl ?? "",
 		discoveryTags: primitives.discoveryTags ?? [],
+		latitude: primitives.latitude ?? null,
+		longitude: primitives.longitude ?? null,
+		geocodingProvider: primitives.geocodingProvider ?? null,
+		geocodedAt: primitives.geocodedAt ?? null,
 	};
 }
 

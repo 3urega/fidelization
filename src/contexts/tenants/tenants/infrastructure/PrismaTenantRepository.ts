@@ -154,6 +154,23 @@ export class PrismaTenantRepository extends TenantRepository {
 
 	async updateProfile(tenantId: string, profile: TenantProfileUpdate): Promise<Tenant | null> {
 		try {
+			const geolocationData =
+				profile.geolocation === undefined
+					? {}
+					: profile.geolocation === null
+						? {
+								latitude: null,
+								longitude: null,
+								geocodingProvider: null,
+								geocodedAt: null,
+							}
+						: {
+								latitude: profile.geolocation.latitude,
+								longitude: profile.geolocation.longitude,
+								geocodingProvider: profile.geolocation.geocodingProvider,
+								geocodedAt: profile.geolocation.geocodedAt,
+							};
+
 			const row = await prisma.tenant.update({
 				where: { id: tenantId },
 				data: {
@@ -162,6 +179,7 @@ export class PrismaTenantRepository extends TenantRepository {
 					...(profile.discoveryTags !== undefined
 						? { discoveryTags: profile.discoveryTags }
 						: {}),
+					...geolocationData,
 				},
 			});
 
