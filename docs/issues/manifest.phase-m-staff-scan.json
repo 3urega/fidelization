@@ -3,14 +3,6 @@
   "sourceDoc": "docs/domain/staff-scan-flow.md",
   "issues": [
     {
-      "title": "Phase M3: Record staff scan by target with typed outcomes",
-      "bodyFile": "docs/issues/staff-scan-record-by-target.md"
-    },
-    {
-      "title": "Phase M4: Staff scan page redesign (/scan)",
-      "bodyFile": "docs/issues/staff-scan-page-redesign.md"
-    },
-    {
       "title": "Phase M5: Staff scan verify scripts and full regression",
       "bodyFile": "docs/issues/staff-scan-verify-e2e.md"
     },

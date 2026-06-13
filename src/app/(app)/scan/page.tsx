@@ -9,7 +9,7 @@ export default function StaffScanPage(): ReactElement {
 		<div className="flex flex-col gap-6">
 			<PageHeader
 				title="Escanear cliente"
-				description="Elige el tipo de consumición, escanea el QR y registra puntos y sellos en el carril correcto."
+				description="Elige la tarjeta o promoción, escanea el QR y registra la visita."
 			/>
 			<Card>
 				<StaffScanForm />
