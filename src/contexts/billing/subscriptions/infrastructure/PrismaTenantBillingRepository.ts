@@ -56,6 +56,14 @@ export class PrismaTenantBillingRepository extends TenantBillingRepository {
 		return rows.map((row) => SubscriptionPlan.fromPersistence(row));
 	}
 
+	async listAllPlans(): Promise<SubscriptionPlan[]> {
+		const rows = await prisma.subscriptionPlan.findMany({
+			orderBy: { priceMonthly: "asc" },
+		});
+
+		return rows.map((row) => SubscriptionPlan.fromPersistence(row));
+	}
+
 	async saveSubscription(subscription: TenantSubscription): Promise<void> {
 		const p = subscription.toPrimitives();
 

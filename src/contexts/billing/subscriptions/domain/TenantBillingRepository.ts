@@ -10,6 +10,10 @@ export abstract class TenantBillingRepository {
 
 	abstract listActivePlans(): Promise<SubscriptionPlan[]>;
 
+	async listAllPlans(): Promise<SubscriptionPlan[]> {
+		return this.listActivePlans();
+	}
+
 	abstract saveSubscription(subscription: TenantSubscription): Promise<void>;
 
 	abstract searchActiveSubscription(tenantId: string): Promise<TenantSubscription | null>;

@@ -19,7 +19,9 @@ import { SyncTenantSubscriptionFromStripe } from "../../../billing/subscriptions
 import { ProcessStripeWebhook } from "../../../billing/subscriptions/application/sync/ProcessStripeWebhook";
 import { StripeWebhookEventRepository } from "../../../billing/stripe/domain/StripeWebhookEventRepository";
 import { PrismaStripeWebhookEventRepository } from "../../../billing/stripe/infrastructure/PrismaStripeWebhookEventRepository";
+import { ListPlatformSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListPlatformSubscriptionPlans";
 import { ListSubscriptionPlans } from "../../../billing/subscriptions/application/list/ListSubscriptionPlans";
+import { UpdateSubscriptionPlan } from "../../../billing/subscriptions/application/update/UpdateSubscriptionPlan";
 import { StripeCheckoutGateway } from "../../../billing/stripe/domain/StripeCheckoutGateway";
 import { StripeWebhookGateway } from "../../../billing/stripe/domain/StripeWebhookGateway";
 import { StripeCheckoutGatewayStripe } from "../../../billing/stripe/infrastructure/StripeCheckoutGatewayStripe";
@@ -303,6 +305,8 @@ builder.registerAndUse(StripeWebhookGatewayStripe);
 builder.register(StripeWebhookEventRepository).use(PrismaStripeWebhookEventRepository);
 builder.registerAndUse(PrismaStripeWebhookEventRepository);
 builder.registerAndUse(ListSubscriptionPlans);
+builder.registerAndUse(ListPlatformSubscriptionPlans);
+builder.registerAndUse(UpdateSubscriptionPlan);
 builder.registerAndUse(AssignTenantSubscriptionPlan);
 builder.registerAndUse(CreateStripeCheckoutSession);
 builder.registerAndUse(CompleteStripeCheckoutSession);

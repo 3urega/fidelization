@@ -3,14 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P4: Platform admin owners (comerciantes) list",
-      "bodyFile": "docs/issues/platform-admin-owners-list.md"
-    },
-    {
-      "title": "Phase P5: Platform admin subscription plans catalog UI",
-      "bodyFile": "docs/issues/platform-admin-plans-catalog-ui.md"
-    },
-    {
       "title": "Phase P6: Platform admin billing overview (MRR, subscriptions, failed payments)",
       "bodyFile": "docs/issues/platform-admin-billing-overview.md"
     },

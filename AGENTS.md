@@ -41,6 +41,8 @@ npm run verify:platform-admin-impersonate-use-case # issue #73 — ImpersonateTe
 npm run verify:platform-admin-impersonate # issue #73 — impersonate owner E2E (dev + DATABASE_URL)
 npm run verify:platform-admin-owners-use-case # issue #74 — ListPlatformOwners (domain stub)
 npm run verify:platform-admin-owners # issue #74 — owners list E2E (dev + DATABASE_URL)
+npm run verify:platform-admin-plans-use-case # issue #75 — ListPlatformSubscriptionPlans + UpdateSubscriptionPlan (domain stub)
+npm run verify:platform-admin-plans # issue #75 — platform plans catalog E2E (dev + DATABASE_URL)
 npm run verify:business-register   # issues #11–#12 — owner user step 1 (onboarding cookie, hash, no membership)
 npm run verify:business-onboarding # issue #13 — wizard step 2 → tenant + owner session → /panel
 npm run verify:format-tenant-host  # issue #15 — formatTenantHost + slugifyBusinessName
@@ -129,7 +131,7 @@ Detalle completo: [`docs/business-rules.md`](docs/business-rules.md).
 
 - **Owner/staff login:** `/login` en subdominio tenant → `/panel` en ese host (cookie host-only). Apex `localhost:3000/login` = login app personal (`kind: user`) → `/home`. Requiere `AUTH_SECRET`; opcional `APP_DOMAIN=localhost` + `NEXT_PUBLIC_APP_DOMAIN=localhost` para resolución de tenant en middleware. **Producción:** cookie `Domain=.${APP_DOMAIN}` + redirect tenant → `{slug}.${APP_DOMAIN}/panel` (`verify:session-cookie-prod`). Detalle: [`docs/backend/session-cookies-localhost-dev.md`](docs/backend/session-cookies-localhost-dev.md).
 - **Superadmin (issue #8):** solo `http://localhost:3000/platform/login` (apex) → `/platform`; no usar `/login` ni subdominios de negocio. Verifies: `verify:platform-login`, `verify:platform-isolation`.
-- **Superadmin dashboard (issue #9):** en `/platform/tenants` — lista, detalle, impersonar owner; comerciantes en `/platform/owners`; home KPI en `/platform`. `verify:platform-tenants`, `verify:platform-admin-dashboard*`, `verify:platform-admin-tenant-detail*`, `verify:platform-admin-impersonate*`, `verify:platform-admin-owners*`.
+- **Superadmin dashboard (issue #9):** en `/platform/tenants` — lista, detalle, impersonar owner; comerciantes en `/platform/owners`; catálogo planes en `/platform/plans`; home KPI en `/platform`. `verify:platform-tenants`, `verify:platform-admin-dashboard*`, `verify:platform-admin-tenant-detail*`, `verify:platform-admin-impersonate*`, `verify:platform-admin-owners*`, `verify:platform-admin-plans*`.
 - **Demo:** `demo@starter.local` + botón demo, o `cafe-demo.localhost`.
 - **Business register (issues #11–#12):** `http://localhost:3000/register/business` → onboarding session → paso 2 en `/register/business/tenant`. `verify:business-register`, `verify:business-onboarding` (#13).
 - **Subdomain preview (#15):** paso 2 muestra `{slug}.localhost` (con `NEXT_PUBLIC_APP_DOMAIN=localhost`); `verify:format-tenant-host`.
@@ -230,7 +232,7 @@ docs/
 | Promociones owner + cliente (#35–#37) | `verify:promotions*` + `/settings/promotions` (#36) + `verify:customer-promotions*` + `/app/card` (#37) |
 | Platform mobile app Phase G (#38–#45) | `verify:platform-app-auth-use-case` (#38), `verify:platform-app-public-home` (#39), `verify:platform-app-register-business` (#40), `verify:platform-app-dashboard` (#41), `verify:platform-app-customer-join` (#42), `verify:platform-app-establishment-detail` (#43), `verify:platform-app-global-qr-scan` (#44), `verify:platform-app-e2e` (#45) + `docs/domain/customer-platform-app.md` + **`docs/backend/external-services-env.md`** (Google OAuth) |
 | Superadmin foundation (issue #8), tenant isolation | `docs/domain/saas-architecture.md` + `npm run verify:platform-isolation` |
-| Superadmin dashboard (issue #9, #71–#74) | `docs/superadmin.md` + `verify:platform-tenants` + `verify:platform-admin-dashboard*` + `verify:platform-admin-tenant-detail*` + `verify:platform-admin-impersonate*` + `verify:platform-admin-owners*` |
+| Superadmin dashboard (issue #9, #71–#75) | `docs/superadmin.md` + `verify:platform-tenants` + `verify:platform-admin-dashboard*` + `verify:platform-admin-tenant-detail*` + `verify:platform-admin-impersonate*` + `verify:platform-admin-owners*` + `verify:platform-admin-plans*` |
 | Superadmin dashboard / CRUD tenants, feature flags, billing SaaS | `docs/domain/saas-architecture.md` (sección *Implementation status*) |
 | Resolución de tenant (subdominio, JWT `tenantId`, middleware, login) | `docs/teenant-resolution.md` (sección *Implementation status*) + `src/middleware.ts`, `src/lib/auth/session.ts` |
 | Login dev atascado / cookie / superadmin vs owner | `docs/backend/session-cookies-localhost-dev.md` + `npm run verify:platform-login` / `verify:owner-login` |
