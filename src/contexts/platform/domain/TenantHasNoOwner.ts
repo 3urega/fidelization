@@ -1,4 +1,4 @@
-import { DomainError } from "../../../shared/domain/DomainError";
+import { DomainError } from "../../shared/domain/DomainError";
 
 export class TenantHasNoOwner extends DomainError {
 	static readonly ERROR_TYPE = "TenantHasNoOwner";

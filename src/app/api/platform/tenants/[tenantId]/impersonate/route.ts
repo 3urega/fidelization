@@ -2,17 +2,17 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { ImpersonateTenantOwnerFromPlatformSession } from "../../../../../contexts/platform/application/impersonation/ImpersonateTenantOwnerFromPlatformSession";
-import { TenantHasNoOwner } from "../../../../../contexts/platform/domain/TenantHasNoOwner";
-import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { HttpNextResponse } from "../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { TenantNotFound } from "../../../../../contexts/tenants/tenants/domain/TenantNotFound";
-import { TenantRole } from "../../../../../contexts/tenants/memberships/domain/TenantRole";
-import { authResponseToJson } from "../../../../../lib/auth/http";
-import { requirePlatformSession } from "../../../../../lib/auth/requirePlatformSession";
-import { createSessionToken, jsonWithSessionCookie } from "../../../../../lib/auth/session";
-import { getResolvedTenantFromRequest } from "../../../../../lib/tenant/getResolvedTenant";
-import { resolveTenantPanelRedirectUrl } from "../../../../../lib/tenant/resolveTenantPanelRedirectUrl";
+import { ImpersonateTenantOwnerFromPlatformSession } from "../../../../../../contexts/platform/application/impersonation/ImpersonateTenantOwnerFromPlatformSession";
+import { TenantHasNoOwner } from "../../../../../../contexts/platform/domain/TenantHasNoOwner";
+import { container } from "../../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { HttpNextResponse } from "../../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { TenantNotFound } from "../../../../../../contexts/tenants/tenants/domain/TenantNotFound";
+import { TenantRole } from "../../../../../../contexts/tenants/memberships/domain/TenantRole";
+import { authResponseToJson } from "../../../../../../lib/auth/http";
+import { requirePlatformSession } from "../../../../../../lib/auth/requirePlatformSession";
+import { createSessionToken, jsonWithSessionCookie } from "../../../../../../lib/auth/session";
+import { getResolvedTenantFromRequest } from "../../../../../../lib/tenant/getResolvedTenant";
+import { resolveTenantPanelRedirectUrl } from "../../../../../../lib/tenant/resolveTenantPanelRedirectUrl";
 
 export const dynamic = "force-dynamic";
 

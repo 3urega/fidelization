@@ -507,7 +507,7 @@ Publicadas en GitHub · manifest: [`manifest.phase-p-superadmin.json`](issues/ma
 |-------|--------|--------|
 | P1 | [#71](https://github.com/3urega/fidelization/issues/71) ✅ **Implemented** (2026-06-13) | KPI home + `/platform/tenants` |
 | P2 | [#72](https://github.com/3urega/fidelization/issues/72) ✅ **Implemented** (2026-06-13) | Detalle tenant + plan |
-| P3 | [#73](https://github.com/3urega/fidelization/issues/73) | Impersonar owner (crítico) |
+| P3 | [#73](https://github.com/3urega/fidelization/issues/73) ✅ **Implemented** (2026-06-13) | Impersonar owner (crítico) |
 | P4 | [#74](https://github.com/3urega/fidelization/issues/74) | Comerciantes |
 | P5 | [#75](https://github.com/3urega/fidelization/issues/75) | Planes Basic/Pro/Premium |
 | P6 | [#76](https://github.com/3urega/fidelization/issues/76) | Facturación / MRR |
