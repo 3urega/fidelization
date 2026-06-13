@@ -52,6 +52,7 @@
     "verify:customer-qr-session": "tsx scripts/verify-customer-qr-session.ts",
     "verify:customer-scan": "tsx scripts/verify-customer-scan.ts",
     "verify:stamp-campaigns-use-case": "tsx scripts/verify-stamp-campaigns-use-case.ts",
+    "verify:stamp-campaign-dashboard-use-case": "tsx scripts/verify-stamp-campaign-dashboard-use-case.ts",
     "verify:stamp-campaigns": "tsx scripts/verify-stamp-campaigns.ts",
     "verify:loyalty-visual-assets": "tsx scripts/verify-loyalty-visual-assets.ts",
     "verify:loyalty-progress-component": "tsx scripts/verify-loyalty-progress-component.ts",

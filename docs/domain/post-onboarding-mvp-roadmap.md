@@ -497,7 +497,7 @@ Skills: `plan-to-issues` (drafts) → `publish-github-issues` (GitHub) → `kanb
 
 | # | Slice | Body file |
 |---|-------|-----------|
-| [#55](https://github.com/3urega/fidelization/issues/55) | K1 | [`stamp-campaign-dashboard-domain.md`](../issues/stamp-campaign-dashboard-domain.md) |
+| [#55](https://github.com/3urega/fidelization/issues/55) | K1 | [`stamp-campaign-dashboard-domain.md`](../issues/stamp-campaign-dashboard-domain.md) | **Closed** (2026-06-13) |
 | [#56](https://github.com/3urega/fidelization/issues/56) | K2 | [`stamp-campaign-dashboard-api.md`](../issues/stamp-campaign-dashboard-api.md) |
 | [#57](https://github.com/3urega/fidelization/issues/57) | K3 | [`owner-panel-tabs-dashboard.md`](../issues/owner-panel-tabs-dashboard.md) |
 | [#58](https://github.com/3urega/fidelization/issues/58) | K4 | [`stamp-campaign-dashboard-ui.md`](../issues/stamp-campaign-dashboard-ui.md) |
