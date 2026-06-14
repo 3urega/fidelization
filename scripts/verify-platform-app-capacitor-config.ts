@@ -48,10 +48,40 @@ function assertCapacitorConfig(): void {
 	console.log("✅ capacitor.config.ts webDir=out");
 }
 
+function assertGeolocationDependency(): void {
+	const packageJson = readFileSync(join(process.cwd(), "package.json"), "utf8");
+
+	if (!packageJson.includes('"@capacitor/geolocation"')) {
+		console.error("❌ package.json missing @capacitor/geolocation");
+		process.exit(1);
+	}
+
+	console.log("✅ package.json includes @capacitor/geolocation");
+}
+
+function assertAndroidLocationPermissions(): void {
+	const manifestPath = join(process.cwd(), "android/app/src/main/AndroidManifest.xml");
+	const manifest = readFileSync(manifestPath, "utf8");
+
+	if (!manifest.includes('android.permission.ACCESS_FINE_LOCATION')) {
+		console.error("❌ AndroidManifest missing ACCESS_FINE_LOCATION");
+		process.exit(1);
+	}
+
+	if (!manifest.includes('android.permission.ACCESS_COARSE_LOCATION')) {
+		console.error("❌ AndroidManifest missing ACCESS_COARSE_LOCATION");
+		process.exit(1);
+	}
+
+	console.log("✅ AndroidManifest location permissions");
+}
+
 async function main(): Promise<void> {
 	assertDeepLinkParser();
 	assertAndroidManifest();
 	assertCapacitorConfig();
+	assertGeolocationDependency();
+	assertAndroidLocationPermissions();
 
 	if (process.env.SKIP_CAPACITOR_BUILD === "1") {
 		console.log("⏭️ skip build:capacitor (SKIP_CAPACITOR_BUILD=1)");

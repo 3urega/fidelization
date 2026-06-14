@@ -8,10 +8,5 @@
     "87": "https://github.com/3urega/fidelization/issues/87",
     "88": "https://github.com/3urega/fidelization/issues/88"
   },
-  "issues": [
-    {
-      "title": "Phase Q4: Discover grid Cerca de mi UI (user location + distance cards)",
-      "bodyFile": "docs/issues/discover-grid-cerca-de-mi-ui.md"
-    }
-  ]
+  "issues": []
 }
