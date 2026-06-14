@@ -142,5 +142,20 @@ Manifest: [`docs/issues/manifest.phase-q-location-discovery.json`](issues/manife
 
 *(Publicado 2026-06-13.)*
 
+## GitHub issues (Phase R — tenant geocoding feedback)
+
+Seguimiento post-Q: el owner debe **ver si su dirección se geocodificó**, **preview en mapa** y checklist coherente. Sin geocode silencioso.
+
+Manifest: [`docs/issues/manifest.phase-r-tenant-geocoding-feedback.json`](issues/manifest.phase-r-tenant-geocoding-feedback.json)
+
+| # | Issue | Capas |
+|---|-------|-------|
+| [#89](https://github.com/3urega/fidelization/issues/89) | R1: Geocoding status API + regeocode | dominio, API |
+| [#90](https://github.com/3urega/fidelization/issues/90) | R2: Profile feedback UI (banner / reintentar) | UI owner |
+| [#91](https://github.com/3urega/fidelization/issues/91) | R3: Mapa estático con pin en perfil | UI + proxy map URL |
+| [#92](https://github.com/3urega/fidelization/issues/92) | R4: Checklist panel vs coords reales | panel |
+
+*(Publicado 2026-06-13.)*
+
 [1]: https://developers.google.com/maps/documentation/geocoding?utm_source=chatgpt.com "Google Maps Platform Documentation | Geocoding API"
 [2]: https://docs.mapbox.com/api/search/geocoding/?utm_source=chatgpt.com "Geocoding API | API Docs"

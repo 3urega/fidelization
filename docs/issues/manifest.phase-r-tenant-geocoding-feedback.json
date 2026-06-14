@@ -1,0 +1,29 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/localization.md",
+  "label": "tenant-geocoding-feedback",
+  "published": {
+    "89": "https://github.com/3urega/fidelization/issues/89",
+    "90": "https://github.com/3urega/fidelization/issues/90",
+    "91": "https://github.com/3urega/fidelization/issues/91",
+    "92": "https://github.com/3urega/fidelization/issues/92"
+  },
+  "issues": [
+    {
+      "title": "Phase R1: Tenant geocoding status API (explicit feedback + regeocode)",
+      "bodyFile": "docs/issues/tenant-geocoding-status-api.md"
+    },
+    {
+      "title": "Phase R2: Tenant profile geocoding feedback UI (owner status banner)",
+      "bodyFile": "docs/issues/tenant-geocoding-profile-feedback-ui.md"
+    },
+    {
+      "title": "Phase R3: Tenant geocoding static map preview on profile",
+      "bodyFile": "docs/issues/tenant-geocoding-map-preview.md"
+    },
+    {
+      "title": "Phase R4: Owner panel checklist reflects verified geolocation",
+      "bodyFile": "docs/issues/tenant-geocoding-panel-checklist.md"
+    }
+  ]
+}
