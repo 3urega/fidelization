@@ -38,7 +38,7 @@ Mostrar un **mapa estático con pin** en `/settings/profile` cuando el tenant ti
 
 ## Issues relacionadas
 
-- `tenant-geocoding-profile-feedback-ui.md` (R2)
+- GitHub #90 (R2, implemented)
 - `tenant-geocoding-panel-checklist.md` (R4)
 
 ## Referencias

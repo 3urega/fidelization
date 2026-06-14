@@ -151,8 +151,8 @@ Manifest: [`docs/issues/manifest.phase-r-tenant-geocoding-feedback.json`](issues
 | # | Issue | Capas |
 |---|-------|-------|
 | [#89](https://github.com/3urega/fidelization/issues/89) | R1: Geocoding status API + regeocode — **Implemented** 2026-06-13 | dominio, API |
-| [#90](https://github.com/3urega/fidelization/issues/90) | R2: Profile feedback UI (banner / reintentar) | UI owner |
-| [#91](https://github.com/3urega/fidelization/issues/91) | R3: Mapa estático con pin en perfil | UI + proxy map URL |
+| [#90](https://github.com/3urega/fidelization/issues/90) | R2: Profile feedback UI (banner / reintentar) — **Implemented** 2026-06-13 | UI owner |
+| [#91](https://github.com/3urega/fidelization/issues/91) | R3: Mapa estático con pin en perfil — **Implemented** 2026-06-13 | UI + proxy map URL |
 | [#92](https://github.com/3urega/fidelization/issues/92) | R4: Checklist panel vs coords reales | panel |
 
 *(Publicado 2026-06-13.)*

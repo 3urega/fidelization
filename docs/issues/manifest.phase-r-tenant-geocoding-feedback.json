@@ -10,10 +10,6 @@
   },
   "issues": [
     {
-      "title": "Phase R2: Tenant profile geocoding feedback UI (owner status banner)",
-      "bodyFile": "docs/issues/tenant-geocoding-profile-feedback-ui.md"
-    },
-    {
       "title": "Phase R3: Tenant geocoding static map preview on profile",
       "bodyFile": "docs/issues/tenant-geocoding-map-preview.md"
     },

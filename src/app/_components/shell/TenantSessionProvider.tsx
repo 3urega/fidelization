@@ -35,6 +35,10 @@ export type TenantSessionTenant = {
 	description: string;
 	coverImageUrl: string;
 	discoveryTags: string[];
+	latitude: number | null;
+	longitude: number | null;
+	geocodedAt: string | null;
+	geocodingProvider?: string | null;
 };
 
 export type TenantSessionImpersonation = {
