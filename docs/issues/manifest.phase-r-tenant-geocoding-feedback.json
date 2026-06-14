@@ -10,10 +10,6 @@
   },
   "issues": [
     {
-      "title": "Phase R1: Tenant geocoding status API (explicit feedback + regeocode)",
-      "bodyFile": "docs/issues/tenant-geocoding-status-api.md"
-    },
-    {
       "title": "Phase R2: Tenant profile geocoding feedback UI (owner status banner)",
       "bodyFile": "docs/issues/tenant-geocoding-profile-feedback-ui.md"
     },
