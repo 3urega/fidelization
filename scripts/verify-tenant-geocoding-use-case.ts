@@ -7,6 +7,7 @@ import { GeocodingFailed } from "../src/contexts/shared/geocoding/domain/Geocodi
 import { GeocodingGateway } from "../src/contexts/shared/geocoding/domain/GeocodingGateway";
 import { GeocodingResult } from "../src/contexts/shared/geocoding/domain/GeocodingResult";
 import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
+import { ApplyTenantGeocodingForAddress } from "../src/contexts/tenants/tenants/application/geocoding/ApplyTenantGeocodingForAddress";
 import { UpdateTenantProfile } from "../src/contexts/tenants/tenants/application/update/UpdateTenantProfile";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import {
@@ -107,19 +108,26 @@ class FailingGeocodingGateway extends GeocodingGateway {
 	}
 }
 
-function makeGeocodeUseCase(gateway: GeocodingGateway): GeocodeAddressString {
-	return new GeocodeAddressString(gateway);
+function makeUpdateUseCase(
+	repository: RecordingTenantRepository,
+	gateway: GeocodingGateway,
+): UpdateTenantProfile {
+	return new UpdateTenantProfile(
+		repository,
+		new ApplyTenantGeocodingForAddress(new GeocodeAddressString(gateway)),
+	);
 }
 
 async function verifyAddressChangeGeocodes(): Promise<void> {
 	const repository = new RecordingTenantRepository(baseTenant);
-	const useCase = new UpdateTenantProfile(repository, makeGeocodeUseCase(new SuccessGeocodingGateway()));
+	const useCase = makeUpdateUseCase(repository, new SuccessGeocodingGateway());
 
-	const tenant = await useCase.execute({
+	const result = await useCase.execute({
 		tenantId,
 		role: TenantRole.Owner,
 		profile: { address: "Carrer Major 10, Igualada" },
 	});
+	const tenant = result.tenant;
 
 	if (
 		tenant.address !== "Carrer Major 10, Igualada" ||
@@ -136,7 +144,7 @@ async function verifyAddressChangeGeocodes(): Promise<void> {
 
 async function verifyUnchangedAddressSkipsGeocode(): Promise<void> {
 	const repository = new RecordingTenantRepository(baseTenant);
-	const useCase = new UpdateTenantProfile(repository, makeGeocodeUseCase(new SuccessGeocodingGateway()));
+	const useCase = makeUpdateUseCase(repository, new SuccessGeocodingGateway());
 
 	await useCase.execute({
 		tenantId,
@@ -161,16 +169,22 @@ async function verifyEmptyAddressClearsCoords(): Promise<void> {
 		geocodedAt: new Date().toISOString(),
 	});
 	const repository = new RecordingTenantRepository(withCoords);
-	const useCase = new UpdateTenantProfile(repository, makeGeocodeUseCase(new SuccessGeocodingGateway()));
+	const useCase = makeUpdateUseCase(repository, new SuccessGeocodingGateway());
 
-	const tenant = await useCase.execute({
+	const result = await useCase.execute({
 		tenantId,
 		role: TenantRole.Owner,
 		profile: { address: "" },
 	});
+	const tenant = result.tenant;
 
-	if (tenant.address !== "" || tenant.latitude !== null || repository.lastProfileUpdate?.geolocation !== null) {
-		console.error("❌ empty address should clear geolocation", tenant.toPrimitives(), repository.lastProfileUpdate);
+	if (
+		result.geocodingStatus !== "cleared" ||
+		tenant.address !== "" ||
+		tenant.latitude !== null ||
+		repository.lastProfileUpdate?.geolocation !== null
+	) {
+		console.error("❌ empty address should clear geolocation", result, repository.lastProfileUpdate);
 		process.exit(1);
 	}
 
@@ -179,13 +193,14 @@ async function verifyEmptyAddressClearsCoords(): Promise<void> {
 
 async function verifyGeocodeFailureStillSavesAddress(): Promise<void> {
 	const repository = new RecordingTenantRepository(baseTenant);
-	const useCase = new UpdateTenantProfile(repository, makeGeocodeUseCase(new FailingGeocodingGateway()));
+	const useCase = makeUpdateUseCase(repository, new FailingGeocodingGateway());
 
-	const tenant = await useCase.execute({
+	const result = await useCase.execute({
 		tenantId,
 		role: TenantRole.Owner,
 		profile: { address: "Unknown place XYZ" },
 	});
+	const tenant = result.tenant;
 
 	if (
 		tenant.address !== "Unknown place XYZ" ||
@@ -201,7 +216,7 @@ async function verifyGeocodeFailureStillSavesAddress(): Promise<void> {
 
 async function verifyLongAddressStillValidated(): Promise<void> {
 	const repository = new RecordingTenantRepository(baseTenant);
-	const useCase = new UpdateTenantProfile(repository, makeGeocodeUseCase(new SuccessGeocodingGateway()));
+	const useCase = makeUpdateUseCase(repository, new SuccessGeocodingGateway());
 
 	try {
 		await useCase.execute({

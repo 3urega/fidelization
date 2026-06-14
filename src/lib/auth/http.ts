@@ -25,6 +25,7 @@ import type { PlatformDashboardMetrics } from "../../contexts/platform/domain/Pl
 import type { PlatformTenantDetail } from "../../contexts/platform/domain/PlatformTenantDetail";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
+import type { TenantProfileUpdateResult } from "../../contexts/tenants/tenants/domain/TenantProfileUpdateResult";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
 
@@ -67,6 +68,16 @@ export function tenantToJson(tenant: Tenant): Record<string, string | number | n
 		longitude: primitives.longitude ?? null,
 		geocodingProvider: primitives.geocodingProvider ?? null,
 		geocodedAt: primitives.geocodedAt ?? null,
+	};
+}
+
+export function tenantProfileUpdateToJson(
+	result: TenantProfileUpdateResult,
+): Record<string, unknown> {
+	return {
+		tenant: tenantToJson(result.tenant),
+		geocodingStatus: result.geocodingStatus,
+		...(result.geocodingMessage ? { geocodingMessage: result.geocodingMessage } : {}),
 	};
 }
 
@@ -564,6 +575,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "InvalidTenantProfile") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "TenantGeocodingAddressRequired") {
 		return HttpNextResponse.domainError(error, 400);
 	}
 	if (error.type === "InvalidTenantCoverImage") {

@@ -78,19 +78,32 @@ async function main(): Promise<void> {
 			geocodingProvider?: string | null;
 			geocodedAt?: string | null;
 		};
+		geocodingStatus?: string;
+		geocodingMessage?: string;
 	};
 
 	if (
 		!patch.ok ||
 		patchBody.tenant?.address !== testAddress ||
 		patchBody.tenant?.description !== testDescription ||
-		patchBody.tenant?.discoveryTags?.join(",") !== testTags.join(",")
+		patchBody.tenant?.discoveryTags?.join(",") !== testTags.join(",") ||
+		!patchBody.geocodingStatus
 	) {
 		console.error("❌ PATCH /api/tenant/profile:", patch.status, patchBody);
 		process.exit(1);
 	}
 
-	console.log("✅ PATCH /api/tenant/profile → address + description");
+	if (hasMapboxToken) {
+		if (patchBody.geocodingStatus !== "ok" || !patchBody.geocodingMessage) {
+			console.error("❌ expected geocodingStatus ok with token", patchBody);
+			process.exit(1);
+		}
+	} else if (patchBody.geocodingStatus !== "failed") {
+		console.error("❌ expected geocodingStatus failed without token", patchBody);
+		process.exit(1);
+	}
+
+	console.log(`✅ PATCH /api/tenant/profile → geocodingStatus=${patchBody.geocodingStatus}`);
 
 	const rowAfterPatch = await prisma.tenant.findUnique({
 		where: { id: tenantId },
@@ -137,8 +150,12 @@ async function main(): Promise<void> {
 		body: JSON.stringify({ description: `${testDescription} updated` }),
 	});
 
-	if (!descriptionOnlyPatch.ok) {
-		console.error("❌ PATCH description only:", descriptionOnlyPatch.status);
+	const descriptionOnlyBody = (await descriptionOnlyPatch.json()) as {
+		geocodingStatus?: string;
+	};
+
+	if (!descriptionOnlyPatch.ok || descriptionOnlyBody.geocodingStatus !== "skipped") {
+		console.error("❌ PATCH description only:", descriptionOnlyPatch.status, descriptionOnlyBody);
 		process.exit(1);
 	}
 
@@ -157,6 +174,27 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ description-only PATCH does not re-geocode");
+
+	const regeocode = await fetch(`${brandingVerifyBaseUrl}/api/tenant/profile/regeocode`, {
+		method: "POST",
+		headers: { cookie: headers.cookie },
+	});
+	const regeocodeBody = (await regeocode.json()) as {
+		geocodingStatus?: string;
+		tenant?: { latitude?: number | null };
+	};
+
+	if (!regeocode.ok || !regeocodeBody.geocodingStatus) {
+		console.error("❌ POST regeocode:", regeocode.status, regeocodeBody);
+		process.exit(1);
+	}
+
+	if (hasMapboxToken && regeocodeBody.geocodingStatus !== "ok") {
+		console.error("❌ regeocode should succeed with token", regeocodeBody);
+		process.exit(1);
+	}
+
+	console.log(`✅ POST /api/tenant/profile/regeocode → geocodingStatus=${regeocodeBody.geocodingStatus}`);
 
 	await fetch(`${brandingVerifyBaseUrl}/api/tenant/profile`, {
 		method: "PATCH",

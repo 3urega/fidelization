@@ -9,7 +9,7 @@ import { UpdateTenantProfile } from "../../../../contexts/tenants/tenants/applic
 import { TenantNotFound } from "../../../../contexts/tenants/tenants/domain/TenantNotFound";
 import { TenantProfileUpdateInput } from "../../../../contexts/tenants/tenants/domain/TenantProfileUpdate";
 import { TenantRole } from "../../../../contexts/tenants/memberships/domain/TenantRole";
-import { handleAuthDomainError, tenantToJson } from "../../../../lib/auth/http";
+import { handleAuthDomainError, tenantProfileUpdateToJson } from "../../../../lib/auth/http";
 import { requireTenantSession } from "../../../../lib/auth/requireTenantSession";
 
 export const dynamic = "force-dynamic";
@@ -23,13 +23,13 @@ export async function PATCH(request: Request): Promise<Response> {
 	const body = (await request.json()) as TenantProfileUpdateInput;
 
 	try {
-		const tenant = await container.get(UpdateTenantProfile).execute({
+		const result = await container.get(UpdateTenantProfile).execute({
 			tenantId: auth.session.tenantId,
 			role: auth.session.role as TenantRole,
 			profile: body,
 		});
 
-		return NextResponse.json({ tenant: tenantToJson(tenant) });
+		return NextResponse.json(tenantProfileUpdateToJson(result));
 	} catch (error) {
 		if (error instanceof DomainError) {
 			const response = handleAuthDomainError(error);

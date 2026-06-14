@@ -5,6 +5,7 @@ import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRol
 import { GeocodeAddressString } from "../src/contexts/shared/geocoding/application/geocode/GeocodeAddressString";
 import { GeocodingGateway } from "../src/contexts/shared/geocoding/domain/GeocodingGateway";
 import { Coordinates } from "../src/contexts/shared/geocoding/domain/Coordinates";
+import { ApplyTenantGeocodingForAddress } from "../src/contexts/tenants/tenants/application/geocoding/ApplyTenantGeocodingForAddress";
 import { UpdateTenantProfile } from "../src/contexts/tenants/tenants/application/update/UpdateTenantProfile";
 import { InvalidTenantProfile } from "../src/contexts/tenants/tenants/domain/InvalidTenantProfile";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
@@ -27,7 +28,10 @@ class NoopGeocodingGateway extends GeocodingGateway {
 }
 
 function profileUseCase(repository: TenantRepository): UpdateTenantProfile {
-	return new UpdateTenantProfile(repository, new GeocodeAddressString(new NoopGeocodingGateway()));
+	return new UpdateTenantProfile(
+		repository,
+		new ApplyTenantGeocodingForAddress(new GeocodeAddressString(new NoopGeocodingGateway())),
+	);
 }
 
 const baseTenant = Tenant.fromPrimitives({
@@ -193,7 +197,7 @@ async function verifyOwnerSuccessStub(): Promise<void> {
 	});
 	const useCase = profileUseCase(new StubTenantRepository(baseTenant, updated));
 
-	const tenant = await useCase.execute({
+	const result = await useCase.execute({
 		tenantId,
 		role: TenantRole.Owner,
 		profile: {
@@ -201,6 +205,7 @@ async function verifyOwnerSuccessStub(): Promise<void> {
 			description: "Café de barrio con tostadas artesanales.",
 		},
 	});
+	const tenant = result.tenant;
 
 	if (tenant.address !== "Calle Mayor 1, Madrid" || tenant.description !== updated.description) {
 		console.error("❌ owner update did not return expected profile");
@@ -218,11 +223,12 @@ async function verifyEmptyFieldsAllowed(): Promise<void> {
 	});
 	const useCase = profileUseCase(new StubTenantRepository(baseTenant, cleared));
 
-	const tenant = await useCase.execute({
+	const result = await useCase.execute({
 		tenantId,
 		role: TenantRole.Owner,
 		profile: { address: "", description: "" },
 	});
+	const tenant = result.tenant;
 
 	if (tenant.address !== "" || tenant.description !== "") {
 		console.error("❌ empty strings should be allowed");
@@ -239,11 +245,12 @@ async function verifyDiscoveryTags(): Promise<void> {
 	});
 	const useCase = profileUseCase(new StubTenantRepository(baseTenant, updated));
 
-	const tenant = await useCase.execute({
+	const result = await useCase.execute({
 		tenantId,
 		role: TenantRole.Owner,
 		profile: { discoveryTags: ["desayunos", "brunch"] },
 	});
+	const tenant = result.tenant;
 
 	if (tenant.discoveryTags.join(",") !== "desayunos,brunch") {
 		console.error("❌ discoveryTags update failed", tenant.discoveryTags);

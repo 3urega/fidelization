@@ -162,6 +162,8 @@ import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFi
 import { UpdateTenantBranding } from "../../../tenants/tenants/application/update/UpdateTenantBranding";
 import { ListDiscoverableEstablishments } from "../../../tenants/tenants/application/list/ListDiscoverableEstablishments";
 import { UpdateTenantProfile } from "../../../tenants/tenants/application/update/UpdateTenantProfile";
+import { RegeocodeTenantProfile } from "../../../tenants/tenants/application/update/RegeocodeTenantProfile";
+import { ApplyTenantGeocodingForAddress } from "../../../tenants/tenants/application/geocoding/ApplyTenantGeocodingForAddress";
 import { UploadTenantCoverImage } from "../../../tenants/tenants/application/update/UploadTenantCoverImage";
 import { UpdateTenantStatus } from "../../../tenants/tenants/application/update/UpdateTenantStatus";
 import { TenantRepository } from "../../../tenants/tenants/domain/TenantRepository";
@@ -272,7 +274,9 @@ builder.registerAndUse(ListUserRelationships);
 builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
 builder.registerAndUse(ListDiscoverableEstablishments);
+builder.registerAndUse(ApplyTenantGeocodingForAddress);
 builder.registerAndUse(UpdateTenantProfile);
+builder.registerAndUse(RegeocodeTenantProfile);
 builder.registerAndUse(UploadTenantCoverImage);
 builder.registerAndUse(UpdateTenantStatus);
 

@@ -1,18 +1,18 @@
 import { Service } from "diod";
 
-import { GeocodeAddressString } from "../../../../shared/geocoding/application/geocode/GeocodeAddressString";
-import { GeocodingFailed } from "../../../../shared/geocoding/domain/GeocodingFailed";
-import { GeocodingNotConfigured } from "../../../../shared/geocoding/domain/GeocodingNotConfigured";
 import { TenantRole } from "../../../memberships/domain/TenantRole";
+import { ApplyTenantGeocodingForAddress } from "../geocoding/ApplyTenantGeocodingForAddress";
 import { Tenant } from "../../domain/Tenant";
-import { TenantGeolocation } from "../../domain/TenantGeolocation";
 import { TenantNotFound } from "../../domain/TenantNotFound";
 import { TenantProfileForbidden } from "../../domain/TenantProfileForbidden";
+import { tenantProfileGeocodingOutcome } from "../../domain/TenantProfileGeocodingOutcome";
 import {
 	parseTenantProfileUpdate,
 	type TenantProfileUpdate,
 	TenantProfileUpdateInput,
 } from "../../domain/TenantProfileUpdate";
+import type { TenantProfileUpdateResult } from "../../domain/TenantProfileUpdateResult";
+import { TENANT_GEOCODING_STATUS } from "../../domain/TenantGeocodingStatus";
 import { TenantRepository } from "../../domain/TenantRepository";
 
 export type UpdateTenantProfileParams = {
@@ -25,10 +25,10 @@ export type UpdateTenantProfileParams = {
 export class UpdateTenantProfile {
 	constructor(
 		private readonly tenantRepository: TenantRepository,
-		private readonly geocodeAddressString: GeocodeAddressString,
+		private readonly applyTenantGeocodingForAddress: ApplyTenantGeocodingForAddress,
 	) {}
 
-	async execute(params: UpdateTenantProfileParams): Promise<Tenant> {
+	async execute(params: UpdateTenantProfileParams): Promise<TenantProfileUpdateResult> {
 		if (params.role !== TenantRole.Owner) {
 			throw new TenantProfileForbidden(params.role);
 		}
@@ -40,46 +40,41 @@ export class UpdateTenantProfile {
 			throw new TenantNotFound(params.tenantId);
 		}
 
-		await this.applyGeolocationIfAddressChanged(profile, existing.address);
+		const geocodingOutcome = await this.applyGeolocationIfAddressChanged(profile, existing.address);
 
 		const updated = await this.tenantRepository.updateProfile(params.tenantId, profile);
 		if (!updated) {
 			throw new TenantNotFound(params.tenantId);
 		}
 
-		return updated;
+		return {
+			tenant: updated,
+			geocodingStatus: geocodingOutcome.status,
+			geocodingMessage: geocodingOutcome.message,
+		};
 	}
 
 	private async applyGeolocationIfAddressChanged(
 		profile: TenantProfileUpdate,
 		currentAddress: string,
-	): Promise<void> {
+	) {
 		if (profile.address === undefined) {
-			return;
+			return tenantProfileGeocodingOutcome(TENANT_GEOCODING_STATUS.Skipped);
 		}
 
 		if (profile.address === currentAddress) {
-			return;
+			return tenantProfileGeocodingOutcome(TENANT_GEOCODING_STATUS.Skipped);
 		}
 
 		if (profile.address === "") {
 			profile.geolocation = null;
 
-			return;
+			return tenantProfileGeocodingOutcome(TENANT_GEOCODING_STATUS.Cleared);
 		}
 
-		try {
-			const result = await this.geocodeAddressString.execute({ address: profile.address });
-			profile.geolocation = TenantGeolocation.fromGeocodingResult(result);
-		} catch (error) {
-			if (error instanceof GeocodingFailed || error instanceof GeocodingNotConfigured) {
-				console.warn(`[UpdateTenantProfile] geocoding skipped: ${error.message}`);
-				profile.geolocation = null;
+		const result = await this.applyTenantGeocodingForAddress.execute(profile.address);
+		profile.geolocation = result.geolocation;
 
-				return;
-			}
-
-			throw error;
-		}
+		return result.outcome;
 	}
 }
