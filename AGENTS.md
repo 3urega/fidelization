@@ -76,6 +76,7 @@ npm run verify:tenant-geocoding-profile-feedback  # Phase R2 #90 — geocoding b
 npm run verify:tenant-geocoding-map-preview  # Phase R3 #91 — static map URL builder + proxy E2E
 npm run verify:tenant-geolocation-checklist  # Phase R4 #92 — panel checklist vs verified coords
 npm run verify:platform-user-search-zone-use-case # Phase S1 #93 — user search zone domain + API
+npm run verify:platform-user-profile-shell # Phase S2 #94 — /home/profile tabs shell E2E (dev + DATABASE_URL)
 npm run db:backfill-tenant-geocoding # backfill coords for tenants with address and no latitude
 npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.register (domain)
 npm run verify:customer-use-case   # issue #18 — RegisterCustomer + AuthenticateCustomerByQr + DI

@@ -2,12 +2,22 @@
 
 export type PlatformHomeTab = "explore" | "locales" | "negocios";
 
+export type PlatformProfileTab = "personal" | "tarjetas";
+
 export function parsePlatformHomeTab(value: string | null | undefined): PlatformHomeTab {
 	if (value === "locales" || value === "negocios") {
 		return value;
 	}
 
 	return "explore";
+}
+
+export function parsePlatformProfileTab(value: string | null | undefined): PlatformProfileTab {
+	if (value === "tarjetas") {
+		return "tarjetas";
+	}
+
+	return "personal";
 }
 
 export const platformRoutes = {
@@ -17,6 +27,9 @@ export const platformRoutes = {
 	home: "/home",
 	homeTab: (tab: PlatformHomeTab): string =>
 		tab === "explore" ? "/home" : `/home?tab=${tab}`,
+	homeProfile: (tab: PlatformProfileTab = "personal"): string =>
+		tab === "personal" ? "/home/profile" : `/home/profile?tab=${tab}`,
+	homeProfileSearchZone: (): string => "/home/profile?tab=personal#search-zone",
 	homeDiscover: "/home/discover",
 	homeQr: "/home/qr",
 	homeBusiness: (slug: string) => `/home/business/${encodeURIComponent(slug)}`,

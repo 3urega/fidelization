@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Phase S2: Perfil app personal shell + tabs (informacion + tarjetas)",
-      "bodyFile": "docs/issues/platform-user-profile-shell-tabs.md"
-    },
-    {
       "title": "Phase S3: Editor zona de busqueda (geocode + mapa + confirmar)",
       "bodyFile": "docs/issues/platform-user-search-zone-editor.md"
     },

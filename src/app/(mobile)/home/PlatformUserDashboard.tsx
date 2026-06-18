@@ -159,10 +159,18 @@ export function PlatformUserDashboard({
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
-			<header className="flex flex-col gap-1">
-				<p className="text-sm font-medium text-primary">Tu espacio</p>
-				<h1 className="text-2xl font-semibold text-foreground">Hola, {displayName}</h1>
-				{displayEmail ? <p className="text-sm text-muted">{displayEmail}</p> : null}
+			<header className="flex items-start justify-between gap-3">
+				<div className="flex flex-col gap-1">
+					<p className="text-sm font-medium text-primary">Tu espacio</p>
+					<h1 className="text-2xl font-semibold text-foreground">Hola, {displayName}</h1>
+					{displayEmail ? <p className="text-sm text-muted">{displayEmail}</p> : null}
+				</div>
+				<Link
+					href={platformRoutes.homeProfile()}
+					className="shrink-0 text-sm font-medium text-primary hover:opacity-80"
+				>
+					Perfil
+				</Link>
 			</header>
 
 			<HoverTooltip message={qrDisabledReason} className="w-full">
