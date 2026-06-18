@@ -142,7 +142,7 @@ npm run verify:onboarding-plan-selection   # E2E con dev server + DATABASE_URL
 
 ## Geocoding (Mapbox / Google Maps)
 
-Convierte la **dirección del negocio** en coordenadas al guardar el perfil (`PATCH /api/tenant/profile`). En dev se usa **Mapbox** por defecto; el adaptador **Google Geocoding API** está listo para producción.
+Convierte la **dirección del negocio** en coordenadas al guardar el perfil (`PATCH /api/tenant/profile`) y alimenta el **mapa estático** del owner (`GET /api/tenant/geocoding-map-preview`, proxy server-side). En dev se usa **Mapbox** por defecto; el adaptador **Google Geocoding API** está listo para producción.
 
 ### Variables en `.env`
 
@@ -155,18 +155,18 @@ MAPBOX_ACCESS_TOKEN=pk.eyJ...
 | Variable | Para qué |
 |----------|----------|
 | `GEOCODING_PROVIDER` | `mapbox` (default) o `google` — selecciona el adaptador activo en servidor |
-| `MAPBOX_ACCESS_TOKEN` | Token **secreto** de Mapbox (Geocoding API v5) |
-| `GOOGLE_MAPS_GEOCODING_API_KEY` | API key con Geocoding API habilitada (distinto del OAuth Client ID) |
+| `MAPBOX_ACCESS_TOKEN` | Token **secreto** de Mapbox (Geocoding API v5 + Static Images en perfil owner) |
+| `GOOGLE_MAPS_GEOCODING_API_KEY` | API key con Geocoding API y Static Maps habilitadas (distinto del OAuth Client ID) |
 
 ### Mapbox (recomendado en dev)
 
 1. Cuenta en [Mapbox](https://account.mapbox.com/).
-2. Crear un **secret access token** con scope de Geocoding.
+2. Crear un **secret access token** con scope de Geocoding (Static Images usa el mismo token en servidor).
 3. Pegar en `MAPBOX_ACCESS_TOKEN`.
 
 ### Google Maps (prod o alternativa)
 
-1. [Google Cloud Console](https://console.cloud.google.com/) → habilitar **Geocoding API**.
+1. [Google Cloud Console](https://console.cloud.google.com/) → habilitar **Geocoding API** y **Maps Static API**.
 2. Crear **API key** restringida (IP servidor / referrers según despliegue).
 3. `GEOCODING_PROVIDER=google` + `GOOGLE_MAPS_GEOCODING_API_KEY`.
 
@@ -179,6 +179,8 @@ MAPBOX_ACCESS_TOKEN=pk.eyJ...
 
 ```bash
 npm run verify:geocoding-gateway-use-case
+npm run verify:tenant-geocoding-map-preview
+npm run verify:tenant-geocoding-profile-feedback
 ```
 
 ---

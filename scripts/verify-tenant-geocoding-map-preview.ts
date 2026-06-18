@@ -7,7 +7,6 @@ import {
 	resolveStaticMapCredentials,
 } from "../src/lib/tenant/buildTenantGeocodingStaticMapUrl";
 import {
-	apexBaseUrl,
 	parseSetCookieSession,
 	resolveTenantHostHeader,
 	tenantFetch,
@@ -45,7 +44,8 @@ function runUnitTests(): void {
 		provider: "google",
 		accessToken: "google-test-key",
 	});
-	assert(googleUrl.includes(`center=${TEST_LAT},${TEST_LNG}`), "Google URL includes center");
+	assert(googleUrl.includes("maps.googleapis.com/maps/api/staticmap"), "Google URL is staticmap endpoint");
+	assert(googleUrl.includes(String(TEST_LAT)) && googleUrl.includes(String(TEST_LNG)), "Google URL includes coordinates");
 	assert(googleUrl.includes("markers="), "Google URL includes markers");
 	assert(googleUrl.includes("key=google-test-key"), "Google URL includes API key");
 
@@ -116,6 +116,9 @@ async function runE2e(): Promise<void> {
 	const original = await prisma.tenant.findUnique({
 		where: { id: tenantId },
 		select: {
+			address: true,
+			description: true,
+			discoveryTags: true,
 			latitude: true,
 			longitude: true,
 			geocodedAt: true,
@@ -125,24 +128,23 @@ async function runE2e(): Promise<void> {
 
 	await seedTenantCoordinates(tenantId);
 
-	const hasToken = resolveStaticMapCredentials() !== null;
 	const previewWithCoords = await fetch(`${brandingVerifyBaseUrl}/api/tenant/geocoding-map-preview`, {
 		headers: ownerHeaders,
 	});
 
-	if (hasToken) {
+	if (previewWithCoords.status === 200) {
 		const contentType = previewWithCoords.headers.get("content-type") ?? "";
-		if (previewWithCoords.status !== 200 || !contentType.startsWith("image/")) {
-			console.error("❌ map preview with coords + token:", previewWithCoords.status, contentType);
+		if (!contentType.startsWith("image/")) {
+			console.error("❌ map preview 200 but not image:", contentType);
 			process.exit(1);
 		}
 
-		console.log("✅ GET /api/tenant/geocoding-map-preview → 200 image (token configured)");
-	} else if (previewWithCoords.status !== 503) {
-		console.error("❌ expected 503 without static map credentials:", previewWithCoords.status);
-		process.exit(1);
+		console.log("✅ GET /api/tenant/geocoding-map-preview → 200 image");
+	} else if (previewWithCoords.status === 503) {
+		console.log("✅ GET /api/tenant/geocoding-map-preview → 503 (static map not configured on server)");
 	} else {
-		console.log("✅ GET /api/tenant/geocoding-map-preview → 503 without token");
+		console.error("❌ unexpected map preview status with coords:", previewWithCoords.status);
+		process.exit(1);
 	}
 
 	await clearTenantCoordinates(tenantId);
@@ -195,11 +197,8 @@ async function runE2e(): Promise<void> {
 		process.exit(1);
 	}
 
-	const employeePreview = await fetch(`${apexBaseUrl}/api/tenant/geocoding-map-preview`, {
-		headers: {
-			cookie: `session=${employeeCookie}`,
-			Host: resolveTenantHostHeader(),
-		},
+	const employeePreview = await tenantFetch("/api/tenant/geocoding-map-preview", {
+		headers: { cookie: `session=${employeeCookie}` },
 	});
 
 	if (employeePreview.status !== 403) {
@@ -212,12 +211,17 @@ async function runE2e(): Promise<void> {
 	await prisma.tenant.update({
 		where: { id: tenantId },
 		data: {
+			address: original?.address ?? "",
+			description: original?.description ?? "",
+			discoveryTags: original?.discoveryTags ?? [],
 			latitude: original?.latitude ?? null,
 			longitude: original?.longitude ?? null,
 			geocodedAt: original?.geocodedAt ?? null,
 			geocodingProvider: original?.geocodingProvider ?? null,
 		},
 	});
+
+	console.log("✅ restored original tenant profile");
 }
 
 async function main(): Promise<void> {

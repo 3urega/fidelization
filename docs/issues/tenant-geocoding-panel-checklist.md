@@ -32,8 +32,9 @@ Corregir el **checklist del panel owner** para que «ubicación del negocio» re
 
 ## Issues relacionadas
 
-- `tenant-geocoding-status-api.md` (R1)
+- GitHub #89 (R1, implemented)
 - GitHub #90 (R2, implemented)
+- GitHub #91 (R3, implemented)
 
 ## Referencias
 

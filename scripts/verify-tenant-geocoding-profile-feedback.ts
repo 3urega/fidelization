@@ -85,12 +85,34 @@ async function runE2e(): Promise<void> {
 		"Content-Type": "application/json",
 	};
 
+	const meBefore = await fetch(`${brandingVerifyBaseUrl}/api/me`, {
+		headers: { cookie: headers.cookie },
+	});
+	const meBeforeBody = (await meBefore.json()) as {
+		tenant?: {
+			address?: string;
+			description?: string;
+			discoveryTags?: string[];
+		};
+	};
+
+	if (!meBefore.ok || !meBeforeBody.tenant) {
+		console.error("❌ GET /api/me before PATCH:", meBefore.status, meBeforeBody);
+		process.exit(1);
+	}
+
+	const originalAddress = meBeforeBody.tenant.address ?? "";
+	const originalDescription = meBeforeBody.tenant.description ?? "";
+	const originalTags = meBeforeBody.tenant.discoveryTags ?? [];
+	const testAddress = `Verify Geocoding Feedback ${Date.now()} Calle 1, Barcelona`;
+	const testDescription = "Feedback UI verify";
+
 	const patch = await fetch(`${brandingVerifyBaseUrl}/api/tenant/profile`, {
 		method: "PATCH",
 		headers,
 		body: JSON.stringify({
-			address: "Verify Geocoding Feedback Calle 1, Barcelona",
-			description: "Feedback UI verify",
+			address: testAddress,
+			description: testDescription,
 		}),
 	});
 	const patchBody = (await patch.json()) as {
@@ -103,19 +125,24 @@ async function runE2e(): Promise<void> {
 		process.exit(1);
 	}
 
+	if (patchBody.geocodingStatus === TENANT_GEOCODING_STATUS.Skipped) {
+		console.error("❌ expected geocoding attempt on new address, got skipped", patchBody);
+		process.exit(1);
+	}
+
 	const hasMapboxToken = Boolean(process.env.MAPBOX_ACCESS_TOKEN?.trim());
-	const expectedStatus = hasMapboxToken ? "ok" : "failed";
+	const expectedStatus = hasMapboxToken ? TENANT_GEOCODING_STATUS.Ok : TENANT_GEOCODING_STATUS.Failed;
 
 	if (patchBody.geocodingStatus !== expectedStatus) {
 		console.error(`❌ expected geocodingStatus ${expectedStatus}`, patchBody);
 		process.exit(1);
 	}
 
-	const failedPatchDisplay = displayStateFromPatchResponse(
+	const patchDisplay = displayStateFromPatchResponse(
 		patchBody.geocodingStatus as typeof TENANT_GEOCODING_STATUS.Ok,
 		patchBody.geocodingMessage,
 	);
-	assert(failedPatchDisplay !== null, "PATCH response maps to display state");
+	assert(patchDisplay !== null, "PATCH response maps to display state");
 
 	console.log(`✅ PATCH /api/tenant/profile → geocodingStatus=${patchBody.geocodingStatus}`);
 
@@ -131,6 +158,18 @@ async function runE2e(): Promise<void> {
 	}
 
 	console.log(`✅ POST /api/tenant/profile/regeocode → geocodingStatus=${regeocodeBody.geocodingStatus}`);
+
+	await fetch(`${brandingVerifyBaseUrl}/api/tenant/profile`, {
+		method: "PATCH",
+		headers,
+		body: JSON.stringify({
+			address: originalAddress,
+			description: originalDescription,
+			discoveryTags: originalTags,
+		}),
+	});
+
+	console.log("✅ restored original profile");
 }
 
 async function main(): Promise<void> {

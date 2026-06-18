@@ -10,10 +10,6 @@
   },
   "issues": [
     {
-      "title": "Phase R3: Tenant geocoding static map preview on profile",
-      "bodyFile": "docs/issues/tenant-geocoding-map-preview.md"
-    },
-    {
       "title": "Phase R4: Owner panel checklist reflects verified geolocation",
       "bodyFile": "docs/issues/tenant-geocoding-panel-checklist.md"
     }
