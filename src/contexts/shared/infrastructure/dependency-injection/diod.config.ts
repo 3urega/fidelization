@@ -39,7 +39,9 @@ import { UserAuthenticator } from "../../../identity/users/application/authentic
 import { AuthenticateGoogleUser } from "../../../identity/users/application/authenticate/AuthenticateGoogleUser";
 import { EnterPlatformUserFromTenantSession } from "../../../identity/users/application/authenticate/EnterPlatformUserFromTenantSession";
 import { LoginPlatformUser } from "../../../identity/users/application/authenticate/LoginPlatformUser";
+import { ClearUserSearchZone } from "../../../identity/users/application/profile/ClearUserSearchZone";
 import { EnsureUserQrValue } from "../../../identity/users/application/profile/EnsureUserQrValue";
+import { UpdateUserSearchZone } from "../../../identity/users/application/profile/UpdateUserSearchZone";
 import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
@@ -218,6 +220,8 @@ builder.registerAndUse(CreateOwnerBusiness);
 builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(EnsureUserQrValue);
+builder.registerAndUse(UpdateUserSearchZone);
+builder.registerAndUse(ClearUserSearchZone);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(AuthenticateGoogleUser);
 builder.registerAndUse(LoginPlatformUser);

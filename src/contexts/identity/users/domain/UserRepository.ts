@@ -1,5 +1,6 @@
 import { User } from "./User";
 import { UserId } from "./UserId";
+import type { UserSearchZone } from "./UserSearchZone";
 
 export type UserWithPasswordHash = {
 	user: User;
@@ -21,6 +22,8 @@ export abstract class UserRepository {
 
 	/** Sets qr_value only when currently null (idempotent, safe for concurrent lazy assign). */
 	abstract assignQrValueIfAbsent(userId: UserId, qrValue: string): Promise<void>;
+
+	abstract updateSearchZone(userId: UserId, zone: UserSearchZone | null): Promise<User>;
 
 	abstract isPlatformSuperadmin(userId: string): Promise<boolean>;
 }

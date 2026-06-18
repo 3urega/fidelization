@@ -10,6 +10,7 @@ import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/d
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
@@ -195,6 +196,10 @@ class InMemoryUserRepository extends UserRepository {
 	async updatePasswordHash(): Promise<void> {}
 
 	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
+	}
 
 	async isPlatformSuperadmin(): Promise<boolean> {
 		return false;

@@ -125,6 +125,7 @@
     "verify:tenant-geocoding-profile-feedback": "tsx scripts/verify-tenant-geocoding-profile-feedback.ts",
     "verify:tenant-geocoding-map-preview": "tsx scripts/verify-tenant-geocoding-map-preview.ts",
     "verify:tenant-geolocation-checklist": "tsx scripts/verify-tenant-geolocation-checklist.ts",
+    "verify:platform-user-search-zone-use-case": "tsx scripts/verify-platform-user-search-zone-use-case.ts",
     "verify:tenant-feature-flags-use-case": "tsx scripts/verify-tenant-feature-flags-use-case.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "db:backfill-tenant-geocoding": "tsx scripts/backfill-tenant-geocoding.ts",

@@ -12,6 +12,7 @@ import { PlatformUserCannotUseUserLogin } from "../src/contexts/identity/users/d
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { hashPassword } from "../src/lib/auth/password";
 
 class InMemoryUserRepository extends UserRepository {
@@ -60,6 +61,10 @@ class InMemoryUserRepository extends UserRepository {
 	}
 
 	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
+	}
 
 	async isPlatformSuperadmin(userId: string): Promise<boolean> {
 		for (const row of this.users.values()) {

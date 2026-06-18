@@ -4,6 +4,7 @@ import { UserId } from "./UserId";
 import { UserName } from "./UserName";
 import { UserPlan } from "./UserPlan";
 import { UserProfilePicture } from "./UserProfilePicture";
+import { UserSearchZone } from "./UserSearchZone";
 
 export type UserPrimitives = {
 	id: string;
@@ -14,6 +15,7 @@ export type UserPrimitives = {
 	qrValue: string | null;
 	oauthProvider: string | null;
 	oauthSubject: string | null;
+	searchZone: UserSearchZone | null;
 };
 
 export class User extends AggregateRoot {
@@ -26,6 +28,7 @@ export class User extends AggregateRoot {
 		public readonly qrValue: string | null,
 		public readonly oauthProvider: string | null,
 		public readonly oauthSubject: string | null,
+		public searchZone: UserSearchZone | null,
 	) {
 		super();
 	}
@@ -44,6 +47,7 @@ export class User extends AggregateRoot {
 			new UserProfilePicture(profilePicture),
 			UserPlan.Free,
 			qrValue,
+			null,
 			null,
 			null,
 		);
@@ -66,6 +70,7 @@ export class User extends AggregateRoot {
 			params.qrValue,
 			"google",
 			params.oauthSubject,
+			null,
 		);
 	}
 
@@ -80,6 +85,7 @@ export class User extends AggregateRoot {
 			qrValue,
 			"google",
 			oauthSubject,
+			this.searchZone,
 		);
 	}
 
@@ -93,6 +99,7 @@ export class User extends AggregateRoot {
 			primitives.qrValue,
 			primitives.oauthProvider,
 			primitives.oauthSubject,
+			primitives.searchZone,
 		);
 	}
 
@@ -106,6 +113,7 @@ export class User extends AggregateRoot {
 			qrValue: this.qrValue,
 			oauthProvider: this.oauthProvider,
 			oauthSubject: this.oauthSubject,
+			searchZone: this.searchZone,
 		};
 	}
 
@@ -116,5 +124,13 @@ export class User extends AggregateRoot {
 
 	setPlan(plan: UserPlan): void {
 		this.plan = plan;
+	}
+
+	setSearchZone(zone: UserSearchZone): void {
+		this.searchZone = zone;
+	}
+
+	clearSearchZone(): void {
+		this.searchZone = null;
 	}
 }

@@ -23,11 +23,29 @@ import { Promotion } from "../../contexts/loyalty/promotions/domain/Promotion";
 import type { CustomerPromotionSummary } from "../../contexts/loyalty/promotions/domain/CustomerPromotionSummary";
 import type { PlatformDashboardMetrics } from "../../contexts/platform/domain/PlatformDashboardMetrics";
 import type { PlatformTenantDetail } from "../../contexts/platform/domain/PlatformTenantDetail";
+import type { UserSearchZone } from "../../contexts/identity/users/domain/UserSearchZone";
 import { SubscriptionPlan } from "../../contexts/billing/subscriptions/domain/SubscriptionPlan";
 import { Tenant } from "../../contexts/tenants/tenants/domain/Tenant";
 import type { TenantProfileUpdateResult } from "../../contexts/tenants/tenants/domain/TenantProfileUpdateResult";
 import { TenantEmployee } from "../../contexts/tenants/memberships/domain/TenantEmployee";
 import { CustomerSessionClaims, TenantSessionClaims } from "./session";
+
+export function searchZoneToJson(
+	zone: UserSearchZone | null,
+): Record<string, string | number> | null {
+	if (!zone) {
+		return null;
+	}
+
+	const primitives = zone.toPrimitives();
+
+	return {
+		label: primitives.label,
+		latitude: primitives.latitude,
+		longitude: primitives.longitude,
+		updatedAt: primitives.updatedAt,
+	};
+}
 
 export function userToJson(user: {
 	id: { value: string };
@@ -36,7 +54,8 @@ export function userToJson(user: {
 	profilePicture: { value: string };
 	plan: string;
 	qrValue?: string | null;
-}): Record<string, string | null> {
+	searchZone?: UserSearchZone | null;
+}): Record<string, string | null | Record<string, string | number>> {
 	return {
 		id: user.id.value,
 		name: user.name.value,
@@ -44,6 +63,7 @@ export function userToJson(user: {
 		profilePicture: user.profilePicture.value,
 		plan: user.plan,
 		qrValue: user.qrValue ?? null,
+		searchZone: searchZoneToJson(user.searchZone ?? null),
 	};
 }
 
@@ -678,6 +698,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	}
 	if (error.type === "TenantPlanLimitExceeded") {
 		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidUserSearchZone") {
+		return HttpNextResponse.domainError(error, 400);
+	}
+	if (error.type === "InvalidCoordinates") {
+		return HttpNextResponse.domainError(error, 400);
 	}
 
 	return undefined;

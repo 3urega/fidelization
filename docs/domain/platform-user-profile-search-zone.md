@@ -67,16 +67,18 @@ Radio backend (`radiusKm`, default 25) permanece en API; **no se muestra al usua
 - Phase R (#91): patrón mapa estático tenant → reutilizar proxy/builder para preview de zona usuario.
 - `GeocodingGateway` (#85): geocode forward del texto de búsqueda.
 
-## Issues GitHub (draft)
+## Issues GitHub (Phase S)
 
 Manifest: [`docs/issues/manifest.phase-s-user-profile-search-zone.json`](../issues/manifest.phase-s-user-profile-search-zone.json)
 
 | # | Issue | Valor |
 |---|-------|-------|
-| S1 | User search zone domain + API | Persistencia y contrato |
-| S2 | Perfil app shell + tabs | Navegación y estructura |
-| S3 | Editor zona de búsqueda | Geocode + mapa + confirmar |
-| S4 | Tab mis tarjetas de sellos | Resumen fidelización |
-| S5 | Grid discover + zona guardada + copy | UX integrada |
+| [#93](https://github.com/3urega/fidelization/issues/93) | S1: User search zone domain + API | Persistencia y contrato |
+| [#94](https://github.com/3urega/fidelization/issues/94) | S2: Perfil app shell + tabs | Navegación y estructura |
+| [#95](https://github.com/3urega/fidelization/issues/95) | S3: Editor zona de búsqueda | Geocode + mapa + confirmar |
+| [#96](https://github.com/3urega/fidelization/issues/96) | S4: Tab mis tarjetas de sellos | Resumen fidelización |
+| [#97](https://github.com/3urega/fidelization/issues/97) | S5: Grid discover + zona guardada + copy | UX integrada |
+
+*(Publicado 2026-06-18.)*
 
 **Relacionado:** [`customer-platform-app.md`](customer-platform-app.md), [`localization.md`](../localization.md).

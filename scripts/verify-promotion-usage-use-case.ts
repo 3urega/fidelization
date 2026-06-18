@@ -12,6 +12,7 @@ import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/S
 import { TenantBillingRepository } from "../src/contexts/billing/subscriptions/domain/TenantBillingRepository";
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { RecordPromotionUse } from "../src/contexts/loyalty/customers/application/promotions/RecordPromotionUse";
 import { ListCustomerPromotionSummaries } from "../src/contexts/loyalty/promotions/application/list/ListCustomerPromotionSummaries";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
@@ -232,6 +233,10 @@ class InMemoryUserRepository extends UserRepository {
 	async updatePasswordHash(): Promise<void> {}
 
 	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
+	}
 
 	async isPlatformSuperadmin(): Promise<boolean> {
 		return false;

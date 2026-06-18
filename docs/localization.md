@@ -165,7 +165,15 @@ Perfil app personal, zona de búsqueda persistida e integración grid Explorar.
 
 Spec: [`docs/domain/platform-user-profile-search-zone.md`](domain/platform-user-profile-search-zone.md) · Manifest: [`docs/issues/manifest.phase-s-user-profile-search-zone.json`](issues/manifest.phase-s-user-profile-search-zone.json)
 
-*(Draft — publicar con publish-github-issues.)*
+| # | Issue |
+|---|-------|
+| [#93](https://github.com/3urega/fidelization/issues/93) | S1: User search zone domain + API |
+| [#94](https://github.com/3urega/fidelization/issues/94) | S2: Perfil app shell + tabs |
+| [#95](https://github.com/3urega/fidelization/issues/95) | S3: Editor zona de búsqueda |
+| [#96](https://github.com/3urega/fidelization/issues/96) | S4: Tab mis tarjetas de sellos |
+| [#97](https://github.com/3urega/fidelization/issues/97) | S5: Grid discover + copy UX |
+
+*(Publicado 2026-06-18.)*
 
 [1]: https://developers.google.com/maps/documentation/geocoding?utm_source=chatgpt.com "Google Maps Platform Documentation | Geocoding API"
 [2]: https://docs.mapbox.com/api/search/geocoding/?utm_source=chatgpt.com "Geocoding API | API Docs"

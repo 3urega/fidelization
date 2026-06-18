@@ -7,6 +7,7 @@ import { EnsureUserQrValue } from "../src/contexts/identity/users/application/pr
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { hashPassword } from "../src/lib/auth/password";
 import { prisma } from "../src/lib/prisma";
 
@@ -69,6 +70,10 @@ class InMemoryUserRepository extends UserRepository {
 
 			return;
 		}
+	}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
 	}
 
 	async isPlatformSuperadmin(): Promise<boolean> {

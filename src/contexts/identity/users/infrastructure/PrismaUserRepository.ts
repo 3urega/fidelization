@@ -2,14 +2,17 @@ import { Service } from "diod";
 
 import { prisma } from "../../../../lib/prisma";
 import { User } from "../domain/User";
+import { UserDoesNotExist } from "../domain/UserDoesNotExist";
 import { UserId } from "../domain/UserId";
 import { UserPlan } from "../domain/UserPlan";
 import { UserRepository, UserWithPasswordHash } from "../domain/UserRepository";
+import { UserSearchZone } from "../domain/UserSearchZone";
 
 @Service()
 export class PrismaUserRepository extends UserRepository {
 	async save(user: User, passwordHash: string): Promise<void> {
 		const primitives = user.toPrimitives();
+		const searchZone = primitives.searchZone?.toPrimitives();
 
 		await prisma.user.upsert({
 			where: { id: primitives.id },
@@ -23,6 +26,10 @@ export class PrismaUserRepository extends UserRepository {
 				qrValue: primitives.qrValue,
 				oauthProvider: primitives.oauthProvider,
 				oauthSubject: primitives.oauthSubject,
+				searchZoneLabel: searchZone?.label ?? null,
+				searchZoneLatitude: searchZone?.latitude ?? null,
+				searchZoneLongitude: searchZone?.longitude ?? null,
+				searchZoneUpdatedAt: searchZone ? new Date(searchZone.updatedAt) : null,
 			},
 			update: {
 				name: primitives.name,
@@ -33,6 +40,10 @@ export class PrismaUserRepository extends UserRepository {
 				qrValue: primitives.qrValue,
 				oauthProvider: primitives.oauthProvider,
 				oauthSubject: primitives.oauthSubject,
+				searchZoneLabel: searchZone?.label ?? null,
+				searchZoneLatitude: searchZone?.latitude ?? null,
+				searchZoneLongitude: searchZone?.longitude ?? null,
+				searchZoneUpdatedAt: searchZone ? new Date(searchZone.updatedAt) : null,
 			},
 		});
 	}
@@ -99,6 +110,34 @@ export class PrismaUserRepository extends UserRepository {
 		});
 	}
 
+	async updateSearchZone(userId: UserId, zone: UserSearchZone | null): Promise<User> {
+		const zonePrimitives = zone?.toPrimitives();
+
+		await prisma.user.update({
+			where: { id: userId.value },
+			data: zonePrimitives
+				? {
+						searchZoneLabel: zonePrimitives.label,
+						searchZoneLatitude: zonePrimitives.latitude,
+						searchZoneLongitude: zonePrimitives.longitude,
+						searchZoneUpdatedAt: new Date(zonePrimitives.updatedAt),
+					}
+				: {
+						searchZoneLabel: null,
+						searchZoneLatitude: null,
+						searchZoneLongitude: null,
+						searchZoneUpdatedAt: null,
+					},
+		});
+
+		const user = await this.search(userId);
+		if (!user) {
+			throw new UserDoesNotExist(userId.value);
+		}
+
+		return user;
+	}
+
 	async isPlatformSuperadmin(userId: string): Promise<boolean> {
 		const row = await prisma.user.findUnique({
 			where: { id: userId },
@@ -117,7 +156,24 @@ export class PrismaUserRepository extends UserRepository {
 		qrValue: string | null;
 		oauthProvider: string | null;
 		oauthSubject: string | null;
+		searchZoneLabel: string | null;
+		searchZoneLatitude: number | null;
+		searchZoneLongitude: number | null;
+		searchZoneUpdatedAt: Date | null;
 	}): User {
+		const searchZone =
+			row.searchZoneLabel &&
+			row.searchZoneLatitude != null &&
+			row.searchZoneLongitude != null &&
+			row.searchZoneUpdatedAt
+				? UserSearchZone.fromPrimitives({
+						label: row.searchZoneLabel,
+						latitude: row.searchZoneLatitude,
+						longitude: row.searchZoneLongitude,
+						updatedAt: row.searchZoneUpdatedAt.toISOString(),
+					})
+				: null;
+
 		return User.fromPrimitives({
 			id: row.id,
 			name: row.name,
@@ -127,6 +183,7 @@ export class PrismaUserRepository extends UserRepository {
 			qrValue: row.qrValue,
 			oauthProvider: row.oauthProvider,
 			oauthSubject: row.oauthSubject,
+			searchZone,
 		});
 	}
 }

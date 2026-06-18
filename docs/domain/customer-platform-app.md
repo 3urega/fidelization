@@ -419,3 +419,13 @@ Perfil `/home/profile` (información · tarjetas), zona de búsqueda persistida 
 
 Spec: [`platform-user-profile-search-zone.md`](platform-user-profile-search-zone.md) · Manifest: [`docs/issues/manifest.phase-s-user-profile-search-zone.json`](../issues/manifest.phase-s-user-profile-search-zone.json)
 
+| # | Issue |
+|---|-------|
+| [#93](https://github.com/3urega/fidelization/issues/93) | S1: User search zone domain + API |
+| [#94](https://github.com/3urega/fidelization/issues/94) | S2: Perfil app shell + tabs |
+| [#95](https://github.com/3urega/fidelization/issues/95) | S3: Editor zona de búsqueda |
+| [#96](https://github.com/3urega/fidelization/issues/96) | S4: Tab mis tarjetas de sellos |
+| [#97](https://github.com/3urega/fidelization/issues/97) | S5: Grid discover + copy UX |
+
+*(Publicado 2026-06-18.)*
+

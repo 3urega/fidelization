@@ -89,6 +89,10 @@ class InMemoryUserRepository extends UserRepository {
 
 	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {}
 
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
+	}
+
 	async isPlatformSuperadmin(userId: string): Promise<boolean> {
 		for (const row of this.users.values()) {
 			if (row.user.id.value === userId) {

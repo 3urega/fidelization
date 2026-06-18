@@ -67,6 +67,10 @@ model User {
   qrValue          String?            @unique @map("qr_value")
   oauthProvider    String?            @map("oauth_provider")
   oauthSubject     String?            @unique @map("oauth_subject")
+  searchZoneLabel    String?            @map("search_zone_label")
+  searchZoneLatitude Float?             @map("search_zone_latitude")
+  searchZoneLongitude Float?            @map("search_zone_longitude")
+  searchZoneUpdatedAt DateTime?         @map("search_zone_updated_at")
   createdAt        DateTime           @default(now()) @map("created_at")
   memberships      TenantMembership[]
   customers        Customer[]

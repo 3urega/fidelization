@@ -11,6 +11,7 @@ import { UserFinder } from "../src/contexts/identity/users/application/find/User
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import {
 	type OwnerStaffMembership,
 	StaffMembership,
@@ -46,6 +47,9 @@ const ownerUser = User.fromPrimitives({
 	profilePicture: "",
 	plan: "FREE",
 	qrValue: "qr-owner-demo",
+	oauthProvider: null,
+	oauthSubject: null,
+	searchZone: null,
 });
 
 class StubUserRepository extends UserRepository {
@@ -74,6 +78,10 @@ class StubUserRepository extends UserRepository {
 	async updatePasswordHash(): Promise<void> {}
 
 	async assignQrValueIfAbsent(): Promise<void> {}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
+	}
 }
 
 class StubUserFinder extends UserFinder {

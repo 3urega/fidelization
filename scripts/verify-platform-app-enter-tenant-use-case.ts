@@ -11,6 +11,7 @@ import { UserFinder } from "../src/contexts/identity/users/application/find/User
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";
 import { TenantNotFound } from "../src/contexts/tenants/tenants/domain/TenantNotFound";
 import { TenantRepository } from "../src/contexts/tenants/tenants/domain/TenantRepository";
@@ -47,6 +48,10 @@ class StubUserRepository extends UserRepository {
 
 	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {
 		return;
+	}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
 	}
 }
 
@@ -135,6 +140,7 @@ function buildUser(): User {
 		qrValue: `qr-${randomUUID()}`,
 		oauthProvider: null,
 		oauthSubject: null,
+		searchZone: null,
 	});
 }
 
