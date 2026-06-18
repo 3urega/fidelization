@@ -421,7 +421,7 @@ Spec: [`platform-user-profile-search-zone.md`](platform-user-profile-search-zone
 
 | # | Issue |
 |---|-------|
-| [#93](https://github.com/3urega/fidelization/issues/93) | S1: User search zone domain + API |
+| [#93](https://github.com/3urega/fidelization/issues/93) | S1: User search zone domain + API — **Implemented** 2026-06-18 |
 | [#94](https://github.com/3urega/fidelization/issues/94) | S2: Perfil app shell + tabs |
 | [#95](https://github.com/3urega/fidelization/issues/95) | S3: Editor zona de búsqueda |
 | [#96](https://github.com/3urega/fidelization/issues/96) | S4: Tab mis tarjetas de sellos |

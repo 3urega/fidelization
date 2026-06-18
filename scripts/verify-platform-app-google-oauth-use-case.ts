@@ -16,6 +16,7 @@ import { PlatformUserCannotUseUserLogin } from "../src/contexts/identity/users/d
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 
 class StubGoogleIdTokenVerifier extends GoogleIdTokenVerifier {
 	constructor(private readonly claimsByToken: Map<string, GoogleIdTokenClaims>) {

@@ -143,6 +143,10 @@ class InMemoryMembershipRepository extends TenantMembershipRepository {
 			email: normalizedEmail,
 			profilePicture: "",
 			plan: UserPlan.Free,
+			qrValue: null,
+			oauthProvider: null,
+			oauthSubject: null,
+			searchZone: null,
 		});
 		this.users.set(normalizedEmail, user);
 

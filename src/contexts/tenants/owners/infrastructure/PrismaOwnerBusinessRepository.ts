@@ -55,6 +55,7 @@ export class PrismaOwnerBusinessRepository extends OwnerBusinessRepository {
 				qrValue: result.userRow.qrValue,
 				oauthProvider: result.userRow.oauthProvider,
 				oauthSubject: result.userRow.oauthSubject,
+				searchZone: null,
 			}),
 			tenant: tenantFromPrismaRow(result.tenantRow),
 			role: TenantRole.Owner,

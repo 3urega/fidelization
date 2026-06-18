@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Phase S1: User search zone domain + API (persistencia en users)",
-      "bodyFile": "docs/issues/platform-user-search-zone-domain-api.md"
-    },
-    {
       "title": "Phase S2: Perfil app personal shell + tabs (informacion + tarjetas)",
       "bodyFile": "docs/issues/platform-user-profile-shell-tabs.md"
     },

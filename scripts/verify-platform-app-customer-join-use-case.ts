@@ -5,6 +5,7 @@ import { UserFinder } from "../src/contexts/identity/users/application/find/User
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { JoinTenantAsCustomer } from "../src/contexts/loyalty/customers/application/join/JoinTenantAsCustomer";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";

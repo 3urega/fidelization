@@ -69,6 +69,10 @@ async function run(): Promise<void> {
 						email,
 						profilePicture: "",
 						plan: "FREE",
+						qrValue: null,
+						oauthProvider: null,
+						oauthSubject: null,
+						searchZone: null,
 					});
 				}
 
@@ -79,6 +83,10 @@ async function run(): Promise<void> {
 						email,
 						profilePicture: "",
 						plan: "FREE",
+						qrValue: null,
+						oauthProvider: null,
+						oauthSubject: null,
+						searchZone: null,
 					});
 				}
 

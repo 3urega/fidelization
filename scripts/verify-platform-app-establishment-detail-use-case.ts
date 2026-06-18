@@ -15,6 +15,7 @@ import { UserFinder } from "../src/contexts/identity/users/application/find/User
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { TenantAccessSuspended } from "../src/contexts/tenants/tenants/domain/TenantAccessSuspended";
 import { TenantNotFound } from "../src/contexts/tenants/tenants/domain/TenantNotFound";
 import { Tenant } from "../src/contexts/tenants/tenants/domain/Tenant";

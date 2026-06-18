@@ -8,6 +8,7 @@ import { User } from "../src/contexts/identity/users/domain/User";
 import { UserDoesNotExist } from "../src/contexts/identity/users/domain/UserDoesNotExist";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository, UserWithPasswordHash } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import {
 	type PlatformAppUserDetail,
 	type PlatformAppUserRow,
@@ -177,6 +178,14 @@ class InMemoryUserRepository extends UserRepository {
 			});
 			this.users.set(email, { user: updated, passwordHash: row.passwordHash });
 		}
+	}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
+	}
+
+	async isPlatformSuperadmin(): Promise<boolean> {
+		return false;
 	}
 }
 

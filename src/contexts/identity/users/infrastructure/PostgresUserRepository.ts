@@ -5,6 +5,7 @@ import { User } from "../domain/User";
 import { UserId } from "../domain/UserId";
 import { UserPlan } from "../domain/UserPlan";
 import { UserRepository, UserWithPasswordHash } from "../domain/UserRepository";
+import type { UserSearchZone } from "../domain/UserSearchZone";
 
 type DatabaseUserRow = {
 	id: string;
@@ -88,6 +89,10 @@ export class PostgresUserRepository extends PostgresRepository<User> implements 
 		return null;
 	}
 
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone is not supported in legacy PostgresUserRepository");
+	}
+
 	protected toAggregate(row: DatabaseUserRow): User {
 		return User.fromPrimitives({
 			id: row.id,
@@ -98,6 +103,7 @@ export class PostgresUserRepository extends PostgresRepository<User> implements 
 			qrValue: null,
 			oauthProvider: null,
 			oauthSubject: null,
+			searchZone: null,
 		});
 	}
 }

@@ -8,6 +8,7 @@ import { PlatformUserCannotUseUserLogin } from "../src/contexts/identity/users/d
 import { User } from "../src/contexts/identity/users/domain/User";
 import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
+import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { UserFinder } from "../src/contexts/identity/users/application/find/UserFinder";
 
 class StubUserRepository extends UserRepository {
@@ -33,6 +34,7 @@ class StubUserRepository extends UserRepository {
 			qrValue: `qr-${id.value}`,
 			oauthProvider: null,
 			oauthSubject: null,
+			searchZone: null,
 		});
 	}
 
@@ -54,6 +56,10 @@ class StubUserRepository extends UserRepository {
 
 	async assignQrValueIfAbsent(_userId: UserId, _qrValue: string): Promise<void> {
 		return;
+	}
+
+	async updateSearchZone(_userId: UserId, _zone: UserSearchZone | null): Promise<User> {
+		throw new Error("updateSearchZone not implemented");
 	}
 }
 
@@ -95,6 +101,7 @@ async function main(): Promise<void> {
 		qrValue: `qr-${userId}`,
 		oauthProvider: null,
 		oauthSubject: null,
+		searchZone: null,
 	});
 
 	const useCase = new EnterPlatformUserFromTenantSession(
