@@ -146,16 +146,26 @@ Manifest: [`docs/issues/manifest.phase-q-location-discovery.json`](issues/manife
 
 Seguimiento post-Q: el owner debe **ver si su dirección se geocodificó**, **preview en mapa** y checklist coherente. Sin geocode silencioso.
 
-Manifest: [`docs/issues/manifest.phase-r-tenant-geocoding-feedback.json`](issues/manifest.phase-r-tenant-geocoding-feedback.json)
+Manifest Phase R (issues #89–#92): publicado y cerrado 2026-06-14.
 
 | # | Issue | Capas |
 |---|-------|-------|
 | [#89](https://github.com/3urega/fidelization/issues/89) | R1: Geocoding status API + regeocode — **Implemented** 2026-06-13 | dominio, API |
 | [#90](https://github.com/3urega/fidelization/issues/90) | R2: Profile feedback UI (banner / reintentar) — **Implemented** 2026-06-13 | UI owner |
 | [#91](https://github.com/3urega/fidelization/issues/91) | R3: Mapa estático con pin en perfil — **Implemented** 2026-06-13 | UI + proxy map URL |
-| [#92](https://github.com/3urega/fidelization/issues/92) | R4: Checklist panel vs coords reales | panel |
+| [#92](https://github.com/3urega/fidelization/issues/92) | R4: Checklist panel vs coords reales — **Implemented** 2026-06-14 | panel |
 
 *(Publicado 2026-06-13.)*
+
+---
+
+## GitHub issues (Phase S — user profile + search zone)
+
+Perfil app personal, zona de búsqueda persistida e integración grid Explorar.
+
+Spec: [`docs/domain/platform-user-profile-search-zone.md`](domain/platform-user-profile-search-zone.md) · Manifest: [`docs/issues/manifest.phase-s-user-profile-search-zone.json`](issues/manifest.phase-s-user-profile-search-zone.json)
+
+*(Draft — publicar con publish-github-issues.)*
 
 [1]: https://developers.google.com/maps/documentation/geocoding?utm_source=chatgpt.com "Google Maps Platform Documentation | Geocoding API"
 [2]: https://docs.mapbox.com/api/search/geocoding/?utm_source=chatgpt.com "Geocoding API | API Docs"

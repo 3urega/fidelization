@@ -12,6 +12,7 @@ import { Card } from "../../_components/ui/Card";
 import { hasTenantAddress } from "../../../lib/tenant/hasTenantAddress";
 import { hasTenantChosenPlan } from "../../../lib/tenant/hasTenantChosenPlan";
 import { hasTenantDiscoveryTags } from "../../../lib/tenant/hasTenantDiscoveryTags";
+import { hasTenantVerifiedLocation } from "../../../lib/tenant/hasTenantVerifiedLocation";
 import { isTenantBrandingCustomized } from "../../../lib/tenant/isTenantBrandingCustomized";
 import { ownerPanelTabUrl } from "../../../lib/tenant/ownerPanelRoutes";
 
@@ -178,7 +179,8 @@ export function OwnerConfigurationPanel(): ReactElement {
 
 	const isOwner = session.role === "owner";
 	const brandingDone = isTenantBrandingCustomized(session.tenant);
-	const addressDone = isOwner ? hasTenantAddress(session.tenant) : false;
+	const hasAddress = isOwner ? hasTenantAddress(session.tenant) : false;
+	const locationVerified = isOwner ? hasTenantVerifiedLocation(session.tenant) : false;
 	const tagsDone = isOwner ? hasTenantDiscoveryTags(session.tenant) : false;
 	const planDone = isOwner ? hasTenantChosenPlan(session.tenant) : false;
 	const stampsComplete = isOwner ? stampsDone : false;
@@ -277,20 +279,22 @@ export function OwnerConfigurationPanel(): ReactElement {
 							<span
 								className={[
 									"mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-									addressDone
+									locationVerified
 										? "bg-primary text-primary-foreground"
 										: "border border-border text-muted",
 								].join(" ")}
 								aria-hidden
 							>
-								{addressDone ? "✓" : "·"}
+								{locationVerified ? "✓" : "·"}
 							</span>
 							<div>
 								<p className="text-sm font-medium text-foreground">Añade la dirección de tu negocio</p>
 								<p className="text-sm text-muted">
-									{addressDone
+									{locationVerified
 										? "Los clientes pueden ver dónde estás."
-										: "Recomendado para que te encuentren en la app."}
+										: hasAddress
+											? "Confirma tu ubicación en el mapa."
+											: "Recomendado para que te encuentren en la app."}
 								</p>
 							</div>
 						</div>
@@ -299,11 +303,15 @@ export function OwnerConfigurationPanel(): ReactElement {
 								href="/settings/profile"
 								className="text-sm font-medium text-primary hover:underline sm:shrink-0"
 							>
-								{addressDone ? "Editar" : "Añadir dirección"}
+								{locationVerified
+									? "Editar"
+									: hasAddress
+										? "Confirmar ubicación"
+										: "Añadir dirección"}
 							</Link>
 						) : (
 							<span className="text-sm text-muted sm:shrink-0">
-								{addressDone ? "Completado" : "Pendiente (owner)"}
+								{locationVerified ? "Completado" : "Pendiente (owner)"}
 							</span>
 						)}
 					</li>

@@ -10,10 +10,12 @@ import {
 } from "../../../../_components/loyalty/LoyaltyCard";
 import { StampCampaignCards } from "../../../../_components/loyalty/StampCampaignCards";
 import { EstablishmentHeroCover } from "../../../../_components/platform-app/EstablishmentHeroCover";
+import { PlatformUserQrModal } from "../../../../_components/platform-app/PlatformUserQrModal";
 import { platformFetch } from "../../../../../lib/platform/apiUrl";
 import { platformRoutes } from "../../../../../lib/platform/routes";
 import { Button } from "../../../../_components/ui/Button";
 import { Card } from "../../../../_components/ui/Card";
+import { HoverTooltip } from "../../../../_components/ui/HoverTooltip";
 
 type EstablishmentTenant = {
 	id: string;
@@ -36,12 +38,17 @@ type EstablishmentCustomer = {
 	visitsCount: number;
 };
 
+type UserMeResponse = {
+	user: { id: string; name: string; email: string; qrValue: string | null };
+};
+
 type EstablishmentDetailResponse = {
 	mode: "discovery" | "interaction";
 	tenant: EstablishmentTenant;
 	promotions: PromotionRow[];
 	customer: EstablishmentCustomer | null;
 	stampProgress?: StampProgressRow[];
+	userQrValue?: string | null;
 	error?: { description?: string };
 };
 
@@ -142,9 +149,11 @@ export function PlatformEstablishmentDetail(): ReactElement {
 	const params = useParams();
 	const slug = typeof params.slug === "string" ? params.slug : "";
 	const [detail, setDetail] = useState<EstablishmentDetailResponse | null>(null);
+	const [user, setUser] = useState<UserMeResponse["user"] | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [joining, setJoining] = useState(false);
+	const [qrModalOpen, setQrModalOpen] = useState(false);
 
 	const loadDetail = useCallback(async (): Promise<void> => {
 		if (!slug) {
@@ -173,6 +182,26 @@ export function PlatformEstablishmentDetail(): ReactElement {
 		setLoading(true);
 		void loadDetail();
 	}, [loadDetail]);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function loadUser(): Promise<void> {
+			const response = await platformFetch("/api/user/me");
+			if (cancelled || !response.ok) {
+				return;
+			}
+
+			const body = (await response.json()) as UserMeResponse;
+			setUser(body.user);
+		}
+
+		void loadUser();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
 	async function handleJoin(): Promise<void> {
 		setJoining(true);
@@ -215,6 +244,13 @@ export function PlatformEstablishmentDetail(): ReactElement {
 
 	const stampRows = detail.stampProgress ?? [];
 	const { activeCards, availableCards } = splitStampProgressRows(stampRows);
+	const qrValue = user?.qrValue ?? detail.userQrValue ?? null;
+	const qrDisabledReason =
+		loading || !user
+			? "Cargando tu código QR…"
+			: !qrValue
+				? "No se pudo cargar tu código QR. Recarga la página o vuelve a iniciar sesión."
+				: null;
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
@@ -230,6 +266,34 @@ export function PlatformEstablishmentDetail(): ReactElement {
 			/>
 
 			<EstablishmentProfileInfo tenant={detail.tenant} />
+
+			{detail.mode === "interaction" ? (
+				<>
+					<HoverTooltip message={qrDisabledReason} className="w-full">
+						<Button
+							type="button"
+							className="w-full"
+							disabled={!user || !qrValue}
+							onClick={() => {
+								setQrModalOpen(true);
+							}}
+						>
+							Mostrar mi QR
+						</Button>
+					</HoverTooltip>
+
+					{user ? (
+						<PlatformUserQrModal
+							open={qrModalOpen}
+							onClose={() => {
+								setQrModalOpen(false);
+							}}
+							name={user.name}
+							qrValue={qrValue}
+						/>
+					) : null}
+				</>
+			) : null}
 
 			{detail.mode === "discovery" ? (
 				<>

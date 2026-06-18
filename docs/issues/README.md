@@ -51,6 +51,8 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-q-location-discovery.json
 # Phase R — tenant geocoding owner feedback (draft)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-r-tenant-geocoding-feedback.json
+# Phase S — user profile + search zone (draft)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-s-user-profile-search-zone.json
 ```
 
 ## After close on GitHub

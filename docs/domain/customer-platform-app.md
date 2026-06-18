@@ -411,3 +411,11 @@ Manifest: [`docs/issues/manifest.platform-app.json`](../issues/manifest.platform
 
 Phase I issues: **todas cerradas** (#46–#48).
 
+---
+
+## GitHub issues (Phase S — perfil personal y zona de búsqueda)
+
+Perfil `/home/profile` (información · tarjetas), zona de búsqueda persistida e integración con grid Explorar.
+
+Spec: [`platform-user-profile-search-zone.md`](platform-user-profile-search-zone.md) · Manifest: [`docs/issues/manifest.phase-s-user-profile-search-zone.json`](../issues/manifest.phase-s-user-profile-search-zone.json)
+
