@@ -1,5 +1,7 @@
 "use client";
 
+import "mapbox-gl/dist/mapbox-gl.css";
+
 import { type ReactElement, useEffect, useRef } from "react";
 
 import {
@@ -34,6 +36,7 @@ export function MapboxInteractiveMap({
 
 	useEffect(() => {
 		let disposed = false;
+		let resizeObserver: ResizeObserver | null = null;
 
 		async function initMap(): Promise<void> {
 			if (!containerRef.current) {
@@ -41,7 +44,6 @@ export function MapboxInteractiveMap({
 			}
 
 			const mapboxModule = await import("mapbox-gl");
-			await import("mapbox-gl/dist/mapbox-gl.css");
 
 			if (disposed || !containerRef.current) {
 				return;
@@ -69,6 +71,19 @@ export function MapboxInteractiveMap({
 			map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 			mapRef.current = map;
 
+			const resizeMap = (): void => {
+				map.resize();
+			};
+
+			map.on("load", resizeMap);
+			requestAnimationFrame(resizeMap);
+
+			resizeObserver =
+				typeof ResizeObserver !== "undefined" && containerRef.current
+					? new ResizeObserver(resizeMap)
+					: null;
+			resizeObserver?.observe(containerRef.current);
+
 			const emitCenterIfChanged = (): void => {
 				if (isFlyingRef.current) {
 					return;
@@ -92,6 +107,7 @@ export function MapboxInteractiveMap({
 
 		return () => {
 			disposed = true;
+			resizeObserver?.disconnect();
 			for (const marker of markerRefs.current) {
 				marker.remove();
 			}
@@ -185,8 +201,10 @@ export function MapboxInteractiveMap({
 	}, [markers]);
 
 	return (
-		<div className={`relative min-h-[220px] w-full overflow-hidden rounded-theme border border-border bg-surface ${className ?? ""}`}>
-			<div ref={containerRef} className="absolute inset-0" />
+		<div
+			className={`relative w-full overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
+		>
+			<div ref={containerRef} className="absolute inset-0 h-full w-full" />
 			<MapCenterPin />
 		</div>
 	);

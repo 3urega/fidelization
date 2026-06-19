@@ -56,8 +56,8 @@ function geocodeErrorMessage(status: number, body: { error?: { description?: str
 }
 
 const MAP_MIN_HEIGHT = {
-	embedded: "min-h-[220px]",
-	page: "min-h-[min(60vh,520px)]",
+	embedded: "h-[220px]",
+	page: "h-[min(60vh,520px)]",
 } as const;
 
 export function SearchZoneMapEditor({

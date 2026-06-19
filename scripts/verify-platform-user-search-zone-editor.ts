@@ -225,13 +225,15 @@ async function runE2eTests(): Promise<void> {
 	if (
 		profile.status !== 200 ||
 		!profileHtml.includes("Tu perfil") ||
-		!profileHtml.includes("Información personal")
+		!profileHtml.includes("Información personal") ||
+		profileHtml.includes("Confirmar zona") ||
+		profileHtml.includes("Buscar con geocodificación")
 	) {
-		console.error("❌ profile shell missing expected copy", profile.status);
+		console.error("❌ profile should not embed search zone editor", profile.status);
 		process.exit(1);
 	}
 
-	console.log("✅ GET /home/profile shell OK (editor UI hydrates client-side)");
+	console.log("✅ GET /home/profile shell OK (no embedded editor)");
 	console.log("✅ verify:platform-user-search-zone-editor passed");
 }
 

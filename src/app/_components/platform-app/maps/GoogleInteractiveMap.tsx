@@ -37,6 +37,7 @@ export function GoogleInteractiveMap({
 
 	useEffect(() => {
 		let disposed = false;
+		let resizeObserver: ResizeObserver | null = null;
 
 		async function initMap(): Promise<void> {
 			if (!containerRef.current) {
@@ -69,6 +70,19 @@ export function GoogleInteractiveMap({
 
 			mapRef.current = map;
 
+			const resizeMap = (): void => {
+				google.maps.event.trigger(map, "resize");
+			};
+
+			resizeMap();
+			requestAnimationFrame(resizeMap);
+
+			resizeObserver =
+				typeof ResizeObserver !== "undefined" && containerRef.current
+					? new ResizeObserver(resizeMap)
+					: null;
+			resizeObserver?.observe(containerRef.current);
+
 			const emitCenterIfChanged = (): void => {
 				if (isFlyingRef.current) {
 					return;
@@ -99,6 +113,7 @@ export function GoogleInteractiveMap({
 
 		return () => {
 			disposed = true;
+			resizeObserver?.disconnect();
 			for (const marker of markerRefs.current) {
 				marker.setMap(null);
 			}
@@ -161,8 +176,10 @@ export function GoogleInteractiveMap({
 	}, [markers]);
 
 	return (
-		<div className={`relative min-h-[220px] w-full overflow-hidden rounded-theme border border-border bg-surface ${className ?? ""}`}>
-			<div ref={containerRef} className="absolute inset-0" />
+		<div
+			className={`relative w-full overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
+		>
+			<div ref={containerRef} className="absolute inset-0 h-full w-full" />
 			<MapCenterPin />
 		</div>
 	);

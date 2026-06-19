@@ -3,7 +3,6 @@ import "dotenv/config";
 
 import { randomUUID } from "crypto";
 
-import { DEFAULT_DISCOVER_NEAR_RADIUS_KM } from "../src/contexts/tenants/tenants/domain/DiscoverNearFilter";
 import { prisma } from "../src/lib/prisma";
 import { buildDiscoverEstablishmentsQuery, resolveDiscoverActiveNear } from "../src/lib/platform/buildDiscoverEstablishmentsQuery";
 import { formatDistanceKm } from "../src/lib/platform/formatDistanceKm";
@@ -64,7 +63,7 @@ function assertBuildDiscoverEstablishmentsQuery(): void {
 	if (
 		!near.includes(`lat=${BARCELONA_LAT}`) ||
 		!near.includes(`lng=${BARCELONA_LNG}`) ||
-		!near.includes(`radiusKm=${DEFAULT_DISCOVER_NEAR_RADIUS_KM}`)
+		near.includes("radiusKm=")
 	) {
 		console.error("❌ near query", near);
 		process.exit(1);

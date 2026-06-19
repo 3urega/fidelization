@@ -1,4 +1,3 @@
-import { DEFAULT_DISCOVER_NEAR_RADIUS_KM } from "../../contexts/tenants/tenants/domain/DiscoverNearFilter";
 import type { TenantDiscoveryTagId } from "../../contexts/tenants/tenants/domain/TenantDiscoveryTag";
 
 export type DiscoverEstablishmentsNearParams = {
@@ -29,7 +28,8 @@ export type DiscoverActiveNearResult = {
 };
 
 /**
- * Proximity precedence: GPS (when enabled + ready) > saved search zone > no filter.
+ * Proximity precedence: GPS (when enabled + ready) > saved search zone > alphabetical (no near).
+ * When near is set, the API sorts by distance but returns all discoverable establishments.
  */
 export function resolveDiscoverActiveNear(input: {
 	nearMeEnabled: boolean;
@@ -76,10 +76,6 @@ export function buildDiscoverEstablishmentsQuery(
 	if (params.near) {
 		searchParams.set("lat", String(params.near.latitude));
 		searchParams.set("lng", String(params.near.longitude));
-		searchParams.set(
-			"radiusKm",
-			String(params.near.radiusKm ?? DEFAULT_DISCOVER_NEAR_RADIUS_KM),
-		);
 	}
 
 	return searchParams.toString();

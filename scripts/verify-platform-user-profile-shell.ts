@@ -73,13 +73,24 @@ async function main(): Promise<void> {
 		profile.status !== 200 ||
 		!profileHtml.includes("Tu perfil") ||
 		!profileHtml.includes("Información personal") ||
-		!profileHtml.includes("Mis tarjetas")
+		!profileHtml.includes("Mis tarjetas") ||
+		!profileHtml.includes("Zona de búsqueda") ||
+		!profileHtml.includes("/home/map") ||
+		!profileHtml.includes("Establecer zona en el mapa")
 	) {
 		console.error("❌ GET /home/profile shell missing copy", profile.status);
 		process.exit(1);
 	}
 
-	console.log("✅ GET /home/profile shell OK");
+	if (
+		profileHtml.includes("Confirmar zona") ||
+		profileHtml.includes("Buscar con geocodificación")
+	) {
+		console.error("❌ profile should not embed search zone editor");
+		process.exit(1);
+	}
+
+	console.log("✅ GET /home/profile shell OK (summary + link to map)");
 
 	const tarjetasTab = await fetch(`${baseUrl}/home/profile?tab=tarjetas`, {
 		headers: sessionHeaders(userCookie),

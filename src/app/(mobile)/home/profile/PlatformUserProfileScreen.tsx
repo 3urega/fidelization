@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type ReactElement, useEffect, useState } from "react";
 
 import { platformFetch } from "../../../../lib/platform/apiUrl";
+import type { UserSearchZoneJson } from "../../../../lib/platform/resolveSearchZoneMapInitialDraft";
 import {
 	parsePlatformProfileTab,
 	platformRoutes,
@@ -12,7 +13,6 @@ import {
 } from "../../../../lib/platform/routes";
 import {
 	PlatformUserProfilePersonalTab,
-	type UserSearchZoneJson,
 } from "./PlatformUserProfilePersonalTab";
 import { PlatformUserStampCardsTab } from "./PlatformUserStampCardsTab";
 
@@ -146,18 +146,13 @@ export function PlatformUserProfileScreen({
 			<div role="tabpanel">
 				{activeTab === "tarjetas" ? (
 					<PlatformUserStampCardsTab />
-				) : loading ? (
-					<p className="text-sm text-muted">Cargando perfil…</p>
-				) : !user ? (
+				) : !user && !loading ? (
 					<p className="text-sm text-error">Sesión no disponible</p>
 				) : (
 					<PlatformUserProfilePersonalTab
-						name={user.name}
-						email={user.email}
-						searchZone={user.searchZone}
-						onSearchZoneSaved={(zone) => {
-							setUser((current) => (current ? { ...current, searchZone: zone } : current));
-						}}
+						name={user?.name ?? "…"}
+						email={user?.email ?? "…"}
+						searchZone={user?.searchZone ?? null}
 					/>
 				)}
 			</div>

@@ -77,10 +77,10 @@ function getHeadingSubtitle(
 	contextLabel?: string,
 ): string {
 	if (mode === "saved_zone" && contextLabel) {
-		return `Locales cerca de ${contextLabel}`;
+		return `Locales ordenados por distancia desde ${contextLabel}`;
 	}
 	if (mode === "gps_live") {
-		return "Locales cerca de tu ubicación actual";
+		return "Locales ordenados por distancia desde tu ubicación";
 	}
 	return "Todos los establecimientos dados de alta en la plataforma.";
 }
@@ -368,7 +368,7 @@ export function EstablishmentDiscoverGrid({
 						) : null}
 						{showSetZoneCta ? (
 							<Link
-								href={platformRoutes.homeProfileSearchZone()}
+								href={platformRoutes.homeMap}
 								className="text-xs font-medium text-primary underline hover:opacity-90"
 							>
 								Establecer zona de búsqueda
@@ -479,14 +479,13 @@ function DiscoverProximityEmptyState({
 		return (
 			<div className="flex flex-col gap-2 py-2">
 				<p className="text-sm text-muted">
-					No hay locales cerca de {contextLabel}. Prueba otra zona o explora todos los
-					locales.
+					Aún no hay locales disponibles. Puedes cambiar tu zona de referencia en el mapa.
 				</p>
 				<Link
-					href={platformRoutes.homeProfileSearchZone()}
+					href={platformRoutes.homeMap}
 					className="self-start text-sm font-medium text-primary underline hover:opacity-90"
 				>
-					Editar zona de búsqueda
+					Cambiar zona en el mapa
 				</Link>
 			</div>
 		);
@@ -495,8 +494,8 @@ function DiscoverProximityEmptyState({
 	if (mode === "gps_live") {
 		return (
 			<p className="text-sm text-muted">
-				No hay locales cerca de tu ubicación actual. Prueba desactivar el filtro o explora
-				todos los locales.
+				Aún no hay locales disponibles. Prueba desactivar «Cerca de mí» o explora todos los
+				locales.
 			</p>
 		);
 	}

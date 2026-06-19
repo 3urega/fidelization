@@ -29,7 +29,8 @@ export const platformRoutes = {
 		tab === "explore" ? "/home" : `/home?tab=${tab}`,
 	homeProfile: (tab: PlatformProfileTab = "personal"): string =>
 		tab === "personal" ? "/home/profile" : `/home/profile?tab=${tab}`,
-	homeProfileSearchZone: (): string => "/home/profile?tab=personal#search-zone",
+	/** @deprecated Use `homeMap` — zone editing moved to `/home/map` (Phase U4 #106). */
+	homeProfileSearchZone: (): string => platformRoutes.homeMap,
 	homeMap: "/home/map",
 	homeDiscover: "/home/discover",
 	homeQr: "/home/qr",

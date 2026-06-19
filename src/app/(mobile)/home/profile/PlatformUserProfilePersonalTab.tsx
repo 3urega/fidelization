@@ -1,16 +1,15 @@
 "use client";
 
-import { type ReactElement, useState } from "react";
+import { type ReactElement } from "react";
 
-import { UserSearchZoneEditor, type UserSearchZoneJson } from "../../../_components/platform-app/UserSearchZoneEditor";
+import { SearchZoneProfileSummary } from "../../../_components/platform-app/SearchZoneProfileSummary";
+import type { UserSearchZoneJson } from "../../../../lib/platform/resolveSearchZoneMapInitialDraft";
 import { Card } from "../../../_components/ui/Card";
 
 type PlatformUserProfilePersonalTabProps = {
 	name: string;
 	email: string;
 	searchZone: UserSearchZoneJson | null;
-	onSearchZoneSaved: (zone: UserSearchZoneJson) => void;
-	initialEditorOpen?: boolean;
 };
 
 export type { UserSearchZoneJson };
@@ -19,13 +18,7 @@ export function PlatformUserProfilePersonalTab({
 	name,
 	email,
 	searchZone,
-	onSearchZoneSaved,
-	initialEditorOpen = false,
 }: PlatformUserProfilePersonalTabProps): ReactElement {
-	const [editorOpenFromHash] = useState(
-		() => typeof window !== "undefined" && window.location.hash === "#search-zone",
-	);
-
 	return (
 		<div className="flex flex-col gap-4">
 			<Card className="flex flex-col gap-3">
@@ -39,14 +32,9 @@ export function PlatformUserProfilePersonalTab({
 				</div>
 			</Card>
 
-			<section id="search-zone" className="flex flex-col gap-3 scroll-mt-4">
+			<section className="flex flex-col gap-3">
 				<h2 className="text-sm font-medium text-foreground">Zona de búsqueda</h2>
-
-				<UserSearchZoneEditor
-					savedZone={searchZone}
-					onZoneSaved={onSearchZoneSaved}
-					initialOpen={initialEditorOpen || editorOpenFromHash}
-				/>
+				<SearchZoneProfileSummary searchZone={searchZone} />
 			</section>
 		</div>
 	);

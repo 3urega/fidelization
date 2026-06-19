@@ -50,7 +50,12 @@ function assertResolveDiscoverActiveNearFixtures(): void {
 		process.exit(1);
 	}
 
-	console.log("✅ resolveDiscoverActiveNear + query from saved zone");
+	if (query.includes("radiusKm=")) {
+		console.error("❌ discover query should not send radiusKm (sort-only)", query);
+		process.exit(1);
+	}
+
+	console.log("✅ resolveDiscoverActiveNear + query from saved zone (no radiusKm)");
 }
 
 function parseSessionCookie(setCookie: string | null): string | null {
@@ -190,25 +195,31 @@ async function assertSearchZoneGridE2E(): Promise<void> {
 		const zoneQuery = buildDiscoverEstablishmentsQuery({
 			offset: 0,
 			limit: 20,
-			near: { ...proximity.near!, radiusKm: 50 },
+			near: proximity.near!,
 		});
+
+		if (zoneQuery.includes("radiusKm=")) {
+			console.error("❌ zone-sorted query should not include radiusKm", zoneQuery);
+			process.exit(1);
+		}
+
 		const zoneList = await fetch(`${baseUrl}/api/user/establishments?${zoneQuery}`, { headers });
 		const zoneBody = (await zoneList.json()) as {
 			establishments?: { slug: string; distanceKm?: number }[];
 		};
 
 		if (!zoneList.ok || !Array.isArray(zoneBody.establishments)) {
-			console.error("❌ zone-filtered establishments", zoneList.status, zoneBody);
+			console.error("❌ zone-sorted establishments", zoneList.status, zoneBody);
 			process.exit(1);
 		}
 
 		const demoRow = zoneBody.establishments.find((row) => row.slug === "cafe-demo");
 		if (!demoRow || typeof demoRow.distanceKm !== "number") {
-			console.error("❌ cafe-demo distanceKm missing with zone filter", zoneBody);
+			console.error("❌ cafe-demo distanceKm missing with zone sort", zoneBody);
 			process.exit(1);
 		}
 
-		console.log(`✅ zone-filtered API returns distanceKm=${demoRow.distanceKm} for cafe-demo`);
+		console.log(`✅ zone-sorted API returns distanceKm=${demoRow.distanceKm} for cafe-demo`);
 
 		const home = await fetch(`${baseUrl}/home`, { headers });
 		const homeHtml = await home.text();

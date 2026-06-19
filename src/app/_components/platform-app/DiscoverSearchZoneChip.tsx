@@ -10,7 +10,7 @@ type DiscoverSearchZoneChipProps = {
 
 export function DiscoverSearchZoneChip({
 	label,
-	href = platformRoutes.homeProfileSearchZone(),
+	href = platformRoutes.homeMap,
 }: DiscoverSearchZoneChipProps): ReactElement {
 	return (
 		<Link

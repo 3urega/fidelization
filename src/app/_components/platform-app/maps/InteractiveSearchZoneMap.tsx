@@ -19,7 +19,7 @@ export type InteractiveSearchZoneMapAllProps = InteractiveSearchZoneMapProps & {
 
 function MapFallback({ message }: { message: string }): ReactElement {
 	return (
-		<div className="flex min-h-[220px] w-full items-center justify-center rounded-theme border border-border bg-surface px-3 py-4">
+		<div className="flex h-[220px] w-full items-center justify-center rounded-theme border border-border bg-surface px-3 py-4">
 			<p className="text-sm text-muted">{message}</p>
 		</div>
 	);
@@ -27,7 +27,7 @@ function MapFallback({ message }: { message: string }): ReactElement {
 
 function MapLoadingSkeleton(): ReactElement {
 	return (
-		<div className="flex min-h-[220px] w-full items-center justify-center rounded-theme border border-border bg-surface px-3 py-4">
+		<div className="flex h-[220px] w-full items-center justify-center rounded-theme border border-border bg-surface px-3 py-4">
 			<p className="text-sm text-muted">Cargando mapa…</p>
 		</div>
 	);
