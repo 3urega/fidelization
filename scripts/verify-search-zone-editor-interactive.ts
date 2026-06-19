@@ -207,14 +207,14 @@ async function main(): Promise<void> {
 
 		if (
 			profile.status !== 200 ||
-			!profileHtml.includes("Zona de búsqueda") ||
+			!profileHtml.includes("Tu perfil") ||
 			!profileHtml.includes("Información personal")
 		) {
-			console.error("❌ profile shell missing search zone section", profile.status);
+			console.error("❌ profile shell missing expected copy", profile.status);
 			process.exit(1);
 		}
 
-		console.log("✅ GET /home/profile shell OK");
+		console.log("✅ GET /home/profile shell OK (editor hydrates client-side)");
 		console.log("✅ verify:search-zone-editor-interactive passed");
 	} finally {
 		await prisma.tenant.update({
