@@ -7,6 +7,7 @@ import {
 	type DiscoverableEstablishmentsPage,
 } from "../domain/DiscoverableEstablishment";
 import type { DiscoverNearFilter } from "../domain/DiscoverNearFilter";
+import type { EstablishmentMapMarker } from "../domain/EstablishmentMapMarker";
 import { roundDistanceKm } from "../domain/haversineDistanceKm";
 import { Tenant } from "../domain/Tenant";
 import type { ListDiscoverableEstablishmentsParams } from "../domain/TenantRepository";
@@ -32,6 +33,19 @@ type DiscoverableNearRow = {
 	distance_km: number | string;
 };
 
+type EstablishmentMapMarkerRow = {
+	id: string;
+	name: string;
+	slug: string;
+	logo_url: string | null;
+	latitude: number;
+	longitude: number;
+	distance_km: number | string;
+};
+
+const DEFAULT_MAP_MARKERS_LIMIT = 50;
+const MAX_MAP_MARKERS_LIMIT = 50;
+
 function buildDiscoverTagFilterSql(filterTags: TenantDiscoveryTagId[]): Prisma.Sql {
 	if (filterTags.length === 0) {
 		return Prisma.empty;
@@ -42,6 +56,19 @@ function buildDiscoverTagFilterSql(filterTags: TenantDiscoveryTagId[]): Prisma.S
 	);
 
 	return Prisma.sql`AND (${Prisma.join(conditions, " OR ")})`;
+}
+
+function mapEstablishmentMapMarkerRow(row: EstablishmentMapMarkerRow): EstablishmentMapMarker {
+	const logoUrl = row.logo_url?.trim();
+
+	return {
+		id: row.id,
+		slug: row.slug,
+		name: row.name,
+		latitude: row.latitude,
+		longitude: row.longitude,
+		...(logoUrl ? { logoUrl } : {}),
+	};
 }
 
 function mapDiscoverableNearRow(row: DiscoverableNearRow): DiscoverableEstablishment {
@@ -167,6 +194,44 @@ export class PrismaTenantRepository extends TenantRepository {
 			establishments: pageRows.map(mapDiscoverableNearRow),
 			hasMore,
 		};
+	}
+
+	async listEstablishmentMapMarkersNear(
+		near: DiscoverNearFilter,
+		limit = DEFAULT_MAP_MARKERS_LIMIT,
+	): Promise<EstablishmentMapMarker[]> {
+		const cappedLimit = Math.min(Math.max(limit, 1), MAX_MAP_MARKERS_LIMIT);
+
+		const rows = await prisma.$queryRaw<EstablishmentMapMarkerRow[]>`
+			SELECT id, name, slug, logo_url, latitude, longitude, distance_km
+			FROM (
+				SELECT
+					id,
+					name,
+					slug,
+					logo_url,
+					latitude,
+					longitude,
+					(
+						6371 * acos(
+							LEAST(1.0, GREATEST(-1.0,
+								cos(radians(${near.latitude})) * cos(radians(latitude))
+									* cos(radians(longitude) - radians(${near.longitude}))
+								+ sin(radians(${near.latitude})) * sin(radians(latitude))
+							))
+						)
+					) AS distance_km
+				FROM tenants
+				WHERE status = ${TenantStatus.Active}
+					AND latitude IS NOT NULL
+					AND longitude IS NOT NULL
+			) AS near_tenants
+			WHERE distance_km <= ${near.radiusKm}
+			ORDER BY distance_km ASC, name ASC, id ASC
+			LIMIT ${cappedLimit}
+		`;
+
+		return rows.map(mapEstablishmentMapMarkerRow);
 	}
 
 	async findById(tenantId: string): Promise<Tenant | null> {

@@ -172,6 +172,7 @@ import { PrismaOwnerOnboardingRepository } from "../../../tenants/owners/infrast
 import { TenantFinder } from "../../../tenants/tenants/application/find/TenantFinder";
 import { UpdateTenantBranding } from "../../../tenants/tenants/application/update/UpdateTenantBranding";
 import { ListDiscoverableEstablishments } from "../../../tenants/tenants/application/list/ListDiscoverableEstablishments";
+import { ListEstablishmentMapMarkersNearPoint } from "../../../tenants/tenants/application/list/ListEstablishmentMapMarkersNearPoint";
 import { UpdateTenantProfile } from "../../../tenants/tenants/application/update/UpdateTenantProfile";
 import { RegeocodeTenantProfile } from "../../../tenants/tenants/application/update/RegeocodeTenantProfile";
 import { ApplyTenantGeocodingForAddress } from "../../../tenants/tenants/application/geocoding/ApplyTenantGeocodingForAddress";
@@ -290,6 +291,7 @@ builder.registerAndUse(ListUserRelationships);
 builder.registerAndUse(TenantFinder);
 builder.registerAndUse(UpdateTenantBranding);
 builder.registerAndUse(ListDiscoverableEstablishments);
+builder.registerAndUse(ListEstablishmentMapMarkersNearPoint);
 builder.registerAndUse(ApplyTenantGeocodingForAddress);
 builder.registerAndUse(UpdateTenantProfile);
 builder.registerAndUse(RegeocodeTenantProfile);

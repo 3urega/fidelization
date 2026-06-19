@@ -7,6 +7,7 @@ import type { TenantPlatformProfileUpdate } from "./TenantPlatformProfileUpdate"
 import { TenantStatus } from "./TenantStatus";
 import type { TenantDiscoveryTagId } from "./TenantDiscoveryTag";
 import type { DiscoverNearFilter } from "./DiscoverNearFilter";
+import type { EstablishmentMapMarker } from "./EstablishmentMapMarker";
 
 export type ListDiscoverableEstablishmentsParams = {
 	offset: number;
@@ -22,6 +23,13 @@ export abstract class TenantRepository {
 		_params: ListDiscoverableEstablishmentsParams,
 	): Promise<DiscoverableEstablishmentsPage> {
 		return { establishments: [], hasMore: false };
+	}
+
+	async listEstablishmentMapMarkersNear(
+		_near: DiscoverNearFilter,
+		_limit?: number,
+	): Promise<EstablishmentMapMarker[]> {
+		return [];
 	}
 
 	abstract findById(tenantId: string): Promise<Tenant | null>;

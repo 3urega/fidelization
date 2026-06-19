@@ -3,6 +3,7 @@ export type MapLatLng = {
 	longitude: number;
 };
 
+/** Matches domain `EstablishmentMapMarker` and nearby-establishments API JSON. */
 export type EstablishmentMapMarker = {
 	id: string;
 	slug: string;
