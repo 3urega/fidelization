@@ -32,6 +32,9 @@ import { GeocodeAddressString } from "../../geocoding/application/geocode/Geocod
 import { GeocodingGateway } from "../../geocoding/domain/GeocodingGateway";
 import { GeocodingGatewayGoogle } from "../../geocoding/infrastructure/GeocodingGatewayGoogle";
 import { GeocodingGatewayMapbox } from "../../geocoding/infrastructure/GeocodingGatewayMapbox";
+import { PlaceSuggestionGateway } from "../../geocoding/domain/PlaceSuggestionGateway";
+import { PlaceSuggestionGatewayGoogle } from "../../geocoding/infrastructure/PlaceSuggestionGatewayGoogle";
+import { PlaceSuggestionGatewayMapbox } from "../../geocoding/infrastructure/PlaceSuggestionGatewayMapbox";
 import { env } from "../../../../lib/env";
 import { StripeWebhookGatewayStripe } from "../../../billing/stripe/infrastructure/StripeWebhookGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
@@ -43,6 +46,7 @@ import { ClearUserSearchZone } from "../../../identity/users/application/profile
 import { EnsureUserQrValue } from "../../../identity/users/application/profile/EnsureUserQrValue";
 import { UpdateUserSearchZone } from "../../../identity/users/application/profile/UpdateUserSearchZone";
 import { GeocodeUserSearchZoneQuery } from "../../../identity/users/application/profile/GeocodeUserSearchZoneQuery";
+import { SuggestSearchZonePlaces } from "../../../identity/users/application/profile/SuggestSearchZonePlaces";
 import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
@@ -223,6 +227,7 @@ builder.registerAndUse(UserFinder);
 builder.registerAndUse(EnsureUserQrValue);
 builder.registerAndUse(UpdateUserSearchZone);
 builder.registerAndUse(GeocodeUserSearchZoneQuery);
+builder.registerAndUse(SuggestSearchZonePlaces);
 builder.registerAndUse(ClearUserSearchZone);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(AuthenticateGoogleUser);
@@ -389,6 +394,13 @@ if (env.geocodingProvider === "google") {
 	builder.register(GeocodingGateway).use(GeocodingGatewayGoogle);
 } else {
 	builder.register(GeocodingGateway).use(GeocodingGatewayMapbox);
+}
+builder.registerAndUse(PlaceSuggestionGatewayMapbox);
+builder.registerAndUse(PlaceSuggestionGatewayGoogle);
+if (env.geocodingProvider === "google") {
+	builder.register(PlaceSuggestionGateway).use(PlaceSuggestionGatewayGoogle);
+} else {
+	builder.register(PlaceSuggestionGateway).use(PlaceSuggestionGatewayMapbox);
 }
 builder.registerAndUse(GeocodeAddressString);
 

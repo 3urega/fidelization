@@ -62,6 +62,11 @@ export async function POST(request: Request): Promise<Response> {
 			return NextResponse.json({ error: { description: error.message } }, { status: 500 });
 		}
 
-		throw error;
+		console.error("[POST /api/auth/login/user]", error);
+
+		return NextResponse.json(
+			{ error: { description: "No se pudo iniciar sesión. Inténtalo de nuevo." } },
+			{ status: 500 },
+		);
 	}
 }

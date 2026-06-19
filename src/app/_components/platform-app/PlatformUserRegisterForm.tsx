@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactElement, useState } from "react";
 
-import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformFetch, parsePlatformResponseJson, platformApiFallbackMessage } from "../../../lib/platform/apiUrl";
 import { platformRoutes } from "../../../lib/platform/routes";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
@@ -60,38 +60,45 @@ export function PlatformUserRegisterForm({
 
 		setLoading(true);
 
-		const response = await platformFetch("/api/auth/register/user", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			credentials: "include",
-			body: JSON.stringify({ name, email, password }),
-		});
+		try {
+			const response = await platformFetch("/api/auth/register/user", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ name, email, password }),
+			});
 
-		setLoading(false);
+			const data = await parsePlatformResponseJson<
+				UserAuthResponse & {
+					error?: { description?: string; type?: string };
+				}
+			>(response);
 
-		if (!response.ok) {
-			const data = (await response.json()) as {
-				error?: { description?: string; type?: string };
-			};
-			setError(
-				mapRegisterError(
-					data.error?.description ?? "Error al registrarse",
-					data.error?.type,
-				),
-			);
+			if (!response.ok) {
+				setError(
+					mapRegisterError(
+						data?.error?.description ??
+							platformApiFallbackMessage(response.status, "Error al registrarse"),
+						data?.error?.type,
+					),
+				);
 
-			return;
+				return;
+			}
+
+			if (data?.kind !== "user" || !data.user?.id) {
+				setError("Respuesta inválida del servidor");
+
+				return;
+			}
+
+			router.push(redirectTo);
+			router.refresh();
+		} catch {
+			setError("Error de red al registrarse. Comprueba tu conexión.");
+		} finally {
+			setLoading(false);
 		}
-
-		const data = (await response.json()) as UserAuthResponse;
-		if (data.kind !== "user" || !data.user?.id) {
-			setError("Respuesta inválida del servidor");
-
-			return;
-		}
-
-		router.push(redirectTo);
-		router.refresh();
 	}
 
 	return (

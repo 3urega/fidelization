@@ -32,3 +32,36 @@ export function platformFetch(path: string, init: RequestInit = {}): Promise<Res
 		...init,
 	});
 }
+
+export async function parsePlatformResponseJson<T>(response: Response): Promise<T | null> {
+	try {
+		const text = await response.text();
+
+		if (!text.trim()) {
+			return null;
+		}
+
+		return JSON.parse(text) as T;
+	} catch {
+		return null;
+	}
+}
+
+export function platformApiFallbackMessage(
+	status: number,
+	fallback = "Error en la solicitud",
+): string {
+	if (status === 401) {
+		return "Email o contraseña incorrectos";
+	}
+
+	if (status === 403) {
+		return "No tienes permiso para continuar";
+	}
+
+	if (status >= 500) {
+		return "El servidor no está disponible. Inténtalo de nuevo.";
+	}
+
+	return fallback;
+}

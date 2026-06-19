@@ -81,4 +81,4 @@ Manifest: [`docs/issues/manifest.phase-s-user-profile-search-zone.json`](../issu
 
 *(Publicado 2026-06-18.)*
 
-**Relacionado:** [`customer-platform-app.md`](customer-platform-app.md), [`localization.md`](../localization.md).
+**Relacionado:** [`customer-platform-app.md`](customer-platform-app.md), [`localization.md`](../localization.md), [`platform-user-search-zone-interactive-map.md`](platform-user-search-zone-interactive-map.md) (Phase T: mapa interactivo + suggest en vivo).

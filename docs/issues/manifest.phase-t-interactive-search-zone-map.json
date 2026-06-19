@@ -1,0 +1,30 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/platform-user-search-zone-interactive-map.md",
+  "label": "interactive-search-zone-map",
+  "published": {
+    "98": "https://github.com/3urega/fidelization/issues/98",
+    "99": "https://github.com/3urega/fidelization/issues/99",
+    "100": "https://github.com/3urega/fidelization/issues/100",
+    "101": "https://github.com/3urega/fidelization/issues/101",
+    "102": "https://github.com/3urega/fidelization/issues/102"
+  },
+  "issues": [
+    {
+      "title": "Phase T2: Interactive map client config port + API (Mapbox GL / Google Maps JS)",
+      "bodyFile": "docs/issues/search-zone-interactive-map-port.md"
+    },
+    {
+      "title": "Phase T3: Interactive search zone map UI (pan, zoom, draggable pin)",
+      "bodyFile": "docs/issues/search-zone-interactive-map-ui.md"
+    },
+    {
+      "title": "Phase T4: Establishment map markers near search zone point",
+      "bodyFile": "docs/issues/search-zone-map-establishment-markers.md"
+    },
+    {
+      "title": "Phase T5: Integrate interactive map UX in UserSearchZoneEditor + verify",
+      "bodyFile": "docs/issues/search-zone-editor-interactive-integration.md"
+    }
+  ]
+}
