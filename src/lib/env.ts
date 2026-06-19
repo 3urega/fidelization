@@ -116,6 +116,26 @@ export const env = {
 		return optionalEnv("GOOGLE_MAPS_GEOCODING_API_KEY");
 	},
 
+	/** Mapbox public access token (pk.) for Mapbox GL JS in authenticated client config API. */
+	get mapboxPublicAccessToken(): string | undefined {
+		return optionalEnv("MAPBOX_PUBLIC_ACCESS_TOKEN") ?? optionalEnv("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN");
+	},
+
+	/** Google Maps JavaScript API key for interactive map SDK (referrer-restricted in prod). */
+	get googleMapsJsApiKey(): string | undefined {
+		return optionalEnv("GOOGLE_MAPS_JS_API_KEY") ?? optionalEnv("GOOGLE_MAPS_GEOCODING_API_KEY");
+	},
+
+	/** Optional Mapbox style URL for interactive maps (default streets-v12 in adapter). */
+	get mapboxStyleUrl(): string | undefined {
+		return optionalEnv("MAPBOX_STYLE_URL");
+	},
+
+	/** Optional Google Cloud map ID for vector maps. */
+	get googleMapsMapId(): string | undefined {
+		return optionalEnv("GOOGLE_MAPS_MAP_ID");
+	},
+
 	/** Warn in production boot when critical vars are missing (non-throwing). */
 	validateProduction(): string[] {
 		const missing: string[] = [];

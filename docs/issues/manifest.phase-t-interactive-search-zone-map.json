@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Phase T2: Interactive map client config port + API (Mapbox GL / Google Maps JS)",
-      "bodyFile": "docs/issues/search-zone-interactive-map-port.md"
-    },
-    {
       "title": "Phase T3: Interactive search zone map UI (pan, zoom, draggable pin)",
       "bodyFile": "docs/issues/search-zone-interactive-map-ui.md"
     },

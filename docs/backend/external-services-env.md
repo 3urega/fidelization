@@ -155,8 +155,13 @@ MAPBOX_ACCESS_TOKEN=pk.eyJ...
 | Variable | Para qué |
 |----------|----------|
 | `GEOCODING_PROVIDER` | `mapbox` (default) o `google` — selecciona el adaptador activo en servidor |
-| `MAPBOX_ACCESS_TOKEN` | Token **secreto** de Mapbox (Geocoding API v5 + Static Images en perfil owner) |
-| `GOOGLE_MAPS_GEOCODING_API_KEY` | API key con Geocoding API, Static Maps y **Places API** (Autocomplete + Place Details para suggest en zona usuario) |
+| `MAPBOX_ACCESS_TOKEN` | Token Mapbox server-side (Geocoding API v5 + Static Images). En dev puede ser `pk.` si no hay token público dedicado |
+| `MAPBOX_PUBLIC_ACCESS_TOKEN` | Token **público** `pk.` para Mapbox GL JS — expuesto solo vía `GET /api/user/search-zone/map-client-config` (sesión user) |
+| `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` | Alias opcional del token público Mapbox (mismo uso que arriba) |
+| `GOOGLE_MAPS_GEOCODING_API_KEY` | API key server-side: Geocoding, Static Maps y **Places API** (suggest). En dev puede servir también como fallback JS |
+| `GOOGLE_MAPS_JS_API_KEY` | API key **Maps JavaScript API** (referrer-restricted en prod) para mapa interactivo cliente |
+| `MAPBOX_STYLE_URL` | Opcional — style URL Mapbox GL (default `mapbox://styles/mapbox/streets-v12`) |
+| `GOOGLE_MAPS_MAP_ID` | Opcional — Cloud Map ID de Google para mapas vectoriales |
 
 ### Mapbox (recomendado en dev)
 
@@ -166,7 +171,7 @@ MAPBOX_ACCESS_TOKEN=pk.eyJ...
 
 ### Google Maps (prod o alternativa)
 
-1. [Google Cloud Console](https://console.cloud.google.com/) → habilitar **Geocoding API**, **Maps Static API** y **Places API**.
+1. [Google Cloud Console](https://console.cloud.google.com/) → habilitar **Geocoding API**, **Maps Static API**, **Places API** y **Maps JavaScript API**.
 2. Crear **API key** restringida (IP servidor / referrers según despliegue).
 3. `GEOCODING_PROVIDER=google` + `GOOGLE_MAPS_GEOCODING_API_KEY`.
 
@@ -181,6 +186,8 @@ MAPBOX_ACCESS_TOKEN=pk.eyJ...
 npm run verify:geocoding-gateway-use-case
 npm run verify:search-zone-place-suggest-use-case
 npm run verify:search-zone-place-suggest
+npm run verify:interactive-map-client-config-use-case
+npm run verify:interactive-map-client-config
 npm run verify:tenant-geocoding-map-preview
 npm run verify:tenant-geocoding-profile-feedback
 ```

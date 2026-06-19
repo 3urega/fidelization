@@ -35,6 +35,9 @@ import { GeocodingGatewayMapbox } from "../../geocoding/infrastructure/Geocoding
 import { PlaceSuggestionGateway } from "../../geocoding/domain/PlaceSuggestionGateway";
 import { PlaceSuggestionGatewayGoogle } from "../../geocoding/infrastructure/PlaceSuggestionGatewayGoogle";
 import { PlaceSuggestionGatewayMapbox } from "../../geocoding/infrastructure/PlaceSuggestionGatewayMapbox";
+import { InteractiveMapClientConfigProvider } from "../../maps/domain/InteractiveMapClientConfigProvider";
+import { InteractiveMapClientConfigGoogle } from "../../maps/infrastructure/InteractiveMapClientConfigGoogle";
+import { InteractiveMapClientConfigMapbox } from "../../maps/infrastructure/InteractiveMapClientConfigMapbox";
 import { env } from "../../../../lib/env";
 import { StripeWebhookGatewayStripe } from "../../../billing/stripe/infrastructure/StripeWebhookGatewayStripe";
 import { PrismaTenantBillingRepository } from "../../../billing/subscriptions/infrastructure/PrismaTenantBillingRepository";
@@ -46,6 +49,7 @@ import { ClearUserSearchZone } from "../../../identity/users/application/profile
 import { EnsureUserQrValue } from "../../../identity/users/application/profile/EnsureUserQrValue";
 import { UpdateUserSearchZone } from "../../../identity/users/application/profile/UpdateUserSearchZone";
 import { GeocodeUserSearchZoneQuery } from "../../../identity/users/application/profile/GeocodeUserSearchZoneQuery";
+import { GetInteractiveMapClientConfig } from "../../../identity/users/application/profile/GetInteractiveMapClientConfig";
 import { SuggestSearchZonePlaces } from "../../../identity/users/application/profile/SuggestSearchZonePlaces";
 import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
@@ -228,6 +232,7 @@ builder.registerAndUse(EnsureUserQrValue);
 builder.registerAndUse(UpdateUserSearchZone);
 builder.registerAndUse(GeocodeUserSearchZoneQuery);
 builder.registerAndUse(SuggestSearchZonePlaces);
+builder.registerAndUse(GetInteractiveMapClientConfig);
 builder.registerAndUse(ClearUserSearchZone);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(AuthenticateGoogleUser);
@@ -401,6 +406,13 @@ if (env.geocodingProvider === "google") {
 	builder.register(PlaceSuggestionGateway).use(PlaceSuggestionGatewayGoogle);
 } else {
 	builder.register(PlaceSuggestionGateway).use(PlaceSuggestionGatewayMapbox);
+}
+builder.registerAndUse(InteractiveMapClientConfigMapbox);
+builder.registerAndUse(InteractiveMapClientConfigGoogle);
+if (env.geocodingProvider === "google") {
+	builder.register(InteractiveMapClientConfigProvider).use(InteractiveMapClientConfigGoogle);
+} else {
+	builder.register(InteractiveMapClientConfigProvider).use(InteractiveMapClientConfigMapbox);
 }
 builder.registerAndUse(GeocodeAddressString);
 
