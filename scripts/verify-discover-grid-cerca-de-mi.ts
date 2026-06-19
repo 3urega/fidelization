@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 
 import { DEFAULT_DISCOVER_NEAR_RADIUS_KM } from "../src/contexts/tenants/tenants/domain/DiscoverNearFilter";
 import { prisma } from "../src/lib/prisma";
-import { buildDiscoverEstablishmentsQuery } from "../src/lib/platform/buildDiscoverEstablishmentsQuery";
+import { buildDiscoverEstablishmentsQuery, resolveDiscoverActiveNear } from "../src/lib/platform/buildDiscoverEstablishmentsQuery";
 import { formatDistanceKm } from "../src/lib/platform/formatDistanceKm";
 import {
 	requestUserLocation,
@@ -71,6 +71,65 @@ function assertBuildDiscoverEstablishmentsQuery(): void {
 	}
 
 	console.log("✅ buildDiscoverEstablishmentsQuery");
+}
+
+function assertResolveDiscoverActiveNear(): void {
+	const zone = {
+		label: "Terrassa, Barcelona",
+		latitude: 41.5639,
+		longitude: 2.0084,
+	};
+	const gps = { latitude: 41.39, longitude: 2.17 };
+
+	const all = resolveDiscoverActiveNear({
+		nearMeEnabled: false,
+		gps: null,
+		searchZone: null,
+	});
+	if (all.mode !== "all" || all.near !== undefined) {
+		console.error("❌ expected all mode", all);
+		process.exit(1);
+	}
+
+	const saved = resolveDiscoverActiveNear({
+		nearMeEnabled: false,
+		gps: null,
+		searchZone: zone,
+	});
+	if (
+		saved.mode !== "saved_zone" ||
+		saved.near?.latitude !== zone.latitude ||
+		saved.contextLabel !== zone.label
+	) {
+		console.error("❌ expected saved_zone", saved);
+		process.exit(1);
+	}
+
+	const gpsLive = resolveDiscoverActiveNear({
+		nearMeEnabled: true,
+		gps,
+		searchZone: zone,
+	});
+	if (
+		gpsLive.mode !== "gps_live" ||
+		gpsLive.near?.latitude !== gps.latitude ||
+		gpsLive.near?.longitude !== gps.longitude
+	) {
+		console.error("❌ expected gps_live precedence over zone", gpsLive);
+		process.exit(1);
+	}
+
+	const gpsWaiting = resolveDiscoverActiveNear({
+		nearMeEnabled: true,
+		gps: null,
+		searchZone: zone,
+	});
+	if (gpsWaiting.mode !== "saved_zone") {
+		console.error("❌ GPS enabled but not ready should fall back to zone", gpsWaiting);
+		process.exit(1);
+	}
+
+	console.log("✅ resolveDiscoverActiveNear precedence");
 }
 
 async function assertRequestUserLocationMock(): Promise<void> {
@@ -209,6 +268,7 @@ async function assertNearApiE2E(): Promise<void> {
 async function main(): Promise<void> {
 	assertFormatDistanceKm();
 	assertBuildDiscoverEstablishmentsQuery();
+	assertResolveDiscoverActiveNear();
 	await assertRequestUserLocationMock();
 	await assertNearApiE2E();
 	console.log("✅ verify:discover-grid-cerca-de-mi passed");

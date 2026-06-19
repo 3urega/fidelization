@@ -27,7 +27,7 @@ export function DiscoverNearMeToggle({
 			aria-pressed={enabled}
 			aria-busy={loading}
 		>
-			{loading ? "Obteniendo ubicación…" : "Cerca de mí"}
+			{loading ? "Obteniendo ubicación…" : "Ahora cerca de mí"}
 		</button>
 	);
 }

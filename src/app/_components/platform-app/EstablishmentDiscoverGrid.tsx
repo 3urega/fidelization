@@ -1,17 +1,23 @@
 "use client";
 
+import Link from "next/link";
 import { type ReactElement, useCallback, useEffect, useRef, useState } from "react";
 
 import {
 	type TenantDiscoveryTagId,
 } from "../../../contexts/tenants/tenants/domain/TenantDiscoveryTag";
+import { platformFetch } from "../../../lib/platform/apiUrl";
 import {
 	buildDiscoverEstablishmentsQuery,
+	resolveDiscoverActiveNear,
 	type DiscoverEstablishmentsNearParams,
+	type DiscoverProximityMode,
+	type UserSearchZoneCoords,
 } from "../../../lib/platform/buildDiscoverEstablishmentsQuery";
-import { platformFetch } from "../../../lib/platform/apiUrl";
+import { platformRoutes } from "../../../lib/platform/routes";
 import { useUserLocation } from "../../../lib/platform/useUserLocation";
 import { DiscoverNearMeToggle } from "./DiscoverNearMeToggle";
+import { DiscoverSearchZoneChip } from "./DiscoverSearchZoneChip";
 import { DiscoverTagFilterBar } from "./DiscoverTagFilterBar";
 import {
 	EstablishmentDiscoverCard,
@@ -23,6 +29,16 @@ type DiscoverResponse = {
 	establishments?: DiscoverEstablishment[];
 	hasMore?: boolean;
 	error?: { description?: string };
+};
+
+type MeSearchZoneResponse = {
+	user?: {
+		searchZone?: {
+			label: string;
+			latitude: number;
+			longitude: number;
+		} | null;
+	};
 };
 
 const INITIAL_LIMIT = 6;
@@ -56,6 +72,19 @@ function DiscoverGridLoadingIndicator({ label }: { label: string }): ReactElemen
 	);
 }
 
+function getHeadingSubtitle(
+	mode: DiscoverProximityMode,
+	contextLabel?: string,
+): string {
+	if (mode === "saved_zone" && contextLabel) {
+		return `Locales cerca de ${contextLabel}`;
+	}
+	if (mode === "gps_live") {
+		return "Locales cerca de tu ubicación actual";
+	}
+	return "Todos los establecimientos dados de alta en la plataforma.";
+}
+
 export function EstablishmentDiscoverGrid({
 	showHeading = true,
 }: EstablishmentDiscoverGridProps): ReactElement {
@@ -66,6 +95,8 @@ export function EstablishmentDiscoverGrid({
 	const [error, setError] = useState<string | null>(null);
 	const [selectedFilterTags, setSelectedFilterTags] = useState<TenantDiscoveryTagId[]>([]);
 	const [nearMeEnabled, setNearMeEnabled] = useState(false);
+	const [searchZone, setSearchZone] = useState<UserSearchZoneCoords | null>(null);
+	const [searchZoneLoaded, setSearchZoneLoaded] = useState(false);
 	const { state: locationState, request: requestLocation, reset: resetLocation } =
 		useUserLocation();
 	const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -75,20 +106,72 @@ export function EstablishmentDiscoverGrid({
 	const wasIntersectingRef = useRef(false);
 	const activeNearRef = useRef<DiscoverEstablishmentsNearParams | undefined>(undefined);
 
-	const resolveActiveNear = useCallback((): DiscoverEstablishmentsNearParams | undefined => {
-		if (!nearMeEnabled || locationState.status !== "ready") {
-			return undefined;
-		}
+	const gpsCoords =
+		locationState.status === "ready"
+			? {
+					latitude: locationState.location.latitude,
+					longitude: locationState.location.longitude,
+				}
+			: null;
 
-		return {
-			latitude: locationState.location.latitude,
-			longitude: locationState.location.longitude,
-		};
-	}, [locationState, nearMeEnabled]);
+	const proximity = resolveDiscoverActiveNear({
+		nearMeEnabled,
+		gps: gpsCoords,
+		searchZone,
+	});
 
 	useEffect(() => {
-		activeNearRef.current = resolveActiveNear();
-	}, [resolveActiveNear]);
+		activeNearRef.current = proximity.near;
+	}, [proximity.near?.latitude, proximity.near?.longitude]);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function loadSearchZone(): Promise<void> {
+			try {
+				const response = await platformFetch("/api/user/me");
+				if (!response.ok) {
+					if (!cancelled) {
+						setSearchZone(null);
+						setSearchZoneLoaded(true);
+					}
+					return;
+				}
+
+				const data = (await response.json()) as MeSearchZoneResponse;
+				const zone = data.user?.searchZone;
+
+				if (!cancelled) {
+					if (
+						zone &&
+						typeof zone.latitude === "number" &&
+						typeof zone.longitude === "number" &&
+						typeof zone.label === "string"
+					) {
+						setSearchZone({
+							label: zone.label,
+							latitude: zone.latitude,
+							longitude: zone.longitude,
+						});
+					} else {
+						setSearchZone(null);
+					}
+					setSearchZoneLoaded(true);
+				}
+			} catch {
+				if (!cancelled) {
+					setSearchZone(null);
+					setSearchZoneLoaded(true);
+				}
+			}
+		}
+
+		void loadSearchZone();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
 	const loadBatch = useCallback(
 		async (
@@ -192,15 +275,31 @@ export function EstablishmentDiscoverGrid({
 	);
 
 	useEffect(() => {
+		if (!searchZoneLoaded) {
+			return;
+		}
+
 		if (nearMeEnabled && locationState.status === "loading") {
 			return;
 		}
 
-		const near = resolveActiveNear();
 		offsetRef.current = 0;
 		wasIntersectingRef.current = false;
-		void loadBatch(0, INITIAL_LIMIT, false, selectedFilterTags, near);
-	}, [loadBatch, locationState.status, nearMeEnabled, resolveActiveNear, selectedFilterTags]);
+		void loadBatch(0, INITIAL_LIMIT, false, selectedFilterTags, proximity.near);
+	}, [
+		loadBatch,
+		locationState.status,
+		locationState.status === "ready"
+			? `${locationState.location.latitude},${locationState.location.longitude}`
+			: null,
+		nearMeEnabled,
+		searchZoneLoaded,
+		searchZone?.latitude,
+		searchZone?.longitude,
+		selectedFilterTags,
+		proximity.near?.latitude,
+		proximity.near?.longitude,
+	]);
 
 	useEffect(() => {
 		const sentinel = sentinelRef.current;
@@ -246,7 +345,8 @@ export function EstablishmentDiscoverGrid({
 	const locationLoading = nearMeEnabled && locationState.status === "loading";
 	const locationDenied = nearMeEnabled && locationState.status === "denied";
 	const locationError = nearMeEnabled && locationState.status === "error";
-	const nearActive = nearMeEnabled && locationState.status === "ready";
+	const showSetZoneCta =
+		searchZoneLoaded && proximity.mode === "all" && !nearMeEnabled;
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -254,7 +354,7 @@ export function EstablishmentDiscoverGrid({
 				<div className="flex flex-col gap-1">
 					<h2 className="text-lg font-semibold text-foreground">Explorar locales</h2>
 					<p className="text-sm text-muted">
-						Todos los establecimientos dados de alta en la plataforma.
+						{getHeadingSubtitle(proximity.mode, proximity.contextLabel)}
 					</p>
 				</div>
 			) : null}
@@ -262,11 +362,24 @@ export function EstablishmentDiscoverGrid({
 			<div className="flex flex-col gap-2">
 				<div className="flex flex-wrap items-center justify-between gap-2">
 					<p className="text-sm font-medium text-foreground">Filtrar locales</p>
-					<DiscoverNearMeToggle
-						enabled={nearMeEnabled}
-						loading={locationLoading}
-						onChange={handleNearMeChange}
-					/>
+					<div className="flex flex-wrap items-center gap-2">
+						{proximity.mode === "saved_zone" && proximity.contextLabel ? (
+							<DiscoverSearchZoneChip label={proximity.contextLabel} />
+						) : null}
+						{showSetZoneCta ? (
+							<Link
+								href={platformRoutes.homeProfileSearchZone()}
+								className="text-xs font-medium text-primary underline hover:opacity-90"
+							>
+								Establecer zona de búsqueda
+							</Link>
+						) : null}
+						<DiscoverNearMeToggle
+							enabled={nearMeEnabled}
+							loading={locationLoading}
+							onChange={handleNearMeChange}
+						/>
+					</div>
 				</div>
 				<DiscoverTagFilterBar value={selectedFilterTags} onChange={setSelectedFilterTags} />
 			</div>
@@ -304,14 +417,6 @@ export function EstablishmentDiscoverGrid({
 			{loading ? <DiscoverGridLoadingIndicator label="Cargando locales…" /> : null}
 			{error ? <p className="text-sm text-error">{error}</p> : null}
 
-			{!loading && items.length === 0 && !error && selectedFilterTags.length === 0 && !nearActive ? (
-				<p className="text-sm text-muted">Aún no hay locales disponibles.</p>
-			) : null}
-
-			{!loading && items.length === 0 && !error && nearActive && selectedFilterTags.length === 0 ? (
-				<p className="text-sm text-muted">No hay locales cerca de ti en este radio.</p>
-			) : null}
-
 			{!loading && items.length === 0 && !error && selectedFilterTags.length > 0 ? (
 				<div className="flex flex-col items-center gap-2 py-4 text-center">
 					<p className="text-sm text-muted">Ningún local coincide con estos filtros.</p>
@@ -323,6 +428,13 @@ export function EstablishmentDiscoverGrid({
 						Quitar filtros
 					</button>
 				</div>
+			) : null}
+
+			{!loading && items.length === 0 && !error && selectedFilterTags.length === 0 ? (
+				<DiscoverProximityEmptyState
+					mode={proximity.mode}
+					contextLabel={proximity.contextLabel}
+				/>
 			) : null}
 
 			<div ref={elasticRootRef} className="touch-pan-y">
@@ -352,4 +464,42 @@ export function EstablishmentDiscoverGrid({
 			</div>
 		</div>
 	);
+}
+
+type DiscoverProximityEmptyStateProps = {
+	mode: DiscoverProximityMode;
+	contextLabel?: string;
+};
+
+function DiscoverProximityEmptyState({
+	mode,
+	contextLabel,
+}: DiscoverProximityEmptyStateProps): ReactElement {
+	if (mode === "saved_zone" && contextLabel) {
+		return (
+			<div className="flex flex-col gap-2 py-2">
+				<p className="text-sm text-muted">
+					No hay locales cerca de {contextLabel}. Prueba otra zona o explora todos los
+					locales.
+				</p>
+				<Link
+					href={platformRoutes.homeProfileSearchZone()}
+					className="self-start text-sm font-medium text-primary underline hover:opacity-90"
+				>
+					Editar zona de búsqueda
+				</Link>
+			</div>
+		);
+	}
+
+	if (mode === "gps_live") {
+		return (
+			<p className="text-sm text-muted">
+				No hay locales cerca de tu ubicación actual. Prueba desactivar el filtro o explora
+				todos los locales.
+			</p>
+		);
+	}
+
+	return <p className="text-sm text-muted">Aún no hay locales disponibles.</p>;
 }

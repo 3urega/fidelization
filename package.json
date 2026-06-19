@@ -25,6 +25,7 @@
     "verify:discover-establishments-near-use-case": "tsx scripts/verify-discover-establishments-near-use-case.ts",
     "verify:discover-establishments-near": "tsx scripts/verify-discover-establishments-near.ts",
     "verify:discover-grid-cerca-de-mi": "tsx scripts/verify-discover-grid-cerca-de-mi.ts",
+    "verify:discover-grid-search-zone": "tsx scripts/verify-discover-grid-search-zone.ts",
     "verify:platform-app-customer-join-use-case": "tsx scripts/verify-platform-app-customer-join-use-case.ts",
     "verify:platform-app-customer-join": "tsx scripts/verify-platform-app-customer-join.ts",
     "verify:platform-app-establishment-detail-use-case": "tsx scripts/verify-platform-app-establishment-detail-use-case.ts",
