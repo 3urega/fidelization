@@ -1,7 +1,7 @@
 import { Service } from "diod";
 
-import type { PlaceSuggestion } from "../../../shared/geocoding/domain/PlaceSuggestion";
-import { PlaceSuggestionGateway } from "../../../shared/geocoding/domain/PlaceSuggestionGateway";
+import type { PlaceSuggestion } from "../../../../shared/geocoding/domain/PlaceSuggestion";
+import { PlaceSuggestionGateway } from "../../../../shared/geocoding/domain/PlaceSuggestionGateway";
 
 const MIN_QUERY_LENGTH = 2;
 const DEFAULT_LIMIT = 5;
