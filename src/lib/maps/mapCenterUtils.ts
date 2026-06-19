@@ -1,5 +1,10 @@
 export const DEFAULT_SEARCH_ZONE_MAP_ZOOM = 14;
 
+export const DEFAULT_SEARCH_ZONE_MAP_CENTER: MapLatLng = {
+	latitude: 41.5631,
+	longitude: 2.0084,
+};
+
 const DEFAULT_EPSILON = 0.000001;
 
 export type MapLatLng = {

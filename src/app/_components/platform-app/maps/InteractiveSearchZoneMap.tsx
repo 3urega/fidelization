@@ -3,7 +3,7 @@
 import { lazy, Suspense, type ReactElement } from "react";
 
 import { useInteractiveMapClientConfig } from "./useInteractiveMapClientConfig";
-import type { InteractiveSearchZoneMapProps } from "./types";
+import type { InteractiveMapClientConfigJson, InteractiveSearchZoneMapProps } from "./types";
 
 const MapboxInteractiveMap = lazy(() =>
 	import("./MapboxInteractiveMap").then((module) => ({ default: module.MapboxInteractiveMap })),
@@ -12,6 +12,10 @@ const MapboxInteractiveMap = lazy(() =>
 const GoogleInteractiveMap = lazy(() =>
 	import("./GoogleInteractiveMap").then((module) => ({ default: module.GoogleInteractiveMap })),
 );
+
+export type InteractiveSearchZoneMapAllProps = InteractiveSearchZoneMapProps & {
+	clientConfig?: InteractiveMapClientConfigJson;
+};
 
 function MapFallback({ message }: { message: string }): ReactElement {
 	return (
@@ -29,8 +33,29 @@ function MapLoadingSkeleton(): ReactElement {
 	);
 }
 
-export function InteractiveSearchZoneMap(props: InteractiveSearchZoneMapProps): ReactElement {
-	const configState = useInteractiveMapClientConfig();
+function InteractiveSearchZoneMapInner({
+	clientConfig,
+	...props
+}: InteractiveSearchZoneMapAllProps & {
+	clientConfig: InteractiveMapClientConfigJson;
+}): ReactElement {
+	const Adapter = clientConfig.provider === "google" ? GoogleInteractiveMap : MapboxInteractiveMap;
+
+	return (
+		<Suspense fallback={<MapLoadingSkeleton />}>
+			<Adapter {...props} config={clientConfig} />
+		</Suspense>
+	);
+}
+
+export function InteractiveSearchZoneMap({
+	clientConfig,
+	...props
+}: InteractiveSearchZoneMapAllProps): ReactElement {
+	const fetchedConfigState = useInteractiveMapClientConfig();
+	const configState = clientConfig
+		? ({ status: "ready" as const, config: clientConfig })
+		: fetchedConfigState;
 
 	if (configState.status === "loading") {
 		return <MapLoadingSkeleton />;
@@ -40,12 +65,5 @@ export function InteractiveSearchZoneMap(props: InteractiveSearchZoneMapProps): 
 		return <MapFallback message={configState.message} />;
 	}
 
-	const Adapter =
-		configState.config.provider === "google" ? GoogleInteractiveMap : MapboxInteractiveMap;
-
-	return (
-		<Suspense fallback={<MapLoadingSkeleton />}>
-			<Adapter {...props} config={configState.config} />
-		</Suspense>
-	);
+	return <InteractiveSearchZoneMapInner {...props} clientConfig={configState.config} />;
 }

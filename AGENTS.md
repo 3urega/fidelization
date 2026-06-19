@@ -86,6 +86,7 @@ npm run verify:interactive-map-client-config # Phase T2 #99 — GET /api/user/se
 npm run verify:interactive-search-zone-map-component # Phase T3 #100 — InteractiveSearchZoneMap utils + module exports
 npm run verify:search-zone-map-markers-use-case # Phase T4 #101 — ListEstablishmentMapMarkersNearPoint (domain stub)
 npm run verify:search-zone-map-markers # Phase T4 #101 — GET /api/user/search-zone/nearby-establishments E2E (dev + DATABASE_URL)
+npm run verify:search-zone-editor-interactive # Phase T5 #102 — interactive editor APIs E2E (dev + DATABASE_URL)
 npm run verify:platform-user-stamp-cards-tab # Phase S4 #96 — profile Mis tarjetas tab E2E (dev + DATABASE_URL)
 npm run db:backfill-tenant-geocoding # backfill coords for tenants with address and no latitude
 npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.register (domain)
