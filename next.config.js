@@ -5,6 +5,7 @@ const nextConfig = {
 	eslint: {
 		ignoreDuringBuilds: true,
 	},
+	transpilePackages: ["mapbox-gl"],
 	...(isCapacitorStatic
 		? {
 				output: "export",
