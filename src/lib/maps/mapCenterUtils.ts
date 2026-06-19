@@ -1,5 +1,8 @@
 export const DEFAULT_SEARCH_ZONE_MAP_ZOOM = 14;
 
+/** Show establishment name labels at this Mapbox/Google zoom level and above. */
+export const ESTABLISHMENT_MARKER_LABEL_MIN_ZOOM = 15;
+
 export const DEFAULT_SEARCH_ZONE_MAP_CENTER: MapLatLng = {
 	latitude: 41.5631,
 	longitude: 2.0084,
@@ -33,4 +36,8 @@ export function fromMapboxLngLat(lng: number, lat: number): MapLatLng {
 
 export function toGoogleLatLngLiteral(center: MapLatLng): { lat: number; lng: number } {
 	return { lat: center.latitude, lng: center.longitude };
+}
+
+export function shouldShowEstablishmentMarkerLabel(zoom: number): boolean {
+	return zoom >= ESTABLISHMENT_MARKER_LABEL_MIN_ZOOM;
 }

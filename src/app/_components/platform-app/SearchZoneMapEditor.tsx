@@ -1,8 +1,7 @@
 "use client";
 
-import { type ReactElement, useEffect, useRef, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 
-import { mapLatLngNearlyEqual } from "../../../lib/maps/mapCenterUtils";
 import { platformFetch, resolvePlatformApiUrl } from "../../../lib/platform/apiUrl";
 import type {
 	SearchZoneDraft,
@@ -70,12 +69,15 @@ export function SearchZoneMapEditor({
 }: SearchZoneMapEditorProps): ReactElement {
 	const [query, setQuery] = useState(initialQuery ?? initialDraft.label);
 	const [draft, setDraft] = useState<SearchZoneDraft>(initialDraft);
+	const [mapViewCenter, setMapViewCenter] = useState<MapLatLng>({
+		latitude: initialDraft.latitude,
+		longitude: initialDraft.longitude,
+	});
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [geocoding, setGeocoding] = useState(false);
 	const [confirming, setConfirming] = useState(false);
 	const [mapLoadFailed, setMapLoadFailed] = useState(false);
-	const userPannedRef = useRef(false);
 	const mapConfigState = useInteractiveMapClientConfig();
 	const suggestionsState = useSearchZoneSuggestions(query);
 	const markersState = useNearbyEstablishmentMarkers({
@@ -87,48 +89,26 @@ export function SearchZoneMapEditor({
 	useEffect(() => {
 		setQuery(initialQuery ?? initialDraft.label);
 		setDraft(initialDraft);
-		userPannedRef.current = false;
+		setMapViewCenter({
+			latitude: initialDraft.latitude,
+			longitude: initialDraft.longitude,
+		});
 		setError(null);
 		setSuccess(null);
 		setMapLoadFailed(false);
 	}, [initialDraft, initialQuery]);
 
-	useEffect(() => {
-		if (suggestionsState.status !== "ready") {
-			return;
-		}
-
-		if (suggestionsState.query !== query.trim() || userPannedRef.current) {
-			return;
-		}
-
-		const firstSuggestion = suggestionsState.suggestions[0];
-		if (!firstSuggestion) {
-			return;
-		}
-
-		const nextDraft = {
-			label: firstSuggestion.label,
-			latitude: firstSuggestion.latitude,
-			longitude: firstSuggestion.longitude,
-		};
-
-		setDraft((current) => {
-			if (
-				current.label === nextDraft.label &&
-				mapLatLngNearlyEqual(current, nextDraft)
-			) {
-				return current;
-			}
-
-			return nextDraft;
+	function applyExplicitZone(next: SearchZoneDraft): void {
+		setDraft(next);
+		setMapViewCenter({
+			latitude: next.latitude,
+			longitude: next.longitude,
 		});
-	}, [query, suggestionsState]);
+	}
 
 	function applySuggestion(suggestion: SearchZonePlaceSuggestion): void {
-		userPannedRef.current = false;
 		setQuery(suggestion.label);
-		setDraft({
+		applyExplicitZone({
 			label: suggestion.label,
 			latitude: suggestion.latitude,
 			longitude: suggestion.longitude,
@@ -138,7 +118,6 @@ export function SearchZoneMapEditor({
 	}
 
 	function handleMapCenterChange(center: MapLatLng): void {
-		userPannedRef.current = true;
 		setDraft((current) => ({
 			...current,
 			latitude: center.latitude,
@@ -161,7 +140,6 @@ export function SearchZoneMapEditor({
 		setError(null);
 		setSuccess(null);
 		setMapLoadFailed(false);
-		userPannedRef.current = false;
 
 		const response = await platformFetch("/api/user/search-zone/geocode", {
 			method: "POST",
@@ -188,7 +166,7 @@ export function SearchZoneMapEditor({
 			return;
 		}
 
-		setDraft({
+		applyExplicitZone({
 			label: body.label,
 			latitude: body.latitude,
 			longitude: body.longitude,
@@ -230,7 +208,7 @@ export function SearchZoneMapEditor({
 
 		const zone = body.user.searchZone;
 		onZoneSaved(zone);
-		setDraft({
+		applyExplicitZone({
 			label: zone.label,
 			latitude: zone.latitude,
 			longitude: zone.longitude,
@@ -270,7 +248,7 @@ export function SearchZoneMapEditor({
 			return (
 				<InteractiveSearchZoneMap
 					clientConfig={mapConfigState.config}
-					center={{ latitude: draft.latitude, longitude: draft.longitude }}
+					center={mapViewCenter}
 					onCenterChange={handleMapCenterChange}
 					markers={markersState.status === "ready" ? markersState.markers : []}
 					className={`${mapMinHeight} w-full`}
@@ -320,7 +298,7 @@ export function SearchZoneMapEditor({
 	const introCopy =
 		variant === "page"
 			? savedZone
-				? "Explora el mapa, busca un lugar o mueve el pin para cambiar tu zona."
+				? "Explora el mapa, busca un lugar o arrastra el mapa para cambiar tu zona."
 				: "Explora locales en el mapa y confirma dónde quieres buscar."
 			: savedZone
 				? "Busca un nuevo lugar o mueve el mapa para cambiar tu zona de exploración."
@@ -338,7 +316,6 @@ export function SearchZoneMapEditor({
 					type="text"
 					value={query}
 					onChange={(event) => {
-						userPannedRef.current = false;
 						setQuery(event.target.value);
 						setError(null);
 						setSuccess(null);
@@ -370,6 +347,10 @@ export function SearchZoneMapEditor({
 			<p className="text-sm text-muted">
 				¿Confirmas esta zona?{" "}
 				<span className="font-medium text-foreground">{draftLabel}</span>
+			</p>
+			<p className="text-xs text-muted">
+				Arrastra el mapa para mover la zona; el pin marca el centro. Usa la rueda del ratón o los botones +/−
+				para ampliar.
 			</p>
 
 			{renderMapSection()}

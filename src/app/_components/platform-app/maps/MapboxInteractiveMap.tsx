@@ -10,6 +10,11 @@ import {
 	mapLatLngNearlyEqual,
 	toMapboxLngLat,
 } from "../../../../lib/maps/mapCenterUtils";
+import {
+	createEstablishmentMapMarkerElement,
+	syncEstablishmentMarkerLabels,
+	type EstablishmentMapMarkerLabelHandle,
+} from "./establishmentMapMarkerDom";
 import { MapCenterPin } from "./MapCenterPin";
 import type { InteractiveMapAdapterProps } from "./types";
 
@@ -19,6 +24,7 @@ export function MapboxInteractiveMap({
 	center,
 	zoom = DEFAULT_SEARCH_ZONE_MAP_ZOOM,
 	onCenterChange,
+	onUserGestureStart,
 	markers = [],
 	interactive = true,
 	className,
@@ -27,12 +33,16 @@ export function MapboxInteractiveMap({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const mapRef = useRef<import("mapbox-gl").Map | null>(null);
 	const markerRefs = useRef<import("mapbox-gl").Marker[]>([]);
+	const establishmentLabelHandlesRef = useRef<EstablishmentMapMarkerLabelHandle[]>([]);
 	const isFlyingRef = useRef(false);
+	const isUserGesturingRef = useRef(false);
 	const centerRef = useRef(center);
 	const onCenterChangeRef = useRef(onCenterChange);
+	const onUserGestureStartRef = useRef(onUserGestureStart);
 
 	centerRef.current = center;
 	onCenterChangeRef.current = onCenterChange;
+	onUserGestureStartRef.current = onUserGestureStart;
 
 	useEffect(() => {
 		let disposed = false;
@@ -58,6 +68,7 @@ export function MapboxInteractiveMap({
 				center: toMapboxLngLat(centerRef.current),
 				zoom,
 				attributionControl: false,
+				cooperativeGestures: false,
 				dragPan: interactive,
 				scrollZoom: interactive,
 				boxZoom: interactive,
@@ -70,6 +81,15 @@ export function MapboxInteractiveMap({
 
 			map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 			mapRef.current = map;
+
+			if (interactive) {
+				map.dragPan.enable();
+				map.scrollZoom.enable();
+				map.boxZoom.enable();
+				map.doubleClickZoom.enable();
+				map.touchZoomRotate.enable();
+				map.keyboard.enable();
+			}
 
 			const resizeMap = (): void => {
 				map.resize();
@@ -99,8 +119,52 @@ export function MapboxInteractiveMap({
 				onCenterChangeRef.current?.(nextCenter);
 			};
 
-			map.on("moveend", emitCenterIfChanged);
+			const notifyUserGesture = (): void => {
+				if (isFlyingRef.current) {
+					return;
+				}
+
+				isUserGesturingRef.current = true;
+				onUserGestureStartRef.current?.();
+			};
+
+			const finishUserGesture = (): void => {
+				if (isFlyingRef.current) {
+					return;
+				}
+
+				isUserGesturingRef.current = false;
+			};
+
+			map.on("dragstart", notifyUserGesture);
+			map.on("zoomstart", notifyUserGesture);
+			map.on("zoomend", () => {
+				finishUserGesture();
+				syncEstablishmentMarkerLabels(establishmentLabelHandlesRef.current, map.getZoom());
+			});
+			map.on("moveend", () => {
+				emitCenterIfChanged();
+				finishUserGesture();
+			});
 			map.on("dragend", emitCenterIfChanged);
+
+			const mapCenter = map.getCenter();
+			const currentCenter = fromMapboxLngLat(mapCenter.lng, mapCenter.lat);
+
+			if (!mapLatLngNearlyEqual(currentCenter, centerRef.current)) {
+				isFlyingRef.current = true;
+				map.easeTo({
+					center: toMapboxLngLat(centerRef.current),
+					essential: true,
+				});
+
+				const handleInitMoveEnd = (): void => {
+					isFlyingRef.current = false;
+					map.off("moveend", handleInitMoveEnd);
+				};
+
+				map.on("moveend", handleInitMoveEnd);
+			}
 		}
 
 		void initMap();
@@ -112,6 +176,7 @@ export function MapboxInteractiveMap({
 				marker.remove();
 			}
 			markerRefs.current = [];
+			establishmentLabelHandlesRef.current = [];
 			mapRef.current?.remove();
 			mapRef.current = null;
 		};
@@ -154,9 +219,8 @@ export function MapboxInteractiveMap({
 		}
 
 		isFlyingRef.current = true;
-		map.flyTo({
+		map.easeTo({
 			center: toMapboxLngLat(center),
-			zoom,
 			essential: true,
 		});
 
@@ -166,7 +230,7 @@ export function MapboxInteractiveMap({
 		};
 
 		map.on("moveend", handleMoveEnd);
-	}, [center, zoom]);
+	}, [center.latitude, center.longitude]);
 
 	useEffect(() => {
 		const map = mapRef.current;
@@ -178,6 +242,7 @@ export function MapboxInteractiveMap({
 			marker.remove();
 		}
 		markerRefs.current = [];
+		establishmentLabelHandlesRef.current = [];
 
 		if (markers.length === 0) {
 			return;
@@ -185,26 +250,29 @@ export function MapboxInteractiveMap({
 
 		void import("mapbox-gl").then((mapboxModule) => {
 			const mapboxgl = mapboxModule.default;
+			const labelHandles: EstablishmentMapMarkerLabelHandle[] = [];
 
 			for (const item of markers) {
-				const el = document.createElement("div");
-				el.className = "h-3 w-3 rounded-full border-2 border-background bg-secondary shadow-sm";
-				el.title = item.name;
+				const { root, setLabelVisible } = createEstablishmentMapMarkerElement(item.name, item.slug);
 
-				const marker = new mapboxgl.Marker({ element: el })
+				const marker = new mapboxgl.Marker({ element: root, anchor: "bottom" })
 					.setLngLat([item.longitude, item.latitude])
 					.addTo(map);
 
 				markerRefs.current.push(marker);
+				labelHandles.push({ setLabelVisible });
 			}
+
+			establishmentLabelHandlesRef.current = labelHandles;
+			syncEstablishmentMarkerLabels(labelHandles, map.getZoom());
 		});
 	}, [markers]);
 
 	return (
 		<div
-			className={`relative w-full overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
+			className={`relative w-full touch-none overscroll-contain overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
 		>
-			<div ref={containerRef} className="absolute inset-0 h-full w-full" />
+			<div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />
 			<MapCenterPin />
 		</div>
 	);

@@ -6,19 +6,42 @@ import { type ReactElement, useEffect, useRef } from "react";
 import {
 	DEFAULT_SEARCH_ZONE_MAP_ZOOM,
 	mapLatLngNearlyEqual,
+	shouldShowEstablishmentMarkerLabel,
 	toGoogleLatLngLiteral,
 } from "../../../../lib/maps/mapCenterUtils";
+import {
+	buildEstablishmentPinIconDataUrl,
+	createEstablishmentMapMarkerElement,
+	getEstablishmentMapMarkerHref,
+	syncEstablishmentMarkerLabels,
+	type EstablishmentMapMarkerLabelHandle,
+} from "./establishmentMapMarkerDom";
 import { MapCenterPin } from "./MapCenterPin";
-import type { InteractiveMapAdapterProps } from "./types";
+import type { EstablishmentMapMarker, InteractiveMapAdapterProps } from "./types";
 
 type GoogleMapsNamespace = typeof google.maps;
 type GoogleMapInstance = google.maps.Map;
-type GoogleMarkerInstance = google.maps.Marker;
+type GoogleAdvancedMarkerElement = google.maps.marker.AdvancedMarkerElement;
+type GoogleClassicMarker = google.maps.Marker;
+
+type GoogleEstablishmentMarkerEntry =
+	| {
+			kind: "advanced";
+			marker: GoogleAdvancedMarkerElement;
+			setLabelVisible: (visible: boolean) => void;
+	  }
+	| {
+			kind: "classic";
+			marker: GoogleClassicMarker;
+			name: string;
+			slug: string;
+	  };
 
 export function GoogleInteractiveMap({
 	center,
 	zoom = DEFAULT_SEARCH_ZONE_MAP_ZOOM,
 	onCenterChange,
+	onUserGestureStart,
 	markers = [],
 	interactive = true,
 	className,
@@ -27,17 +50,120 @@ export function GoogleInteractiveMap({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const mapRef = useRef<GoogleMapInstance | null>(null);
 	const googleMapsRef = useRef<GoogleMapsNamespace | null>(null);
-	const markerRefs = useRef<GoogleMarkerInstance[]>([]);
+	const establishmentMarkerEntriesRef = useRef<GoogleEstablishmentMarkerEntry[]>([]);
 	const isFlyingRef = useRef(false);
+	const isUserGesturingRef = useRef(false);
 	const centerRef = useRef(center);
 	const onCenterChangeRef = useRef(onCenterChange);
+	const onUserGestureStartRef = useRef(onUserGestureStart);
 
 	centerRef.current = center;
 	onCenterChangeRef.current = onCenterChange;
+	onUserGestureStartRef.current = onUserGestureStart;
+
+	function syncGoogleEstablishmentMarkerLabels(mapZoom: number): void {
+		const showLabel = shouldShowEstablishmentMarkerLabel(mapZoom);
+		const advancedHandles: EstablishmentMapMarkerLabelHandle[] = [];
+
+		for (const entry of establishmentMarkerEntriesRef.current) {
+			if (entry.kind === "advanced") {
+				advancedHandles.push({ setLabelVisible: entry.setLabelVisible });
+				continue;
+			}
+
+			entry.marker.setLabel(
+				showLabel
+					? {
+							text: entry.name,
+							color: "var(--color-foreground)",
+							fontSize: "11px",
+							fontWeight: "500",
+						}
+					: null,
+			);
+		}
+
+		syncEstablishmentMarkerLabels(advancedHandles, mapZoom);
+	}
+
+	function clearEstablishmentMarkers(): void {
+		for (const entry of establishmentMarkerEntriesRef.current) {
+			if (entry.kind === "advanced") {
+				entry.marker.map = null;
+				continue;
+			}
+
+			entry.marker.setMap(null);
+		}
+
+		establishmentMarkerEntriesRef.current = [];
+	}
+
+	async function renderEstablishmentMarkers(
+		map: GoogleMapInstance,
+		googleMaps: GoogleMapsNamespace,
+		markerItems: EstablishmentMapMarker[],
+	): Promise<void> {
+		clearEstablishmentMarkers();
+
+		if (markerItems.length === 0) {
+			return;
+		}
+
+		const iconUrl = buildEstablishmentPinIconDataUrl();
+		let AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement | null = null;
+
+		try {
+			const markerLibrary = (await googleMaps.importLibrary("marker")) as google.maps.MarkerLibrary;
+			AdvancedMarkerElement = markerLibrary.AdvancedMarkerElement;
+		} catch {
+			AdvancedMarkerElement = null;
+		}
+
+		const entries: GoogleEstablishmentMarkerEntry[] = [];
+
+		for (const item of markerItems) {
+			const position = { lat: item.latitude, lng: item.longitude };
+
+			if (AdvancedMarkerElement) {
+				const { root, setLabelVisible } = createEstablishmentMapMarkerElement(item.name, item.slug);
+				const marker = new AdvancedMarkerElement({
+					map,
+					position,
+					content: root,
+					gmpClickable: true,
+				});
+
+				entries.push({ kind: "advanced", marker, setLabelVisible });
+				continue;
+			}
+
+			const marker = new googleMaps.Marker({
+				map,
+				position,
+				title: item.name,
+				icon: {
+					url: iconUrl,
+					anchor: new googleMaps.Point(12, 30),
+					scaledSize: new googleMaps.Size(24, 30),
+				},
+			});
+
+			marker.addListener("click", () => {
+				window.location.assign(getEstablishmentMapMarkerHref(item.slug));
+			});
+
+			entries.push({ kind: "classic", marker, name: item.name, slug: item.slug });
+		}
+
+		establishmentMarkerEntriesRef.current = entries;
+		syncGoogleEstablishmentMarkerLabels(map.getZoom() ?? zoom);
+	}
 
 	useEffect(() => {
 		let disposed = false;
 		let resizeObserver: ResizeObserver | null = null;
+		let zoomListener: google.maps.MapsEventListener | null = null;
 
 		async function initMap(): Promise<void> {
 			if (!containerRef.current) {
@@ -105,8 +231,51 @@ export function GoogleInteractiveMap({
 				onCenterChangeRef.current?.(nextCenter);
 			};
 
-			map.addListener("idle", emitCenterIfChanged);
+			const notifyUserGesture = (): void => {
+				if (isFlyingRef.current) {
+					return;
+				}
+
+				isUserGesturingRef.current = true;
+				onUserGestureStartRef.current?.();
+			};
+
+			const finishUserGesture = (): void => {
+				if (isFlyingRef.current) {
+					return;
+				}
+
+				isUserGesturingRef.current = false;
+			};
+
+			map.addListener("dragstart", notifyUserGesture);
+			map.addListener("zoomstart", notifyUserGesture);
+			zoomListener = map.addListener("zoom_changed", () => {
+				syncGoogleEstablishmentMarkerLabels(map.getZoom() ?? zoom);
+			});
+			map.addListener("idle", () => {
+				emitCenterIfChanged();
+				finishUserGesture();
+			});
 			map.addListener("dragend", emitCenterIfChanged);
+
+			const mapCenter = map.getCenter();
+			if (mapCenter) {
+				const currentCenter = {
+					latitude: mapCenter.lat(),
+					longitude: mapCenter.lng(),
+				};
+
+				if (!mapLatLngNearlyEqual(currentCenter, centerRef.current)) {
+					isFlyingRef.current = true;
+					map.panTo(toGoogleLatLngLiteral(centerRef.current));
+
+					const initListener = map.addListener("idle", () => {
+						isFlyingRef.current = false;
+						google.maps.event.removeListener(initListener);
+					});
+				}
+			}
 		}
 
 		void initMap();
@@ -114,10 +283,10 @@ export function GoogleInteractiveMap({
 		return () => {
 			disposed = true;
 			resizeObserver?.disconnect();
-			for (const marker of markerRefs.current) {
-				marker.setMap(null);
+			if (zoomListener) {
+				googleMapsRef.current?.event.removeListener(zoomListener);
 			}
-			markerRefs.current = [];
+			clearEstablishmentMarkers();
 			mapRef.current = null;
 		};
 	}, [config.language, config.mapId, config.publicToken, interactive, zoom]);
@@ -144,13 +313,12 @@ export function GoogleInteractiveMap({
 
 		isFlyingRef.current = true;
 		map.panTo(toGoogleLatLngLiteral(center));
-		map.setZoom(zoom);
 
 		const listener = map.addListener("idle", () => {
 			isFlyingRef.current = false;
 			googleMapsRef.current?.event.removeListener(listener);
 		});
-	}, [center, zoom]);
+	}, [center.latitude, center.longitude]);
 
 	useEffect(() => {
 		const map = mapRef.current;
@@ -159,27 +327,14 @@ export function GoogleInteractiveMap({
 			return;
 		}
 
-		for (const marker of markerRefs.current) {
-			marker.setMap(null);
-		}
-		markerRefs.current = [];
-
-		for (const item of markers) {
-			const marker = new googleMaps.Marker({
-				map,
-				position: { lat: item.latitude, lng: item.longitude },
-				title: item.name,
-			});
-
-			markerRefs.current.push(marker);
-		}
+		void renderEstablishmentMarkers(map, googleMaps, markers);
 	}, [markers]);
 
 	return (
 		<div
-			className={`relative w-full overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
+			className={`relative w-full touch-none overscroll-contain overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
 		>
-			<div ref={containerRef} className="absolute inset-0 h-full w-full" />
+			<div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />
 			<MapCenterPin />
 		</div>
 	);

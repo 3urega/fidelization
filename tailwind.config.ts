@@ -13,6 +13,8 @@ const config: Config = {
 				border: "var(--color-border)",
 				error: "var(--color-error)",
 				"primary-foreground": "var(--color-primary-foreground)",
+				"map-establishment": "var(--color-map-establishment)",
+				"map-establishment-foreground": "var(--color-map-establishment-foreground)",
 			},
 			borderRadius: {
 				theme: "var(--border-radius)",

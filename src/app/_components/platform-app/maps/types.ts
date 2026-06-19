@@ -24,6 +24,8 @@ export type InteractiveSearchZoneMapProps = {
 	center: MapLatLng;
 	zoom?: number;
 	onCenterChange?: (center: MapLatLng) => void;
+	/** Fired when the user starts panning or zooming the map (before center sync). */
+	onUserGestureStart?: () => void;
 	markers?: EstablishmentMapMarker[];
 	interactive?: boolean;
 	className?: string;
