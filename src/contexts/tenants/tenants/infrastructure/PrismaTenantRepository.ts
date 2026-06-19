@@ -30,7 +30,7 @@ type DiscoverableNearRow = {
 	logo_url: string | null;
 	cover_image_url: string | null;
 	discovery_tags: unknown;
-	distance_km: number | string;
+	distance_km: number | string | null;
 };
 
 type EstablishmentMapMarkerRow = {
@@ -72,6 +72,11 @@ function mapEstablishmentMapMarkerRow(row: EstablishmentMapMarkerRow): Establish
 }
 
 function mapDiscoverableNearRow(row: DiscoverableNearRow): DiscoverableEstablishment {
+	const distanceKm =
+		row.distance_km === null || row.distance_km === undefined
+			? undefined
+			: roundDistanceKm(Number(row.distance_km));
+
 	return {
 		id: row.id,
 		name: row.name,
@@ -79,7 +84,7 @@ function mapDiscoverableNearRow(row: DiscoverableNearRow): DiscoverableEstablish
 		logoUrl: row.logo_url?.trim() ? row.logo_url.trim() : null,
 		coverImageUrl: row.cover_image_url?.trim() ? row.cover_image_url.trim() : null,
 		tags: discoveryTagsFromPrisma(row.discovery_tags),
-		distanceKm: roundDistanceKm(Number(row.distance_km)),
+		...(distanceKm !== undefined ? { distanceKm } : {}),
 	};
 }
 
@@ -147,6 +152,7 @@ export class PrismaTenantRepository extends TenantRepository {
 		return { establishments, hasMore };
 	}
 
+	/** Sort-only by proximity; `near.radiusKm` is ignored (Phase U1 #103). */
 	private async listDiscoverableActiveNear(
 		params: ListDiscoverableEstablishmentsParams,
 		near: DiscoverNearFilter,
@@ -166,23 +172,23 @@ export class PrismaTenantRepository extends TenantRepository {
 					logo_url,
 					cover_image_url,
 					discovery_tags,
-					(
-						6371 * acos(
-							LEAST(1.0, GREATEST(-1.0,
-								cos(radians(${near.latitude})) * cos(radians(latitude))
-									* cos(radians(longitude) - radians(${near.longitude}))
-								+ sin(radians(${near.latitude})) * sin(radians(latitude))
-							))
+					CASE
+						WHEN latitude IS NOT NULL AND longitude IS NOT NULL THEN (
+							6371 * acos(
+								LEAST(1.0, GREATEST(-1.0,
+									cos(radians(${near.latitude})) * cos(radians(latitude))
+										* cos(radians(longitude) - radians(${near.longitude}))
+									+ sin(radians(${near.latitude})) * sin(radians(latitude))
+								))
+							)
 						)
-					) AS distance_km
+						ELSE NULL
+					END AS distance_km
 				FROM tenants
 				WHERE status = ${TenantStatus.Active}
-					AND latitude IS NOT NULL
-					AND longitude IS NOT NULL
 					${tagFilter}
-			) AS near_tenants
-			WHERE distance_km <= ${near.radiusKm}
-			ORDER BY distance_km ASC, name ASC, id ASC
+			) AS discover_sorted
+			ORDER BY distance_km ASC NULLS LAST, name ASC, id ASC
 			OFFSET ${offset}
 			LIMIT ${limit + 1}
 		`;

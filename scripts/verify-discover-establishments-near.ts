@@ -7,7 +7,7 @@ import { prisma } from "../src/lib/prisma";
 import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
 
 /**
- * E2E: GET /api/user/establishments?lat=&lng=&radiusKm= near filter.
+ * E2E: GET /api/user/establishments?lat=&lng=&radiusKm= near sort (Phase U1 #103).
  * Requires dev server + DATABASE_URL.
  */
 const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -16,6 +16,8 @@ const BARCELONA_LAT = 41.3874;
 const BARCELONA_LNG = 2.1686;
 const DEMO_LAT = 41.39;
 const DEMO_LNG = 2.17;
+const MADRID_LAT = 40.4168;
+const MADRID_LNG = -3.7038;
 
 function parseSessionCookie(setCookie: string | null): string | null {
 	if (!setCookie) {
@@ -25,6 +27,32 @@ function parseSessionCookie(setCookie: string | null): string | null {
 	const match = /session=([^;]+)/.exec(setCookie);
 
 	return match?.[1] ?? null;
+}
+
+function assertNearSortOrder(
+	establishments: { slug: string; distanceKm?: number }[],
+): void {
+	let lastDistance = -Infinity;
+	let sawMissingDistance = false;
+
+	for (const row of establishments) {
+		if (typeof row.distanceKm === "number") {
+			if (sawMissingDistance) {
+				console.error("❌ rows with distanceKm must appear before rows without", establishments);
+				process.exit(1);
+			}
+
+			if (row.distanceKm < lastDistance) {
+				console.error("❌ establishments must be ordered by distanceKm ascending", establishments);
+				process.exit(1);
+			}
+
+			lastDistance = row.distanceKm;
+			continue;
+		}
+
+		sawMissingDistance = true;
+	}
 }
 
 async function ensureTenantGeocodingColumns(): Promise<void> {
@@ -44,6 +72,11 @@ async function main(): Promise<void> {
 
 	await ensureTenantGeocodingColumns();
 
+	const farTenantId = randomUUID();
+	const noCoordsTenantId = randomUUID();
+	const farSlug = `verify-far-${farTenantId.slice(0, 8)}`;
+	const noCoordsSlug = `verify-no-coords-${noCoordsTenantId.slice(0, 8)}`;
+
 	const demoBefore = await prisma.tenant.findUnique({
 		where: { id: DEMO_TENANT_ID },
 		select: { latitude: true, longitude: true },
@@ -56,6 +89,30 @@ async function main(): Promise<void> {
 
 	const originalLatitude = demoBefore.latitude;
 	const originalLongitude = demoBefore.longitude;
+
+	await prisma.tenant.create({
+		data: {
+			id: farTenantId,
+			name: "Verify Far Madrid",
+			slug: farSlug,
+			status: "active",
+			latitude: MADRID_LAT,
+			longitude: MADRID_LNG,
+			geocodingProvider: "verify",
+			geocodedAt: new Date(),
+		},
+	});
+
+	await prisma.tenant.create({
+		data: {
+			id: noCoordsTenantId,
+			name: "Verify No Coords",
+			slug: noCoordsSlug,
+			status: "active",
+			latitude: null,
+			longitude: null,
+		},
+	});
 
 	await prisma.tenant.update({
 		where: { id: DEMO_TENANT_ID },
@@ -99,7 +156,7 @@ async function main(): Promise<void> {
 		console.log("✅ invalid lat → 400 InvalidDiscoverNearFilter");
 
 		const near = await fetch(
-			`${baseUrl}/api/user/establishments?lat=${BARCELONA_LAT}&lng=${BARCELONA_LNG}&radiusKm=50&limit=20`,
+			`${baseUrl}/api/user/establishments?lat=${BARCELONA_LAT}&lng=${BARCELONA_LNG}&radiusKm=25&limit=50`,
 			{ headers },
 		);
 		const nearBody = (await near.json()) as {
@@ -126,10 +183,32 @@ async function main(): Promise<void> {
 			process.exit(1);
 		}
 
-		console.log(`✅ near filter returns cafe-demo with distanceKm=${demoRow.distanceKm}`);
+		const farRow = nearBody.establishments.find((row) => row.slug === farSlug);
+		if (!farRow || typeof farRow.distanceKm !== "number") {
+			console.error("❌ far tenant must appear with distanceKm even when radiusKm=25", nearBody);
+			process.exit(1);
+		}
+
+		if (farRow.distanceKm <= 25) {
+			console.error("❌ far tenant should be beyond old 25 km filter radius", farRow.distanceKm);
+			process.exit(1);
+		}
+
+		console.log(`✅ far tenant included with distanceKm=${farRow.distanceKm} (radius ignored)`);
+
+		const noCoordsRow = nearBody.establishments.find((row) => row.slug === noCoordsSlug);
+		if (!noCoordsRow || noCoordsRow.distanceKm !== undefined) {
+			console.error("❌ no-coords tenant must appear without distanceKm", nearBody);
+			process.exit(1);
+		}
+
+		assertNearSortOrder(nearBody.establishments);
+		console.log("✅ near sort: distanceKm ascending, no-coords at end");
+
+		console.log(`✅ near sort returns cafe-demo with distanceKm=${demoRow.distanceKm}`);
 
 		const tagged = await fetch(
-			`${baseUrl}/api/user/establishments?lat=${BARCELONA_LAT}&lng=${BARCELONA_LNG}&radiusKm=50&tags=desayunos&limit=20`,
+			`${baseUrl}/api/user/establishments?lat=${BARCELONA_LAT}&lng=${BARCELONA_LNG}&radiusKm=25&tags=desayunos&limit=50`,
 			{ headers },
 		);
 		const taggedBody = (await tagged.json()) as {
@@ -143,7 +222,7 @@ async function main(): Promise<void> {
 
 		console.log("✅ near + tags query succeeds");
 
-		const legacy = await fetch(`${baseUrl}/api/user/establishments?limit=5`, { headers });
+		const legacy = await fetch(`${baseUrl}/api/user/establishments?limit=50`, { headers });
 		const legacyBody = (await legacy.json()) as {
 			establishments?: { slug: string; distanceKm?: number }[];
 		};
@@ -160,6 +239,10 @@ async function main(): Promise<void> {
 		console.log("✅ legacy list without near params");
 		console.log("✅ verify:discover-establishments-near passed");
 	} finally {
+		await prisma.tenant.deleteMany({
+			where: { id: { in: [farTenantId, noCoordsTenantId] } },
+		});
+
 		await prisma.tenant.update({
 			where: { id: DEMO_TENANT_ID },
 			data: {

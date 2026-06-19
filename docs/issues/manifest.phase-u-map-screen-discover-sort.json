@@ -1,0 +1,27 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/platform-user-map-screen.md",
+  "label": "map-screen-discover-sort",
+  "issues": [
+    {
+      "title": "Phase U1: Discover sort-by-distance without radius filter (show all establishments)",
+      "bodyFile": "docs/issues/discover-sort-all-establishments.md"
+    },
+    {
+      "title": "Phase U2: Dedicated search zone map screen (/home/map)",
+      "bodyFile": "docs/issues/profile-map-screen-route.md"
+    },
+    {
+      "title": "Phase U3: Platform app header with profile icon and Ver en el mapa link",
+      "bodyFile": "docs/issues/platform-app-header-map-link.md"
+    },
+    {
+      "title": "Phase U4: Slim profile search zone summary and discover grid CTA updates",
+      "bodyFile": "docs/issues/profile-slim-search-zone-summary.md"
+    },
+    {
+      "title": "Phase U5: Phase U verify scripts, AGENTS.md and docs",
+      "bodyFile": "docs/issues/phase-u-map-screen-verify-docs.md"
+    }
+  ]
+}
