@@ -11,14 +11,6 @@
   },
   "issues": [
     {
-      "title": "Phase S3: Editor zona de busqueda (geocode + mapa + confirmar)",
-      "bodyFile": "docs/issues/platform-user-search-zone-editor.md"
-    },
-    {
-      "title": "Phase S4: Tab mis tarjetas de sellos (activas y completadas)",
-      "bodyFile": "docs/issues/platform-user-stamp-cards-tab.md"
-    },
-    {
       "title": "Phase S5: Grid discover integrado con zona guardada + copy UX",
       "bodyFile": "docs/issues/platform-discover-search-zone-grid-ux.md"
     }

@@ -1,32 +1,31 @@
 "use client";
 
-import { type ReactElement } from "react";
+import { type ReactElement, useState } from "react";
 
-import { Button } from "../../../_components/ui/Button";
+import { UserSearchZoneEditor, type UserSearchZoneJson } from "../../../_components/platform-app/UserSearchZoneEditor";
 import { Card } from "../../../_components/ui/Card";
-
-export type UserSearchZoneJson = {
-	label: string;
-	latitude: number;
-	longitude: number;
-	updatedAt: string;
-};
 
 type PlatformUserProfilePersonalTabProps = {
 	name: string;
 	email: string;
 	searchZone: UserSearchZoneJson | null;
+	onSearchZoneSaved: (zone: UserSearchZoneJson) => void;
+	initialEditorOpen?: boolean;
 };
 
-function scrollToSearchZone(): void {
-	document.getElementById("search-zone")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
+export type { UserSearchZoneJson };
 
 export function PlatformUserProfilePersonalTab({
 	name,
 	email,
 	searchZone,
+	onSearchZoneSaved,
+	initialEditorOpen = false,
 }: PlatformUserProfilePersonalTabProps): ReactElement {
+	const [editorOpenFromHash] = useState(
+		() => typeof window !== "undefined" && window.location.hash === "#search-zone",
+	);
+
 	return (
 		<div className="flex flex-col gap-4">
 			<Card className="flex flex-col gap-3">
@@ -43,44 +42,12 @@ export function PlatformUserProfilePersonalTab({
 			<section id="search-zone" className="flex flex-col gap-3 scroll-mt-4">
 				<h2 className="text-sm font-medium text-foreground">Zona de búsqueda</h2>
 
-				{searchZone ? (
-					<Card className="flex flex-col gap-3">
-						<p className="text-sm text-muted">
-							Exploras locales cerca de{" "}
-							<span className="font-medium text-foreground">{searchZone.label}</span>.
-						</p>
-						<Button type="button" variant="secondary" className="w-full" onClick={scrollToSearchZone}>
-							Cambiar zona
-						</Button>
-					</Card>
-				) : (
-					<Card className="flex flex-col gap-3">
-						<p className="text-sm text-muted">
-							Elige dónde quieres explorar locales. Tu zona se usará en «Explorar» en lugar de
-							pedirte la ubicación cada vez.
-						</p>
-						<Button type="button" className="w-full" onClick={scrollToSearchZone}>
-							Establecer zona de búsqueda
-						</Button>
-					</Card>
-				)}
-
-				<p className="text-xs text-muted">
-					Pronto podrás configurar tu zona en el mapa desde aquí.
-				</p>
+				<UserSearchZoneEditor
+					savedZone={searchZone}
+					onZoneSaved={onSearchZoneSaved}
+					initialOpen={initialEditorOpen || editorOpenFromHash}
+				/>
 			</section>
 		</div>
-	);
-}
-
-export function PlatformUserProfileStampCardsPlaceholderTab(): ReactElement {
-	return (
-		<Card className="flex flex-col gap-2">
-			<p className="text-sm text-muted">
-				Aquí verás un resumen de tus tarjetas de sellos activas y completadas en todos tus
-				locales.
-			</p>
-			<p className="text-sm font-medium text-foreground">Próximamente</p>
-		</Card>
 	);
 }

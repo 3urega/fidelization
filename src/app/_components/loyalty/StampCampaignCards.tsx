@@ -31,12 +31,14 @@ export function StampCampaignCards({
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="flex flex-col gap-1">
-				<h2 className="text-lg font-semibold text-foreground">{title}</h2>
-				{preview && previewSubtitle ? (
-					<p className="text-sm text-muted">{previewSubtitle}</p>
-				) : null}
-			</div>
+			{title ? (
+				<div className="flex flex-col gap-1">
+					<h2 className="text-lg font-semibold text-foreground">{title}</h2>
+					{preview && previewSubtitle ? (
+						<p className="text-sm text-muted">{previewSubtitle}</p>
+					) : null}
+				</div>
+			) : null}
 			<ul className="flex flex-col gap-3">
 				{rows.map((row) => {
 					const current = preview ? 0 : row.current;

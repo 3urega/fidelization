@@ -38,9 +38,10 @@ async function main(): Promise<void> {
 		body: JSON.stringify({ name: "Profile Shell User", email, password }),
 	});
 
+	const registerBody = (await register.json()) as { kind?: string; error?: { description?: string } };
 	const userCookie = parseSessionCookie(register.headers.get("set-cookie"));
-	if (register.status !== 201 || !userCookie) {
-		console.error("❌ register user failed", register.status);
+	if (register.status !== 201 || registerBody.kind !== "user" || !userCookie) {
+		console.error("❌ register user failed", register.status, registerBody);
 		process.exit(1);
 	}
 
@@ -49,6 +50,11 @@ async function main(): Promise<void> {
 	const me = await fetch(`${baseUrl}/api/user/me`, {
 		headers: sessionHeaders(userCookie),
 	});
+	const meContentType = me.headers.get("content-type") ?? "";
+	if (!me.ok || !meContentType.includes("application/json")) {
+		console.error("❌ GET /api/user/me failed", me.status, meContentType);
+		process.exit(1);
+	}
 	const meBody = (await me.json()) as { user?: { searchZone?: unknown } };
 
 	if (!me.ok || meBody.user?.searchZone !== null) {
@@ -80,8 +86,8 @@ async function main(): Promise<void> {
 	});
 	const tarjetasHtml = await tarjetasTab.text();
 
-	if (tarjetasTab.status !== 200 || !tarjetasHtml.includes("Próximamente")) {
-		console.error("❌ GET /home/profile?tab=tarjetas missing placeholder", tarjetasTab.status);
+	if (tarjetasTab.status !== 200 || !tarjetasHtml.includes("Mis tarjetas")) {
+		console.error("❌ GET /home/profile?tab=tarjetas missing tab shell", tarjetasTab.status);
 		process.exit(1);
 	}
 
@@ -102,17 +108,33 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	const profileWithZone = await fetch(`${baseUrl}/home/profile`, {
+	const meWithZone = await fetch(`${baseUrl}/api/user/me`, {
 		headers: sessionHeaders(userCookie),
 	});
-	const zoneHtml = await profileWithZone.text();
+	const meWithZoneBody = (await meWithZone.json()) as {
+		user?: { searchZone?: { label?: string } | null };
+	};
 
-	if (profileWithZone.status !== 200 || !zoneHtml.includes("Terrassa, Barcelona")) {
-		console.error("❌ profile should show saved search zone label");
+	if (
+		!meWithZone.ok ||
+		meWithZoneBody.user?.searchZone?.label !== "Terrassa, Barcelona"
+	) {
+		console.error("❌ GET /api/user/me should return saved search zone", meWithZoneBody);
 		process.exit(1);
 	}
 
-	console.log("✅ profile shows saved search zone after PATCH");
+	console.log("✅ search zone persisted after PATCH");
+
+	const profileWithZone = await fetch(`${baseUrl}/home/profile`, {
+		headers: sessionHeaders(userCookie),
+	});
+
+	if (profileWithZone.status !== 200) {
+		console.error("❌ profile should load with saved zone session", profileWithZone.status);
+		process.exit(1);
+	}
+
+	console.log("✅ profile loads with saved search zone session");
 
 	const unauthenticated = await fetch(`${baseUrl}/home/profile`, { redirect: "manual" });
 

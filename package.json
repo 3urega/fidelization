@@ -127,6 +127,8 @@
     "verify:tenant-geolocation-checklist": "tsx scripts/verify-tenant-geolocation-checklist.ts",
     "verify:platform-user-search-zone-use-case": "tsx scripts/verify-platform-user-search-zone-use-case.ts",
     "verify:platform-user-profile-shell": "tsx scripts/verify-platform-user-profile-shell.ts",
+    "verify:platform-user-search-zone-editor": "tsx scripts/verify-platform-user-search-zone-editor.ts",
+    "verify:platform-user-stamp-cards-tab": "tsx scripts/verify-platform-user-stamp-cards-tab.ts",
     "verify:tenant-feature-flags-use-case": "tsx scripts/verify-tenant-feature-flags-use-case.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",
     "db:backfill-tenant-geocoding": "tsx scripts/backfill-tenant-geocoding.ts",

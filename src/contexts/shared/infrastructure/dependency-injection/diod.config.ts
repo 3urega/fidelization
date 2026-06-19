@@ -42,6 +42,7 @@ import { LoginPlatformUser } from "../../../identity/users/application/authentic
 import { ClearUserSearchZone } from "../../../identity/users/application/profile/ClearUserSearchZone";
 import { EnsureUserQrValue } from "../../../identity/users/application/profile/EnsureUserQrValue";
 import { UpdateUserSearchZone } from "../../../identity/users/application/profile/UpdateUserSearchZone";
+import { GeocodeUserSearchZoneQuery } from "../../../identity/users/application/profile/GeocodeUserSearchZoneQuery";
 import { RegisterPlatformUser } from "../../../identity/users/application/register/RegisterPlatformUser";
 import { UserFinder } from "../../../identity/users/application/find/UserFinder";
 import { UserRegistrar } from "../../../identity/users/application/register/UserRegistrar";
@@ -221,6 +222,7 @@ builder.registerAndUse(OwnerRegistrar);
 builder.registerAndUse(UserFinder);
 builder.registerAndUse(EnsureUserQrValue);
 builder.registerAndUse(UpdateUserSearchZone);
+builder.registerAndUse(GeocodeUserSearchZoneQuery);
 builder.registerAndUse(ClearUserSearchZone);
 builder.registerAndUse(UserAuthenticator);
 builder.registerAndUse(AuthenticateGoogleUser);

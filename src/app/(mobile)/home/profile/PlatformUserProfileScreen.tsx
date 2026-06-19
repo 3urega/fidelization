@@ -12,9 +12,9 @@ import {
 } from "../../../../lib/platform/routes";
 import {
 	PlatformUserProfilePersonalTab,
-	PlatformUserProfileStampCardsPlaceholderTab,
 	type UserSearchZoneJson,
 } from "./PlatformUserProfilePersonalTab";
+import { PlatformUserStampCardsTab } from "./PlatformUserStampCardsTab";
 
 type UserMeResponse = {
 	user: {
@@ -145,7 +145,7 @@ export function PlatformUserProfileScreen({
 
 			<div role="tabpanel">
 				{activeTab === "tarjetas" ? (
-					<PlatformUserProfileStampCardsPlaceholderTab />
+					<PlatformUserStampCardsTab />
 				) : loading ? (
 					<p className="text-sm text-muted">Cargando perfil…</p>
 				) : !user ? (
@@ -155,6 +155,9 @@ export function PlatformUserProfileScreen({
 						name={user.name}
 						email={user.email}
 						searchZone={user.searchZone}
+						onSearchZoneSaved={(zone) => {
+							setUser((current) => (current ? { ...current, searchZone: zone } : current));
+						}}
 					/>
 				)}
 			</div>
