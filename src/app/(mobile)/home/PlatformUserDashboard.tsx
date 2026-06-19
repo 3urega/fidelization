@@ -6,6 +6,7 @@ import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { platformFetch } from "../../../lib/platform/apiUrl";
 import { platformRoutes, parsePlatformHomeTab, type PlatformHomeTab } from "../../../lib/platform/routes";
+import { PlatformAppHeader } from "../../_components/platform-app/PlatformAppHeader";
 import { PlatformUserQrModal } from "../../_components/platform-app/PlatformUserQrModal";
 import { BusinessSummaryCard } from "../../_components/platform-app/BusinessSummaryCard";
 import { EstablishmentDiscoverGrid } from "../../_components/platform-app/EstablishmentDiscoverGrid";
@@ -159,19 +160,11 @@ export function PlatformUserDashboard({
 
 	return (
 		<main className="flex flex-1 flex-col gap-6 py-4">
-			<header className="flex items-start justify-between gap-3">
-				<div className="flex flex-col gap-1">
-					<p className="text-sm font-medium text-primary">Tu espacio</p>
-					<h1 className="text-2xl font-semibold text-foreground">Hola, {displayName}</h1>
-					{displayEmail ? <p className="text-sm text-muted">{displayEmail}</p> : null}
-				</div>
-				<Link
-					href={platformRoutes.homeProfile()}
-					className="shrink-0 text-sm font-medium text-primary hover:opacity-80"
-				>
-					Perfil
-				</Link>
-			</header>
+			<PlatformAppHeader
+				eyebrow="Tu espacio"
+				title={`Hola, ${displayName}`}
+				subtitle={displayEmail || undefined}
+			/>
 
 			<HoverTooltip message={qrDisabledReason} className="w-full">
 				<Button

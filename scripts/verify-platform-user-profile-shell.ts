@@ -154,12 +154,19 @@ async function main(): Promise<void> {
 	const home = await fetch(`${baseUrl}/home`, { headers: sessionHeaders(userCookie) });
 	const homeHtml = await home.text();
 
-	if (home.status !== 200 || !homeHtml.includes("Perfil")) {
-		console.error("❌ /home should link to Perfil", home.status);
+	if (
+		home.status !== 200 ||
+		!homeHtml.includes("Ver en el mapa") ||
+		!homeHtml.includes("/home/map") ||
+		!homeHtml.includes('aria-label="Perfil"') ||
+		!homeHtml.includes("/home/profile") ||
+		homeHtml.includes(">Perfil</")
+	) {
+		console.error("❌ /home should show map link and profile icon (not text Perfil)", home.status);
 		process.exit(1);
 	}
 
-	console.log("✅ /home Perfil link OK");
+	console.log("✅ /home header map link + profile icon OK");
 	console.log("✅ verify:platform-user-profile-shell passed");
 }
 

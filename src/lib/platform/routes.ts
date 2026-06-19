@@ -30,6 +30,7 @@ export const platformRoutes = {
 	homeProfile: (tab: PlatformProfileTab = "personal"): string =>
 		tab === "personal" ? "/home/profile" : `/home/profile?tab=${tab}`,
 	homeProfileSearchZone: (): string => "/home/profile?tab=personal#search-zone",
+	homeMap: "/home/map",
 	homeDiscover: "/home/discover",
 	homeQr: "/home/qr",
 	homeBusiness: (slug: string) => `/home/business/${encodeURIComponent(slug)}`,

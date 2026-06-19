@@ -215,6 +215,20 @@ async function main(): Promise<void> {
 		}
 
 		console.log("✅ GET /home/profile shell OK (editor hydrates client-side)");
+
+		const mapPage = await fetch(`${baseUrl}/home/map`, { headers });
+		const mapHtml = await mapPage.text();
+
+		if (
+			mapPage.status !== 200 ||
+			!mapHtml.includes("Mapa") ||
+			!mapHtml.includes("Obteniendo ubicación")
+		) {
+			console.error("❌ map page shell missing expected copy", mapPage.status);
+			process.exit(1);
+		}
+
+		console.log("✅ GET /home/map shell OK (map editor hydrates client-side)");
 		console.log("✅ verify:search-zone-editor-interactive passed");
 	} finally {
 		await prisma.tenant.update({
