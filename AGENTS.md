@@ -83,6 +83,7 @@ npm run verify:search-zone-place-suggest-use-case # Phase T1 #98 — PlaceSugges
 npm run verify:search-zone-place-suggest # Phase T1 #98 — GET /api/user/search-zone/suggest E2E (dev server)
 npm run verify:interactive-map-client-config-use-case # Phase T2 #99 — InteractiveMapClientConfigProvider + use case (domain stub)
 npm run verify:interactive-map-client-config # Phase T2 #99 — GET /api/user/search-zone/map-client-config E2E (dev server)
+npm run verify:interactive-search-zone-map-component # Phase T3 #100 — InteractiveSearchZoneMap utils + module exports
 npm run verify:platform-user-stamp-cards-tab # Phase S4 #96 — profile Mis tarjetas tab E2E (dev + DATABASE_URL)
 npm run db:backfill-tenant-geocoding # backfill coords for tenants with address and no latitude
 npm run verify:customer-session    # issue #18 — JWT kind customer + Customer.register (domain)

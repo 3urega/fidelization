@@ -53,7 +53,7 @@ Manifest: [`docs/issues/manifest.phase-t-interactive-search-zone-map.json`](../i
 |---|-------|-------|
 | [#98](https://github.com/3urega/fidelization/issues/98) | T1: Live place suggest + API | Autocomplete mientras escribes — **Implemented** 2026-06-19 |
 | [#99](https://github.com/3urega/fidelization/issues/99) | T2: Interactive map port + client config | Base DDD Mapbox/Google — **Implemented** 2026-06-19 |
-| [#100](https://github.com/3urega/fidelization/issues/100) | T3: Mapa interactivo UI | Pan, zoom, pin arrastrable |
+| [#100](https://github.com/3urega/fidelization/issues/100) | T3: Mapa interactivo UI | Pan, zoom, pin arrastrable — **Implemented** 2026-06-19 |
 | [#101](https://github.com/3urega/fidelization/issues/101) | T4: Markers de locales | Negocios geocodificados en mapa |
 | [#102](https://github.com/3urega/fidelization/issues/102) | T5: Integración editor + verify | UX completa en perfil |
 
