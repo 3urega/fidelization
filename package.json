@@ -134,6 +134,8 @@
     "verify:interactive-map-client-config-use-case": "tsx scripts/verify-interactive-map-client-config-use-case.ts",
     "verify:interactive-map-client-config": "tsx scripts/verify-interactive-map-client-config.ts",
     "verify:interactive-search-zone-map-component": "tsx scripts/verify-interactive-search-zone-map-component.ts",
+    "verify:search-zone-map-markers-use-case": "tsx scripts/verify-search-zone-map-markers-use-case.ts",
+    "verify:search-zone-map-markers": "tsx scripts/verify-search-zone-map-markers.ts",
     "verify:platform-user-stamp-cards-tab": "tsx scripts/verify-platform-user-stamp-cards-tab.ts",
     "verify:tenant-feature-flags-use-case": "tsx scripts/verify-tenant-feature-flags-use-case.ts",
     "db:users": "tsx scripts/check-user-memberships.ts",

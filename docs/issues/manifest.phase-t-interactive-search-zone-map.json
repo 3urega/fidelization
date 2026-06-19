@@ -11,10 +11,6 @@
   },
   "issues": [
     {
-      "title": "Phase T4: Establishment map markers near search zone point",
-      "bodyFile": "docs/issues/search-zone-map-establishment-markers.md"
-    },
-    {
       "title": "Phase T5: Integrate interactive map UX in UserSearchZoneEditor + verify",
       "bodyFile": "docs/issues/search-zone-editor-interactive-integration.md"
     }
