@@ -1,6 +1,6 @@
 # Ruleta de fidelización (gamification)
 
-**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) + V3 ([#110](https://github.com/3urega/fidelization/issues/110), 2026-06-20) implemented; V4–V7 open ([#111](https://github.com/3urega/fidelization/issues/111)–[#114](https://github.com/3urega/fidelization/issues/114)).
+**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) + V3 ([#110](https://github.com/3urega/fidelization/issues/110), 2026-06-20) + V4 ([#111](https://github.com/3urega/fidelization/issues/111), 2026-06-20) implemented; V5–V7 open ([#112](https://github.com/3urega/fidelization/issues/112)–[#114](https://github.com/3urega/fidelization/issues/114)).
 
 ## Overview
 
@@ -36,6 +36,16 @@ Premio físico → pending_redeem (canje staff v2)
 
 Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reglas de frecuencia.
 
+## Implementation status (V4)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Spin use cases | `ExecuteRouletteSpin`, `GetRoulettePublicState`, `AssertRouletteSpinAccess` |
+| Loyalty reuse | `ApplyCustomerLoyaltyOutcome`, `Customer.earnPoints()` |
+| Client APIs | `GET/POST /api/user/establishments/[slug]/games/ruleta` (+ `/spin`) |
+| Domain verify | `npm run verify:roulette-spin-use-case` |
+| E2E verify | `npm run verify:roulette-spin` (dev + `DATABASE_URL`) |
+
 ## Implementation status (V3)
 
 | Artefacto | Ruta |
@@ -70,7 +80,7 @@ Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reg
 | [#108](https://github.com/3urega/fidelization/issues/108) | Phase V1: Roulette domain engine (RNG + config validation) | **Implemented** 2026-06-20 |
 | [#109](https://github.com/3urega/fidelization/issues/109) | Phase V2: Roulette persistence (Prisma + tenant activation) | **Implemented** 2026-06-20 |
 | [#110](https://github.com/3urega/fidelization/issues/110) | Phase V3: Owner roulette config API + settings UI | **Implemented** 2026-06-20 |
-| [#111](https://github.com/3urega/fidelization/issues/111) | Phase V4: Client spin API (ExecuteRouletteSpin + prize application) | `docs/issues/roulette-spin-api.md` |
+| [#111](https://github.com/3urega/fidelization/issues/111) | Phase V4: Client spin API (ExecuteRouletteSpin + prize application) | **Implemented** 2026-06-20 |
 | [#112](https://github.com/3urega/fidelization/issues/112) | Phase V5: Roulette visual assets + Wheel UI + establishment detail | `docs/issues/roulette-visual-assets-ui.md` |
 | [#113](https://github.com/3urega/fidelization/issues/113) | Phase V6: Spin eligibility after staff scan | `docs/issues/roulette-scan-eligibility.md` |
 | [#114](https://github.com/3urega/fidelization/issues/114) | Phase V7: Staff redeem pending roulette prizes (v2) | `docs/issues/roulette-staff-redeem-v2.md` |

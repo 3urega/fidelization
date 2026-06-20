@@ -67,6 +67,8 @@
     "verify:roulette-config-use-case": "tsx scripts/verify-roulette-config-use-case.ts",
     "verify:roulette-config": "tsx scripts/verify-roulette-config.ts",
     "verify:roulette-owner-config": "tsx scripts/verify-roulette-owner-config.ts",
+    "verify:roulette-spin-use-case": "tsx scripts/verify-roulette-spin-use-case.ts",
+    "verify:roulette-spin": "tsx scripts/verify-roulette-spin.ts",
     "verify:stamp-campaign-adopt-template-use-case": "tsx scripts/verify-stamp-campaign-adopt-template-use-case.ts",
     "verify:stamp-campaign-adopt-template": "tsx scripts/verify-stamp-campaign-adopt-template.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",
