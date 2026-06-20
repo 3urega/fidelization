@@ -147,10 +147,21 @@ export function GamificationGamesPanel(): ReactElement {
 					{game.description ? (
 						<p className="mt-2 text-sm text-muted">{game.description}</p>
 					) : null}
-					<p className="mt-4 text-sm font-medium text-muted">Próximamente</p>
-					<p className="mt-1 text-xs text-muted">
-						El motor de juego estará disponible en una próxima actualización.
-					</p>
+					{game.slug === "ruleta" ? (
+						<Link
+							href="/settings/games/ruleta"
+							className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
+						>
+							Configurar ruleta →
+						</Link>
+					) : (
+						<>
+							<p className="mt-4 text-sm font-medium text-muted">Próximamente</p>
+							<p className="mt-1 text-xs text-muted">
+								El motor de juego estará disponible en una próxima actualización.
+							</p>
+						</>
+					)}
 				</Card>
 			))}
 		</div>

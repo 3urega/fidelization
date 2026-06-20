@@ -1,0 +1,29 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Circular spin button with GIRAR text">
+  <defs>
+    <linearGradient id="goldRing" x1="22" y1="16" x2="98" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D4A853"/>
+      <stop offset="1" stop-color="#B8893A"/>
+    </linearGradient>
+    <filter id="softShadow" x="8" y="10" width="104" height="106" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#3D2B1F" flood-opacity="0.20"/>
+    </filter>
+    <filter id="innerSoft" x="28" y="28" width="64" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#6F4E37" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <!-- outer coffee border -->
+    <circle cx="60" cy="58" r="51" fill="#6F4E37"/>
+    <!-- gold tappable ring -->
+    <circle cx="60" cy="58" r="48" fill="url(#goldRing)"/>
+    <!-- subtle upper highlight on ring -->
+    <path d="M24.8 51.8C28 34.1 42.9 20.6 61 20.6C76.1 20.6 89.1 29.7 94.8 42.8" stroke="#F0CF82" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+    <!-- cream inner face -->
+    <circle cx="60" cy="58" r="34" fill="#F5F0E8" stroke="#6F4E37" stroke-width="2" filter="url(#innerSoft)"/>
+    <!-- small café-friendly shine -->
+    <path d="M43.5 44.5C47.3 39.8 53.1 36.9 59.7 36.9" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <text x="60" y="64" text-anchor="middle" font-family="Nunito, Avenir Rounded, Arial Rounded MT Bold, Arial, sans-serif" font-weight="800" font-size="19" letter-spacing="0.8" fill="#3D2B1F">GIRAR</text>
+</svg>

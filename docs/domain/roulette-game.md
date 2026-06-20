@@ -1,6 +1,6 @@
 # Ruleta de fidelización (gamification)
 
-**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) implemented; V3–V7 open ([#110](https://github.com/3urega/fidelization/issues/110)–[#114](https://github.com/3urega/fidelization/issues/114)).
+**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) + V3 ([#110](https://github.com/3urega/fidelization/issues/110), 2026-06-20) implemented; V4–V7 open ([#111](https://github.com/3urega/fidelization/issues/111)–[#114](https://github.com/3urega/fidelization/issues/114)).
 
 ## Overview
 
@@ -36,6 +36,14 @@ Premio físico → pending_redeem (canje staff v2)
 
 Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reglas de frecuencia.
 
+## Implementation status (V3)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Owner config API | `GET/PUT /api/loyalty/games/ruleta/config`, `PATCH …/activation` |
+| Settings UI | `/settings/games/ruleta` — `RouletteConfigEditor`, `RouletteWheelPreview` |
+| Owner verify | `npm run verify:roulette-owner-config` (dev + `DATABASE_URL`) |
+
 ## Implementation status (V2)
 
 | Artefacto | Ruta |
@@ -61,7 +69,7 @@ Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reg
 |---|--------|------|
 | [#108](https://github.com/3urega/fidelization/issues/108) | Phase V1: Roulette domain engine (RNG + config validation) | **Implemented** 2026-06-20 |
 | [#109](https://github.com/3urega/fidelization/issues/109) | Phase V2: Roulette persistence (Prisma + tenant activation) | **Implemented** 2026-06-20 |
-| [#110](https://github.com/3urega/fidelization/issues/110) | Phase V3: Owner roulette config API + settings UI | `docs/issues/roulette-owner-config-ui.md` |
+| [#110](https://github.com/3urega/fidelization/issues/110) | Phase V3: Owner roulette config API + settings UI | **Implemented** 2026-06-20 |
 | [#111](https://github.com/3urega/fidelization/issues/111) | Phase V4: Client spin API (ExecuteRouletteSpin + prize application) | `docs/issues/roulette-spin-api.md` |
 | [#112](https://github.com/3urega/fidelization/issues/112) | Phase V5: Roulette visual assets + Wheel UI + establishment detail | `docs/issues/roulette-visual-assets-ui.md` |
 | [#113](https://github.com/3urega/fidelization/issues/113) | Phase V6: Spin eligibility after staff scan | `docs/issues/roulette-scan-eligibility.md` |

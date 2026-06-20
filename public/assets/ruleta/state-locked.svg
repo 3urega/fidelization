@@ -1,0 +1,49 @@
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Locked roulette state icon">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#3D2B1F" flood-opacity="0.18"/>
+    </filter>
+    <linearGradient id="goldGrad" x1="84" y1="76" x2="168" y2="170" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4A853"/>
+      <stop offset="1" stop-color="#B8893A"/>
+    </linearGradient>
+    <clipPath id="wheelClip">
+      <circle cx="120" cy="120" r="84"/>
+    </clipPath>
+  </defs>
+
+  <!-- Faded roulette silhouette -->
+  <g opacity="0.4" filter="url(#softShadow)">
+    <circle cx="120" cy="120" r="88" fill="#F5F0E8" stroke="#6F4E37" stroke-width="3"/>
+    <g clip-path="url(#wheelClip)">
+      <path d="M120 120 L120 36 A84 84 0 0 1 179.4 60.6 Z" fill="#D4A853"/>
+      <path d="M120 120 L179.4 60.6 A84 84 0 0 1 204 120 Z" fill="#F5F0E8"/>
+      <path d="M120 120 L204 120 A84 84 0 0 1 179.4 179.4 Z" fill="#6F4E37"/>
+      <path d="M120 120 L179.4 179.4 A84 84 0 0 1 120 204 Z" fill="#F5F0E8"/>
+      <path d="M120 120 L120 204 A84 84 0 0 1 60.6 179.4 Z" fill="#D4A853"/>
+      <path d="M120 120 L60.6 179.4 A84 84 0 0 1 36 120 Z" fill="#F5F0E8"/>
+      <path d="M120 120 L36 120 A84 84 0 0 1 60.6 60.6 Z" fill="#6F4E37"/>
+      <path d="M120 120 L60.6 60.6 A84 84 0 0 1 120 36 Z" fill="#F5F0E8"/>
+    </g>
+    <circle cx="120" cy="120" r="84" fill="none" stroke="#6F4E37" stroke-width="2"/>
+    <circle cx="120" cy="120" r="30" fill="#F5F0E8" stroke="#6F4E37" stroke-width="3"/>
+    <circle cx="120" cy="120" r="17" fill="#D4A853" stroke="#6F4E37" stroke-width="2"/>
+  </g>
+
+  <!-- Center lock overlay -->
+  <g filter="url(#softShadow)">
+    <circle cx="120" cy="124" r="54" fill="#F5F0E8" stroke="#6F4E37" stroke-width="3"/>
+    <path d="M96 116V101C96 87.8 106.8 77 120 77C133.2 77 144 87.8 144 101V116" stroke="#6F4E37" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <rect x="88" y="108" width="64" height="54" rx="14" fill="url(#goldGrad)" stroke="#6F4E37" stroke-width="3"/>
+    <path d="M120 128C124.4 128 128 131.6 128 136C128 139 126.3 141.6 124 143V149C124 151.2 122.2 153 120 153C117.8 153 116 151.2 116 149V143C113.7 141.6 112 139 112 136C112 131.6 115.6 128 120 128Z" fill="#6F4E37"/>
+    <path d="M98 122C106 115 134 114 144 123" stroke="#F5F0E8" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+  </g>
+
+  <!-- Small return cue: subtle visit sparkle -->
+  <g stroke="#D4A853" stroke-width="2" stroke-linecap="round" opacity="0.9">
+    <path d="M62 54V64"/>
+    <path d="M57 59H67"/>
+    <path d="M181 184V194"/>
+    <path d="M176 189H186"/>
+  </g>
+</svg>

@@ -660,6 +660,12 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "PromotionForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "RouletteConfigForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "InvalidRouletteConfig") {
+		return HttpNextResponse.domainError(error, 400);
+	}
 	if (error.type === "InvalidPromotion") {
 		return HttpNextResponse.domainError(error, 400);
 	}

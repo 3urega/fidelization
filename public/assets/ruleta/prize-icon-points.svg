@@ -1,0 +1,40 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bonus points prize icon">
+  <defs>
+    <linearGradient id="coinGold" x1="22" y1="18" x2="74" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F1CD73"/>
+      <stop offset="0.55" stop-color="#D4A853"/>
+      <stop offset="1" stop-color="#B8893A"/>
+    </linearGradient>
+    <filter id="softShadow" x="8" y="20" width="80" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#6F4E37" flood-opacity="0.20"/>
+    </filter>
+  </defs>
+
+  <!-- plus sparkle -->
+  <g stroke="#D4A853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M70 13V27"/>
+    <path d="M63 20H77"/>
+    <path d="M80.5 29.5L84.5 33.5" opacity="0.75"/>
+    <path d="M84.5 29.5L80.5 33.5" opacity="0.75"/>
+  </g>
+
+  <!-- coin stack -->
+  <g filter="url(#softShadow)">
+    <!-- back coin -->
+    <ellipse cx="48" cy="57" rx="28" ry="12" fill="url(#coinGold)" stroke="#6F4E37" stroke-width="2"/>
+    <path d="M20 57V65C20 71.6 32.5 77 48 77C63.5 77 76 71.6 76 65V57" fill="url(#coinGold)"/>
+    <path d="M20 57V65C20 71.6 32.5 77 48 77C63.5 77 76 71.6 76 65V57" stroke="#6F4E37" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M27 65C31.5 69 39 71 48 71C57 71 64.5 69 69 65" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+
+    <!-- middle coin -->
+    <ellipse cx="48" cy="46" rx="28" ry="12" fill="url(#coinGold)" stroke="#6F4E37" stroke-width="2"/>
+    <path d="M20 46V54C20 60.6 32.5 66 48 66C63.5 66 76 60.6 76 54V46" fill="url(#coinGold)"/>
+    <path d="M20 46V54C20 60.6 32.5 66 48 66C63.5 66 76 60.6 76 54V46" stroke="#6F4E37" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M27 54C31.5 58 39 60 48 60C57 60 64.5 58 69 54" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+
+    <!-- top coin -->
+    <ellipse cx="48" cy="35" rx="28" ry="12" fill="url(#coinGold)" stroke="#6F4E37" stroke-width="2"/>
+    <ellipse cx="48" cy="35" rx="18" ry="7" fill="none" stroke="#F5F0E8" stroke-width="2" opacity="0.55"/>
+    <path d="M35 31.5C39 29.8 44.5 29 48 29" stroke="#FFF8E8" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+  </g>
+</svg>

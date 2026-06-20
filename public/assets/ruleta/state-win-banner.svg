@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200" viewBox="0 0 600 200" fill="none">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#3D2B1F" flood-opacity="0.18"/>
+    </filter>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E3BE67"/>
+      <stop offset="1" stop-color="#D4A853"/>
+    </linearGradient>
+  </defs>
+
+  <!-- soft festive arc behind cup -->
+  <path d="M176 118C216 55 386 55 424 118" stroke="#D4A853" stroke-width="8" stroke-linecap="round" opacity="0.22"/>
+  <path d="M205 127C240 82 360 82 395 127" stroke="#4A9B6E" stroke-width="6" stroke-linecap="round" opacity="0.18"/>
+
+  <!-- left ribbons -->
+  <path d="M51 58C84 37 107 41 124 70" stroke="#D4A853" stroke-width="9" stroke-linecap="round"/>
+  <path d="M60 85C91 68 122 74 143 104" stroke="#4A9B6E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M106 48C123 31 151 30 171 49" stroke="#6F4E37" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <path d="M66 128C91 113 119 116 137 139" stroke="#D4A853" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- right ribbons -->
+  <path d="M476 70C496 39 526 37 553 61" stroke="#D4A853" stroke-width="9" stroke-linecap="round"/>
+  <path d="M456 105C481 75 512 69 542 87" stroke="#4A9B6E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M430 49C455 29 488 32 505 50" stroke="#6F4E37" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  <path d="M463 139C483 116 514 113 535 129" stroke="#D4A853" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- confetti dots -->
+  <g opacity="0.95">
+    <circle cx="92" cy="31" r="5" fill="#D4A853"/>
+    <circle cx="151" cy="88" r="4" fill="#4A9B6E"/>
+    <circle cx="180" cy="36" r="3" fill="#F5F0E8" stroke="#6F4E37" stroke-width="1.8"/>
+    <circle cx="423" cy="34" r="4" fill="#F5F0E8" stroke="#6F4E37" stroke-width="1.8"/>
+    <circle cx="511" cy="36" r="5" fill="#4A9B6E"/>
+    <circle cx="555" cy="120" r="4" fill="#D4A853"/>
+    <circle cx="43" cy="111" r="4" fill="#4A9B6E"/>
+    <circle cx="223" cy="46" r="3" fill="#D4A853"/>
+    <circle cx="379" cy="47" r="3" fill="#D4A853"/>
+  </g>
+
+  <!-- stars -->
+  <g stroke="#6F4E37" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M142 31L148 44L162 49L148 54L142 67L136 54L122 49L136 44L142 31Z" fill="#D4A853"/>
+    <path d="M475 26L481 40L496 45L481 51L475 65L469 51L454 45L469 40L475 26Z" fill="#D4A853"/>
+    <path d="M96 146L100 155L110 159L100 163L96 172L92 163L82 159L92 155L96 146Z" fill="#F5F0E8"/>
+    <path d="M506 151L511 160L520 164L511 168L506 177L502 168L492 164L502 160L506 151Z" fill="#F5F0E8"/>
+    <path d="M300 18L304 28L315 32L304 36L300 46L296 36L285 32L296 28L300 18Z" fill="#D4A853"/>
+  </g>
+
+  <!-- cheering coffee cup -->
+  <g filter="url(#softShadow)">
+    <!-- arms -->
+    <path d="M250 94C235 76 223 72 210 65" stroke="#6F4E37" stroke-width="6" stroke-linecap="round"/>
+    <path d="M350 94C365 76 377 72 390 65" stroke="#6F4E37" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="207" cy="63" r="7" fill="#D4A853" stroke="#6F4E37" stroke-width="2"/>
+    <circle cx="393" cy="63" r="7" fill="#D4A853" stroke="#6F4E37" stroke-width="2"/>
+
+    <!-- saucer -->
+    <ellipse cx="300" cy="151" rx="74" ry="14" fill="#F5F0E8" stroke="#6F4E37" stroke-width="2"/>
+    <path d="M242 150C268 161 333 161 358 150" stroke="#D4A853" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- cup body -->
+    <path d="M239 81H348C344 127 329 149 294 149C260 149 244 127 239 81Z" fill="#F5F0E8" stroke="#6F4E37" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="293.5" cy="82" rx="55" ry="17" fill="#F5F0E8" stroke="#6F4E37" stroke-width="3"/>
+    <ellipse cx="293.5" cy="82" rx="39" ry="9" fill="#6F4E37" opacity="0.92"/>
+    <ellipse cx="286" cy="79" rx="20" ry="4" fill="#D4A853" opacity="0.55"/>
+
+    <!-- handle -->
+    <path d="M346 94C368 88 382 99 379 117C376 136 358 141 340 130" stroke="#6F4E37" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M349 99C363 96 371 103 369 116C367 127 356 130 343 124" stroke="#F5F0E8" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+    <!-- happy face -->
+    <path d="M276 113C281 118 287 118 292 113" stroke="#6F4E37" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M304 113C309 118 315 118 320 113" stroke="#6F4E37" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M289 130C297 136 306 136 314 130" stroke="#6F4E37" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="264" cy="122" r="5" fill="#D4A853" opacity="0.35"/>
+    <circle cx="328" cy="122" r="5" fill="#D4A853" opacity="0.35"/>
+  </g>
+
+  <!-- foreground confetti strips -->
+  <g stroke-linecap="round" stroke-width="2.5">
+    <path d="M194 123L179 136" stroke="#4A9B6E"/>
+    <path d="M406 122L421 136" stroke="#4A9B6E"/>
+    <path d="M170 113L156 113" stroke="#D4A853"/>
+    <path d="M430 113L444 113" stroke="#D4A853"/>
+    <path d="M230 56L218 43" stroke="#6F4E37" opacity="0.75"/>
+    <path d="M370 56L382 43" stroke="#6F4E37" opacity="0.75"/>
+  </g>
+</svg>

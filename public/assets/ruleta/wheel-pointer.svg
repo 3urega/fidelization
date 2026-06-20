@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="100" viewBox="0 0 80 100" fill="none">
+  <title>Café loyalty roulette pointer</title>
+  <desc>Flat vector roulette pointer for a café loyalty mobile app, with warm coffee-brown body, gold highlight, rounded shapes, and transparent background.</desc>
+
+  <!-- subtle shadow beneath tip -->
+  <ellipse cx="40" cy="91" rx="13" ry="4" fill="#2E211A" opacity="0.18"/>
+
+  <!-- main rounded teardrop / pointer body -->
+  <path d="M40 7
+           C55.6 7 68 19.4 68 35
+           C68 51.5 55.2 64.8 46.4 76.4
+           C43.2 80.7 41.2 84.9 40 90
+           C38.8 84.9 36.8 80.7 33.6 76.4
+           C24.8 64.8 12 51.5 12 35
+           C12 19.4 24.4 7 40 7Z"
+        fill="#6F4E37" stroke="#5D3F2D" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- warm inner soft highlight -->
+  <path d="M40 13
+           C52.2 13 62 22.8 62 35
+           C62 48.9 50.3 61.2 42.5 71.9
+           C41.5 73.3 40.7 74.7 40 76.2
+           C39.3 74.7 38.5 73.3 37.5 71.9
+           C29.7 61.2 18 48.9 18 35
+           C18 22.8 27.8 13 40 13Z"
+        fill="#8A654A" opacity="0.22"/>
+
+  <!-- gold highlight stripe -->
+  <path d="M31 17.5
+           C35.6 14.9 41.5 14.2 47.2 15.7
+           C45 27.4 42.2 42.9 38.8 58.6
+           C37.4 65.1 36 70.5 34.7 74.7
+           C32.8 72 30.6 69.1 28.4 66.1
+           C31.5 51.4 34.4 35.1 36.4 19.5
+           C34.5 20 32.7 20.8 31 21.8Z"
+        fill="#D4A853" opacity="0.95"/>
+
+  <!-- small cream glint to keep it premium but soft -->
+  <circle cx="29.5" cy="28.5" r="4.5" fill="#F5F0E8" opacity="0.24"/>
+</svg>

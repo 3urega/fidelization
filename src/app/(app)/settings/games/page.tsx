@@ -6,7 +6,7 @@ export default function GamificationSettingsPage(): React.ReactElement {
 		<>
 			<PageHeader
 				title="Juegos"
-				description="Gamificación para fidelizar clientes. Los juegos se activarán próximamente."
+				description="Gamificación para fidelizar clientes. Configura juegos como la ruleta desde cada tarjeta."
 			/>
 			<GamificationGamesPanel />
 		</>
