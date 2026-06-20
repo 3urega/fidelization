@@ -1,20 +1,20 @@
 import { Service } from "diod";
 
-import { AssertTenantPlanFeature } from "../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
-import { LoyaltyTransaction } from "../../loyalty_transactions/domain/LoyaltyTransaction";
-import { LoyaltyTransactionRepository } from "../../loyalty_transactions/domain/LoyaltyTransactionRepository";
-import { CustomerPromotionUsage } from "../../promotions/domain/CustomerPromotionUsage";
-import { CustomerPromotionUsageRepository } from "../../promotions/domain/CustomerPromotionUsageRepository";
-import { InvalidPromotion } from "../../promotions/domain/InvalidPromotion";
-import { PromotionNotFound } from "../../promotions/domain/PromotionNotFound";
-import { PromotionRepository } from "../../promotions/domain/PromotionRepository";
-import { CustomerStampProgress } from "../../stamp_campaigns/domain/CustomerStampProgress";
-import { StampCampaignRepository } from "../../stamp_campaigns/domain/StampCampaignRepository";
-import { Customer } from "../domain/Customer";
-import { CustomerRepository } from "../domain/CustomerRepository";
-import { CustomerNotFound } from "../domain/CustomerNotFound";
-import { InvalidStampScan } from "../domain/InvalidStampScan";
-import type { StaffScanOutcome } from "../domain/StaffScanOutcome";
+import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { LoyaltyTransaction } from "../../../loyalty_transactions/domain/LoyaltyTransaction";
+import { LoyaltyTransactionRepository } from "../../../loyalty_transactions/domain/LoyaltyTransactionRepository";
+import { CustomerPromotionUsage } from "../../../promotions/domain/CustomerPromotionUsage";
+import { CustomerPromotionUsageRepository } from "../../../promotions/domain/CustomerPromotionUsageRepository";
+import { InvalidPromotion } from "../../../promotions/domain/InvalidPromotion";
+import { PromotionNotFound } from "../../../promotions/domain/PromotionNotFound";
+import { PromotionRepository } from "../../../promotions/domain/PromotionRepository";
+import { CustomerStampProgress } from "../../../stamp_campaigns/domain/CustomerStampProgress";
+import { StampCampaignRepository } from "../../../stamp_campaigns/domain/StampCampaignRepository";
+import { Customer } from "../../domain/Customer";
+import { CustomerRepository } from "../../domain/CustomerRepository";
+import { CustomerNotFound } from "../../domain/CustomerNotFound";
+import { InvalidStampScan } from "../../domain/InvalidStampScan";
+import type { StaffScanOutcome } from "../../domain/StaffScanOutcome";
 
 export type ApplyPointsParams = {
 	tenantId: string;

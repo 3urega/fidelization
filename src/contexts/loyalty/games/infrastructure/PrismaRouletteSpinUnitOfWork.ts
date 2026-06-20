@@ -1,6 +1,6 @@
 import { Service } from "diod";
 
-import { ApplyCustomerLoyaltyOutcome } from "../../../customers/application/loyalty/ApplyCustomerLoyaltyOutcome";
+import { ApplyCustomerLoyaltyOutcome } from "../../customers/application/loyalty/ApplyCustomerLoyaltyOutcome";
 import {
 	RouletteSpinUnitOfWork,
 	type RouletteSpinUnitOfWorkParams,
