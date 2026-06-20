@@ -60,6 +60,7 @@ npm run verify:platform-admin-campaign-templates-use-case # issue #80 — platfo
 npm run verify:platform-admin-campaign-templates # issue #80 — campaign templates CRUD E2E (dev + DATABASE_URL)
 npm run verify:platform-admin-games-use-case # issue #81 — platform games library CRUD (domain stub)
 npm run verify:platform-admin-games # issue #81 — games library CRUD E2E (dev + DATABASE_URL)
+npm run verify:roulette-wheel-use-case # Phase V1 #108 — roulette domain engine (RNG + config validation)
 npm run verify:tenant-games-list # issue #81 — owner games list + plan gating E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaign-adopt-template-use-case # issue #80 — adopt platform template → tenant campaign (domain stub)
 npm run verify:stamp-campaign-adopt-template # issue #80 — owner adopt template E2E (dev + DATABASE_URL)

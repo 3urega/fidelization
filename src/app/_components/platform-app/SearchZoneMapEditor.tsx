@@ -117,16 +117,6 @@ export function SearchZoneMapEditor({
 		setSuccess(null);
 	}
 
-	function handleMapCenterChange(center: MapLatLng): void {
-		setDraft((current) => ({
-			...current,
-			latitude: center.latitude,
-			longitude: center.longitude,
-			label: current.label.trim() || query.trim() || "Zona seleccionada",
-		}));
-		setSuccess(null);
-	}
-
 	async function handleLegacyGeocode(event: React.FormEvent): Promise<void> {
 		event.preventDefault();
 
@@ -249,7 +239,10 @@ export function SearchZoneMapEditor({
 				<InteractiveSearchZoneMap
 					clientConfig={mapConfigState.config}
 					center={mapViewCenter}
-					onCenterChange={handleMapCenterChange}
+					zonePin={{
+						latitude: draft.latitude,
+						longitude: draft.longitude,
+					}}
 					markers={markersState.status === "ready" ? markersState.markers : []}
 					className={`${mapMinHeight} w-full`}
 				/>
@@ -298,10 +291,10 @@ export function SearchZoneMapEditor({
 	const introCopy =
 		variant === "page"
 			? savedZone
-				? "Explora el mapa, busca un lugar o arrastra el mapa para cambiar tu zona."
+				? "Explora el mapa y busca un lugar para cambiar tu zona."
 				: "Explora locales en el mapa y confirma dónde quieres buscar."
 			: savedZone
-				? "Busca un nuevo lugar o mueve el mapa para cambiar tu zona de exploración."
+				? "Busca un nuevo lugar para cambiar tu zona de exploración."
 				: "Elige dónde quieres explorar locales. Tu zona se usará en «Explorar» en lugar de pedirte la ubicación cada vez.";
 
 	const cancelLabel = variant === "page" ? "Volver" : "Cancelar";
@@ -349,8 +342,7 @@ export function SearchZoneMapEditor({
 				<span className="font-medium text-foreground">{draftLabel}</span>
 			</p>
 			<p className="text-xs text-muted">
-				Arrastra el mapa para mover la zona; el pin marca el centro. Usa la rueda del ratón o los botones +/−
-				para ampliar.
+				El pin marca tu zona (ubicación actual o lugar elegido). Arrastra y usa +/− para explorar el mapa.
 			</p>
 
 			{renderMapSection()}

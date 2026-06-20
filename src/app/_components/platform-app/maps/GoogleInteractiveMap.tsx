@@ -16,7 +16,10 @@ import {
 	syncEstablishmentMarkerLabels,
 	type EstablishmentMapMarkerLabelHandle,
 } from "./establishmentMapMarkerDom";
-import { MapCenterPin } from "./MapCenterPin";
+import {
+	buildSearchZonePinIconDataUrl,
+	createSearchZonePinElement,
+} from "./searchZonePinDom";
 import type { EstablishmentMapMarker, InteractiveMapAdapterProps } from "./types";
 
 type GoogleMapsNamespace = typeof google.maps;
@@ -37,8 +40,19 @@ type GoogleEstablishmentMarkerEntry =
 			slug: string;
 	  };
 
+type GoogleZonePinEntry =
+	| {
+			kind: "advanced";
+			marker: GoogleAdvancedMarkerElement;
+	  }
+	| {
+			kind: "classic";
+			marker: GoogleClassicMarker;
+	  };
+
 export function GoogleInteractiveMap({
 	center,
+	zonePin,
 	zoom = DEFAULT_SEARCH_ZONE_MAP_ZOOM,
 	onCenterChange,
 	onUserGestureStart,
@@ -51,6 +65,7 @@ export function GoogleInteractiveMap({
 	const mapRef = useRef<GoogleMapInstance | null>(null);
 	const googleMapsRef = useRef<GoogleMapsNamespace | null>(null);
 	const establishmentMarkerEntriesRef = useRef<GoogleEstablishmentMarkerEntry[]>([]);
+	const zonePinEntryRef = useRef<GoogleZonePinEntry | null>(null);
 	const isFlyingRef = useRef(false);
 	const isUserGesturingRef = useRef(false);
 	const centerRef = useRef(center);
@@ -97,6 +112,73 @@ export function GoogleInteractiveMap({
 		}
 
 		establishmentMarkerEntriesRef.current = [];
+	}
+
+	function clearZonePin(): void {
+		if (!zonePinEntryRef.current) {
+			return;
+		}
+
+		if (zonePinEntryRef.current.kind === "advanced") {
+			zonePinEntryRef.current.marker.map = null;
+		} else {
+			zonePinEntryRef.current.marker.setMap(null);
+		}
+
+		zonePinEntryRef.current = null;
+	}
+
+	async function renderZonePin(
+		map: GoogleMapInstance,
+		googleMaps: GoogleMapsNamespace,
+		pin: NonNullable<InteractiveMapAdapterProps["zonePin"]>,
+	): Promise<void> {
+		const position = { lat: pin.latitude, lng: pin.longitude };
+
+		if (zonePinEntryRef.current) {
+			if (zonePinEntryRef.current.kind === "advanced") {
+				zonePinEntryRef.current.marker.position = position;
+			} else {
+				zonePinEntryRef.current.marker.setPosition(position);
+			}
+
+			return;
+		}
+
+		let AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement | null = null;
+
+		try {
+			const markerLibrary = (await googleMaps.importLibrary("marker")) as google.maps.MarkerLibrary;
+			AdvancedMarkerElement = markerLibrary.AdvancedMarkerElement;
+		} catch {
+			AdvancedMarkerElement = null;
+		}
+
+		if (AdvancedMarkerElement) {
+			const { root } = createSearchZonePinElement();
+			const marker = new AdvancedMarkerElement({
+				map,
+				position,
+				content: root,
+			});
+
+			zonePinEntryRef.current = { kind: "advanced", marker };
+			return;
+		}
+
+		const iconUrl = buildSearchZonePinIconDataUrl();
+		const marker = new googleMaps.Marker({
+			map,
+			position,
+			icon: {
+				url: iconUrl,
+				anchor: new googleMaps.Point(14, 36),
+				scaledSize: new googleMaps.Size(28, 36),
+			},
+			clickable: false,
+		});
+
+		zonePinEntryRef.current = { kind: "classic", marker };
 	}
 
 	async function renderEstablishmentMarkers(
@@ -287,6 +369,7 @@ export function GoogleInteractiveMap({
 				googleMapsRef.current?.event.removeListener(zoomListener);
 			}
 			clearEstablishmentMarkers();
+			clearZonePin();
 			mapRef.current = null;
 		};
 	}, [config.language, config.mapId, config.publicToken, interactive, zoom]);
@@ -330,12 +413,26 @@ export function GoogleInteractiveMap({
 		void renderEstablishmentMarkers(map, googleMaps, markers);
 	}, [markers]);
 
+	useEffect(() => {
+		const map = mapRef.current;
+		const googleMaps = googleMapsRef.current;
+		if (!map || !googleMaps) {
+			return;
+		}
+
+		if (!zonePin) {
+			clearZonePin();
+			return;
+		}
+
+		void renderZonePin(map, googleMaps, zonePin);
+	}, [zonePin?.latitude, zonePin?.longitude]);
+
 	return (
 		<div
 			className={`relative w-full touch-none overscroll-contain overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
 		>
 			<div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />
-			<MapCenterPin />
 		</div>
 	);
 }

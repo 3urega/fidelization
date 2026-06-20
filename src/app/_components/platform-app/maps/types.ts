@@ -22,6 +22,8 @@ export type InteractiveMapClientConfigJson = {
 
 export type InteractiveSearchZoneMapProps = {
 	center: MapLatLng;
+	/** Geographic pin for the selected search zone (user location or chosen suggestion). */
+	zonePin?: MapLatLng;
 	zoom?: number;
 	onCenterChange?: (center: MapLatLng) => void;
 	/** Fired when the user starts panning or zooming the map (before center sync). */

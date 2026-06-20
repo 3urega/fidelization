@@ -55,6 +55,8 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-s-user-profile-search-zone.json
 # Phase T — interactive search zone map (draft)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-t-interactive-search-zone-map.json
+# Phase V — roulette gamification game (publicado #108-#114)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-v-roulette-game.json
 ```
 
 ## After close on GitHub

@@ -15,13 +15,14 @@ import {
 	syncEstablishmentMarkerLabels,
 	type EstablishmentMapMarkerLabelHandle,
 } from "./establishmentMapMarkerDom";
-import { MapCenterPin } from "./MapCenterPin";
+import { createSearchZonePinElement } from "./searchZonePinDom";
 import type { InteractiveMapAdapterProps } from "./types";
 
 const DEFAULT_MAPBOX_STYLE = "mapbox://styles/mapbox/streets-v12";
 
 export function MapboxInteractiveMap({
 	center,
+	zonePin,
 	zoom = DEFAULT_SEARCH_ZONE_MAP_ZOOM,
 	onCenterChange,
 	onUserGestureStart,
@@ -33,6 +34,7 @@ export function MapboxInteractiveMap({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const mapRef = useRef<import("mapbox-gl").Map | null>(null);
 	const markerRefs = useRef<import("mapbox-gl").Marker[]>([]);
+	const zonePinMarkerRef = useRef<import("mapbox-gl").Marker | null>(null);
 	const establishmentLabelHandlesRef = useRef<EstablishmentMapMarkerLabelHandle[]>([]);
 	const isFlyingRef = useRef(false);
 	const isUserGesturingRef = useRef(false);
@@ -176,6 +178,8 @@ export function MapboxInteractiveMap({
 				marker.remove();
 			}
 			markerRefs.current = [];
+			zonePinMarkerRef.current?.remove();
+			zonePinMarkerRef.current = null;
 			establishmentLabelHandlesRef.current = [];
 			mapRef.current?.remove();
 			mapRef.current = null;
@@ -268,12 +272,44 @@ export function MapboxInteractiveMap({
 		});
 	}, [markers]);
 
+	useEffect(() => {
+		const map = mapRef.current;
+		if (!map) {
+			return;
+		}
+
+		if (!zonePin) {
+			zonePinMarkerRef.current?.remove();
+			zonePinMarkerRef.current = null;
+			return;
+		}
+
+		void import("mapbox-gl").then((mapboxModule) => {
+			if (!mapRef.current) {
+				return;
+			}
+
+			const mapboxgl = mapboxModule.default;
+
+			if (zonePinMarkerRef.current) {
+				zonePinMarkerRef.current.setLngLat([zonePin.longitude, zonePin.latitude]);
+				return;
+			}
+
+			const { root } = createSearchZonePinElement();
+			const marker = new mapboxgl.Marker({ element: root, anchor: "bottom" })
+				.setLngLat([zonePin.longitude, zonePin.latitude])
+				.addTo(mapRef.current);
+
+			zonePinMarkerRef.current = marker;
+		});
+	}, [zonePin?.latitude, zonePin?.longitude]);
+
 	return (
 		<div
 			className={`relative w-full touch-none overscroll-contain overflow-hidden rounded-theme border border-border bg-surface ${className ?? "h-[220px]"}`}
 		>
 			<div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />
-			<MapCenterPin />
 		</div>
 	);
 }
