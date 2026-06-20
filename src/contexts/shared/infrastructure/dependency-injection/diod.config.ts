@@ -61,6 +61,13 @@ import { GoogleIdTokenVerifierGoogle } from "../../../identity/users/infrastruct
 import { PrismaUserRepository } from "../../../identity/users/infrastructure/PrismaUserRepository";
 import { CouponRepository } from "../../../loyalty/coupons/domain/CouponRepository";
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
+import { EnableTenantGame } from "../../../loyalty/games/application/config/EnableTenantGame";
+import { GetTenantRouletteConfig } from "../../../loyalty/games/application/config/GetTenantRouletteConfig";
+import { UpsertTenantRouletteConfig } from "../../../loyalty/games/application/config/UpsertTenantRouletteConfig";
+import { RouletteSpinRepository } from "../../../loyalty/games/domain/RouletteSpinRepository";
+import { TenantGameActivationRepository } from "../../../loyalty/games/domain/TenantGameActivationRepository";
+import { PrismaRouletteSpinRepository } from "../../../loyalty/games/infrastructure/PrismaRouletteSpinRepository";
+import { PrismaTenantGameActivationRepository } from "../../../loyalty/games/infrastructure/PrismaTenantGameActivationRepository";
 import { AuthenticateCustomerByQr } from "../../../loyalty/customers/application/authenticate/AuthenticateCustomerByQr";
 import { GetCustomerActiveRewards } from "../../../loyalty/customers/application/profile/GetCustomerActiveRewards";
 import { GetCustomerStampProgress } from "../../../loyalty/customers/application/profile/GetCustomerStampProgress";
@@ -366,6 +373,14 @@ builder.registerAndUse(PrismaCustomerPromotionUsageRepository);
 
 builder.register(CouponRepository).use(PrismaCouponRepository);
 builder.registerAndUse(PrismaCouponRepository);
+
+builder.register(TenantGameActivationRepository).use(PrismaTenantGameActivationRepository);
+builder.registerAndUse(PrismaTenantGameActivationRepository);
+builder.register(RouletteSpinRepository).use(PrismaRouletteSpinRepository);
+builder.registerAndUse(PrismaRouletteSpinRepository);
+builder.registerAndUse(GetTenantRouletteConfig);
+builder.registerAndUse(UpsertTenantRouletteConfig);
+builder.registerAndUse(EnableTenantGame);
 
 builder.register(NotificationRepository).use(PrismaNotificationRepository);
 builder.registerAndUse(PrismaNotificationRepository);

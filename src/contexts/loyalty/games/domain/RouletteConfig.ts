@@ -143,3 +143,48 @@ export function parseRouletteConfig(input: unknown): RouletteConfig {
 
 	return RouletteConfig.fromSegments(segments, rules);
 }
+
+/** Minimal default config when enabling ruleta without prior upsert. */
+export function createDefaultRouletteConfig(): RouletteConfig {
+	return parseRouletteConfig({
+		version: ROULETTE_CONFIG_VERSION,
+		segments: [
+			{
+				id: "00000000-0000-4000-8000-000000000101",
+				label: "Sin premio",
+				weight: 50,
+				prizeType: "none",
+				prize: {},
+			},
+			{
+				id: "00000000-0000-4000-8000-000000000102",
+				label: "+10 puntos",
+				weight: 30,
+				prizeType: "points",
+				prize: { points: 10 },
+			},
+			{
+				id: "00000000-0000-4000-8000-000000000103",
+				label: "+1 sello",
+				weight: 15,
+				prizeType: "stamp",
+				prize: { campaignId: "00000000-0000-4000-8000-000000000010" },
+			},
+			{
+				id: "00000000-0000-4000-8000-000000000104",
+				label: "Café gratis",
+				weight: 5,
+				prizeType: "physical",
+				prize: { description: "Café gratis" },
+				stockLimit: 10,
+				stockUsed: 0,
+			},
+		],
+		rules: {
+			maxSpinsPerDay: 1,
+			maxSpinsPerWeek: 3,
+			eligibilityTtlHours: 24,
+			trigger: "after_staff_scan",
+		},
+	});
+}

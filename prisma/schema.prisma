@@ -115,6 +115,8 @@ model Tenant {
   notifications      Notification[]
   subscriptions      Subscription[]
   impersonationEvents PlatformImpersonationEvent[]
+  gameActivations    TenantGameActivation[]
+  rouletteSpins      RouletteSpin[]
 
   @@map("tenants")
 }
@@ -160,6 +162,7 @@ model Customer {
   loyaltyTransactions LoyaltyTransaction[]
   stampProgress CustomerStampProgress[]
   promotionUsages CustomerPromotionUsage[]
+  rouletteSpins RouletteSpin[]
 
   @@unique([userId, tenantId])
   @@index([tenantId])
@@ -393,4 +396,41 @@ model PlatformGame {
 
   @@index([status, sortOrder])
   @@map("platform_games")
+}
+
+model TenantGameActivation {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  gameSlug  String   @map("game_slug")
+  isEnabled Boolean  @default(false) @map("is_enabled")
+  config    Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, gameSlug])
+  @@index([tenantId])
+  @@map("tenant_game_activations")
+}
+
+model RouletteSpin {
+  id             String    @id @default(uuid())
+  tenantId       String    @map("tenant_id")
+  customerId     String    @map("customer_id")
+  segmentId      String    @map("segment_id")
+  segmentIndex   Int       @map("segment_index")
+  prizeType      String    @map("prize_type")
+  prizePayload   Json      @map("prize_payload")
+  status         String    @default("applied")
+  triggerSource  String    @map("trigger_source")
+  triggerRef     String?   @map("trigger_ref")
+  idempotencyKey String?   @unique @map("idempotency_key")
+  configSnapshot Json      @map("config_snapshot")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  redeemedAt     DateTime? @map("redeemed_at")
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, customerId, createdAt])
+  @@map("roulette_spins")
 }
