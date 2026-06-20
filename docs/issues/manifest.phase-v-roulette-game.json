@@ -4,10 +4,6 @@
   "label": "phase-v-roulette-game",
   "issues": [
     {
-      "title": "Phase V2: Roulette persistence (Prisma + tenant activation)",
-      "bodyFile": "docs/issues/roulette-persistence-config.md"
-    },
-    {
       "title": "Phase V3: Owner roulette config API + settings UI",
       "bodyFile": "docs/issues/roulette-owner-config-ui.md"
     },

@@ -3,6 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 
 import { hashPassword } from "../src/lib/auth/password";
+import { RULETA_GAME_SLUG } from "../src/contexts/loyalty/games/domain/TenantGameActivation";
+import { DEMO_ROULETTE_CONFIG } from "../src/lib/roulette/demoRouletteConfig";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -27,6 +29,7 @@ const DEMO_TEMPLATE_MATCHA_ID = "00000000-0000-4000-8000-000000000022";
 const DEMO_GAME_RULETA_ID = "00000000-0000-4000-8000-000000000030";
 const DEMO_GAME_RASCA_ID = "00000000-0000-4000-8000-000000000031";
 const DEMO_GAME_CAJA_ID = "00000000-0000-4000-8000-000000000032";
+const DEMO_TENANT_RULETA_ACTIVATION_ID = "00000000-0000-4000-8000-000000000033";
 
 async function main(): Promise<void> {
 	const superadminEmail = (process.env.SUPERADMIN_EMAIL ?? "superadmin@platform.local").toLowerCase().trim();
@@ -366,9 +369,27 @@ async function main(): Promise<void> {
 		},
 	});
 
+	await prisma.tenantGameActivation.upsert({
+		where: { id: DEMO_TENANT_RULETA_ACTIVATION_ID },
+		update: {
+			tenantId: DEMO_TENANT_ID,
+			gameSlug: RULETA_GAME_SLUG,
+			isEnabled: true,
+			config: DEMO_ROULETTE_CONFIG,
+		},
+		create: {
+			id: DEMO_TENANT_RULETA_ACTIVATION_ID,
+			tenantId: DEMO_TENANT_ID,
+			gameSlug: RULETA_GAME_SLUG,
+			isEnabled: true,
+			config: DEMO_ROULETTE_CONFIG,
+		},
+	});
+
 	console.log("Seed: demo owner + plans basic/pro/premium + customer QR (demo-qr-cafe-demo)");
 	console.log("Seed: 3 platform campaign templates (coffee, croissant, matcha)");
 	console.log("Seed: 3 platform games (ruleta active, rasca beta, caja-misteriosa draft)");
+	console.log("Seed: cafe-demo ruleta activation (requires Premium plan to mutate)");
 	console.log(`Seed: superadmin ${superadminEmail} (no tenant membership)`);
 }
 

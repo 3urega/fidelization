@@ -25,6 +25,7 @@ The system is built around strict tenant isolation and (target) event-driven loy
 | `loyalty_transactions` | **Yes** | § 2.5 |
 | `rewards`, `stamp_campaigns`, `customer_stamp_progress` | **Yes** | § 2.6–2.7 |
 | `promotions`, `coupons`, `notifications` | **Yes** | § 2.8–2.10 |
+| `tenant_game_activations`, `roulette_spins` (gamification) | **Yes** (Phase V2 #109) | § 2.14 |
 | `subscription_plans`, `subscriptions`, tenant `status` / `features` / FK | **Yes** | § 2.1, billing |
 | Superadmin (`users.platform_role`) | **Yes** | `PlatformRole.superadmin` on `users`; no `tenant_memberships` row |
 
@@ -308,6 +309,37 @@ Per-tenant billing state.
 | `started_at`, `ends_at` | |
 | `stripe_subscription_id` | Optional |
 | `created_at` | |
+
+---
+
+## 2.14 Gamification — tenant game activation & roulette spins (implemented — Phase V2 #109)
+
+Migration: [`20260620120000_tenant_game_activations_roulette_spins`](../../prisma/migrations/20260620120000_tenant_game_activations_roulette_spins/migration.sql).
+
+### Table `tenant_game_activations`
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID (text) | PK |
+| `tenant_id` | UUID (text) | FK → `tenants` |
+| `game_slug` | text | e.g. `ruleta`; unique with `tenant_id` |
+| `is_enabled` | boolean | Owner toggle |
+| `config` | JSONB | `RouletteConfig` v1 (segments + rules) |
+| `created_at`, `updated_at` | timestamp | |
+
+### Table `roulette_spins`
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID (text) | PK |
+| `tenant_id`, `customer_id` | UUID (text) | FKs |
+| `segment_id`, `segment_index` | text, int | Winning segment |
+| `prize_type`, `prize_payload` | text, JSONB | Prize applied |
+| `status` | text | `applied`, `pending_redeem`, `expired` |
+| `trigger_source`, `trigger_ref` | text | e.g. `staff_scan` |
+| `idempotency_key` | text | Optional unique |
+| `config_snapshot` | JSONB | Config at spin time |
+| `created_at`, `redeemed_at` | timestamp | |
 
 ---
 

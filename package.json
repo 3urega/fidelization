@@ -64,6 +64,8 @@
     "verify:platform-admin-games": "tsx scripts/verify-platform-admin-games.ts",
     "verify:tenant-games-list": "tsx scripts/verify-tenant-games-list.ts",
     "verify:roulette-wheel-use-case": "tsx scripts/verify-roulette-wheel-use-case.ts",
+    "verify:roulette-config-use-case": "tsx scripts/verify-roulette-config-use-case.ts",
+    "verify:roulette-config": "tsx scripts/verify-roulette-config.ts",
     "verify:stamp-campaign-adopt-template-use-case": "tsx scripts/verify-stamp-campaign-adopt-template-use-case.ts",
     "verify:stamp-campaign-adopt-template": "tsx scripts/verify-stamp-campaign-adopt-template.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",
