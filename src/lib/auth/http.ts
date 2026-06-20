@@ -663,6 +663,21 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "RouletteConfigForbidden") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "RouletteGameDisabled") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "RouletteGameNotAvailable") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "RouletteSpinRateLimitExceeded") {
+		return HttpNextResponse.domainError(error, 403);
+	}
+	if (error.type === "RouletteSegmentsExhausted") {
+		return HttpNextResponse.domainError(error, 409);
+	}
+	if (error.type === "TenantGameActivationNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
 	if (error.type === "InvalidRouletteConfig") {
 		return HttpNextResponse.domainError(error, 400);
 	}

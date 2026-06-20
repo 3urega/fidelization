@@ -42,6 +42,35 @@ export class RouletteConfig {
 			rules: { ...this.rules },
 		};
 	}
+
+	withIncrementedStockUsed(segmentId: string): RouletteConfig {
+		let found = false;
+
+		const segments = this.segments.map((segment) => {
+			const primitives = segment.toPrimitives();
+
+			if (primitives.id !== segmentId) {
+				return segment;
+			}
+
+			found = true;
+			const stockUsed = primitives.stockUsed + 1;
+
+			if (primitives.stockLimit !== null && stockUsed > primitives.stockLimit) {
+				throw new InvalidRouletteConfig(
+					`Segment ${segmentId} stock limit exceeded (${primitives.stockLimit})`,
+				);
+			}
+
+			return RouletteSegment.fromPrimitives({ ...primitives, stockUsed });
+		});
+
+		if (!found) {
+			throw new InvalidRouletteConfig(`Segment ${segmentId} not found in config`);
+		}
+
+		return RouletteConfig.fromSegments(segments, this.rules);
+	}
 }
 
 function parseTrigger(value: unknown): RouletteTrigger {

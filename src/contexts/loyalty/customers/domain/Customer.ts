@@ -103,6 +103,18 @@ export class Customer {
 		});
 	}
 
+	/** Award points without incrementing visit count (e.g. roulette prize). */
+	earnPoints(points: number): Customer {
+		if (!Number.isInteger(points) || points <= 0) {
+			throw new Error("points must be a positive integer");
+		}
+
+		return Customer.fromPrimitives({
+			...this.toPrimitives(),
+			pointsBalance: this.pointsBalance + points,
+		});
+	}
+
 	redeemPoints(costPoints: number): Customer {
 		if (!Number.isInteger(costPoints) || costPoints <= 0) {
 			throw new Error("costPoints must be a positive integer");

@@ -1,0 +1,65 @@
+<svg width="390" height="844" viewBox="0 0 390 844" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="centerGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(195 398) rotate(90) scale(330 240)">
+      <stop offset="0" stop-color="#F5F0E8" stop-opacity="0.72"/>
+      <stop offset="0.42" stop-color="#F5F0E8" stop-opacity="0.28"/>
+      <stop offset="0.76" stop-color="#F5F0E8" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#F5F0E8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softBlur" x="-80" y="40" width="550" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="tinyShadow" x="-20" y="-20" width="430" height="884" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#6F4E37" flood-opacity="0.05"/>
+    </filter>
+    <pattern id="softDots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#6F4E37" opacity="0.055"/>
+    </pattern>
+  </defs>
+
+  <!-- transparent background by design -->
+  <rect width="390" height="844" fill="transparent"/>
+
+  <!-- modal center glow -->
+  <ellipse cx="195" cy="398" rx="240" ry="330" fill="url(#centerGlow)" filter="url(#softBlur)"/>
+  <ellipse cx="195" cy="398" rx="184" ry="184" fill="#F5F0E8" opacity="0.075"/>
+
+  <!-- faint dotted wheel-motion rings -->
+  <g opacity="0.55" filter="url(#tinyShadow)">
+    <circle cx="195" cy="398" r="96" stroke="#6F4E37" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 12" opacity="0.12"/>
+    <circle cx="195" cy="398" r="132" stroke="#D4A853" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 14" opacity="0.14"/>
+    <circle cx="195" cy="398" r="168" stroke="#6F4E37" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 16" opacity="0.10"/>
+    <circle cx="195" cy="398" r="204" stroke="#D4A853" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 18" opacity="0.09"/>
+  </g>
+
+  <!-- very subtle radial arcs for movement -->
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.13">
+    <path d="M74 332C95 260 158 216 230 224" stroke="#6F4E37" stroke-width="2"/>
+    <path d="M316 464C295 536 232 580 160 572" stroke="#D4A853" stroke-width="2"/>
+    <path d="M97 507C68 452 74 381 115 332" stroke="#4A9B6E" stroke-width="2" opacity="0.55"/>
+    <path d="M293 289C322 344 316 415 275 464" stroke="#6F4E37" stroke-width="2"/>
+  </g>
+
+  <!-- soft edge steam curves, kept away from wheel center -->
+  <g fill="none" stroke="#6F4E37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.10">
+    <path d="M31 138C50 121 49 101 36 82C65 99 68 125 45 150"/>
+    <path d="M58 170C83 148 81 123 65 99C102 122 104 154 75 185"/>
+    <path d="M349 122C330 105 331 85 344 66C315 83 312 109 335 134"/>
+    <path d="M322 154C297 132 299 107 315 83C278 106 276 138 305 169"/>
+    <path d="M28 706C51 687 51 662 36 641C72 661 75 694 48 722"/>
+    <path d="M351 724C329 704 330 679 345 658C309 678 306 711 333 739"/>
+  </g>
+
+  <!-- faint decorative dotted texture outside center -->
+  <rect x="0" y="0" width="390" height="844" fill="url(#softDots)" opacity="0.55"/>
+
+  <!-- tiny sparkle accents at low contrast -->
+  <g opacity="0.14">
+    <path d="M86 239L91 250L102 255L91 260L86 271L81 260L70 255L81 250L86 239Z" fill="#D4A853"/>
+    <path d="M309 555L313 564L322 568L313 572L309 581L305 572L296 568L305 564L309 555Z" fill="#D4A853"/>
+    <circle cx="61" cy="430" r="3" fill="#4A9B6E" opacity="0.5"/>
+    <circle cx="332" cy="359" r="3" fill="#6F4E37" opacity="0.45"/>
+    <circle cx="195" cy="177" r="2.5" fill="#D4A853" opacity="0.55"/>
+    <circle cx="195" cy="619" r="2.5" fill="#D4A853" opacity="0.5"/>
+  </g>
+</svg>
