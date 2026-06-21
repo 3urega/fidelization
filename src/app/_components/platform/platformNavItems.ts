@@ -2,13 +2,14 @@
  * Static navigation for the platform admin shell.
  * To add a module: append an entry with href, label, and icon key; create the page under (platform)/platform/.
  */
-export type PlatformNavIcon = "home" | "building" | "users" | "clients" | "templates" | "games" | "plans" | "billing" | "flags" | "chart" | "mail";
+export type PlatformNavIcon = "home" | "building" | "users" | "clients" | "templates" | "games" | "plans" | "billing" | "flags" | "chart" | "mail" | "shield";
 
 export type PlatformNavItem = {
 	href: string;
 	label: string;
 	icon: PlatformNavIcon;
 	comingSoon?: boolean;
+	badgeSummary?: boolean;
 };
 
 export const platformNav: readonly PlatformNavItem[] = [
@@ -23,4 +24,5 @@ export const platformNav: readonly PlatformNavItem[] = [
 	{ href: "/platform/features", label: "Feature flags", icon: "flags" },
 	{ href: "/platform/analytics", label: "Analítica", icon: "chart" },
 	{ href: "/platform/communications", label: "Comunicación", icon: "mail" },
+	{ href: "/platform/moderation", label: "Moderación", icon: "shield", badgeSummary: true },
 ] as const;

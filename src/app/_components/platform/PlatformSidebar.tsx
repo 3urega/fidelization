@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type ReactElement } from "react";
+import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { PlatformNavIcon } from "./PlatformNavIcon";
 import { platformNav } from "./platformNavItems";
@@ -24,6 +24,42 @@ function isNavItemActive(pathname: string, href: string): boolean {
 export function PlatformSidebar({ mobileOpen, onNavigate }: PlatformSidebarProps): ReactElement {
 	const pathname = usePathname();
 	const { session, loading } = usePlatformSession();
+	const [openModerationCount, setOpenModerationCount] = useState(0);
+
+	const loadModerationSummary = useCallback(async (): Promise<void> => {
+		try {
+			const response = await fetch("/api/platform/moderation/summary", {
+				credentials: "include",
+			});
+
+			if (!response.ok) {
+				setOpenModerationCount(0);
+
+				return;
+			}
+
+			const data = (await response.json()) as { openCount?: number };
+			setOpenModerationCount(data.openCount ?? 0);
+		} catch {
+			setOpenModerationCount(0);
+		}
+	}, []);
+
+	useEffect(() => {
+		void loadModerationSummary();
+	}, [loadModerationSummary]);
+
+	useEffect(() => {
+		function handleModerationUpdated(): void {
+			void loadModerationSummary();
+		}
+
+		window.addEventListener("platform-moderation-updated", handleModerationUpdated);
+
+		return () => {
+			window.removeEventListener("platform-moderation-updated", handleModerationUpdated);
+		};
+	}, [loadModerationSummary]);
 
 	return (
 		<aside
@@ -84,7 +120,12 @@ export function PlatformSidebar({ mobileOpen, onNavigate }: PlatformSidebarProps
 							aria-current={active ? "page" : undefined}
 						>
 							<PlatformNavIcon icon={item.icon} />
-							{item.label}
+							<span className="flex-1">{item.label}</span>
+							{item.badgeSummary && openModerationCount > 0 ? (
+								<span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-error px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+									{openModerationCount}
+								</span>
+							) : null}
 						</Link>
 					);
 				})}
