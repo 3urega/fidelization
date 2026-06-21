@@ -36,6 +36,8 @@ export const platformRoutes = {
 	homeQr: "/home/qr",
 	homeBusiness: (slug: string) => `/home/business/${encodeURIComponent(slug)}`,
 	homeEstablishment: (slug: string) => `/home/establishments/${encodeURIComponent(slug)}`,
+	homeEstablishmentRoulette: (slug: string) =>
+		`/home/establishments/${encodeURIComponent(slug)}/ruleta`,
 	join: (slug: string) => `/join/${encodeURIComponent(slug)}`,
 	registerBusiness: "/business/register",
 	registerBusinessTenant: "/business/register/tenant",

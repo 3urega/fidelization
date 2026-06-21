@@ -52,6 +52,11 @@ type EstablishmentDetailResponse = {
 	error?: { description?: string };
 };
 
+type RoulettePublicState = {
+	isEnabled: boolean;
+	canSpin: boolean;
+};
+
 function EstablishmentProfileInfo({ tenant }: { tenant: EstablishmentTenant }): ReactElement | null {
 	const description = tenant.description?.trim();
 	const address = tenant.address?.trim();
@@ -154,6 +159,7 @@ export function PlatformEstablishmentDetail(): ReactElement {
 	const [loading, setLoading] = useState(true);
 	const [joining, setJoining] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
+	const [rouletteState, setRouletteState] = useState<RoulettePublicState | null>(null);
 
 	const loadDetail = useCallback(async (): Promise<void> => {
 		if (!slug) {
@@ -202,6 +208,37 @@ export function PlatformEstablishmentDetail(): ReactElement {
 			cancelled = true;
 		};
 	}, []);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function loadRouletteState(): Promise<void> {
+			if (!slug) {
+				return;
+			}
+
+			const response = await platformFetch(
+				`/api/user/establishments/${encodeURIComponent(slug)}/games/ruleta`,
+			);
+
+			if (cancelled || !response.ok) {
+				return;
+			}
+
+			const body = (await response.json()) as RoulettePublicState;
+			setRouletteState(body);
+		}
+
+		if (detail?.mode === "interaction" && detail.customer) {
+			void loadRouletteState();
+		} else {
+			setRouletteState(null);
+		}
+
+		return () => {
+			cancelled = true;
+		};
+	}, [slug, detail?.mode, detail?.customer?.id]);
 
 	async function handleJoin(): Promise<void> {
 		setJoining(true);
@@ -291,6 +328,26 @@ export function PlatformEstablishmentDetail(): ReactElement {
 							name={user.name}
 							qrValue={qrValue}
 						/>
+					) : null}
+
+					{rouletteState?.isEnabled ? (
+						<Card>
+							<div className="flex flex-col gap-3">
+								<div>
+									<h2 className="text-sm font-medium text-foreground">Ruleta de premios</h2>
+									<p className="mt-1 text-sm text-muted">
+										{rouletteState.canSpin
+											? "Tienes un giro disponible. ¡Prueba suerte!"
+											: "La ruleta está activa, pero no puedes girar ahora mismo."}
+									</p>
+								</div>
+								<Link href={platformRoutes.homeEstablishmentRoulette(slug)} className="w-full">
+									<Button type="button" className="w-full" variant={rouletteState.canSpin ? "primary" : "secondary"}>
+										{rouletteState.canSpin ? "Girar ruleta" : "Ver ruleta"}
+									</Button>
+								</Link>
+							</div>
+						</Card>
 					) : null}
 				</>
 			) : null}

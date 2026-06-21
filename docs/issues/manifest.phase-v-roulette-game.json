@@ -4,10 +4,6 @@
   "label": "phase-v-roulette-game",
   "issues": [
     {
-      "title": "Phase V5: Roulette visual assets + Wheel UI + establishment detail",
-      "bodyFile": "docs/issues/roulette-visual-assets-ui.md"
-    },
-    {
       "title": "Phase V6: Spin eligibility after staff scan",
       "bodyFile": "docs/issues/roulette-scan-eligibility.md"
     },

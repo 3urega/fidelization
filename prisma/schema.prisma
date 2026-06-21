@@ -117,6 +117,7 @@ model Tenant {
   impersonationEvents PlatformImpersonationEvent[]
   gameActivations    TenantGameActivation[]
   rouletteSpins      RouletteSpin[]
+  rouletteSpinEligibilities RouletteSpinEligibility[]
 
   @@map("tenants")
 }
@@ -163,6 +164,7 @@ model Customer {
   stampProgress CustomerStampProgress[]
   promotionUsages CustomerPromotionUsage[]
   rouletteSpins RouletteSpin[]
+  rouletteSpinEligibilities RouletteSpinEligibility[]
 
   @@unique([userId, tenantId])
   @@index([tenantId])
@@ -433,4 +435,20 @@ model RouletteSpin {
 
   @@index([tenantId, customerId, createdAt])
   @@map("roulette_spins")
+}
+
+model RouletteSpinEligibility {
+  id             String    @id @default(uuid())
+  tenantId       String    @map("tenant_id")
+  customerId     String    @map("customer_id")
+  expiresAt      DateTime  @map("expires_at")
+  consumedAt     DateTime? @map("consumed_at")
+  consumedSpinId String?   @map("consumed_spin_id")
+  triggerRef     String?   @map("trigger_ref")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, customerId, consumedAt, expiresAt])
+  @@map("roulette_spin_eligibilities")
 }
