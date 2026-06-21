@@ -14,6 +14,7 @@ import { StaffScanForbidden } from "../../domain/StaffScanForbidden";
 import type { StaffScanOutcome } from "../../domain/StaffScanOutcome";
 import { parseStaffScanTargetInput } from "../../domain/StaffScanTarget";
 import { DEFAULT_POINTS_PER_VISIT } from "../../domain/StampProgressSummary";
+import { IssueRouletteSpinEligibility } from "../../../games/application/eligibility/IssueRouletteSpinEligibility";
 import { ApplyCustomerLoyaltyOutcome } from "../loyalty/ApplyCustomerLoyaltyOutcome";
 import { ResolveCustomerByQrForStaffScan } from "./ResolveCustomerByQrForStaffScan";
 
@@ -40,6 +41,7 @@ export class RecordStaffScanByTarget {
 		private readonly resolveCustomerByQr: ResolveCustomerByQrForStaffScan,
 		private readonly loyaltyTransactionRepository: LoyaltyTransactionRepository,
 		private readonly applyLoyaltyOutcome: ApplyCustomerLoyaltyOutcome,
+		private readonly issueRouletteSpinEligibility: IssueRouletteSpinEligibility,
 	) {}
 
 	async execute(params: RecordStaffScanByTargetParams): Promise<RecordStaffScanByTargetResult> {
@@ -121,6 +123,19 @@ export class RecordStaffScanByTarget {
 					maxUsesPerUser: promoResult.maxUsesPerUser ?? 0,
 				});
 			}
+		}
+
+		const rouletteEligibility = await this.issueRouletteSpinEligibility.execute({
+			tenantId: params.tenantId,
+			customerId: updated.id,
+			triggerRef: pointsTransaction.toPrimitives().id,
+		});
+
+		if (rouletteEligibility) {
+			outcomes.push({
+				kind: "roulette_spin_granted",
+				expiresAt: rouletteEligibility.expiresAt,
+			});
 		}
 
 		return { customer: updated, outcomes };

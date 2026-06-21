@@ -30,6 +30,8 @@ function outcomeClassName(kind: StaffScanOutcome["kind"]): string {
 			return "text-muted";
 		case "promotion_applied":
 			return "text-foreground";
+		case "roulette_spin_granted":
+			return "font-medium text-primary";
 		default: {
 			const exhaustive: never = kind;
 

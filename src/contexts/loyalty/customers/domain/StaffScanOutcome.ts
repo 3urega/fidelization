@@ -4,7 +4,8 @@ export type StaffScanOutcomeKind =
 	| "card_completed"
 	| "card_already_completed"
 	| "promotion_applied"
-	| "promotion_exhausted";
+	| "promotion_exhausted"
+	| "roulette_spin_granted";
 
 export type StaffScanPointRecordedOutcome = {
 	kind: "point_recorded";
@@ -46,13 +47,19 @@ export type StaffScanPromotionExhaustedOutcome = {
 	maxUsesPerUser: number | null;
 };
 
+export type StaffScanRouletteSpinGrantedOutcome = {
+	kind: "roulette_spin_granted";
+	expiresAt: string;
+};
+
 export type StaffScanOutcome =
 	| StaffScanPointRecordedOutcome
 	| StaffScanStampAddedOutcome
 	| StaffScanCardCompletedOutcome
 	| StaffScanCardAlreadyCompletedOutcome
 	| StaffScanPromotionAppliedOutcome
-	| StaffScanPromotionExhaustedOutcome;
+	| StaffScanPromotionExhaustedOutcome
+	| StaffScanRouletteSpinGrantedOutcome;
 
 const STAFF_SCAN_OUTCOME_KINDS = new Set<string>([
 	"point_recorded",
@@ -61,6 +68,7 @@ const STAFF_SCAN_OUTCOME_KINDS = new Set<string>([
 	"card_already_completed",
 	"promotion_applied",
 	"promotion_exhausted",
+	"roulette_spin_granted",
 ]);
 
 export function isStaffScanOutcome(value: unknown): value is StaffScanOutcome {
@@ -87,6 +95,8 @@ export function formatStaffScanOutcomeMessage(outcome: StaffScanOutcome): string
 			return "Promoción aplicada";
 		case "promotion_exhausted":
 			return "¡La promoción ya ha sido agotada!";
+		case "roulette_spin_granted":
+			return `Ruleta desbloqueada hasta ${new Date(outcome.expiresAt).toLocaleString("es-ES")}`;
 		default: {
 			const exhaustive: never = outcome;
 
