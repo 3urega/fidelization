@@ -2,17 +2,17 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { SuspendTenantForModerationReport } from "../../../../../../contexts/platform/application/moderation/SuspendTenantForModerationReport";
-import { InvalidModerationReport } from "../../../../../../contexts/platform/domain/InvalidModerationReport";
-import { ModerationReportAlreadyResolved } from "../../../../../../contexts/platform/domain/ModerationReportAlreadyResolved";
-import { ModerationReportNotFound } from "../../../../../../contexts/platform/domain/ModerationReportNotFound";
-import { container } from "../../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { HttpNextResponse } from "../../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { platformTenantToJson } from "../../../../../../lib/auth/http";
-import { requirePlatformSession } from "../../../../../../lib/auth/requirePlatformSession";
-import { moderationReportEntityToJson } from "../../../../../../lib/platform/moderation";
-import { getResolvedTenantFromRequest } from "../../../../../../lib/tenant/getResolvedTenant";
-import { TenantNotFound } from "../../../../../../contexts/tenants/tenants/domain/TenantNotFound";
+import { SuspendTenantForModerationReport } from "../../../../../../../contexts/platform/application/moderation/SuspendTenantForModerationReport";
+import { InvalidModerationReport } from "../../../../../../../contexts/platform/domain/InvalidModerationReport";
+import { ModerationReportAlreadyResolved } from "../../../../../../../contexts/platform/domain/ModerationReportAlreadyResolved";
+import { ModerationReportNotFound } from "../../../../../../../contexts/platform/domain/ModerationReportNotFound";
+import { container } from "../../../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { HttpNextResponse } from "../../../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { platformTenantToJson } from "../../../../../../../lib/auth/http";
+import { requirePlatformSession } from "../../../../../../../lib/auth/requirePlatformSession";
+import { moderationReportEntityToJson } from "../../../../../../../lib/platform/moderation";
+import { getResolvedTenantFromRequest } from "../../../../../../../lib/tenant/getResolvedTenant";
+import { TenantNotFound } from "../../../../../../../contexts/tenants/tenants/domain/TenantNotFound";
 
 export const dynamic = "force-dynamic";
 

@@ -2,15 +2,15 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
-import { ResolveModerationReport } from "../../../../../../contexts/platform/application/moderation/ResolveModerationReport";
-import { InvalidModerationReport } from "../../../../../../contexts/platform/domain/InvalidModerationReport";
-import { ModerationReportAlreadyResolved } from "../../../../../../contexts/platform/domain/ModerationReportAlreadyResolved";
-import { ModerationReportNotFound } from "../../../../../../contexts/platform/domain/ModerationReportNotFound";
-import { container } from "../../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
-import { HttpNextResponse } from "../../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
-import { requirePlatformSession } from "../../../../../../lib/auth/requirePlatformSession";
-import { moderationReportEntityToJson } from "../../../../../../lib/platform/moderation";
-import { getResolvedTenantFromRequest } from "../../../../../../lib/tenant/getResolvedTenant";
+import { ResolveModerationReport } from "../../../../../../../contexts/platform/application/moderation/ResolveModerationReport";
+import { InvalidModerationReport } from "../../../../../../../contexts/platform/domain/InvalidModerationReport";
+import { ModerationReportAlreadyResolved } from "../../../../../../../contexts/platform/domain/ModerationReportAlreadyResolved";
+import { ModerationReportNotFound } from "../../../../../../../contexts/platform/domain/ModerationReportNotFound";
+import { container } from "../../../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
+import { HttpNextResponse } from "../../../../../../../contexts/shared/infrastructure/http/HttpNextResponse";
+import { requirePlatformSession } from "../../../../../../../lib/auth/requirePlatformSession";
+import { moderationReportEntityToJson } from "../../../../../../../lib/platform/moderation";
+import { getResolvedTenantFromRequest } from "../../../../../../../lib/tenant/getResolvedTenant";
 
 export const dynamic = "force-dynamic";
 
