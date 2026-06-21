@@ -72,6 +72,8 @@
     "verify:roulette-spin-e2e": "tsx scripts/verify-roulette-spin-e2e.ts",
     "verify:roulette-scan-eligibility-use-case": "tsx scripts/verify-roulette-scan-eligibility-use-case.ts",
     "verify:roulette-scan-eligibility": "tsx scripts/verify-roulette-scan-eligibility.ts",
+    "verify:roulette-staff-redeem-use-case": "tsx scripts/verify-roulette-staff-redeem-use-case.ts",
+    "verify:roulette-staff-redeem": "tsx scripts/verify-roulette-staff-redeem.ts",
     "verify:stamp-campaign-adopt-template-use-case": "tsx scripts/verify-stamp-campaign-adopt-template-use-case.ts",
     "verify:stamp-campaign-adopt-template": "tsx scripts/verify-stamp-campaign-adopt-template.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",

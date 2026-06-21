@@ -129,6 +129,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 		}).length;
 	}
 
+	async listPendingRedeemByCustomer(): Promise<RouletteSpin[]> {
+		return [];
+	}
+
 	all(): RouletteSpinPrimitives[] {
 		return this.spins.map((spin) => spin.toPrimitives());
 	}

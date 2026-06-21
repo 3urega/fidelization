@@ -1,6 +1,6 @@
 # Ruleta de fidelización (gamification)
 
-**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) + V3 ([#110](https://github.com/3urega/fidelization/issues/110), 2026-06-20) + V4 ([#111](https://github.com/3urega/fidelization/issues/111), 2026-06-20) + V5 ([#112](https://github.com/3urega/fidelization/issues/112), 2026-06-20) + V6 ([#113](https://github.com/3urega/fidelization/issues/113), 2026-06-20) implemented; V7 open ([#114](https://github.com/3urega/fidelization/issues/114)).
+**Status:** **Implemented (MVP ruleta)** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) through V7 ([#114](https://github.com/3urega/fidelization/issues/114), 2026-06-20).
 
 ## Overview
 
@@ -35,6 +35,19 @@ Premio físico → pending_redeem (canje staff v2)
 | `roulette_spins` | Giro ejecutado, segmento, premio, status, idempotency |
 
 Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reglas de frecuencia.
+
+## Implementation status (V7)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Redeem use case | `RedeemRouletteSpin` — `pending_redeem` → `applied` + `redeemedAt` |
+| List pending | `ListPendingRouletteSpinsForStaff` + `GET /api/loyalty/games/ruleta/spins/pending?qrValue=` |
+| Staff API | `POST /api/loyalty/games/ruleta/spins/[spinId]/redeem` |
+| Staff UI | `/scan` — `StaffRoulettePendingRedeem` |
+| Domain verify | `npm run verify:roulette-staff-redeem-use-case` |
+| E2E verify | `npm run verify:roulette-staff-redeem` (dev + `DATABASE_URL`) |
+
+Solo premios `physical` en `pending_redeem`; owner/employee; segundo redeem → `RouletteSpinAlreadyRedeemed` (409).
 
 ## Implementation status (V6)
 
@@ -110,7 +123,7 @@ Reglas: una elegibilidad no consumida por customer/tenant; nuevo scan **renueva*
 | [#111](https://github.com/3urega/fidelization/issues/111) | Phase V4: Client spin API (ExecuteRouletteSpin + prize application) | **Implemented** 2026-06-20 |
 | [#112](https://github.com/3urega/fidelization/issues/112) | Phase V5: Roulette visual assets + Wheel UI + establishment detail | **Implemented** 2026-06-20 |
 | [#113](https://github.com/3urega/fidelization/issues/113) | Phase V6: Spin eligibility after staff scan | **Implemented** 2026-06-20 |
-| [#114](https://github.com/3urega/fidelization/issues/114) | Phase V7: Staff redeem pending roulette prizes (v2) | `docs/issues/roulette-staff-redeem-v2.md` |
+| [#114](https://github.com/3urega/fidelization/issues/114) | Phase V7: Staff redeem pending roulette prizes (v2) | **Implemented** 2026-06-20 |
 
 Manifest: [`docs/issues/manifest.phase-v-roulette-game.json`](../issues/manifest.phase-v-roulette-game.json).
 

@@ -261,12 +261,12 @@ async function main(): Promise<void> {
 	});
 	const userRedeemBody = (await userRedeem.json()) as { error?: { type?: string } };
 
-	if (userRedeem.status !== 403 || userRedeemBody.error?.type !== "RouletteStaffForbidden") {
-		console.error("❌ platform user cannot redeem", userRedeem.status, userRedeemBody);
+	if (userRedeem.status !== 401) {
+		console.error("❌ platform user cannot redeem staff API", userRedeem.status, userRedeemBody);
 		process.exit(1);
 	}
 
-	console.log("✅ platform user session blocked from redeem");
+	console.log("✅ non-staff session blocked from redeem");
 
 	await prisma.tenant.update({
 		where: { id: DEMO_TENANT_ID },

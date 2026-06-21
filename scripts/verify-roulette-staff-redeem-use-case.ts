@@ -20,19 +20,21 @@ import { RouletteStaffForbidden } from "../src/contexts/loyalty/games/domain/Rou
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
+import { User } from "../src/contexts/identity/users/domain/User";
+import { UserId } from "../src/contexts/identity/users/domain/UserId";
 import { UserRepository } from "../src/contexts/identity/users/domain/UserRepository";
 import { TenantRole } from "../src/contexts/tenants/memberships/domain/TenantRole";
 
-const tenantId = "00000000-0000-4000-8000-0000000000r1";
-const customerId = "00000000-0000-4000-8000-0000000000r2";
-const spinId = "00000000-0000-4000-8000-0000000000r3";
-const staffUserId = "00000000-0000-4000-8000-0000000000r4";
+const tenantId = "00000000-0000-4000-8000-000000000701";
+const customerId = "00000000-0000-4000-8000-000000000702";
+const spinId = "00000000-0000-4000-8000-000000000703";
+const staffUserId = "00000000-0000-4000-8000-000000000704";
 
 const physicalConfig = parseRouletteConfig({
 	version: 1,
 	segments: [
 		{
-			id: "00000000-0000-4000-8000-000000000r01",
+			id: "00000000-0000-4000-8000-000000000711",
 			label: "Café gratis",
 			weight: 100,
 			prizeType: "physical",
@@ -41,7 +43,7 @@ const physicalConfig = parseRouletteConfig({
 			stockUsed: 0,
 		},
 		{
-			id: "00000000-0000-4000-8000-000000000r02",
+			id: "00000000-0000-4000-8000-000000000712",
 			label: "Sin premio",
 			weight: 1,
 			prizeType: "none",
@@ -105,8 +107,11 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 }
 
 class InMemoryCustomerRepository extends CustomerRepository {
-	constructor(private readonly customer: Customer) {
+	private customer: Customer;
+
+	constructor(customer: Customer) {
 		super();
+		this.customer = customer;
 	}
 
 	async save(customer: Customer): Promise<void> {
@@ -140,7 +145,7 @@ class InMemoryCustomerRepository extends CustomerRepository {
 
 class NoopUserRepository extends UserRepository {
 	async save(): Promise<void> {}
-	async searchById(): Promise<null> {
+	async search(): Promise<null> {
 		return null;
 	}
 	async searchByEmail(): Promise<null> {
@@ -148,6 +153,27 @@ class NoopUserRepository extends UserRepository {
 	}
 	async searchByQrValue(): Promise<null> {
 		return null;
+	}
+	async searchByOAuthSubject(): Promise<null> {
+		return null;
+	}
+	async updatePasswordHash(): Promise<void> {}
+	async assignQrValueIfAbsent(): Promise<void> {}
+	async updateSearchZone(userId: UserId): Promise<User> {
+		return User.fromPrimitives({
+			id: userId.value,
+			name: "noop",
+			email: "noop@local",
+			profilePicture: "",
+			plan: "FREE",
+			qrValue: null,
+			oauthProvider: null,
+			oauthSubject: null,
+			searchZone: null,
+		});
+	}
+	async isPlatformSuperadmin(): Promise<boolean> {
+		return false;
 	}
 }
 
@@ -176,7 +202,7 @@ function createPendingPhysicalSpin(): RouletteSpin {
 		id: spinId,
 		tenantId,
 		customerId,
-		segmentId: "00000000-0000-4000-8000-000000000r01",
+		segmentId: "00000000-0000-4000-8000-000000000711",
 		segmentIndex: 0,
 		prizeType: "physical",
 		prizePayload: { description: "Café gratis" },
@@ -197,7 +223,7 @@ async function main(): Promise<void> {
 	const customer = Customer.fromPrimitives({
 		id: customerId,
 		tenantId,
-		userId: "00000000-0000-4000-8000-0000000000r5",
+		userId: "00000000-0000-4000-8000-000000000705",
 		name: "Redeem Verify",
 		email: "redeem@verify.local",
 		phone: null,
@@ -295,7 +321,7 @@ async function main(): Promise<void> {
 
 	const pointsSpin = RouletteSpin.fromPrimitives({
 		...(createPendingPhysicalSpin().toPrimitives() as RouletteSpinPrimitives),
-		id: "00000000-0000-4000-8000-0000000000r6",
+		id: "00000000-0000-4000-8000-000000000706",
 		prizeType: "points",
 		prizePayload: { points: 10 },
 		status: "applied",
