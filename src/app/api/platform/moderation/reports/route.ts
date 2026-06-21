@@ -3,11 +3,11 @@ import "reflect-metadata";
 import { NextResponse } from "next/server";
 
 import { ListModerationReports } from "../../../../../contexts/platform/application/moderation/ListModerationReports";
+import { type ModerationReportStatus } from "../../../../../contexts/platform/domain/ModerationReportTypes";
 import { container } from "../../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { requirePlatformSession } from "../../../../../lib/auth/requirePlatformSession";
 import { moderationReportsPageToJson } from "../../../../../lib/platform/moderation";
 import { getResolvedTenantFromRequest } from "../../../../../lib/tenant/getResolvedTenant";
-import { type ModerationReportStatus } from "../../../../../contexts/platform/domain/ModerationReportTypes";
 
 export const dynamic = "force-dynamic";
 

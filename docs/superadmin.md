@@ -373,7 +373,11 @@ Top campañas
 
 # 11. Moderación
 
-Para el futuro.
+**Implemented** — GitHub [#83](https://github.com/3urega/fidelization/issues/83) (2026-06-21).
+
+Superadmin en `/platform/moderation`: cola de `moderation_reports` (open/resolved) para targets `tenant` y `promotion`; acciones **marcar resuelto** y **suspender negocio** (delega a `SetTenantPlatformStatus` de P2). Badge en nav vía `GET /api/platform/moderation/summary`. Sin flujo de reporte desde app cliente (fundación extensible).
+
+Verifies: `verify:platform-admin-moderation-use-case`, `verify:platform-admin-moderation`.
 
 ---
 
@@ -525,7 +529,7 @@ Publicadas en GitHub · manifest: [`manifest.phase-p-superadmin.json`](issues/ma
 | P10 | [#80](https://github.com/3urega/fidelization/issues/80) ✅ **Implemented** (2026-06-13) | Plantillas campañas |
 | P11 | [#81](https://github.com/3urega/fidelization/issues/81) ✅ **Implemented** (2026-06-13) | Biblioteca juegos |
 | P12 | [#82](https://github.com/3urega/fidelization/issues/82) ✅ **Implemented** (2026-06-21) | Comunicación |
-| P13 | [#83](https://github.com/3urega/fidelization/issues/83) | Moderación |
+| P13 | [#83](https://github.com/3urega/fidelization/issues/83) ✅ **Implemented** (2026-06-21) | Moderación |
 | P14 | [#84](https://github.com/3urega/fidelization/issues/84) | Sistema / integraciones |
 
 **Orden recomendado:** P1 → P2 → **P3** (impersonación) → P4 → P5 → P6 → P7 → P8 → P9 → P10–P14.

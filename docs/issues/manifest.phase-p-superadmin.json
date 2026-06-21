@@ -3,10 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P13: Platform admin moderation queue (foundation)",
-      "bodyFile": "docs/issues/platform-admin-moderation-foundation.md"
-    },
-    {
       "title": "Phase P14: Platform admin system settings (platform branding and integrations)",
       "bodyFile": "docs/issues/platform-admin-system-settings.md"
     }
