@@ -37,6 +37,15 @@ const pointsSpinConfig = {
 			stockLimit: null,
 			stockUsed: 0,
 		},
+		{
+			id: "00000000-0000-4000-8000-000000000802",
+			label: "Sin premio",
+			weight: 1,
+			prizeType: "none" as const,
+			prize: {},
+			stockLimit: null,
+			stockUsed: 0,
+		},
 	],
 	rules: {
 		...DEMO_ROULETTE_CONFIG.rules,

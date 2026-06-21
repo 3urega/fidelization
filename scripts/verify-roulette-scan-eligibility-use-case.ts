@@ -44,6 +44,15 @@ const scanTriggerConfig = parseRouletteConfig({
 			stockLimit: null,
 			stockUsed: 0,
 		},
+		{
+			id: "00000000-0000-4000-8000-000000000e02",
+			label: "Sin premio",
+			weight: 1,
+			prizeType: "none",
+			prize: {},
+			stockLimit: null,
+			stockUsed: 0,
+		},
 	],
 	rules: {
 		maxSpinsPerDay: 2,
