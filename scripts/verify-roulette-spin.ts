@@ -275,9 +275,13 @@ async function main(): Promise<void> {
 
 	if (
 		!detailAfter.ok ||
-		detailAfterBody.customer?.pointsBalance !== pointsBefore + 10
+		detailAfterBody.customer?.pointsBalance !== pointsBefore + 11
 	) {
-		console.error("❌ points not reflected in detail", detailAfter.status, detailAfterBody);
+		console.error(
+			"❌ points not reflected in detail (scan +1, spin +10)",
+			detailAfter.status,
+			detailAfterBody,
+		);
 		process.exit(1);
 	}
 

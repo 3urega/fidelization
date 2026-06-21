@@ -675,6 +675,18 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "RouletteSpinNotEligible") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "RouletteSpinNotFound") {
+		return HttpNextResponse.domainError(error, 404);
+	}
+	if (error.type === "RouletteSpinNotPendingRedeem") {
+		return HttpNextResponse.domainError(error, 409);
+	}
+	if (error.type === "RouletteSpinAlreadyRedeemed") {
+		return HttpNextResponse.domainError(error, 409);
+	}
+	if (error.type === "RouletteStaffForbidden") {
+		return HttpNextResponse.domainError(error, 403);
+	}
 	if (error.type === "RouletteSegmentsExhausted") {
 		return HttpNextResponse.domainError(error, 409);
 	}

@@ -10,4 +10,9 @@ export abstract class RouletteSpinRepository {
 		customerId: string,
 		since: Date,
 	): Promise<number>;
+
+	abstract listPendingRedeemByCustomer(
+		tenantId: string,
+		customerId: string,
+	): Promise<RouletteSpin[]>;
 }

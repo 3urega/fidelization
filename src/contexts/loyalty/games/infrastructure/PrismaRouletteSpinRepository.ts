@@ -60,6 +60,20 @@ export class PrismaRouletteSpinRepository extends RouletteSpinRepository {
 		});
 	}
 
+	async listPendingRedeemByCustomer(tenantId: string, customerId: string): Promise<RouletteSpin[]> {
+		const rows = await prisma.rouletteSpin.findMany({
+			where: {
+				tenantId,
+				customerId,
+				status: "pending_redeem",
+				prizeType: "physical",
+			},
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => this.mapRow(row));
+	}
+
 	private mapRow(row: {
 		id: string;
 		tenantId: string;

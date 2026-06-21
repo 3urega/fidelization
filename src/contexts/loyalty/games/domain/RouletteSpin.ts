@@ -3,6 +3,8 @@ import { randomUUID } from "crypto";
 import type { RoulettePrizeType } from "./RoulettePrizeType";
 import type { RouletteConfigPrimitives } from "./RouletteConfig";
 import type { RouletteSegmentPrize } from "./RouletteSegment";
+import { RouletteSpinAlreadyRedeemed } from "./RouletteSpinAlreadyRedeemed";
+import { RouletteSpinNotPendingRedeem } from "./RouletteSpinNotPendingRedeem";
 
 export const ROULETTE_SPIN_STATUSES = ["pending_redeem", "applied", "expired"] as const;
 export type RouletteSpinStatus = (typeof ROULETTE_SPIN_STATUSES)[number];
@@ -77,5 +79,35 @@ export class RouletteSpin {
 			prizePayload: { ...this.data.prizePayload },
 			configSnapshot: { ...this.data.configSnapshot },
 		};
+	}
+
+	redeem(redeemedAt: Date = new Date()): RouletteSpin {
+		if (this.data.prizeType !== "physical") {
+			throw new RouletteSpinNotPendingRedeem("Only physical prizes require staff redemption");
+		}
+
+		if (this.data.status === "applied" && this.data.redeemedAt !== null) {
+			throw new RouletteSpinAlreadyRedeemed(this.data.id);
+		}
+
+		if (this.data.status !== "pending_redeem") {
+			throw new RouletteSpinNotPendingRedeem(
+				`Roulette spin status must be pending_redeem (current: ${this.data.status})`,
+			);
+		}
+
+		return new RouletteSpin({
+			...this.data,
+			status: "applied",
+			redeemedAt: redeemedAt.toISOString(),
+		});
+	}
+
+	segmentLabel(): string {
+		const segment = this.data.configSnapshot.segments.find(
+			(item) => item.id === this.data.segmentId,
+		);
+
+		return segment?.label ?? "Premio físico";
 	}
 }

@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 
 import { StaffScanForm } from "../../_components/loyalty/StaffScanForm";
+import { StaffRoulettePendingRedeem } from "../../_components/loyalty/StaffRoulettePendingRedeem";
 import { PageHeader } from "../../_components/shell/PageHeader";
 import { Card } from "../../_components/ui/Card";
 
@@ -14,6 +15,7 @@ export default function StaffScanPage(): ReactElement {
 			<Card>
 				<StaffScanForm />
 			</Card>
+			<StaffRoulettePendingRedeem />
 		</div>
 	);
 }

@@ -67,6 +67,8 @@ import { UpsertTenantRouletteConfig } from "../../../loyalty/games/application/c
 import { IssueRouletteSpinEligibility } from "../../../loyalty/games/application/eligibility/IssueRouletteSpinEligibility";
 import { AssertRouletteSpinAccess } from "../../../loyalty/games/application/spin/AssertRouletteSpinAccess";
 import { ExecuteRouletteSpin } from "../../../loyalty/games/application/spin/ExecuteRouletteSpin";
+import { ListPendingRouletteSpinsForStaff } from "../../../loyalty/games/application/redeem/ListPendingRouletteSpinsForStaff";
+import { RedeemRouletteSpin } from "../../../loyalty/games/application/redeem/RedeemRouletteSpin";
 import { GetRoulettePublicState } from "../../../loyalty/games/application/spin/GetRoulettePublicState";
 import { RouletteSpinUnitOfWork } from "../../../loyalty/games/domain/RouletteSpinUnitOfWork";
 import { RouletteSpinEligibilityRepository } from "../../../loyalty/games/domain/RouletteSpinEligibilityRepository";
@@ -399,6 +401,8 @@ builder.registerAndUse(PrismaRouletteSpinUnitOfWork);
 builder.registerAndUse(AssertRouletteSpinAccess);
 builder.registerAndUse(GetRoulettePublicState);
 builder.registerAndUse(ExecuteRouletteSpin);
+builder.registerAndUse(RedeemRouletteSpin);
+builder.registerAndUse(ListPendingRouletteSpinsForStaff);
 
 builder.register(NotificationRepository).use(PrismaNotificationRepository);
 builder.registerAndUse(PrismaNotificationRepository);
