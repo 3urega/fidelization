@@ -7,6 +7,7 @@ export type StaffScanOutcomeJson = {
 	campaignId?: string;
 	campaignName?: string;
 	pointsBalance?: number;
+	expiresAt?: string;
 };
 
 export type StaffScanResponseJson = {
@@ -122,4 +123,33 @@ export async function resolveStampCampaignTargetId(
 	const created = await createVerifyStampCampaign(baseUrl, ownerHeaders, labelPrefix);
 
 	return created.campaignId;
+}
+
+export function findRouletteSpinGrantedOutcome(
+	outcomes: StaffScanOutcomeJson[] | undefined,
+): StaffScanOutcomeJson | undefined {
+	return outcomes?.find((outcome) => outcome.kind === "roulette_spin_granted");
+}
+
+export async function grantSpinEligibilityViaStaffScan(
+	baseUrl: string,
+	ownerHeaders: Record<string, string>,
+	userQrValue: string,
+	labelPrefix = "Roulette eligibility verify",
+): Promise<{ expiresAt: string }> {
+	const campaignId = await resolveStampCampaignTargetId(baseUrl, ownerHeaders, labelPrefix);
+	const scan = await postStaffScan(
+		baseUrl,
+		ownerHeaders,
+		campaignScanBody(userQrValue, campaignId),
+	);
+	const rouletteOutcome = findRouletteSpinGrantedOutcome(scan.body.outcomes);
+
+	if (scan.status !== 200 || !rouletteOutcome?.expiresAt) {
+		throw new Error(
+			`staff scan did not grant roulette eligibility: ${scan.status} ${JSON.stringify(scan.body)}`,
+		);
+	}
+
+	return { expiresAt: rouletteOutcome.expiresAt };
 }

@@ -55,6 +55,7 @@ type EstablishmentDetailResponse = {
 type RoulettePublicState = {
 	isEnabled: boolean;
 	canSpin: boolean;
+	eligibility: { expiresAt: string } | null;
 };
 
 function EstablishmentProfileInfo({ tenant }: { tenant: EstablishmentTenant }): ReactElement | null {
@@ -338,12 +339,18 @@ export function PlatformEstablishmentDetail(): ReactElement {
 									<p className="mt-1 text-sm text-muted">
 										{rouletteState.canSpin
 											? "Tienes un giro disponible. ¡Prueba suerte!"
-											: "La ruleta está activa, pero no puedes girar ahora mismo."}
+											: rouletteState.eligibility
+												? "Has usado tu giro. Vuelve tras una nueva visita."
+												: "Pide en caja que escaneen tu QR para desbloquear la ruleta."}
 									</p>
 								</div>
 								<Link href={platformRoutes.homeEstablishmentRoulette(slug)} className="w-full">
 									<Button type="button" className="w-full" variant={rouletteState.canSpin ? "primary" : "secondary"}>
-										{rouletteState.canSpin ? "Girar ruleta" : "Ver ruleta"}
+										{rouletteState.canSpin
+											? "Girar ruleta"
+											: rouletteState.eligibility
+												? "Ver ruleta"
+												: "Cómo desbloquear la ruleta"}
 									</Button>
 								</Link>
 							</div>

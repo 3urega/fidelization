@@ -68,7 +68,6 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
 			tenantId: detail.tenant.id,
 			customerId: detail.customer.id,
 			userId: auth.session.userId,
-			triggerSource: "manual",
 		});
 
 		return NextResponse.json(rouletteSpinResultToJson(result));

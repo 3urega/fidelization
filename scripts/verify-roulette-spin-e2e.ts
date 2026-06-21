@@ -5,16 +5,25 @@ import { existsSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
 
+import {
+	TENANT_ID_HEADER,
+	TENANT_SLUG_HEADER,
+} from "../src/lib/tenant/forwardResolvedTenantHeaders";
 import { ROULETTE_REQUIRED_ASSET_PATHS } from "../src/app/_components/loyalty/games/rouletteAssets";
 import { RULETA_GAME_SLUG } from "../src/contexts/loyalty/games/domain/TenantGameActivation";
 import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
 import { DEMO_ROULETTE_CONFIG } from "../src/lib/roulette/demoRouletteConfig";
 import { prisma } from "../src/lib/prisma";
-import { ensureDemoTenantActive } from "./lib/customer-verify-helpers";
+import {
+	apexBaseUrl,
+	ensureDemoTenantActive,
+	tenantId,
+	tenantSlug,
+} from "./lib/customer-verify-helpers";
+import { grantSpinEligibilityViaStaffScan } from "./lib/staff-scan-verify-helpers";
 
-const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const baseUrl = apexBaseUrl;
 const PLAN_PREMIUM_ID = "00000000-0000-4000-8000-000000000007";
-const tenantSlug = "cafe-demo";
 
 function parseSessionCookie(setCookie: string | null): string | null {
 	if (!setCookie) {
@@ -30,6 +39,14 @@ function sessionHeaders(session: string): Record<string, string> {
 	return { cookie: `session=${session}` };
 }
 
+function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
+	return {
+		[TENANT_ID_HEADER]: tenantId,
+		[TENANT_SLUG_HEADER]: tenantSlug,
+		...extra,
+	};
+}
+
 function assertAssetsOnDisk(): void {
 	for (const publicPath of ROULETTE_REQUIRED_ASSET_PATHS) {
 		const filePath = join(process.cwd(), "public", publicPath.replace(/^\//, ""));
@@ -43,7 +60,7 @@ function assertAssetsOnDisk(): void {
 	}
 }
 
-async function registerUser(): Promise<string> {
+async function registerUser(): Promise<{ cookie: string; qrValue: string }> {
 	const email = `verify-roulette-ui-${randomUUID()}@example.local`;
 	const password = "password123";
 
@@ -52,14 +69,17 @@ async function registerUser(): Promise<string> {
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ name: "Roulette UI User", email, password }),
 	});
+	const registerBody = (await register.json()) as {
+		user?: { qrValue: string | null };
+	};
 	const cookie = parseSessionCookie(register.headers.get("set-cookie"));
 
-	if (register.status !== 201 || !cookie) {
+	if (register.status !== 201 || !cookie || !registerBody.user?.qrValue) {
 		console.error("❌ register user failed", register.status);
 		process.exit(1);
 	}
 
-	return cookie;
+	return { cookie, qrValue: registerBody.user.qrValue };
 }
 
 async function main(): Promise<void> {
@@ -100,7 +120,7 @@ async function main(): Promise<void> {
 		update: { isEnabled: true, config: DEMO_ROULETTE_CONFIG },
 	});
 
-	const cookie = await registerUser();
+	const { cookie, qrValue } = await registerUser();
 
 	const join = await fetch(`${baseUrl}/api/user/establishments/join`, {
 		method: "POST",
@@ -114,6 +134,39 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ user joined cafe-demo");
+
+	const lockedApi = await fetch(
+		`${baseUrl}/api/user/establishments/${tenantSlug}/games/ruleta`,
+		{ headers: sessionHeaders(cookie) },
+	);
+	const lockedBody = (await lockedApi.json()) as { canSpin?: boolean; isEnabled?: boolean };
+
+	if (!lockedApi.ok || lockedBody.canSpin !== false || !lockedBody.isEnabled) {
+		console.error("❌ ruleta should be locked before scan", lockedApi.status, lockedBody);
+		process.exit(1);
+	}
+
+	console.log("✅ ruleta API locked before staff scan");
+
+	const ownerLogin = await fetch(`${baseUrl}/api/auth/demo`, { method: "POST" });
+	const ownerCookie = parseSessionCookie(ownerLogin.headers.get("set-cookie"));
+
+	if (!ownerLogin.ok || !ownerCookie) {
+		console.error("❌ owner demo login");
+		process.exit(1);
+	}
+
+	await grantSpinEligibilityViaStaffScan(
+		baseUrl,
+		tenantHeaders({
+			"Content-Type": "application/json",
+			cookie: `session=${ownerCookie}`,
+		}),
+		qrValue,
+		"Roulette UI verify",
+	);
+
+	console.log("✅ staff scan unlocks ruleta for UI flow");
 
 	const page = await fetch(`${baseUrl}/home/establishments/${tenantSlug}/ruleta`, {
 		headers: sessionHeaders(cookie),
@@ -148,14 +201,18 @@ async function main(): Promise<void> {
 		`${baseUrl}/api/user/establishments/${tenantSlug}/games/ruleta`,
 		{ headers: sessionHeaders(cookie) },
 	);
-	const ruletaBody = (await ruletaApi.json()) as { isEnabled?: boolean };
+	const ruletaBody = (await ruletaApi.json()) as {
+		isEnabled?: boolean;
+		canSpin?: boolean;
+		eligibility?: { expiresAt: string } | null;
+	};
 
-	if (!ruletaApi.ok || !ruletaBody.isEnabled) {
-		console.error("❌ ruleta API not enabled for cafe-demo", ruletaApi.status, ruletaBody);
+	if (!ruletaApi.ok || !ruletaBody.isEnabled || !ruletaBody.canSpin || !ruletaBody.eligibility?.expiresAt) {
+		console.error("❌ ruleta API not unlocked after scan", ruletaApi.status, ruletaBody);
 		process.exit(1);
 	}
 
-	console.log("✅ ruleta API enabled (detail CTA integration)");
+	console.log("✅ ruleta API enabled and canSpin after scan");
 
 	const detailPage = await fetch(`${baseUrl}/home/establishments/${tenantSlug}`, {
 		headers: sessionHeaders(cookie),

@@ -672,6 +672,9 @@ export function handleAuthDomainError(error: DomainError): NextResponse | undefi
 	if (error.type === "RouletteSpinRateLimitExceeded") {
 		return HttpNextResponse.domainError(error, 403);
 	}
+	if (error.type === "RouletteSpinNotEligible") {
+		return HttpNextResponse.domainError(error, 403);
+	}
 	if (error.type === "RouletteSegmentsExhausted") {
 		return HttpNextResponse.domainError(error, 409);
 	}

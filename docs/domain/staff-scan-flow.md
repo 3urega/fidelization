@@ -101,7 +101,7 @@ Multiple lines may appear (e.g. punto + producto anotado; producto anotado + tar
 - `GET /api/loyalty/scan/targets` — lista tarjetas activas + promos activas para el picker.
 - `POST /api/loyalty/scan` — body `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }`.
 
-`outcomes[]` discriminated union: `point_recorded`, `stamp_added`, `card_completed`, `card_already_completed`, `promotion_applied`, `promotion_exhausted`.
+`outcomes[]` discriminated union: `point_recorded`, `stamp_added`, `card_completed`, `card_already_completed`, `promotion_applied`, `promotion_exhausted`, `roulette_spin_granted` (Premium + ruleta activa + `rules.trigger: after_staff_scan`; incluye `expiresAt` ISO).
 
 ## Edge cases (dominio)
 

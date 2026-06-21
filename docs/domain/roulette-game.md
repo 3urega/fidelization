@@ -1,6 +1,6 @@
 # Ruleta de fidelización (gamification)
 
-**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) + V3 ([#110](https://github.com/3urega/fidelization/issues/110), 2026-06-20) + V4 ([#111](https://github.com/3urega/fidelization/issues/111), 2026-06-20) + V5 ([#112](https://github.com/3urega/fidelization/issues/112), 2026-06-20) implemented; V6–V7 open ([#113](https://github.com/3urega/fidelization/issues/113)–[#114](https://github.com/3urega/fidelization/issues/114)).
+**Status:** **In progress** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) + V2 ([#109](https://github.com/3urega/fidelization/issues/109), 2026-06-20) + V3 ([#110](https://github.com/3urega/fidelization/issues/110), 2026-06-20) + V4 ([#111](https://github.com/3urega/fidelization/issues/111), 2026-06-20) + V5 ([#112](https://github.com/3urega/fidelization/issues/112), 2026-06-20) + V6 ([#113](https://github.com/3urega/fidelization/issues/113), 2026-06-20) implemented; V7 open ([#114](https://github.com/3urega/fidelization/issues/114)).
 
 ## Overview
 
@@ -35,6 +35,22 @@ Premio físico → pending_redeem (canje staff v2)
 | `roulette_spins` | Giro ejecutado, segmento, premio, status, idempotency |
 
 Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reglas de frecuencia.
+
+## Implementation status (V6)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Eligibility table | `roulette_spin_eligibilities` (Prisma migration) |
+| Domain | `RouletteSpinEligibility`, `RouletteSpinNotEligible` |
+| Issue use case | `IssueRouletteSpinEligibility` — emisión tras staff scan |
+| Scan integration | `RecordStaffScanByTarget` → outcome `roulette_spin_granted` |
+| Spin gate | `GetRoulettePublicState` / `ExecuteRouletteSpin` requieren elegibilidad activa |
+| Consumo atómico | `PrismaRouletteSpinUnitOfWork` — spin + `consumedAt` en `$transaction` |
+| Staff outcome | `StaffScanOutcome` kind `roulette_spin_granted` + `expiresAt` |
+| Domain verify | `npm run verify:roulette-scan-eligibility-use-case` |
+| E2E verify | `npm run verify:roulette-scan-eligibility` (dev + `DATABASE_URL`) |
+
+Reglas: una elegibilidad no consumida por customer/tenant; nuevo scan **renueva** `expiresAt`; `canSpin` = gates Premium + ruleta activa + rate limits + elegibilidad activa; giro consume elegibilidad (`triggerSource: staff_scan`, `triggerRef: eligibilityId`).
 
 ## Implementation status (V5)
 
@@ -93,7 +109,7 @@ Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reg
 | [#110](https://github.com/3urega/fidelization/issues/110) | Phase V3: Owner roulette config API + settings UI | **Implemented** 2026-06-20 |
 | [#111](https://github.com/3urega/fidelization/issues/111) | Phase V4: Client spin API (ExecuteRouletteSpin + prize application) | **Implemented** 2026-06-20 |
 | [#112](https://github.com/3urega/fidelization/issues/112) | Phase V5: Roulette visual assets + Wheel UI + establishment detail | **Implemented** 2026-06-20 |
-| [#113](https://github.com/3urega/fidelization/issues/113) | Phase V6: Spin eligibility after staff scan | `docs/issues/roulette-scan-eligibility.md` |
+| [#113](https://github.com/3urega/fidelization/issues/113) | Phase V6: Spin eligibility after staff scan | **Implemented** 2026-06-20 |
 | [#114](https://github.com/3urega/fidelization/issues/114) | Phase V7: Staff redeem pending roulette prizes (v2) | `docs/issues/roulette-staff-redeem-v2.md` |
 
 Manifest: [`docs/issues/manifest.phase-v-roulette-game.json`](../issues/manifest.phase-v-roulette-game.json).

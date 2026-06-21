@@ -6,8 +6,9 @@ import type { RouletteSegmentPrize } from "../../domain/RouletteSegment";
 import {
 	RouletteSpin,
 	type RouletteSpinStatus,
-	type RouletteSpinTriggerSource,
 } from "../../domain/RouletteSpin";
+import { RouletteSpinEligibilityRepository } from "../../domain/RouletteSpinEligibilityRepository";
+import { RouletteSpinNotEligible } from "../../domain/RouletteSpinNotEligible";
 import { RouletteSpinUnitOfWork } from "../../domain/RouletteSpinUnitOfWork";
 import { TenantGameActivationNotFound } from "../../domain/TenantGameActivationNotFound";
 import { TenantGameActivationRepository } from "../../domain/TenantGameActivationRepository";
@@ -18,8 +19,6 @@ export type ExecuteRouletteSpinParams = {
 	tenantId: string;
 	customerId: string;
 	userId: string;
-	triggerSource?: RouletteSpinTriggerSource;
-	triggerRef?: string | null;
 	rng?: RandomNumberGenerator;
 };
 
@@ -38,6 +37,7 @@ export class ExecuteRouletteSpin {
 		private readonly assertRouletteSpinAccess: AssertRouletteSpinAccess,
 		private readonly getTenantRouletteConfig: GetTenantRouletteConfig,
 		private readonly activationRepository: TenantGameActivationRepository,
+		private readonly eligibilityRepository: RouletteSpinEligibilityRepository,
 		private readonly spinUnitOfWork: RouletteSpinUnitOfWork,
 	) {}
 
@@ -46,6 +46,15 @@ export class ExecuteRouletteSpin {
 			tenantId: params.tenantId,
 			customerId: params.customerId,
 		});
+
+		const activeEligibility = await this.eligibilityRepository.findActiveByCustomer(
+			params.tenantId,
+			params.customerId,
+		);
+
+		if (!activeEligibility) {
+			throw new RouletteSpinNotEligible();
+		}
 
 		const activationRow = await this.activationRepository.searchByTenantAndSlug(
 			params.tenantId,
@@ -63,6 +72,7 @@ export class ExecuteRouletteSpin {
 		const prize = { ...segmentPrimitives.prize };
 		const status: RouletteSpinStatus = prizeType === "physical" ? "pending_redeem" : "applied";
 		const configSnapshot = config.toPrimitives();
+		const eligibilityId = activeEligibility.toPrimitives().id;
 
 		const spin = RouletteSpin.create({
 			tenantId: params.tenantId,
@@ -72,13 +82,14 @@ export class ExecuteRouletteSpin {
 			prizeType,
 			prizePayload: prize,
 			status,
-			triggerSource: params.triggerSource ?? "manual",
-			triggerRef: params.triggerRef ?? null,
+			triggerSource: "staff_scan",
+			triggerRef: eligibilityId,
 			configSnapshot,
 		});
 
 		const updatedConfig = config.withIncrementedStockUsed(segmentPrimitives.id);
 		const updatedActivation = activationRow.withConfig(updatedConfig);
+		const consumedEligibility = activeEligibility.consume(spin.toPrimitives().id);
 
 		const prizeApplication =
 			prizeType === "none" || prizeType === "physical"
@@ -96,6 +107,7 @@ export class ExecuteRouletteSpin {
 			spin,
 			activation: updatedActivation,
 			prizeApplication,
+			eligibilityToConsume: consumedEligibility,
 		});
 
 		return {

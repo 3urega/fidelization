@@ -23,7 +23,10 @@ import { RouletteGameDisabled } from "../src/contexts/loyalty/games/domain/Roule
 import { RouletteGameNotAvailable } from "../src/contexts/loyalty/games/domain/RouletteGameNotAvailable";
 import { RouletteSegmentsExhausted } from "../src/contexts/loyalty/games/domain/RouletteSegmentsExhausted";
 import { RouletteSpinRateLimitExceeded } from "../src/contexts/loyalty/games/domain/RouletteSpinRateLimitExceeded";
+import { RouletteSpinNotEligible } from "../src/contexts/loyalty/games/domain/RouletteSpinNotEligible";
 import { RouletteSpin, type RouletteSpinPrimitives } from "../src/contexts/loyalty/games/domain/RouletteSpin";
+import { RouletteSpinEligibility } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibility";
+import { RouletteSpinEligibilityRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibilityRepository";
 import { RouletteSpinRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinRepository";
 import { RouletteSpinUnitOfWork } from "../src/contexts/loyalty/games/domain/RouletteSpinUnitOfWork";
 import {
@@ -34,7 +37,6 @@ import { TenantGameActivationRepository } from "../src/contexts/loyalty/games/do
 import { parseRouletteConfig } from "../src/contexts/loyalty/games/domain/RouletteConfig";
 import { PlatformGame } from "../src/contexts/platform/domain/PlatformGame";
 import { PlatformGameRepository } from "../src/contexts/platform/domain/PlatformGameRepository";
-import { PrismaRouletteSpinUnitOfWork } from "../src/contexts/loyalty/games/infrastructure/PrismaRouletteSpinUnitOfWork";
 
 const tenantId = "00000000-0000-4000-8000-0000000000s1";
 const customerId = "00000000-0000-4000-8000-0000000000s2";
@@ -129,6 +131,138 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 
 	all(): RouletteSpinPrimitives[] {
 		return this.spins.map((spin) => spin.toPrimitives());
+	}
+}
+
+class InMemoryRouletteSpinEligibilityRepository extends RouletteSpinEligibilityRepository {
+	private rows: RouletteSpinEligibility[] = [];
+
+	async save(eligibility: RouletteSpinEligibility): Promise<void> {
+		const id = eligibility.toPrimitives().id;
+		this.rows = this.rows.filter((row) => row.toPrimitives().id !== id);
+		this.rows.push(eligibility);
+	}
+
+	async findActiveByCustomer(
+		tenantIdValue: string,
+		customerIdValue: string,
+		at: Date = new Date(),
+	): Promise<RouletteSpinEligibility | null> {
+		const row = await this.findUnconsumedByCustomer(tenantIdValue, customerIdValue);
+
+		if (!row || !row.isActive(at)) {
+			return null;
+		}
+
+		return row;
+	}
+
+	async findUnconsumedByCustomer(
+		tenantIdValue: string,
+		customerIdValue: string,
+	): Promise<RouletteSpinEligibility | null> {
+		return (
+			this.rows.find((row) => {
+				const primitives = row.toPrimitives();
+
+				return (
+					primitives.tenantId === tenantIdValue &&
+					primitives.customerId === customerIdValue &&
+					primitives.consumedAt === null
+				);
+			}) ?? null
+		);
+	}
+
+	seedActive(expiresAt: Date): RouletteSpinEligibility {
+		const eligibility = RouletteSpinEligibility.create({
+			tenantId,
+			customerId,
+			expiresAt,
+		});
+		this.rows = [eligibility];
+
+		return eligibility;
+	}
+}
+
+class InMemoryRouletteSpinUnitOfWork extends RouletteSpinUnitOfWork {
+	constructor(
+		private readonly spinRepository: InMemoryRouletteSpinRepository,
+		private readonly activationRepository: InMemoryTenantGameActivationRepository,
+		private readonly eligibilityRepository: InMemoryRouletteSpinEligibilityRepository,
+		private readonly applyOutcome: ApplyCustomerLoyaltyOutcome,
+	) {
+		super();
+	}
+
+	async execute(params: import("../src/contexts/loyalty/games/domain/RouletteSpinUnitOfWork").RouletteSpinUnitOfWorkParams): Promise<void> {
+		await this.spinRepository.save(params.spin);
+		await this.activationRepository.save(params.activation);
+		await this.eligibilityRepository.save(params.eligibilityToConsume);
+
+		const prize = params.prizeApplication;
+
+		if (!prize) {
+			return;
+		}
+
+		const metadata = {
+			source: "roulette_spin",
+			spinId: prize.spinId,
+		};
+
+		if (prize.prizeType === "points") {
+			const points = prize.prize.points;
+
+			if (!points || points < 1) {
+				return;
+			}
+
+			await this.applyOutcome.applyPoints({
+				tenantId: prize.tenantId,
+				customerId: prize.customerId,
+				points,
+				createdByUserId: prize.userId,
+				metadata,
+			});
+
+			return;
+		}
+
+		if (prize.prizeType === "stamp") {
+			const campaignId = prize.prize.campaignId;
+
+			if (!campaignId) {
+				return;
+			}
+
+			await this.applyOutcome.applyStamp({
+				tenantId: prize.tenantId,
+				customerId: prize.customerId,
+				campaignId,
+				createdByUserId: prize.userId,
+				metadata,
+			});
+
+			return;
+		}
+
+		if (prize.prizeType === "promotion") {
+			const promotionId = prize.prize.promotionId;
+
+			if (!promotionId) {
+				return;
+			}
+
+			await this.applyOutcome.applyPromotion({
+				tenantId: prize.tenantId,
+				customerId: prize.customerId,
+				promotionId,
+				createdByUserId: prize.userId,
+				metadata,
+			});
+		}
 	}
 }
 
@@ -270,6 +404,7 @@ class StubAssertTenantPlanFeature {
 function buildStack(
 	activationRepository: InMemoryTenantGameActivationRepository,
 	spinRepository: InMemoryRouletteSpinRepository,
+	eligibilityRepository: InMemoryRouletteSpinEligibilityRepository,
 	platformGame: PlatformGame | null,
 	customerRepository: InMemoryCustomerRepository,
 	features: SubscriptionPlanFeatures,
@@ -290,26 +425,30 @@ function buildStack(
 		new NoopCustomerPromotionUsageRepository(),
 		assertFeature,
 	);
-	const unitOfWork = new PrismaRouletteSpinUnitOfWork(
+	const unitOfWork = new InMemoryRouletteSpinUnitOfWork(
 		spinRepository,
 		activationRepository,
+		eligibilityRepository,
 		applyOutcome,
-	) as RouletteSpinUnitOfWork;
+	);
 
 	return {
 		executeSpin: new ExecuteRouletteSpin(
 			assertAccess,
 			getConfig,
 			activationRepository,
+			eligibilityRepository,
 			unitOfWork,
 		),
-		publicState: new GetRoulettePublicState(assertAccess, getConfig),
+		publicState: new GetRoulettePublicState(assertAccess, getConfig, eligibilityRepository),
+		eligibilityRepository,
 	};
 }
 
 async function main(): Promise<void> {
 	const activationRepository = new InMemoryTenantGameActivationRepository();
 	const spinRepository = new InMemoryRouletteSpinRepository();
+	const eligibilityRepository = new InMemoryRouletteSpinEligibilityRepository();
 	const customer = Customer.fromPrimitives({
 		id: customerId,
 		tenantId,
@@ -345,19 +484,44 @@ async function main(): Promise<void> {
 	const stack = buildStack(
 		activationRepository,
 		spinRepository,
+		eligibilityRepository,
 		activeGame,
 		customerRepository,
 		PREMIUM_PLAN_FEATURES,
 	);
 
-	const state = await stack.publicState.execute({ tenantId, customerId });
+	const lockedState = await stack.publicState.execute({ tenantId, customerId });
 
-	if (!state.canSpin || state.segments.length !== 2) {
-		console.error("❌ public state canSpin", state);
+	if (lockedState.canSpin || lockedState.eligibility !== null) {
+		console.error("❌ public state should be locked without eligibility", lockedState);
 		process.exit(1);
 	}
 
-	console.log("✅ GetRoulettePublicState canSpin");
+	console.log("✅ GetRoulettePublicState locked without eligibility");
+
+	try {
+		await stack.executeSpin.execute({ tenantId, customerId, userId, rng: () => 0 });
+		console.error("❌ spin without eligibility should throw");
+		process.exit(1);
+	} catch (error) {
+		if (!(error instanceof RouletteSpinNotEligible)) {
+			console.error("❌ wrong error without eligibility", error);
+			process.exit(1);
+		}
+	}
+
+	console.log("✅ ExecuteRouletteSpin blocked without eligibility");
+
+	eligibilityRepository.seedActive(new Date(Date.now() + 24 * 60 * 60 * 1000));
+
+	const state = await stack.publicState.execute({ tenantId, customerId });
+
+	if (!state.canSpin || state.segments.length !== 2 || !state.eligibility?.expiresAt) {
+		console.error("❌ public state canSpin with eligibility", state);
+		process.exit(1);
+	}
+
+	console.log("✅ GetRoulettePublicState canSpin with eligibility");
 
 	const result = await stack.executeSpin.execute({
 		tenantId,
@@ -414,10 +578,12 @@ async function main(): Promise<void> {
 	const disabledStack = buildStack(
 		activationRepository,
 		new InMemoryRouletteSpinRepository(),
+		new InMemoryRouletteSpinEligibilityRepository(),
 		activeGame,
 		customerRepository,
 		PREMIUM_PLAN_FEATURES,
 	);
+	disabledStack.eligibilityRepository.seedActive(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
 	try {
 		await disabledStack.executeSpin.execute({ tenantId, customerId, userId });
@@ -444,10 +610,12 @@ async function main(): Promise<void> {
 	const draftStack = buildStack(
 		activationRepository,
 		new InMemoryRouletteSpinRepository(),
+		new InMemoryRouletteSpinEligibilityRepository(),
 		PlatformGame.fromPrimitives({ ...activeGame.toPrimitives(), status: "draft" }),
 		customerRepository,
 		PREMIUM_PLAN_FEATURES,
 	);
+	draftStack.eligibilityRepository.seedActive(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
 	try {
 		await draftStack.executeSpin.execute({ tenantId, customerId, userId });
@@ -465,10 +633,12 @@ async function main(): Promise<void> {
 	const basicStack = buildStack(
 		activationRepository,
 		new InMemoryRouletteSpinRepository(),
+		new InMemoryRouletteSpinEligibilityRepository(),
 		activeGame,
 		customerRepository,
 		BASIC_PLAN_FEATURES,
 	);
+	basicStack.eligibilityRepository.seedActive(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
 	try {
 		await basicStack.executeSpin.execute({ tenantId, customerId, userId });
@@ -520,10 +690,12 @@ async function main(): Promise<void> {
 	const exhaustedStack = buildStack(
 		activationRepository,
 		new InMemoryRouletteSpinRepository(),
+		new InMemoryRouletteSpinEligibilityRepository(),
 		activeGame,
 		customerRepository,
 		PREMIUM_PLAN_FEATURES,
 	);
+	exhaustedStack.eligibilityRepository.seedActive(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
 	try {
 		await exhaustedStack.executeSpin.execute({ tenantId, customerId, userId });

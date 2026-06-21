@@ -1,7 +1,8 @@
-import type { RoulettePrizeType } from "../domain/RoulettePrizeType";
-import type { RouletteSegmentPrize } from "../domain/RouletteSegment";
-import type { RouletteSpin } from "../domain/RouletteSpin";
-import type { TenantGameActivation } from "../domain/TenantGameActivation";
+import type { RoulettePrizeType } from "./RoulettePrizeType";
+import type { RouletteSegmentPrize } from "./RouletteSegment";
+import type { RouletteSpinEligibility } from "./RouletteSpinEligibility";
+import type { RouletteSpin } from "./RouletteSpin";
+import type { TenantGameActivation } from "./TenantGameActivation";
 
 export type RouletteSpinPrizeApplication = {
 	prizeType: RoulettePrizeType;
@@ -16,6 +17,7 @@ export type RouletteSpinUnitOfWorkParams = {
 	spin: RouletteSpin;
 	activation: TenantGameActivation;
 	prizeApplication: RouletteSpinPrizeApplication | null;
+	eligibilityToConsume: RouletteSpinEligibility;
 };
 
 export abstract class RouletteSpinUnitOfWork {

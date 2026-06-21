@@ -17,7 +17,8 @@ type RoulettePublicState = {
 	isEnabled: boolean;
 	canSpin: boolean;
 	segments: { id: string; label: string; color?: string }[];
-	rules: { maxSpinsPerDay: number; maxSpinsPerWeek: number };
+	rules: { maxSpinsPerDay: number; maxSpinsPerWeek: number; eligibilityTtlHours: number };
+	eligibility: { expiresAt: string } | null;
 	error?: { description?: string };
 };
 
@@ -33,6 +34,27 @@ type SpinResponse = RouletteSpinResultView & {
 };
 
 type ViewPhase = "loading" | "disabled" | "locked" | "ready" | "spinning" | "result";
+
+function formatExpiresAt(iso: string): string {
+	return new Date(iso).toLocaleString("es-ES", {
+		day: "numeric",
+		month: "short",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
+
+function lockedMessage(state: RoulettePublicState | null): string {
+	if (!state) {
+		return "No puedes girar la ruleta en este momento.";
+	}
+
+	if (state.eligibility) {
+		return `Has alcanzado el límite de giros (máx. ${state.rules.maxSpinsPerDay} al día). Vuelve más tarde.`;
+	}
+
+	return "Pide en caja que escaneen tu QR para desbloquear la ruleta.";
+}
 
 export function RouletteSpinClient(): ReactElement {
 	const params = useParams();
@@ -116,6 +138,7 @@ export function RouletteSpinClient(): ReactElement {
 
 			if (response.status === 403) {
 				setPhase("locked");
+				void load();
 			}
 
 			return;
@@ -174,11 +197,12 @@ export function RouletteSpinClient(): ReactElement {
 					</div>
 					<div>
 						<h2 className="text-lg font-semibold text-foreground">Ruleta no disponible</h2>
-						<p className="mt-2 text-sm text-muted">
-							{state?.rules
-								? `Has alcanzado el límite de giros (máx. ${state.rules.maxSpinsPerDay} al día). Vuelve más tarde.`
-								: "No puedes girar la ruleta en este momento."}
-						</p>
+						<p className="mt-2 text-sm text-muted">{lockedMessage(state)}</p>
+						{state?.eligibility ? (
+							<p className="mt-1 text-xs text-muted">
+								Última elegibilidad hasta {formatExpiresAt(state.eligibility.expiresAt)}
+							</p>
+						) : null}
 					</div>
 					<Link href={platformRoutes.homeEstablishment(slug)} className="w-full">
 						<Button type="button" variant="secondary" className="w-full">
@@ -190,6 +214,11 @@ export function RouletteSpinClient(): ReactElement {
 
 			{phase === "ready" || phase === "spinning" ? (
 				<div className="flex flex-col items-center gap-6">
+					{state?.eligibility ? (
+						<p className="text-center text-xs text-muted">
+							Giro disponible hasta {formatExpiresAt(state.eligibility.expiresAt)}
+						</p>
+					) : null}
 					<RouletteWheel
 						segments={state?.segments ?? []}
 						tenantPrimaryColor={tenantPrimaryColor}

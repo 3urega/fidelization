@@ -9,6 +9,7 @@ export function roulettePublicStateToJson(
 		canSpin: state.canSpin,
 		segments: state.segments,
 		rules: state.rules,
+		eligibility: state.eligibility,
 	};
 }
 
