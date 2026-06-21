@@ -35,6 +35,10 @@ import { GeocodingGatewayMapbox } from "../../geocoding/infrastructure/Geocoding
 import { PlaceSuggestionGateway } from "../../geocoding/domain/PlaceSuggestionGateway";
 import { PlaceSuggestionGatewayGoogle } from "../../geocoding/infrastructure/PlaceSuggestionGatewayGoogle";
 import { PlaceSuggestionGatewayMapbox } from "../../geocoding/infrastructure/PlaceSuggestionGatewayMapbox";
+import { PlatformEmailSender } from "../../notifications/domain/PlatformEmailSender";
+import { PlatformPushSender } from "../../notifications/domain/PlatformPushSender";
+import { ConsolePlatformEmailSender } from "../../notifications/infrastructure/ConsolePlatformEmailSender";
+import { ConsolePlatformPushSender } from "../../notifications/infrastructure/ConsolePlatformPushSender";
 import { InteractiveMapClientConfigProvider } from "../../maps/domain/InteractiveMapClientConfigProvider";
 import { InteractiveMapClientConfigGoogle } from "../../maps/infrastructure/InteractiveMapClientConfigGoogle";
 import { InteractiveMapClientConfigMapbox } from "../../maps/infrastructure/InteractiveMapClientConfigMapbox";
@@ -142,6 +146,13 @@ import { ImpersonateTenantOwnerFromPlatformSession } from "../../../platform/app
 import { CreatePlatformCampaignTemplate } from "../../../platform/application/campaign_templates/CreatePlatformCampaignTemplate";
 import { ListPlatformCampaignTemplates } from "../../../platform/application/campaign_templates/ListPlatformCampaignTemplates";
 import { UpdatePlatformCampaignTemplate } from "../../../platform/application/campaign_templates/UpdatePlatformCampaignTemplate";
+import { ListPlatformBroadcasts } from "../../../platform/application/communications/ListPlatformBroadcasts";
+import { PreviewPlatformBroadcast } from "../../../platform/application/communications/PreviewPlatformBroadcast";
+import { SendPlatformBroadcast } from "../../../platform/application/communications/SendPlatformBroadcast";
+import { CountOpenModerationReports } from "../../../platform/application/moderation/CountOpenModerationReports";
+import { ListModerationReports } from "../../../platform/application/moderation/ListModerationReports";
+import { ResolveModerationReport } from "../../../platform/application/moderation/ResolveModerationReport";
+import { SuspendTenantForModerationReport } from "../../../platform/application/moderation/SuspendTenantForModerationReport";
 import { CreatePlatformGame } from "../../../platform/application/games/CreatePlatformGame";
 import { ListPlatformGames } from "../../../platform/application/games/ListPlatformGames";
 import { UpdatePlatformGame } from "../../../platform/application/games/UpdatePlatformGame";
@@ -154,6 +165,10 @@ import { ListPlatformTenants } from "../../../platform/application/tenants/ListP
 import { UpdatePlatformTenant } from "../../../platform/application/tenants/UpdatePlatformTenant";
 import { SetTenantPlatformStatus } from "../../../platform/application/tenants/SetTenantPlatformStatus";
 import { PlatformCampaignTemplateRepository } from "../../../platform/domain/PlatformCampaignTemplateRepository";
+import { PlatformBroadcastAudienceRepository } from "../../../platform/domain/PlatformBroadcastAudienceRepository";
+import { PlatformBroadcastRepository } from "../../../platform/domain/PlatformBroadcastRepository";
+import { ModerationReportRepository } from "../../../platform/domain/ModerationReportRepository";
+import { ModerationReportTargetResolver } from "../../../platform/domain/ModerationReportTargetResolver";
 import { PlatformGameRepository } from "../../../platform/domain/PlatformGameRepository";
 import { PlatformAppUsersReadRepository } from "../../../platform/domain/PlatformAppUsersReadRepository";
 import { PlatformAnalyticsReadRepository } from "../../../platform/domain/PlatformAnalyticsReadRepository";
@@ -163,6 +178,12 @@ import { PlatformDashboardReadRepository } from "../../../platform/domain/Platfo
 import { PlatformImpersonationEventRepository } from "../../../platform/domain/PlatformImpersonationEventRepository";
 import { PlatformTenantDetailReadRepository } from "../../../platform/domain/PlatformTenantDetailReadRepository";
 import { PrismaPlatformCampaignTemplateRepository } from "../../../platform/infrastructure/PrismaPlatformCampaignTemplateRepository";
+import { PrismaPlatformBroadcastAudienceRepository } from "../../../platform/infrastructure/PrismaPlatformBroadcastAudienceRepository";
+import { PrismaPlatformBroadcastRepository } from "../../../platform/infrastructure/PrismaPlatformBroadcastRepository";
+import {
+	PrismaModerationReportRepository,
+	PrismaModerationReportTargetResolver,
+} from "../../../platform/infrastructure/PrismaModerationReportRepository";
 import { PrismaPlatformGameRepository } from "../../../platform/infrastructure/PrismaPlatformGameRepository";
 import { PrismaPlatformAppUsersReadRepository } from "../../../platform/infrastructure/PrismaPlatformAppUsersReadRepository";
 import { PrismaPlatformAnalyticsReadRepository } from "../../../platform/infrastructure/PrismaPlatformAnalyticsReadRepository";
@@ -278,6 +299,25 @@ builder.registerAndUse(PrismaPlatformCampaignTemplateRepository);
 builder.registerAndUse(ListPlatformCampaignTemplates);
 builder.registerAndUse(CreatePlatformCampaignTemplate);
 builder.registerAndUse(UpdatePlatformCampaignTemplate);
+builder.register(PlatformBroadcastRepository).use(PrismaPlatformBroadcastRepository);
+builder.registerAndUse(PrismaPlatformBroadcastRepository);
+builder.register(PlatformBroadcastAudienceRepository).use(PrismaPlatformBroadcastAudienceRepository);
+builder.registerAndUse(PrismaPlatformBroadcastAudienceRepository);
+builder.registerAndUse(PreviewPlatformBroadcast);
+builder.registerAndUse(SendPlatformBroadcast);
+builder.registerAndUse(ListPlatformBroadcasts);
+builder.register(ModerationReportTargetResolver).use(PrismaModerationReportTargetResolver);
+builder.registerAndUse(PrismaModerationReportTargetResolver);
+builder.register(ModerationReportRepository).use(PrismaModerationReportRepository);
+builder.registerAndUse(PrismaModerationReportRepository);
+builder.registerAndUse(ListModerationReports);
+builder.registerAndUse(CountOpenModerationReports);
+builder.registerAndUse(ResolveModerationReport);
+builder.registerAndUse(SuspendTenantForModerationReport);
+builder.register(PlatformEmailSender).use(ConsolePlatformEmailSender);
+builder.registerAndUse(ConsolePlatformEmailSender);
+builder.register(PlatformPushSender).use(ConsolePlatformPushSender);
+builder.registerAndUse(ConsolePlatformPushSender);
 builder.register(PlatformGameRepository).use(PrismaPlatformGameRepository);
 builder.registerAndUse(PrismaPlatformGameRepository);
 builder.registerAndUse(ListPlatformGames);

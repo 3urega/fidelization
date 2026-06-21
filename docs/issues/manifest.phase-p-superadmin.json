@@ -3,10 +3,6 @@
   "sourceDoc": "docs/superadmin.md",
   "issues": [
     {
-      "title": "Phase P12: Platform admin communication center (email and push stub)",
-      "bodyFile": "docs/issues/platform-admin-communications-center.md"
-    },
-    {
       "title": "Phase P13: Platform admin moderation queue (foundation)",
       "bodyFile": "docs/issues/platform-admin-moderation-foundation.md"
     },

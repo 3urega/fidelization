@@ -413,6 +413,14 @@ Emails
 
 # 13. Centro de Comunicación
 
+**Implemented** — GitHub [#82](https://github.com/3urega/fidelization/issues/82) (2026-06-21).
+
+Superadmin en `/platform/communications`: compose audiencia (todos comerciantes / clientes app / staff de un negocio), preview (conteo + muestra), confirmación que persiste `platform_broadcasts` + `platform_broadcast_deliveries` y dispara adapters console (`PlatformEmailSender` / `PlatformPushSender` stub). API `POST/GET /api/platform/communications/broadcasts`. Rate limit: 10 envíos confirmados / hora / superadmin.
+
+Verifies: `verify:platform-admin-communications-use-case`, `verify:platform-admin-communications`.
+
+---
+
 Muy útil.
 
 ---
@@ -516,7 +524,7 @@ Publicadas en GitHub · manifest: [`manifest.phase-p-superadmin.json`](issues/ma
 | P9 | [#79](https://github.com/3urega/fidelization/issues/79) ✅ **Implemented** (2026-06-13) | Usuarios app |
 | P10 | [#80](https://github.com/3urega/fidelization/issues/80) ✅ **Implemented** (2026-06-13) | Plantillas campañas |
 | P11 | [#81](https://github.com/3urega/fidelization/issues/81) ✅ **Implemented** (2026-06-13) | Biblioteca juegos |
-| P12 | [#82](https://github.com/3urega/fidelization/issues/82) | Comunicación |
+| P12 | [#82](https://github.com/3urega/fidelization/issues/82) ✅ **Implemented** (2026-06-21) | Comunicación |
 | P13 | [#83](https://github.com/3urega/fidelization/issues/83) | Moderación |
 | P14 | [#84](https://github.com/3urega/fidelization/issues/84) | Sistema / integraciones |
 

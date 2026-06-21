@@ -75,6 +75,9 @@ model User {
   memberships      TenantMembership[]
   customers        Customer[]
   loyaltyTransactionsCreated LoyaltyTransaction[] @relation("LoyaltyTransactionCreatedBy")
+  platformBroadcastsCreated PlatformBroadcast[]
+  moderationReportsFiled    ModerationReport[] @relation("ModerationReportReporter")
+  moderationReportsResolved ModerationReport[] @relation("ModerationReportResolver")
 
   @@map("users")
 }
@@ -118,6 +121,7 @@ model Tenant {
   gameActivations    TenantGameActivation[]
   rouletteSpins      RouletteSpin[]
   rouletteSpinEligibilities RouletteSpinEligibility[]
+  platformBroadcasts      PlatformBroadcast[]
 
   @@map("tenants")
 }
@@ -398,6 +402,56 @@ model PlatformGame {
 
   @@index([status, sortOrder])
   @@map("platform_games")
+}
+
+model PlatformBroadcast {
+  id              String                      @id @default(uuid())
+  channel         String
+  audienceType    String                      @map("audience_type")
+  tenantId        String?                     @map("tenant_id")
+  subject         String
+  body            String
+  status          String
+  recipientCount  Int                         @default(0) @map("recipient_count")
+  createdByUserId String                      @map("created_by_user_id")
+  createdAt       DateTime                    @default(now()) @map("created_at")
+  sentAt          DateTime?                   @map("sent_at")
+  tenant          Tenant?                     @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  createdBy       User                        @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+  deliveries      PlatformBroadcastDelivery[]
+
+  @@index([createdByUserId, createdAt])
+  @@map("platform_broadcasts")
+}
+
+model PlatformBroadcastDelivery {
+  id              String            @id @default(uuid())
+  broadcastId     String            @map("broadcast_id")
+  recipientUserId String            @map("recipient_user_id")
+  recipientEmail  String            @map("recipient_email")
+  deliveryStatus  String            @map("delivery_status")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  broadcast       PlatformBroadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  @@index([broadcastId])
+  @@map("platform_broadcast_deliveries")
+}
+
+model ModerationReport {
+  id               String    @id @default(uuid())
+  reporterUserId   String    @map("reporter_user_id")
+  targetType       String    @map("target_type")
+  targetId         String    @map("target_id")
+  reason           String
+  status           String    @default("open")
+  resolvedAt       DateTime? @map("resolved_at")
+  resolvedByUserId String?   @map("resolved_by_user_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  reporter         User      @relation("ModerationReportReporter", fields: [reporterUserId], references: [id], onDelete: Cascade)
+  resolvedBy       User?     @relation("ModerationReportResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@map("moderation_reports")
 }
 
 model TenantGameActivation {
