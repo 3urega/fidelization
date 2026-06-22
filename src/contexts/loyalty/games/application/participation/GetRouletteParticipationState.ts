@@ -22,6 +22,7 @@ export type GetRouletteParticipationStateResult = {
 		maxSpinsInPeriod: number;
 		maxSpinsPerDay: number;
 		minPurchaseEuros: number | null;
+		participationConditionsText: string | null;
 		requiresEnrollment: boolean;
 	};
 	spinsUsedInPeriod: number;
@@ -52,6 +53,7 @@ export class GetRouletteParticipationState {
 			maxSpinsInPeriod: 3,
 			maxSpinsPerDay: 1,
 			minPurchaseEuros: null as number | null,
+			participationConditionsText: null as string | null,
 			requiresEnrollment: true,
 		};
 
@@ -100,6 +102,7 @@ export class GetRouletteParticipationState {
 				maxSpinsInPeriod: rules.maxSpinsInPeriod,
 				maxSpinsPerDay: rules.maxSpinsPerDay,
 				minPurchaseEuros: rules.minPurchaseEuros,
+				participationConditionsText: rules.participationConditionsText,
 				requiresEnrollment: rules.requiresEnrollment,
 			},
 			spinsUsedInPeriod: usage.spinsUsedInPeriod,

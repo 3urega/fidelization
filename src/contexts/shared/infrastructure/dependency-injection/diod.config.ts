@@ -79,6 +79,7 @@ import { ExecuteRouletteSpin } from "../../../loyalty/games/application/spin/Exe
 import { ListPendingRouletteSpinsForStaff } from "../../../loyalty/games/application/redeem/ListPendingRouletteSpinsForStaff";
 import { RedeemRouletteSpin } from "../../../loyalty/games/application/redeem/RedeemRouletteSpin";
 import { GetRoulettePublicState } from "../../../loyalty/games/application/spin/GetRoulettePublicState";
+import { ListRecentRouletteSpinsForCustomer } from "../../../loyalty/games/application/spin/ListRecentRouletteSpinsForCustomer";
 import { RouletteSpinUnitOfWork } from "../../../loyalty/games/domain/RouletteSpinUnitOfWork";
 import { RouletteSpinEligibilityRepository } from "../../../loyalty/games/domain/RouletteSpinEligibilityRepository";
 import { RouletteParticipationRepository } from "../../../loyalty/games/domain/RouletteParticipationRepository";
@@ -462,6 +463,7 @@ builder.register(RouletteSpinUnitOfWork).use(PrismaRouletteSpinUnitOfWork);
 builder.registerAndUse(PrismaRouletteSpinUnitOfWork);
 builder.registerAndUse(AssertRouletteSpinAccess);
 builder.registerAndUse(GetRoulettePublicState);
+builder.registerAndUse(ListRecentRouletteSpinsForCustomer);
 builder.registerAndUse(ExecuteRouletteSpin);
 builder.registerAndUse(RedeemRouletteSpin);
 builder.registerAndUse(ListPendingRouletteSpinsForStaff);

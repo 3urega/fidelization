@@ -6,7 +6,7 @@ export default function RouletteSettingsPage(): React.ReactElement {
 		<>
 			<PageHeader
 				title="Ruleta"
-				description="Configura los segmentos, premios y probabilidades de la ruleta de fidelización."
+				description="Configura premios, cuotas de participación y condiciones. Flujo: activar en app → autorizar en caja → girar."
 			/>
 			<RouletteConfigEditor />
 		</>

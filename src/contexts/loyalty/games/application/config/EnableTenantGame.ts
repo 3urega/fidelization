@@ -1,7 +1,7 @@
 import { Service } from "diod";
 
 import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
-import { createDefaultRouletteConfig, type RouletteConfig } from "../../domain/RouletteConfig";
+import { createDefaultRouletteConfigV2, type RouletteConfig } from "../../domain/RouletteConfig";
 import {
 	RULETA_GAME_SLUG,
 	TenantGameActivation,
@@ -40,14 +40,14 @@ export class EnableTenantGame {
 
 		if (!existing) {
 			if (!params.isEnabled) {
-				return { isEnabled: false, config: createDefaultRouletteConfig() };
+				return { isEnabled: false, config: createDefaultRouletteConfigV2() };
 			}
 
 			const activation = TenantGameActivation.create({
 				tenantId: params.tenantId,
 				gameSlug,
 				isEnabled: true,
-				config: createDefaultRouletteConfig(),
+				config: createDefaultRouletteConfigV2(),
 			});
 
 			await this.activationRepository.save(activation);

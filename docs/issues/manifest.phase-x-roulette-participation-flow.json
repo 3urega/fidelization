@@ -4,10 +4,6 @@
   "label": "roulette-participation-flow",
   "issues": [
     {
-      "title": "Phase X2: Owner roulette config v2 UI (period, quota, min purchase)",
-      "bodyFile": "docs/issues/roulette-owner-config-v2-ui.md"
-    },
-    {
       "title": "Phase X3: Client roulette enrollment + rich state + app UI",
       "bodyFile": "docs/issues/roulette-client-enrollment-ui.md"
     },

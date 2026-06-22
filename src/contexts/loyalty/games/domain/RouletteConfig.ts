@@ -26,11 +26,14 @@ export type RouletteRulesV1 = {
 	trigger: RouletteTrigger;
 };
 
+export const MAX_ROULETTE_PARTICIPATION_CONDITIONS_TEXT_LENGTH = 500;
+
 export type RouletteRulesV2 = {
 	participationPeriodDays: number;
 	maxSpinsInPeriod: number;
 	maxSpinsPerDay: number;
 	minPurchaseEuros: number | null;
+	participationConditionsText: string | null;
 	requiresEnrollment: boolean;
 	authorizationMode: RouletteAuthorizationMode;
 	eligibilityTtlHours: number;
@@ -62,6 +65,7 @@ export function migrateV1RulesToV2(rules: RouletteRulesV1): RouletteRulesV2 {
 		maxSpinsInPeriod: rules.maxSpinsPerWeek,
 		maxSpinsPerDay: rules.maxSpinsPerDay,
 		minPurchaseEuros: null,
+		participationConditionsText: null,
 		requiresEnrollment: false,
 		authorizationMode: rules.trigger === "after_staff_scan" ? "after_staff_scan" : "staff_explicit",
 		eligibilityTtlHours: rules.eligibilityTtlHours,
@@ -243,6 +247,26 @@ function parseMinPurchaseEuros(value: unknown): number | null {
 	return parsed;
 }
 
+function parseParticipationConditionsText(value: unknown): string | null {
+	if (value === null || value === undefined) {
+		return null;
+	}
+
+	const trimmed = String(value).trim();
+
+	if (trimmed.length === 0) {
+		return null;
+	}
+
+	if (trimmed.length > MAX_ROULETTE_PARTICIPATION_CONDITIONS_TEXT_LENGTH) {
+		throw new InvalidRouletteConfig(
+			`rules.participationConditionsText must be at most ${MAX_ROULETTE_PARTICIPATION_CONDITIONS_TEXT_LENGTH} characters`,
+		);
+	}
+
+	return trimmed;
+}
+
 function parseRulesV2(input: unknown): RouletteRulesV2 {
 	if (!input || typeof input !== "object" || Array.isArray(input)) {
 		throw new InvalidRouletteConfig("rules must be an object");
@@ -278,6 +302,9 @@ function parseRulesV2(input: unknown): RouletteRulesV2 {
 		maxSpinsInPeriod,
 		maxSpinsPerDay,
 		minPurchaseEuros: parseMinPurchaseEuros(record.minPurchaseEuros),
+		participationConditionsText: parseParticipationConditionsText(
+			record.participationConditionsText,
+		),
 		requiresEnrollment,
 		authorizationMode: parseAuthorizationMode(record.authorizationMode),
 		eligibilityTtlHours,
@@ -396,6 +423,7 @@ export function createDefaultRouletteConfigV2(): RouletteConfig {
 			maxSpinsInPeriod: 3,
 			maxSpinsPerDay: 1,
 			minPurchaseEuros: 10,
+			participationConditionsText: null,
 			requiresEnrollment: true,
 			authorizationMode: "staff_explicit",
 			eligibilityTtlHours: 24,

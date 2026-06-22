@@ -92,6 +92,20 @@ export class PrismaRouletteSpinRepository extends RouletteSpinRepository {
 		return rows.map((row) => this.mapRow(row));
 	}
 
+	async listRecentByCustomer(
+		tenantId: string,
+		customerId: string,
+		limit: number,
+	): Promise<RouletteSpin[]> {
+		const rows = await prisma.rouletteSpin.findMany({
+			where: { tenantId, customerId },
+			orderBy: { createdAt: "desc" },
+			take: limit,
+		});
+
+		return rows.map((row) => this.mapRow(row));
+	}
+
 	private mapRow(row: {
 		id: string;
 		tenantId: string;

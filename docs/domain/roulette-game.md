@@ -189,7 +189,7 @@ Phase W (#115–#117) analytics: implementar **después** de X o adaptar read mo
 | # | Título | Body |
 |---|--------|------|
 | [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | **Implemented** 2026-06-22 — [`verify:roulette-participation-use-case`](../../package.json) |
-| [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | [`roulette-owner-config-v2-ui.md`](../issues/roulette-owner-config-v2-ui.md) |
+| [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | **Implemented** 2026-06-22 — `verify:roulette-owner-config` |
 | [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | [`roulette-client-enrollment-ui.md`](../issues/roulette-client-enrollment-ui.md) |
 | [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | [`roulette-staff-authorize-scan.md`](../issues/roulette-staff-authorize-scan.md) |
 | [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | [`phase-x-roulette-flow-verify-docs.md`](../issues/phase-x-roulette-flow-verify-docs.md) |
@@ -206,6 +206,15 @@ Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../i
 | Use cases | `EnrollCustomerInRoulette`, `GetRouletteParticipationState`, `AuthorizeRouletteSpin` |
 | Eligibility extension | `authorizedPurchaseEuros` on `roulette_spin_eligibilities` |
 | Domain verify | `npm run verify:roulette-participation-use-case` |
+
+## Implementation status (X2)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Editor v2 | [`RouletteConfigEditor.tsx`](../../src/app/_components/loyalty/RouletteConfigEditor.tsx) — participación, cuota, min €, texto condiciones |
+| Utils | [`rouletteEditorUtils.ts`](../../src/lib/roulette/rouletteEditorUtils.ts) — `normalizeEditorConfig`, validación UI, default v2 |
+| Defaults | `createDefaultRouletteConfigV2()` en activación; `DEMO_ROULETTE_CONFIG` v2 |
+| Owner verify | `npm run verify:roulette-owner-config` (dev + `DATABASE_URL`) |
 
 ## Fuera de alcance global
 

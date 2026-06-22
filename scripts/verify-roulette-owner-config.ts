@@ -111,6 +111,10 @@ async function main(): Promise<void> {
 		segments: DEMO_ROULETTE_CONFIG.segments.map((segment, index) =>
 			index === 0 ? { ...segment, weight: segment.weight + 1 } : segment,
 		),
+		rules: {
+			...DEMO_ROULETTE_CONFIG.rules,
+			participationConditionsText: "Consumición en barra",
+		},
 	};
 
 	const putConfig = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/games/ruleta/config`, {
@@ -119,19 +123,47 @@ async function main(): Promise<void> {
 		body: JSON.stringify({ config: nextConfig }),
 	});
 	const putBody = (await putConfig.json()) as {
-		config?: { segments?: { weight: number }[] };
+		config?: {
+			version?: number;
+			segments?: { weight: number }[];
+			rules?: {
+				participationPeriodDays?: number;
+				maxSpinsInPeriod?: number;
+				participationConditionsText?: string | null;
+			};
+		};
 		error?: { type?: string };
 	};
 
 	if (
 		!putConfig.ok ||
-		putBody.config?.segments?.[0]?.weight !== nextConfig.segments[0]?.weight
+		putBody.config?.version !== 2 ||
+		putBody.config?.segments?.[0]?.weight !== nextConfig.segments[0]?.weight ||
+		putBody.config?.rules?.participationPeriodDays !== 7 ||
+		putBody.config?.rules?.maxSpinsInPeriod !== 3 ||
+		putBody.config?.rules?.participationConditionsText !== "Consumición en barra"
 	) {
-		console.error("❌ PUT ruleta config:", putConfig.status, putBody);
+		console.error("❌ PUT ruleta config v2:", putConfig.status, putBody);
 		process.exit(1);
 	}
 
-	console.log("✅ PUT /api/loyalty/games/ruleta/config");
+	const prismaRow = await prisma.tenantGameActivation.findUnique({
+		where: {
+			tenantId_gameSlug: { tenantId: DEMO_TENANT_ID, gameSlug: RULETA_GAME_SLUG },
+		},
+	});
+
+	const prismaConfig = prismaRow?.config as {
+		version?: number;
+		rules?: { participationPeriodDays?: number };
+	} | null;
+
+	if (!prismaConfig || prismaConfig.version !== 2 || prismaConfig.rules?.participationPeriodDays !== 7) {
+		console.error("❌ Prisma config should persist v2:", prismaConfig);
+		process.exit(1);
+	}
+
+	console.log("✅ PUT /api/loyalty/games/ruleta/config (v2)");
 
 	const patchOff = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/games/ruleta/activation`, {
 		method: "PATCH",
@@ -278,8 +310,8 @@ async function main(): Promise<void> {
 	}
 
 	const pageHtml = await ruletaPage.text();
-	if (!pageHtml.includes("Ruleta")) {
-		console.error("❌ settings/games/ruleta page missing title");
+	if (!pageHtml.includes("Ruleta") || !pageHtml.includes("cuotas de participación")) {
+		console.error("❌ settings/games/ruleta page missing v2 participation copy");
 		process.exit(1);
 	}
 

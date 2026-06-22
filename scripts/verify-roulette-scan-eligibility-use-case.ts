@@ -144,6 +144,14 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 	async countByCustomerBetween(): Promise<number> {
 		return 0;
 	}
+
+	async listPendingRedeemByCustomer(): Promise<never[]> {
+		return [];
+	}
+
+	async listRecentByCustomer(): Promise<never[]> {
+		return [];
+	}
 }
 
 class StubPlatformGameRepository extends PlatformGameRepository {

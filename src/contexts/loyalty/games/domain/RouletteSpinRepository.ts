@@ -22,4 +22,10 @@ export abstract class RouletteSpinRepository {
 		tenantId: string,
 		customerId: string,
 	): Promise<RouletteSpin[]>;
+
+	abstract listRecentByCustomer(
+		tenantId: string,
+		customerId: string,
+		limit: number,
+	): Promise<RouletteSpin[]>;
 }

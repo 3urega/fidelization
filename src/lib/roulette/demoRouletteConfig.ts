@@ -1,15 +1,11 @@
-import type { RouletteConfigPrimitives } from "../../contexts/loyalty/games/domain/RouletteConfig";
-
-export const DEMO_ROULETTE_RULES = {
-	maxSpinsPerDay: 1,
-	maxSpinsPerWeek: 3,
-	eligibilityTtlHours: 24,
-	trigger: "after_staff_scan" as const,
-};
+import {
+	ROULETTE_CONFIG_VERSION_V2,
+	type RouletteConfigPrimitivesV2,
+} from "../../contexts/loyalty/games/domain/RouletteConfig";
 
 /** Full 6-segment demo config (seed + E2E verifies). */
-export const DEMO_ROULETTE_CONFIG: RouletteConfigPrimitives = {
-	version: 1,
+export const DEMO_ROULETTE_CONFIG: RouletteConfigPrimitivesV2 = {
+	version: ROULETTE_CONFIG_VERSION_V2,
 	segments: [
 		{
 			id: "00000000-0000-4000-8000-000000000001",
@@ -66,5 +62,14 @@ export const DEMO_ROULETTE_CONFIG: RouletteConfigPrimitives = {
 			stockUsed: 0,
 		},
 	],
-	rules: DEMO_ROULETTE_RULES,
+	rules: {
+		participationPeriodDays: 7,
+		maxSpinsInPeriod: 3,
+		maxSpinsPerDay: 1,
+		minPurchaseEuros: 10,
+		participationConditionsText: null,
+		requiresEnrollment: true,
+		authorizationMode: "staff_explicit",
+		eligibilityTtlHours: 24,
+	},
 };

@@ -17,7 +17,10 @@ import { PromotionRepository } from "../src/contexts/loyalty/promotions/domain/P
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
 import { AssertRouletteSpinAccess } from "../src/contexts/loyalty/games/application/spin/AssertRouletteSpinAccess";
 import { ExecuteRouletteSpin } from "../src/contexts/loyalty/games/application/spin/ExecuteRouletteSpin";
+import { GetRouletteParticipationState } from "../src/contexts/loyalty/games/application/participation/GetRouletteParticipationState";
+import { ResolveRouletteParticipationUsage } from "../src/contexts/loyalty/games/application/participation/ResolveRouletteParticipationUsage";
 import { GetRoulettePublicState } from "../src/contexts/loyalty/games/application/spin/GetRoulettePublicState";
+import { ListRecentRouletteSpinsForCustomer } from "../src/contexts/loyalty/games/application/spin/ListRecentRouletteSpinsForCustomer";
 import { GetTenantRouletteConfig } from "../src/contexts/loyalty/games/application/config/GetTenantRouletteConfig";
 import { RouletteGameDisabled } from "../src/contexts/loyalty/games/domain/RouletteGameDisabled";
 import { RouletteGameNotAvailable } from "../src/contexts/loyalty/games/domain/RouletteGameNotAvailable";
@@ -152,8 +155,37 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 		return [];
 	}
 
+	async listRecentByCustomer(
+		tenantIdValue: string,
+		customerIdValue: string,
+		limit: number,
+	): Promise<RouletteSpin[]> {
+		return this.spins
+			.filter((spin) => {
+				const primitives = spin.toPrimitives();
+
+				return (
+					primitives.tenantId === tenantIdValue && primitives.customerId === customerIdValue
+				);
+			})
+			.sort(
+				(a, b) =>
+					new Date(b.toPrimitives().createdAt).getTime() -
+					new Date(a.toPrimitives().createdAt).getTime(),
+			)
+			.slice(0, limit);
+	}
+
 	all(): RouletteSpinPrimitives[] {
 		return this.spins.map((spin) => spin.toPrimitives());
+	}
+}
+
+class InMemoryRouletteParticipationRepository extends RouletteParticipationRepository {
+	async save(): Promise<void> {}
+
+	async findByTenantAndCustomer(): Promise<null> {
+		return null;
 	}
 }
 
@@ -468,6 +500,18 @@ function buildStack(
 		new NoopCustomerPromotionUsageRepository(),
 		assertFeature,
 	);
+	const participationRepository = new InMemoryRouletteParticipationRepository();
+	const resolveUsage = new ResolveRouletteParticipationUsage(
+		spinRepository,
+		eligibilityRepository,
+	);
+	const getParticipationState = new GetRouletteParticipationState(
+		getConfig,
+		participationRepository,
+		eligibilityRepository,
+		resolveUsage,
+	);
+	const listRecentSpins = new ListRecentRouletteSpinsForCustomer(spinRepository);
 	const unitOfWork = new InMemoryRouletteSpinUnitOfWork(
 		spinRepository,
 		activationRepository,
@@ -483,7 +527,13 @@ function buildStack(
 			eligibilityRepository,
 			unitOfWork,
 		),
-		publicState: new GetRoulettePublicState(assertAccess, getConfig, eligibilityRepository),
+		publicState: new GetRoulettePublicState(
+			assertAccess,
+			getConfig,
+			getParticipationState,
+			listRecentSpins,
+			eligibilityRepository,
+		),
 		eligibilityRepository,
 	};
 }

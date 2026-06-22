@@ -5,13 +5,22 @@ import { type ReactElement, useCallback, useEffect, useMemo, useState } from "re
 
 import {
 	MAX_ROULETTE_SEGMENTS,
+	MAX_ROULETTE_PARTICIPATION_CONDITIONS_TEXT_LENGTH,
 	MIN_ROULETTE_SEGMENTS,
-	type RouletteConfigPrimitives,
-	type RouletteRules,
+	type RouletteConfigPrimitivesV2,
+	type RouletteRulesV2,
 } from "../../../contexts/loyalty/games/domain/RouletteConfig";
 import type { RoulettePrizeType } from "../../../contexts/loyalty/games/domain/RoulettePrizeType";
 import type { RouletteSegmentPrimitives } from "../../../contexts/loyalty/games/domain/RouletteSegment";
-import { DEFAULT_ROULETTE_CONFIG } from "../../../lib/roulette/rouletteEditorUtils";
+import {
+	buildEditorSavePayload,
+	cloneEditorConfig,
+	DEFAULT_ROULETTE_CONFIG,
+	hasEditorValidationErrors,
+	normalizeEditorConfig,
+	validateEditorConfig,
+	type RouletteEditorValidationErrors,
+} from "../../../lib/roulette/rouletteEditorUtils";
 import type { RouletteConfigResponse } from "../../../lib/loyalty/rouletteConfigJson";
 import { tenantHasFeature } from "../shell/planFeatures";
 import { useTenantSession } from "../shell/TenantSessionProvider";
@@ -36,21 +45,10 @@ const PRIZE_TYPE_OPTIONS: { value: RoulettePrizeType; label: string }[] = [
 	{ value: "physical", label: "Premio físico" },
 ];
 
-function cloneConfig(config: RouletteConfigPrimitives): RouletteConfigPrimitives {
-	return {
-		version: config.version,
-		rules: { ...config.rules },
-		segments: config.segments.map((segment) => ({
-			...segment,
-			prize: { ...segment.prize },
-		})),
-	};
-}
-
 function mergeStockUsed(
-	next: RouletteConfigPrimitives,
-	previous: RouletteConfigPrimitives | null,
-): RouletteConfigPrimitives {
+	next: RouletteConfigPrimitivesV2,
+	previous: RouletteConfigPrimitivesV2 | null,
+): RouletteConfigPrimitivesV2 {
 	if (!previous) {
 		return next;
 	}
@@ -83,15 +81,16 @@ function newSegment(index: number): RouletteSegmentPrimitives {
 export function RouletteConfigEditor(): ReactElement {
 	const { session, loading, error } = useTenantSession();
 	const [isEnabled, setIsEnabled] = useState(false);
-	const [config, setConfig] = useState<RouletteConfigPrimitives>(() =>
-		cloneConfig(DEFAULT_ROULETTE_CONFIG),
+	const [config, setConfig] = useState<RouletteConfigPrimitivesV2>(() =>
+		cloneEditorConfig(DEFAULT_ROULETTE_CONFIG),
 	);
-	const [savedConfig, setSavedConfig] = useState<RouletteConfigPrimitives | null>(null);
+	const [savedConfig, setSavedConfig] = useState<RouletteConfigPrimitivesV2 | null>(null);
 	const [pageLoading, setPageLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [toggling, setToggling] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+	const [validationErrors, setValidationErrors] = useState<RouletteEditorValidationErrors>({});
 	const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
 	const [promotions, setPromotions] = useState<PromotionOption[]>([]);
 	const [rewards, setRewards] = useState<RewardOption[]>([]);
@@ -126,11 +125,11 @@ export function RouletteConfigEditor(): ReactElement {
 		setIsEnabled(body.isEnabled);
 
 		if (body.config) {
-			const loaded = cloneConfig(body.config);
+			const loaded = normalizeEditorConfig(body.config);
 			setConfig(loaded);
-			setSavedConfig(cloneConfig(body.config));
+			setSavedConfig(cloneEditorConfig(loaded));
 		} else {
-			setConfig(cloneConfig(DEFAULT_ROULETTE_CONFIG));
+			setConfig(cloneEditorConfig(DEFAULT_ROULETTE_CONFIG));
 			setSavedConfig(null);
 		}
 	}, []);
@@ -200,11 +199,12 @@ export function RouletteConfigEditor(): ReactElement {
 		});
 	};
 
-	const updateRules = (patch: Partial<RouletteRules>): void => {
+	const updateRules = (patch: Partial<RouletteRulesV2>): void => {
 		setConfig((current) => ({
 			...current,
 			rules: { ...current.rules, ...patch },
 		}));
+		setValidationErrors({});
 	};
 
 	const addSegment = (): void => {
@@ -259,8 +259,9 @@ export function RouletteConfigEditor(): ReactElement {
 			setIsEnabled(body.isEnabled);
 
 			if (body.config) {
-				setConfig(cloneConfig(body.config));
-				setSavedConfig(cloneConfig(body.config));
+				const loaded = normalizeEditorConfig(body.config);
+				setConfig(loaded);
+				setSavedConfig(cloneEditorConfig(loaded));
 			}
 
 			setSuccess(body.isEnabled ? "Ruleta activada." : "Ruleta desactivada.");
@@ -276,7 +277,17 @@ export function RouletteConfigEditor(): ReactElement {
 		setSubmitError(null);
 		setSuccess(null);
 
-		const payload = mergeStockUsed(config, savedConfig);
+		const payload = buildEditorSavePayload(mergeStockUsed(config, savedConfig));
+		const errors = validateEditorConfig(payload);
+
+		if (hasEditorValidationErrors(errors)) {
+			setValidationErrors(errors);
+			setSubmitError("Revisa los campos de participación antes de guardar.");
+			setSaving(false);
+			return;
+		}
+
+		setValidationErrors({});
 
 		try {
 			const response = await fetch("/api/loyalty/games/ruleta/config", {
@@ -295,8 +306,9 @@ export function RouletteConfigEditor(): ReactElement {
 			}
 
 			if (body.config) {
-				setConfig(cloneConfig(body.config));
-				setSavedConfig(cloneConfig(body.config));
+				const loaded = normalizeEditorConfig(body.config);
+				setConfig(loaded);
+				setSavedConfig(cloneEditorConfig(loaded));
 			}
 
 			setIsEnabled(body.isEnabled);
@@ -357,8 +369,8 @@ export function RouletteConfigEditor(): ReactElement {
 						<h2 className="font-medium text-foreground">Estado</h2>
 						<p className="mt-1 text-sm text-muted">
 							{isEnabled
-								? "La ruleta está activa para tus clientes."
-								: "Activa la ruleta para que los clientes puedan girar tras una visita."}
+								? "La ruleta está activa. Los clientes pueden activarla en la app; en caja autorizan el giro tras pagar."
+								: "Activa la ruleta para que los clientes puedan participar desde la app del local."}
 						</p>
 					</div>
 					<Button
@@ -614,9 +626,43 @@ export function RouletteConfigEditor(): ReactElement {
 			</Card>
 
 			<Card>
-				<h2 className="font-medium text-foreground">Reglas de giro</h2>
-				<div className="mt-4 grid gap-3 sm:grid-cols-3">
-					<Field label="Máx. giros por día">
+				<h2 className="font-medium text-foreground">Reglas de participación</h2>
+				<p className="mt-1 text-sm text-muted">
+					El cliente activa la ruleta en la app, paga en caja y el staff autoriza el giro con el
+					importe. Tras autorizar, dispone de 24 horas para girar en la app.
+				</p>
+				<div className="mt-4 grid gap-3 sm:grid-cols-2">
+					<Field label="Días de participación">
+						<Input
+							type="number"
+							min={1}
+							value={config.rules.participationPeriodDays}
+							onChange={(event) =>
+								updateRules({
+									participationPeriodDays: Math.max(1, Number(event.target.value) || 1),
+								})
+							}
+						/>
+						{validationErrors.participationPeriodDays ? (
+							<p className="mt-1 text-xs text-error">{validationErrors.participationPeriodDays}</p>
+						) : null}
+					</Field>
+					<Field label="Giros totales en el periodo">
+						<Input
+							type="number"
+							min={1}
+							value={config.rules.maxSpinsInPeriod}
+							onChange={(event) =>
+								updateRules({
+									maxSpinsInPeriod: Math.max(1, Number(event.target.value) || 1),
+								})
+							}
+						/>
+						{validationErrors.maxSpinsInPeriod ? (
+							<p className="mt-1 text-xs text-error">{validationErrors.maxSpinsInPeriod}</p>
+						) : null}
+					</Field>
+					<Field label="Máximo giros por día">
 						<Input
 							type="number"
 							min={1}
@@ -627,35 +673,64 @@ export function RouletteConfigEditor(): ReactElement {
 								})
 							}
 						/>
+						{validationErrors.maxSpinsPerDay ? (
+							<p className="mt-1 text-xs text-error">{validationErrors.maxSpinsPerDay}</p>
+						) : null}
 					</Field>
-					<Field label="Máx. giros por semana">
+					<Field label="Importe mínimo en caja (€)">
 						<Input
 							type="number"
-							min={1}
-							value={config.rules.maxSpinsPerWeek}
-							onChange={(event) =>
+							min={0}
+							step={0.01}
+							value={config.rules.minPurchaseEuros ?? ""}
+							placeholder="Sin mínimo"
+							onChange={(event) => {
+								const raw = event.target.value.trim();
+
 								updateRules({
-									maxSpinsPerWeek: Math.max(1, Number(event.target.value) || 1),
-								})
-							}
+									minPurchaseEuros:
+										raw.length === 0 ? null : Math.max(0, Number(raw) || 0),
+								});
+							}}
 						/>
+						{validationErrors.minPurchaseEuros ? (
+							<p className="mt-1 text-xs text-error">{validationErrors.minPurchaseEuros}</p>
+						) : (
+							<p className="mt-1 text-xs text-muted">Vacío = sin importe mínimo.</p>
+						)}
 					</Field>
-					<Field label="Validez tras visita (horas)">
-						<Input
-							type="number"
-							min={1}
-							value={config.rules.eligibilityTtlHours}
-							onChange={(event) =>
-								updateRules({
-									eligibilityTtlHours: Math.max(1, Number(event.target.value) || 1),
-								})
-							}
-						/>
-					</Field>
+					<div className="sm:col-span-2">
+						<Field label="Texto condiciones para el cliente (opcional)">
+							<textarea
+								className={`${SELECT_CLASS} min-h-[5rem] resize-y`}
+								value={config.rules.participationConditionsText ?? ""}
+								maxLength={MAX_ROULETTE_PARTICIPATION_CONDITIONS_TEXT_LENGTH}
+								placeholder="Ej.: Válido con consumición en barra. No acumulable con otras promos."
+								onChange={(event) => {
+									const value = event.target.value;
+
+									updateRules({
+										participationConditionsText: value.length === 0 ? null : value,
+									});
+								}}
+							/>
+							{validationErrors.participationConditionsText ? (
+								<p className="mt-1 text-xs text-error">
+									{validationErrors.participationConditionsText}
+								</p>
+							) : (
+								<p className="mt-1 text-xs text-muted">
+									Visible en la app del cliente junto a las condiciones de participación.
+								</p>
+							)}
+						</Field>
+					</div>
 				</div>
-				<p className="mt-3 text-xs text-muted">
-					Disparador: tras escaneo del staff ({config.rules.trigger}).
-				</p>
+				<ul className="mt-4 list-disc space-y-1 pl-5 text-xs text-muted">
+					<li>El cliente debe activar la ruleta en el detalle del local.</li>
+					<li>En caja, el staff escanea el QR y autoriza el giro indicando el importe pagado.</li>
+					<li>Tras la autorización, el cliente puede girar desde la app mientras dure la validez.</li>
+				</ul>
 			</Card>
 
 			{submitError ? <p className="text-sm text-error">{submitError}</p> : null}

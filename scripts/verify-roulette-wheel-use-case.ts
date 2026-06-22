@@ -143,6 +143,7 @@ function main(): void {
 			maxSpinsInPeriod: 3,
 			maxSpinsPerDay: 1,
 			minPurchaseEuros: 10,
+			participationConditionsText: "Consumición mínima en barra",
 			requiresEnrollment: true,
 			authorizationMode: "staff_explicit",
 			eligibilityTtlHours: 24,

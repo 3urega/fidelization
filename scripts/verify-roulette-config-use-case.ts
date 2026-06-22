@@ -143,8 +143,8 @@ async function main(): Promise<void> {
 
 	const enabled = await enablePremium.execute({ tenantId: "00000000-0000-4000-8000-0000000000v3", isEnabled: true });
 
-	if (!enabled.isEnabled || enabled.config.toPrimitives().segments.length !== 4) {
-		console.error("❌ EnableTenantGame creates default config", enabled);
+	if (!enabled.isEnabled || enabled.config.toPrimitives().version !== 2 || enabled.config.toPrimitives().segments.length !== 4) {
+		console.error("❌ EnableTenantGame creates default v2 config", enabled.config?.toPrimitives());
 		process.exit(1);
 	}
 
