@@ -1,9 +1,8 @@
 "use client";
 
-import { type ReactElement, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { Button } from "../ui/Button";
-import { Card } from "../ui/Card";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
 
@@ -28,6 +27,10 @@ type RedeemResponse = {
 	error?: { type?: string; description?: string };
 };
 
+type StaffRoulettePendingRedeemProps = {
+	autoLookupQr?: string | null;
+};
+
 function formatDate(value: string): string {
 	const date = new Date(value);
 
@@ -41,15 +44,18 @@ function formatDate(value: string): string {
 	});
 }
 
-export function StaffRoulettePendingRedeem(): ReactElement {
-	const [qrValue, setQrValue] = useState("");
+export function StaffRoulettePendingRedeem({
+	autoLookupQr = null,
+}: StaffRoulettePendingRedeemProps): ReactElement {
+	const [manualQrValue, setManualQrValue] = useState("");
 	const [customerName, setCustomerName] = useState<string | null>(null);
 	const [pendingSpins, setPendingSpins] = useState<PendingSpin[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [redeemingSpinId, setRedeemingSpinId] = useState<string | null>(null);
+	const [autoLookupDone, setAutoLookupDone] = useState(false);
 
-	async function loadPending(trimmedQr: string): Promise<void> {
+	const loadPending = useCallback(async (trimmedQr: string): Promise<void> => {
 		const response = await fetch(
 			`/api/loyalty/games/ruleta/spins/pending?qrValue=${encodeURIComponent(trimmedQr)}`,
 			{ credentials: "include" },
@@ -62,15 +68,40 @@ export function StaffRoulettePendingRedeem(): ReactElement {
 
 		setCustomerName(body.customerName ?? null);
 		setPendingSpins(body.pendingSpins ?? []);
-	}
+	}, []);
 
-	async function handleSearch(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+	useEffect(() => {
+		const trimmed = autoLookupQr?.trim();
+
+		if (!trimmed) {
+			return;
+		}
+
+		setError(null);
+		setLoading(true);
+		setAutoLookupDone(false);
+
+		void loadPending(trimmed)
+			.catch((lookupError) => {
+				setCustomerName(null);
+				setPendingSpins([]);
+				setError(
+					lookupError instanceof Error ? lookupError.message : "Error al buscar premios pendientes.",
+				);
+			})
+			.finally(() => {
+				setLoading(false);
+				setAutoLookupDone(true);
+			});
+	}, [autoLookupQr, loadPending]);
+
+	async function handleManualSearch(event: React.FormEvent<HTMLFormElement>): Promise<void> {
 		event.preventDefault();
 		setError(null);
 		setCustomerName(null);
 		setPendingSpins([]);
 
-		const trimmed = qrValue.trim();
+		const trimmed = manualQrValue.trim();
 		if (!trimmed) {
 			setError("Introduce el código QR del cliente.");
 
@@ -85,10 +116,11 @@ export function StaffRoulettePendingRedeem(): ReactElement {
 			setError(searchError instanceof Error ? searchError.message : "Error de red.");
 		} finally {
 			setLoading(false);
+			setAutoLookupDone(true);
 		}
 	}
 
-	async function handleRedeem(spinId: string): Promise<void> {
+	async function handleRedeem(spinId: string, lookupQr: string): Promise<void> {
 		setError(null);
 		setRedeemingSpinId(spinId);
 
@@ -105,9 +137,8 @@ export function StaffRoulettePendingRedeem(): ReactElement {
 				return;
 			}
 
-			const trimmed = qrValue.trim();
-			if (trimmed) {
-				await loadPending(trimmed);
+			if (lookupQr.trim()) {
+				await loadPending(lookupQr.trim());
 			}
 		} catch {
 			setError("Error de red al canjear el premio.");
@@ -116,70 +147,83 @@ export function StaffRoulettePendingRedeem(): ReactElement {
 		}
 	}
 
+	const activeLookupQr = autoLookupQr?.trim() || manualQrValue.trim();
+
 	return (
-		<Card>
-			<form className="flex flex-col gap-4" onSubmit={(event) => void handleSearch(event)}>
-				<div>
-					<h2 className="text-lg font-semibold text-foreground">Premios ruleta pendientes</h2>
-					<p className="mt-1 text-sm text-muted">
-						Busca por QR del cliente los premios físicos pendientes de canje.
+		<details className="rounded-xl border border-border/70 bg-surface/50">
+			<summary className="cursor-pointer list-none px-4 py-4 marker:content-none">
+				<div className="flex flex-col gap-1">
+					<h2 className="text-base font-semibold text-foreground">
+						Canjear premio físico (ruleta)
+					</h2>
+					<p className="text-sm text-muted">
+						Solo si el cliente ya giró y ganó un premio físico pendiente de entrega. Para
+						desbloquear un giro nuevo, usa el formulario de arriba.
 					</p>
 				</div>
+			</summary>
 
-				<Field label="Código QR del cliente">
-					<Input
-						type="text"
-						name="pendingQrValue"
-						value={qrValue}
-						onChange={(event) => setQrValue(event.target.value)}
-						placeholder="Pega el código del cliente"
-						autoComplete="off"
-						spellCheck={false}
-						disabled={loading || redeemingSpinId !== null}
-					/>
-				</Field>
+			<div className="flex flex-col gap-4 border-t border-border px-4 pb-4 pt-4">
+				{autoLookupDone && pendingSpins.length > 0 ? (
+					<div className="flex flex-col gap-3">
+						{customerName ? (
+							<p className="text-sm text-foreground">
+								Premios pendientes de{" "}
+								<span className="font-medium">{customerName}</span>
+							</p>
+						) : null}
+						<ul className="flex flex-col gap-3">
+							{pendingSpins.map((spin) => (
+								<li
+									key={spin.spinId}
+									className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between"
+								>
+									<div>
+										<p className="font-medium text-foreground">{spin.segmentLabel}</p>
+										{spin.prizeDescription ? (
+											<p className="text-sm text-muted">{spin.prizeDescription}</p>
+										) : null}
+										<p className="text-xs text-muted">Ganado: {formatDate(spin.createdAt)}</p>
+									</div>
+									<Button
+										type="button"
+										variant="secondary"
+										disabled={redeemingSpinId !== null}
+										onClick={() => void handleRedeem(spin.spinId, activeLookupQr)}
+									>
+										{redeemingSpinId === spin.spinId ? "Canjeando…" : "Marcar canjeado"}
+									</Button>
+								</li>
+							))}
+						</ul>
+					</div>
+				) : autoLookupDone && customerName && pendingSpins.length === 0 ? (
+					<p className="text-sm text-muted">
+						No hay premios físicos pendientes de canje para este cliente.
+					</p>
+				) : null}
 
-				<Button type="submit" disabled={loading || redeemingSpinId !== null}>
-					{loading ? "Buscando…" : "Buscar premios pendientes"}
-				</Button>
-			</form>
+				<form className="flex flex-col gap-3" onSubmit={(event) => void handleManualSearch(event)}>
+					<p className="text-xs text-muted">Buscar otro cliente o repetir búsqueda manualmente:</p>
+					<Field label="Código QR del cliente">
+						<Input
+							type="text"
+							name="pendingQrValue"
+							value={manualQrValue}
+							onChange={(event) => setManualQrValue(event.target.value)}
+							placeholder="Pega el código del cliente"
+							autoComplete="off"
+							spellCheck={false}
+							disabled={loading || redeemingSpinId !== null}
+						/>
+					</Field>
+					<Button type="submit" variant="secondary" disabled={loading || redeemingSpinId !== null}>
+						{loading ? "Buscando…" : "Buscar premios pendientes"}
+					</Button>
+				</form>
 
-			{error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
-
-			{customerName ? (
-				<p className="mt-4 text-sm text-foreground">
-					Cliente: <span className="font-medium">{customerName}</span>
-				</p>
-			) : null}
-
-			{pendingSpins.length > 0 ? (
-				<ul className="mt-4 flex flex-col gap-3">
-					{pendingSpins.map((spin) => (
-						<li
-							key={spin.spinId}
-							className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center sm:justify-between"
-						>
-							<div>
-								<p className="font-medium text-foreground">{spin.segmentLabel}</p>
-								{spin.prizeDescription ? (
-									<p className="text-sm text-muted">{spin.prizeDescription}</p>
-								) : null}
-								<p className="text-xs text-muted">Ganado: {formatDate(spin.createdAt)}</p>
-							</div>
-							<Button
-								type="button"
-								variant="secondary"
-								disabled={redeemingSpinId !== null}
-								onClick={() => void handleRedeem(spin.spinId)}
-							>
-								{redeemingSpinId === spin.spinId ? "Canjeando…" : "Marcar canjeado"}
-							</Button>
-						</li>
-					))}
-				</ul>
-			) : customerName ? (
-				<p className="mt-4 text-sm text-muted">No hay premios físicos pendientes de canje.</p>
-			) : null}
-		</Card>
+				{error ? <p className="text-sm text-error">{error}</p> : null}
+			</div>
+		</details>
 	);
 }

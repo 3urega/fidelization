@@ -437,6 +437,14 @@ model PlatformBroadcastDelivery {
   @@map("platform_broadcast_deliveries")
 }
 
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
+}
+
 model ModerationReport {
   id               String    @id @default(uuid())
   reporterUserId   String    @map("reporter_user_id")

@@ -27,7 +27,7 @@ export const DEFAULT_ROULETTE_CONFIG: RouletteConfigPrimitives = {
 			label: "+1 sello",
 			weight: 15,
 			prizeType: "stamp",
-			prize: { campaignId: "" },
+			prize: { campaignId: "00000000-0000-4000-8000-000000000010" },
 			stockLimit: null,
 			stockUsed: 0,
 		},

@@ -1,0 +1,19 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/roulette-game.md",
+  "label": "roulette-analytics",
+  "issues": [
+    {
+      "title": "Phase W1: Owner roulette activity dashboard (daily summary + prize drill-down)",
+      "bodyFile": "docs/issues/roulette-activity-dashboard.md"
+    },
+    {
+      "title": "Phase W2: Customer detail: active promotions and roulette spin history",
+      "bodyFile": "docs/issues/customer-detail-promotions-roulette.md"
+    },
+    {
+      "title": "Phase W3: Phase W verify scripts, AGENTS.md and roulette analytics docs",
+      "bodyFile": "docs/issues/phase-w-roulette-analytics-verify-docs.md"
+    }
+  ]
+}

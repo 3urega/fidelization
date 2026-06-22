@@ -6,10 +6,12 @@ import {
 	isStaffScanOutcome,
 	type StaffScanOutcome,
 } from "../../../contexts/loyalty/customers/domain/StaffScanOutcome";
+import { formatStaffScanOutcomeMessage } from "../../../contexts/loyalty/customers/domain/StaffScanOutcome";
 import { Button } from "../ui/Button";
 import { Field } from "../ui/Field";
 import { Input } from "../ui/Input";
 import { StaffScanOutcomesList } from "./StaffScanOutcomesList";
+import { StaffScanRouletteHint } from "./StaffScanRouletteHint";
 import {
 	StaffScanTargetPicker,
 	type StaffScanSelectedTarget,
@@ -27,6 +29,17 @@ type ScanResponse = {
 	};
 };
 
+export type StaffScanSuccessPayload = {
+	qrValue: string;
+	outcomes: StaffScanOutcome[];
+	customer: ScanResponse["customer"] | null;
+};
+
+type StaffScanFormProps = {
+	rouletteUnlockEnabled?: boolean;
+	onScanSuccess?: (payload: StaffScanSuccessPayload) => void;
+};
+
 function parseOutcomes(value: unknown[] | undefined): StaffScanOutcome[] {
 	if (!Array.isArray(value)) {
 		return [];
@@ -35,13 +48,18 @@ function parseOutcomes(value: unknown[] | undefined): StaffScanOutcome[] {
 	return value.filter(isStaffScanOutcome);
 }
 
-export function StaffScanForm(): ReactElement {
+export function StaffScanForm({
+	rouletteUnlockEnabled = false,
+	onScanSuccess,
+}: StaffScanFormProps): ReactElement {
 	const [qrValue, setQrValue] = useState("");
 	const [selectedTarget, setSelectedTarget] = useState<StaffScanSelectedTarget | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [lastOutcomes, setLastOutcomes] = useState<StaffScanOutcome[]>([]);
 	const [lastCustomer, setLastCustomer] = useState<ScanResponse["customer"] | null>(null);
 	const [loading, setLoading] = useState(false);
+
+	const rouletteOutcome = lastOutcomes.find((outcome) => outcome.kind === "roulette_spin_granted");
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
 		event.preventDefault();
@@ -84,9 +102,13 @@ export function StaffScanForm(): ReactElement {
 				return;
 			}
 
-			setLastOutcomes(parseOutcomes(body.outcomes));
-			setLastCustomer(body.customer ?? null);
+			const outcomes = parseOutcomes(body.outcomes);
+			const customer = body.customer ?? null;
+
+			setLastOutcomes(outcomes);
+			setLastCustomer(customer);
 			setQrValue("");
+			onScanSuccess?.({ qrValue: trimmed, outcomes, customer });
 		} catch {
 			setError("Error de red al registrar la visita.");
 		} finally {
@@ -94,8 +116,14 @@ export function StaffScanForm(): ReactElement {
 		}
 	}
 
+	const submitLabel = rouletteUnlockEnabled
+		? "Registrar visita y desbloquear ruleta"
+		: "Registrar visita";
+
 	return (
 		<form className="flex flex-col gap-5" onSubmit={(event) => void handleSubmit(event)}>
+			{rouletteUnlockEnabled ? <StaffScanRouletteHint /> : null}
+
 			<StaffScanTargetPicker
 				selectedTarget={selectedTarget}
 				onSelectTarget={setSelectedTarget}
@@ -120,8 +148,22 @@ export function StaffScanForm(): ReactElement {
 
 			{error ? <p className="text-sm text-error">{error}</p> : null}
 
+			{rouletteOutcome ? (
+				<div className="rounded-xl border-2 border-primary bg-primary/10 p-4">
+					<p className="text-sm font-semibold text-primary">
+						{formatStaffScanOutcomeMessage(rouletteOutcome)}
+					</p>
+					<p className="mt-1 text-sm text-foreground">
+						Indica al cliente que abra la app y gire la ruleta en el detalle del local.
+					</p>
+				</div>
+			) : null}
+
 			{lastOutcomes.length > 0 || lastCustomer ? (
-				<StaffScanOutcomesList outcomes={lastOutcomes} customer={lastCustomer} />
+				<StaffScanOutcomesList
+					outcomes={lastOutcomes.filter((outcome) => outcome.kind !== "roulette_spin_granted")}
+					customer={lastCustomer}
+				/>
 			) : null}
 
 			<Button
@@ -129,7 +171,7 @@ export function StaffScanForm(): ReactElement {
 				disabled={loading || !selectedTarget}
 				className="w-full sm:w-auto"
 			>
-				{loading ? "Registrando…" : "Registrar visita"}
+				{loading ? "Registrando…" : submitLabel}
 			</Button>
 		</form>
 	);

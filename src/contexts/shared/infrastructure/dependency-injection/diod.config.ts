@@ -67,6 +67,7 @@ import { CouponRepository } from "../../../loyalty/coupons/domain/CouponReposito
 import { PrismaCouponRepository } from "../../../loyalty/coupons/infrastructure/PrismaCouponRepository";
 import { EnableTenantGame } from "../../../loyalty/games/application/config/EnableTenantGame";
 import { GetTenantRouletteConfig } from "../../../loyalty/games/application/config/GetTenantRouletteConfig";
+import { GetStaffRouletteScanContext } from "../../../loyalty/games/application/config/GetStaffRouletteScanContext";
 import { UpsertTenantRouletteConfig } from "../../../loyalty/games/application/config/UpsertTenantRouletteConfig";
 import { IssueRouletteSpinEligibility } from "../../../loyalty/games/application/eligibility/IssueRouletteSpinEligibility";
 import { AssertRouletteSpinAccess } from "../../../loyalty/games/application/spin/AssertRouletteSpinAccess";
@@ -153,6 +154,8 @@ import { CountOpenModerationReports } from "../../../platform/application/modera
 import { ListModerationReports } from "../../../platform/application/moderation/ListModerationReports";
 import { ResolveModerationReport } from "../../../platform/application/moderation/ResolveModerationReport";
 import { SuspendTenantForModerationReport } from "../../../platform/application/moderation/SuspendTenantForModerationReport";
+import { GetPlatformSettings } from "../../../platform/application/settings/GetPlatformSettings";
+import { UpdatePlatformSettings } from "../../../platform/application/settings/UpdatePlatformSettings";
 import { CreatePlatformGame } from "../../../platform/application/games/CreatePlatformGame";
 import { ListPlatformGames } from "../../../platform/application/games/ListPlatformGames";
 import { UpdatePlatformGame } from "../../../platform/application/games/UpdatePlatformGame";
@@ -169,6 +172,7 @@ import { PlatformBroadcastAudienceRepository } from "../../../platform/domain/Pl
 import { PlatformBroadcastRepository } from "../../../platform/domain/PlatformBroadcastRepository";
 import { ModerationReportRepository } from "../../../platform/domain/ModerationReportRepository";
 import { ModerationReportTargetResolver } from "../../../platform/domain/ModerationReportTargetResolver";
+import { PlatformSettingsRepository } from "../../../platform/domain/PlatformSettingsRepository";
 import { PlatformGameRepository } from "../../../platform/domain/PlatformGameRepository";
 import { PlatformAppUsersReadRepository } from "../../../platform/domain/PlatformAppUsersReadRepository";
 import { PlatformAnalyticsReadRepository } from "../../../platform/domain/PlatformAnalyticsReadRepository";
@@ -184,6 +188,7 @@ import {
 	PrismaModerationReportRepository,
 	PrismaModerationReportTargetResolver,
 } from "../../../platform/infrastructure/PrismaModerationReportRepository";
+import { PrismaPlatformSettingsRepository } from "../../../platform/infrastructure/PrismaPlatformSettingsRepository";
 import { PrismaPlatformGameRepository } from "../../../platform/infrastructure/PrismaPlatformGameRepository";
 import { PrismaPlatformAppUsersReadRepository } from "../../../platform/infrastructure/PrismaPlatformAppUsersReadRepository";
 import { PrismaPlatformAnalyticsReadRepository } from "../../../platform/infrastructure/PrismaPlatformAnalyticsReadRepository";
@@ -314,6 +319,10 @@ builder.registerAndUse(ListModerationReports);
 builder.registerAndUse(CountOpenModerationReports);
 builder.registerAndUse(ResolveModerationReport);
 builder.registerAndUse(SuspendTenantForModerationReport);
+builder.register(PlatformSettingsRepository).use(PrismaPlatformSettingsRepository);
+builder.registerAndUse(PrismaPlatformSettingsRepository);
+builder.registerAndUse(GetPlatformSettings);
+builder.registerAndUse(UpdatePlatformSettings);
 builder.register(PlatformEmailSender).use(ConsolePlatformEmailSender);
 builder.registerAndUse(ConsolePlatformEmailSender);
 builder.register(PlatformPushSender).use(ConsolePlatformPushSender);
@@ -431,6 +440,7 @@ builder.registerAndUse(PrismaTenantGameActivationRepository);
 builder.register(RouletteSpinRepository).use(PrismaRouletteSpinRepository);
 builder.registerAndUse(PrismaRouletteSpinRepository);
 builder.registerAndUse(GetTenantRouletteConfig);
+builder.registerAndUse(GetStaffRouletteScanContext);
 builder.registerAndUse(UpsertTenantRouletteConfig);
 builder.registerAndUse(EnableTenantGame);
 builder.register(RouletteSpinEligibilityRepository).use(PrismaRouletteSpinEligibilityRepository);

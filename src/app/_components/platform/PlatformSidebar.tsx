@@ -6,6 +6,7 @@ import { type ReactElement, useCallback, useEffect, useState } from "react";
 
 import { PlatformNavIcon } from "./PlatformNavIcon";
 import { platformNav } from "./platformNavItems";
+import { usePlatformBranding } from "./PlatformBrandingProvider";
 import { usePlatformSession } from "./PlatformSessionProvider";
 
 type PlatformSidebarProps = {
@@ -24,6 +25,7 @@ function isNavItemActive(pathname: string, href: string): boolean {
 export function PlatformSidebar({ mobileOpen, onNavigate }: PlatformSidebarProps): ReactElement {
 	const pathname = usePathname();
 	const { session, loading } = usePlatformSession();
+	const { branding, loading: brandingLoading } = usePlatformBranding();
 	const [openModerationCount, setOpenModerationCount] = useState(0);
 
 	const loadModerationSummary = useCallback(async (): Promise<void> => {
@@ -71,14 +73,24 @@ export function PlatformSidebar({ mobileOpen, onNavigate }: PlatformSidebarProps
 			aria-label="Menú de plataforma"
 		>
 			<div className="flex items-center gap-3 border-b border-border px-4 py-4">
-				<span
-					className="flex h-9 w-9 items-center justify-center rounded-theme bg-primary text-sm font-semibold text-primary-foreground"
-					aria-hidden
-				>
-					P
-				</span>
+				{branding.logoUrl.trim() ? (
+					<img
+						src={branding.logoUrl}
+						alt=""
+						className="h-9 w-9 rounded-theme border border-border object-contain"
+					/>
+				) : (
+					<span
+						className="flex h-9 w-9 items-center justify-center rounded-theme bg-primary text-sm font-semibold text-primary-foreground"
+						aria-hidden
+					>
+						{branding.displayName.charAt(0).toUpperCase()}
+					</span>
+				)}
 				<div className="min-w-0 flex-1">
-					<p className="truncate text-sm font-semibold text-foreground">Plataforma</p>
+					<p className="truncate text-sm font-semibold text-foreground">
+						{brandingLoading ? "…" : branding.displayName}
+					</p>
 					<p className="truncate text-xs text-muted">
 						{loading ? "Cargando…" : session?.user.email ?? "Superadmin"}
 					</p>

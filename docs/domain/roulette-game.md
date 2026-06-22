@@ -27,6 +27,15 @@ Premio puntos/sello → reflejado en loyalty me / detalle
 Premio físico → pending_redeem (canje staff v2)
 ```
 
+### Pantalla staff `/scan` (Flujo A vs B)
+
+| Caso en caja | Qué hace el empleado | UI |
+|--------------|---------------------|-----|
+| «Quiero girar la ruleta» | Formulario **principal**: tarjeta → QR → Registrar visita | Banner 3 pasos + outcome «Ruleta desbloqueada…» |
+| «Gané un café en la ruleta» | Sección **colapsada** Canjear premio físico | Auto-búsqueda tras scan o QR manual |
+
+Copy operativo: no confundir «buscar premios pendientes» con desbloquear un giro nuevo. Ver [`staff-scan-flow.md`](staff-scan-flow.md) § Staff scan + ruleta.
+
 ## Modelo de datos (target)
 
 | Tabla | Propósito |
@@ -43,7 +52,9 @@ Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reg
 | Redeem use case | `RedeemRouletteSpin` — `pending_redeem` → `applied` + `redeemedAt` |
 | List pending | `ListPendingRouletteSpinsForStaff` + `GET /api/loyalty/games/ruleta/spins/pending?qrValue=` |
 | Staff API | `POST /api/loyalty/games/ruleta/spins/[spinId]/redeem` |
-| Staff UI | `/scan` — `StaffRoulettePendingRedeem` |
+| Staff UI | `/scan` — `StaffScanPageClient`, `StaffScanRouletteHint`, `StaffRoulettePendingRedeem` (colapsado) |
+| Scan context API | `GET /api/loyalty/games/ruleta/scan-context` |
+| UX verify | `npm run verify:staff-scan-roulette-ux` (dev server) |
 | Domain verify | `npm run verify:roulette-staff-redeem-use-case` |
 | E2E verify | `npm run verify:roulette-staff-redeem` (dev + `DATABASE_URL`) |
 
@@ -126,6 +137,64 @@ Reglas: una elegibilidad no consumida por customer/tenant; nuevo scan **renueva*
 | [#114](https://github.com/3urega/fidelization/issues/114) | Phase V7: Staff redeem pending roulette prizes (v2) | **Implemented** 2026-06-20 |
 
 Manifest: [`docs/issues/manifest.phase-v-roulette-game.json`](../issues/manifest.phase-v-roulette-game.json).
+
+## Phase W — Analytics owner + ficha cliente (draft)
+
+Objetivo: responder operativamente «¿cuánto se ha girado hoy y qué premios salieron?» y «¿qué tiene este cliente?» (tarjetas, promos, ruleta).
+
+| Flujo | Owner ve | Detalle |
+|-------|----------|---------|
+| Dashboard ruleta | «Hoy: 3 giros · 1 premio: llavero» | Clic premio → clientes ganadores + enlace a ficha |
+| Ficha `/customers/[id]` | Sellos (ya), promos activas + uso, historial giros | Complementa actividad reciente y recompensas |
+
+Patrones a reutilizar: `StampScanTimeWindows` + `env.appTimezone`, `ListStampCampaignDashboard`, `ListCustomerPromotionSummaries`, `roulette_spins.configSnapshot` para labels históricos.
+
+### GitHub issues (published)
+
+| # | Título | Body |
+|---|--------|------|
+| [#115](https://github.com/3urega/fidelization/issues/115) | Phase W1: Owner roulette activity dashboard (daily summary + prize drill-down) | [`roulette-activity-dashboard.md`](../issues/roulette-activity-dashboard.md) |
+| [#116](https://github.com/3urega/fidelization/issues/116) | Phase W2: Customer detail: active promotions and roulette spin history | [`customer-detail-promotions-roulette.md`](../issues/customer-detail-promotions-roulette.md) |
+| [#117](https://github.com/3urega/fidelization/issues/117) | Phase W3: Phase W verify scripts, AGENTS.md and roulette analytics docs | [`phase-w-roulette-analytics-verify-docs.md`](../issues/phase-w-roulette-analytics-verify-docs.md) |
+
+Manifest: [`docs/issues/manifest.phase-w-roulette-analytics.json`](../issues/manifest.phase-w-roulette-analytics.json).
+
+## Phase X — Participación cliente + autorización caja (draft)
+
+**Problema:** el MVP (Phase V6) concede elegibilidad de ruleta **automáticamente** al registrar cualquier visita de sello/promo, sin opt-in del cliente, sin cuota por periodo de participación, sin importe mínimo, y sin acción explícita «Autorizar giro» en caja.
+
+**Flujo target:**
+
+```text
+Owner configura (premios, %, cuota periodo, min €)
+  → Cliente activa ruleta en app del local
+  → Ve giros restantes, condiciones, premios posibles, historial
+  → Paga en caja → staff: QR + «Autorizar giro ruleta» + importe
+  → OK: app lista para girar | KO: mensaje claro (no activada, sin cuota, importe bajo…)
+  → Cliente gira → premio servidor
+```
+
+| Gap MVP | Target X |
+|---------|----------|
+| Sin opt-in | `roulette_participations` + enroll API |
+| TTL 24h tras scan sello | Cuota `maxSpinsInPeriod` en `participationPeriodDays` |
+| Scan sello = desbloqueo ruleta | Target staff `roulette_authorize` separado |
+| Sin importe mínimo | `minPurchaseEuros` + campo importe en scan |
+| App: «Pide en caja…» genérico | Estados: not_enrolled → active → authorized_ready → spin |
+
+Phase W (#115–#117) analytics: implementar **después** de X o adaptar read models.
+
+### GitHub issues (published)
+
+| # | Título | Body |
+|---|--------|------|
+| [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | [`roulette-config-v2-participation-domain.md`](../issues/roulette-config-v2-participation-domain.md) |
+| [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | [`roulette-owner-config-v2-ui.md`](../issues/roulette-owner-config-v2-ui.md) |
+| [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | [`roulette-client-enrollment-ui.md`](../issues/roulette-client-enrollment-ui.md) |
+| [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | [`roulette-staff-authorize-scan.md`](../issues/roulette-staff-authorize-scan.md) |
+| [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | [`phase-x-roulette-flow-verify-docs.md`](../issues/phase-x-roulette-flow-verify-docs.md) |
+
+Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../issues/manifest.phase-x-roulette-participation-flow.json).
 
 ## Fuera de alcance global
 

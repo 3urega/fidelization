@@ -39,7 +39,29 @@
 | Target picker | [`StaffScanTargetPicker.tsx`](../../src/app/_components/loyalty/StaffScanTargetPicker.tsx) |
 | Outcomes list | [`StaffScanOutcomesList.tsx`](../../src/app/_components/loyalty/StaffScanOutcomesList.tsx) |
 | Scan form | [`StaffScanForm.tsx`](../../src/app/_components/loyalty/StaffScanForm.tsx) |
-| Page | [`/scan`](../../src/app/(app)/scan/page.tsx) |
+| Page | [`/scan`](../../src/app/(app)/scan/page.tsx) — [`StaffScanPageClient.tsx`](../../src/app/(app)/scan/StaffScanPageClient.tsx) |
+
+## Staff scan + ruleta (Flujo A vs B)
+
+**Flujo A — Cliente quiere girar (caja, habitual):**
+
+1. Empleado elige **una tarjeta o promoción** en el formulario principal.
+2. Pega/escanea el QR del cliente.
+3. Pulsa **Registrar visita** (o **Registrar visita y desbloquear ruleta** si ruleta activa con `after_staff_scan`).
+4. Outcome `roulette_spin_granted` → el cliente gira en su app (`/home/establishments/[slug]/ruleta`).
+
+**Flujo B — Cliente ya ganó premio físico (secundario):**
+
+1. Sección colapsada **Canjear premio físico (ruleta)** en `/scan`.
+2. Tras registrar visita, se auto-buscan premios `pending_redeem` del mismo QR; también búsqueda manual.
+3. Empleado marca **Canjeado** cuando entrega el premio.
+
+| Artefacto | Ruta |
+|-----------|------|
+| Scan context API | `GET /api/loyalty/games/ruleta/scan-context` → `{ unlockEnabled }` |
+| Ruleta hint | [`StaffScanRouletteHint.tsx`](../../src/app/_components/loyalty/StaffScanRouletteHint.tsx) |
+| Canje físico | [`StaffRoulettePendingRedeem.tsx`](../../src/app/_components/loyalty/StaffRoulettePendingRedeem.tsx) |
+| E2E UX verify | `npm run verify:staff-scan-roulette-ux` (dev server) |
 
 ## Implementation status (M5)
 

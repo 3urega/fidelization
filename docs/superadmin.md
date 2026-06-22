@@ -395,7 +395,11 @@ Contenido pendiente
 
 # 12. Sistema
 
-Configuración global.
+**Implemented** — GitHub [#84](https://github.com/3urega/fidelization/issues/84) (2026-06-21).
+
+Superadmin en `/platform/settings`: editar branding persistido (`platform_settings` — nombre visible + logo URL) aplicado al shell platform; checklist integraciones read-only (AUTH_SECRET, Stripe, Google OAuth, APP_DOMAIN, SMTP stub) sin devolver secrets. API `GET/PATCH /api/platform/settings`.
+
+Verifies: `verify:platform-admin-settings-use-case`, `verify:platform-admin-settings`.
 
 ---
 
@@ -530,7 +534,7 @@ Publicadas en GitHub · manifest: [`manifest.phase-p-superadmin.json`](issues/ma
 | P11 | [#81](https://github.com/3urega/fidelization/issues/81) ✅ **Implemented** (2026-06-13) | Biblioteca juegos |
 | P12 | [#82](https://github.com/3urega/fidelization/issues/82) ✅ **Implemented** (2026-06-21) | Comunicación |
 | P13 | [#83](https://github.com/3urega/fidelization/issues/83) ✅ **Implemented** (2026-06-21) | Moderación |
-| P14 | [#84](https://github.com/3urega/fidelization/issues/84) | Sistema / integraciones |
+| P14 | [#84](https://github.com/3urega/fidelization/issues/84) ✅ **Implemented** (2026-06-21) | Sistema / integraciones |
 
 **Orden recomendado:** P1 → P2 → **P3** (impersonación) → P4 → P5 → P6 → P7 → P8 → P9 → P10–P14.
 

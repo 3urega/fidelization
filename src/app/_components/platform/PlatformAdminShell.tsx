@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { type ReactElement, type ReactNode, useState } from "react";
 
+import { PlatformBrandingProvider } from "./PlatformBrandingProvider";
 import { PlatformSessionProvider } from "./PlatformSessionProvider";
 import { PlatformSidebar } from "./PlatformSidebar";
 import { PlatformTopBar } from "./PlatformTopBar";
@@ -25,7 +26,8 @@ export function PlatformAdminShell({ children }: PlatformAdminShellProps): React
 
 	return (
 		<PlatformSessionProvider>
-			<div className="min-h-screen bg-background">
+			<PlatformBrandingProvider>
+				<div className="min-h-screen bg-background">
 				<PlatformTopBar
 					mobileOpen={mobileOpen}
 					onMenuToggle={() => {
@@ -48,6 +50,7 @@ export function PlatformAdminShell({ children }: PlatformAdminShellProps): React
 					<main className="mx-auto w-full max-w-6xl px-4 py-6 md:px-8">{children}</main>
 				</div>
 			</div>
+			</PlatformBrandingProvider>
 		</PlatformSessionProvider>
 	);
 }

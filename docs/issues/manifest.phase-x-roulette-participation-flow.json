@@ -1,0 +1,27 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/roulette-game.md",
+  "label": "roulette-participation-flow",
+  "issues": [
+    {
+      "title": "Phase X1: Roulette config v2 + customer participation domain (enrollment + quota)",
+      "bodyFile": "docs/issues/roulette-config-v2-participation-domain.md"
+    },
+    {
+      "title": "Phase X2: Owner roulette config v2 UI (period, quota, min purchase)",
+      "bodyFile": "docs/issues/roulette-owner-config-v2-ui.md"
+    },
+    {
+      "title": "Phase X3: Client roulette enrollment + rich state + app UI",
+      "bodyFile": "docs/issues/roulette-client-enrollment-ui.md"
+    },
+    {
+      "title": "Phase X4: Staff authorize roulette spin (explicit scan target + purchase amount)",
+      "bodyFile": "docs/issues/roulette-staff-authorize-scan.md"
+    },
+    {
+      "title": "Phase X5: Phase X docs, verifies and migration from Phase V auto-eligibility",
+      "bodyFile": "docs/issues/phase-x-roulette-flow-verify-docs.md"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement } from "react";
 
 import { Button } from "../ui/Button";
+import { usePlatformBranding } from "./PlatformBrandingProvider";
 import { usePlatformSession } from "./PlatformSessionProvider";
 
 type PlatformTopBarProps = {
@@ -14,6 +15,7 @@ type PlatformTopBarProps = {
 export function PlatformTopBar({ mobileOpen, onMenuToggle }: PlatformTopBarProps): ReactElement {
 	const router = useRouter();
 	const { session, loading } = usePlatformSession();
+	const { branding, loading: brandingLoading } = usePlatformBranding();
 
 	async function logout(): Promise<void> {
 		await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -41,7 +43,9 @@ export function PlatformTopBar({ mobileOpen, onMenuToggle }: PlatformTopBarProps
 				</svg>
 			</button>
 
-			<p className="truncate text-sm font-semibold text-foreground md:hidden">Plataforma</p>
+			<p className="truncate text-sm font-semibold text-foreground md:hidden">
+				{brandingLoading ? "…" : branding.displayName}
+			</p>
 
 			<div className="ml-auto flex items-center gap-2">
 				{session?.user.name ? (
