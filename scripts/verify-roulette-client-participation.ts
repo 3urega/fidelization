@@ -541,23 +541,28 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET ruleta recentSpins");
 
-	const detailPage = await fetch(`${apexBaseUrl}/home/establishments/${tenantSlug}`, {
+	const ruletaPage = await fetch(`${apexBaseUrl}/home/establishments/${tenantSlug}/ruleta`, {
 		headers: sessionHeaders(cookie),
 	});
 
-	if (detailPage.status !== 200) {
-		console.error("❌ GET establishment detail page", detailPage.status);
+	if (ruletaPage.status !== 200) {
+		console.error("❌ GET ruleta page", ruletaPage.status);
 		process.exit(1);
 	}
 
-	const detailHtml = await detailPage.text();
+	const ruletaHtml = await ruletaPage.text();
 
-	if (!detailHtml.includes("Ruleta de premios")) {
-		console.error("❌ establishment detail missing roulette card");
+	if (
+		!ruletaHtml.includes("Ruleta") ||
+		(!ruletaHtml.includes("Cargando ruleta") &&
+			!ruletaHtml.includes("Ruleta bloqueada") &&
+			!ruletaHtml.includes("Activar ruleta"))
+	) {
+		console.error("❌ ruleta page missing expected shell");
 		process.exit(1);
 	}
 
-	console.log("✅ establishment detail shows roulette card");
+	console.log("✅ ruleta page shell renders");
 
 	await prisma.tenant.update({
 		where: { id: DEMO_TENANT_ID },

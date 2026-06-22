@@ -190,7 +190,7 @@ Phase W (#115–#117) analytics: implementar **después** de X o adaptar read mo
 |---|--------|------|
 | [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | **Implemented** 2026-06-22 — [`verify:roulette-participation-use-case`](../../package.json) |
 | [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | **Implemented** 2026-06-22 — `verify:roulette-owner-config` |
-| [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | [`roulette-client-enrollment-ui.md`](../issues/roulette-client-enrollment-ui.md) |
+| [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | **Implemented** 2026-06-22 — `verify:roulette-client-participation*` |
 | [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | [`roulette-staff-authorize-scan.md`](../issues/roulette-staff-authorize-scan.md) |
 | [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | [`phase-x-roulette-flow-verify-docs.md`](../issues/phase-x-roulette-flow-verify-docs.md) |
 
@@ -215,6 +215,17 @@ Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../i
 | Utils | [`rouletteEditorUtils.ts`](../../src/lib/roulette/rouletteEditorUtils.ts) — `normalizeEditorConfig`, validación UI, default v2 |
 | Defaults | `createDefaultRouletteConfigV2()` en activación; `DEMO_ROULETTE_CONFIG` v2 |
 | Owner verify | `npm run verify:roulette-owner-config` (dev + `DATABASE_URL`) |
+
+## Implementation status (X3)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Public state v2 | [`GetRoulettePublicState.ts`](../../src/contexts/loyalty/games/application/spin/GetRoulettePublicState.ts) — bifurca legacy vs `staff_explicit`; cuotas, condiciones, historial |
+| Recent spins | [`ListRecentRouletteSpinsForCustomer.ts`](../../src/contexts/loyalty/games/application/spin/ListRecentRouletteSpinsForCustomer.ts) |
+| Enroll API | `POST /api/user/establishments/[slug]/games/ruleta/enroll` |
+| UI cliente | [`RouletteParticipationCard.tsx`](../../src/app/_components/loyalty/games/RouletteParticipationCard.tsx), [`PlatformEstablishmentDetail.tsx`](../../src/app/(mobile)/home/establishments/[slug]/PlatformEstablishmentDetail.tsx), [`RouletteSpinClient.tsx`](../../src/app/(mobile)/home/establishments/[slug]/ruleta/RouletteSpinClient.tsx) |
+| Client helpers | [`rouletteClientState.ts`](../../src/lib/roulette/rouletteClientState.ts), [`roulettePublicStateClient.ts`](../../src/lib/roulette/roulettePublicStateClient.ts) |
+| Verifies | `npm run verify:roulette-client-participation-use-case`, `npm run verify:roulette-client-participation` (dev + `DATABASE_URL`) |
 
 ## Fuera de alcance global
 

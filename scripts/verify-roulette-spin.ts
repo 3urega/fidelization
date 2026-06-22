@@ -11,7 +11,7 @@ import {
 } from "../src/lib/tenant/forwardResolvedTenantHeaders";
 import { RULETA_GAME_SLUG } from "../src/contexts/loyalty/games/domain/TenantGameActivation";
 import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
-import { DEMO_ROULETTE_CONFIG } from "../src/lib/roulette/demoRouletteConfig";
+import { parseRouletteConfig } from "../src/contexts/loyalty/games/domain/RouletteConfig";
 import { prisma } from "../src/lib/prisma";
 import {
 	apexBaseUrl,
@@ -26,14 +26,14 @@ const baseUrl = apexBaseUrl;
 const PLAN_BASIC_ID = "00000000-0000-4000-8000-000000000004";
 const PLAN_PREMIUM_ID = "00000000-0000-4000-8000-000000000007";
 
-const pointsSpinConfig = {
-	...DEMO_ROULETTE_CONFIG,
+const pointsSpinConfig = parseRouletteConfig({
+	version: 1,
 	segments: [
 		{
 			id: "00000000-0000-4000-8000-000000000701",
 			label: "+10 puntos",
 			weight: 100,
-			prizeType: "points" as const,
+			prizeType: "points",
 			prize: { points: 10 },
 			stockLimit: null,
 			stockUsed: 0,
@@ -42,19 +42,19 @@ const pointsSpinConfig = {
 			id: "00000000-0000-4000-8000-000000000702",
 			label: "Sin premio",
 			weight: 1,
-			prizeType: "none" as const,
+			prizeType: "none",
 			prize: {},
 			stockLimit: null,
 			stockUsed: 0,
 		},
 	],
 	rules: {
-		...DEMO_ROULETTE_CONFIG.rules,
 		maxSpinsPerDay: 1,
 		maxSpinsPerWeek: 3,
-		trigger: "after_staff_scan" as const,
+		eligibilityTtlHours: 24,
+		trigger: "after_staff_scan",
 	},
-};
+}).toPrimitives();
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {

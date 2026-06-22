@@ -11,8 +11,8 @@ import {
 	roulettePrimaryCtaLabel,
 	rouletteStatusMessage,
 	type RoulettePublicStateResponse,
-} from "../../../lib/roulette/roulettePublicStateClient";
-import { platformRoutes } from "../../../lib/platform/routes";
+} from "../../../../lib/roulette/roulettePublicStateClient";
+import { platformRoutes } from "../../../../lib/platform/routes";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 
