@@ -80,6 +80,8 @@ npm run verify:roulette-staff-redeem # Phase V7 #114 — staff redeem physical p
 npm run verify:roulette-participation-use-case # Phase X1 #118 — enroll, authorize, quota domain (domain stub)
 npm run verify:roulette-client-participation-use-case # Phase X3 #120 — GetRoulettePublicState v2 + recentSpins (domain stub)
 npm run verify:roulette-client-participation # Phase X3 #120 — client enroll + rich state API E2E (dev + DATABASE_URL)
+npm run verify:roulette-staff-authorize-use-case # Phase X4 #121 — RecordStaffRouletteAuthorizeByQr + legacy gate (domain stub)
+npm run verify:roulette-staff-authorize # Phase X4 #121 — staff authorize scan E2E + client canSpin (dev + DATABASE_URL)
 npm run verify:tenant-games-list # issue #81 — owner games list + plan gating E2E (dev + DATABASE_URL)
 npm run verify:stamp-campaign-adopt-template-use-case # issue #80 — adopt platform template → tenant campaign (domain stub)
 npm run verify:stamp-campaign-adopt-template # issue #80 — owner adopt template E2E (dev + DATABASE_URL)

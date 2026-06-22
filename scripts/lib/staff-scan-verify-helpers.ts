@@ -8,6 +8,9 @@ export type StaffScanOutcomeJson = {
 	campaignName?: string;
 	pointsBalance?: number;
 	expiresAt?: string;
+	purchaseAmountEuros?: number;
+	reasonCode?: string;
+	message?: string;
 };
 
 export type StaffScanResponseJson = {
@@ -129,6 +132,43 @@ export function findRouletteSpinGrantedOutcome(
 	outcomes: StaffScanOutcomeJson[] | undefined,
 ): StaffScanOutcomeJson | undefined {
 	return outcomes?.find((outcome) => outcome.kind === "roulette_spin_granted");
+}
+
+export function findRouletteAuthGrantedOutcome(
+	outcomes: StaffScanOutcomeJson[] | undefined,
+): StaffScanOutcomeJson | undefined {
+	return outcomes?.find((outcome) => outcome.kind === "roulette_auth_granted");
+}
+
+export function findRouletteAuthDeniedOutcome(
+	outcomes: StaffScanOutcomeJson[] | undefined,
+): StaffScanOutcomeJson | undefined {
+	return outcomes?.find((outcome) => outcome.kind === "roulette_auth_denied");
+}
+
+export async function authorizeRouletteViaStaffScan(
+	baseUrl: string,
+	ownerHeaders: Record<string, string>,
+	userQrValue: string,
+	purchaseAmountEuros: number,
+): Promise<{ expiresAt: string; purchaseAmountEuros: number }> {
+	const scan = await postStaffScan(baseUrl, ownerHeaders, {
+		qrValue: userQrValue,
+		targetType: "roulette_authorize",
+		purchaseAmountEuros,
+	});
+	const rouletteOutcome = findRouletteAuthGrantedOutcome(scan.body.outcomes);
+
+	if (scan.status !== 200 || !rouletteOutcome?.expiresAt) {
+		throw new Error(
+			`staff authorize scan failed: ${scan.status} ${JSON.stringify(scan.body)}`,
+		);
+	}
+
+	return {
+		expiresAt: rouletteOutcome.expiresAt,
+		purchaseAmountEuros: rouletteOutcome.purchaseAmountEuros ?? purchaseAmountEuros,
+	};
 }
 
 export async function grantSpinEligibilityViaStaffScan(

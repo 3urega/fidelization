@@ -13,6 +13,14 @@ import { UserRepository } from "../src/contexts/identity/users/domain/UserReposi
 import type { UserSearchZone } from "../src/contexts/identity/users/domain/UserSearchZone";
 import { RecordStaffScanByTarget } from "../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { ResolveCustomerByQrForStaffScan } from "../src/contexts/loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
+import { ApplyCustomerLoyaltyOutcome } from "../src/contexts/loyalty/customers/application/loyalty/ApplyCustomerLoyaltyOutcome";
+import { GetTenantRouletteConfig } from "../src/contexts/loyalty/games/application/config/GetTenantRouletteConfig";
+import { createDefaultRouletteConfigV2 } from "../src/contexts/loyalty/games/domain/RouletteConfig";
+import {
+	RULETA_GAME_SLUG,
+	TenantGameActivation,
+} from "../src/contexts/loyalty/games/domain/TenantGameActivation";
+import { TenantGameActivationRepository } from "../src/contexts/loyalty/games/domain/TenantGameActivationRepository";
 import { Customer } from "../src/contexts/loyalty/customers/domain/Customer";
 import { CustomerRepository } from "../src/contexts/loyalty/customers/domain/CustomerRepository";
 import { InvalidStampScan } from "../src/contexts/loyalty/customers/domain/InvalidStampScan";
@@ -340,17 +348,56 @@ function buildUseCase(
 	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
 	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
 	const resolveCustomer = new ResolveCustomerByQrForStaffScan(customerRepository, userRepository);
-
-	return new RecordStaffScanByTarget(
-		tenantRepository,
+	const applyLoyalty = new ApplyCustomerLoyaltyOutcome(
 		customerRepository,
-		resolveCustomer,
 		loyaltyRepository,
 		stampRepository,
 		promotionRepository,
 		usageRepository,
 		assertFeature,
 	);
+	const activationRepository = new InMemoryTenantGameActivationRepository();
+	activationRepository.setRow(
+		TenantGameActivation.create({
+			tenantId,
+			gameSlug: RULETA_GAME_SLUG,
+			isEnabled: true,
+			config: createDefaultRouletteConfigV2(),
+		}),
+	);
+
+	return new RecordStaffScanByTarget(
+		tenantRepository,
+		customerRepository,
+		resolveCustomer,
+		loyaltyRepository,
+		applyLoyalty,
+		new GetTenantRouletteConfig(activationRepository),
+		{ execute: async () => null } as never,
+	);
+}
+
+class InMemoryTenantGameActivationRepository extends TenantGameActivationRepository {
+	private row: TenantGameActivation | null = null;
+
+	async searchByTenantAndSlug(
+		tenantIdValue: string,
+		gameSlug: string,
+	): Promise<TenantGameActivation | null> {
+		if (!this.row || this.row.tenantId !== tenantIdValue || this.row.gameSlug !== gameSlug) {
+			return null;
+		}
+
+		return this.row;
+	}
+
+	async save(activation: TenantGameActivation): Promise<void> {
+		this.row = activation;
+	}
+
+	setRow(row: TenantGameActivation): void {
+		this.row = row;
+	}
 }
 
 const campaignA = StampCampaign.fromPrimitives({

@@ -1,7 +1,14 @@
 import { Service } from "diod";
 
+import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
 import { ResolveTenantSubscriptionPlan } from "../../../../billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
 import { isPlanFeatureEnabled } from "../../../../billing/subscriptions/domain/TenantPlanFeature";
+import { GetTenantRouletteConfig } from "../../../games/application/config/GetTenantRouletteConfig";
+import {
+	getParticipationRules,
+	usesStaffExplicitAuthorization,
+} from "../../../games/domain/RouletteConfig";
+import { RULETA_GAME_SLUG } from "../../../games/domain/TenantGameActivation";
 import { GENERIC_STAMP_VISIT_LABEL } from "../../../stamp_types/domain/StampType";
 import { StampTypeRepository } from "../../../stamp_types/domain/StampTypeRepository";
 import { StampCampaign } from "../../../stamp_campaigns/domain/StampCampaign";
@@ -32,6 +39,8 @@ export class ListStaffScanTargets {
 		private readonly stampTypeRepository: StampTypeRepository,
 		private readonly promotionRepository: PromotionRepository,
 		private readonly resolveTenantSubscriptionPlan: ResolveTenantSubscriptionPlan,
+		private readonly assertTenantPlanFeature: AssertTenantPlanFeature,
+		private readonly getTenantRouletteConfig: GetTenantRouletteConfig,
 	) {}
 
 	async execute(params: ListStaffScanTargetsParams): Promise<StaffScanTargets> {
@@ -57,8 +66,42 @@ export class ListStaffScanTargets {
 		}));
 
 		const promotions = await this.listPromotionTargets(params.tenantId);
+		const rouletteAuthorize = await this.resolveRouletteAuthorizeTarget(params.tenantId);
 
-		return { stampCampaigns, promotions };
+		return { stampCampaigns, promotions, rouletteAuthorize };
+	}
+
+	private async resolveRouletteAuthorizeTarget(
+		tenantId: string,
+	): Promise<StaffScanTargets["rouletteAuthorize"]> {
+		try {
+			await this.assertTenantPlanFeature.execute({
+				tenantId,
+				feature: "gamification",
+			});
+		} catch {
+			return { enabled: false, minPurchaseEuros: null };
+		}
+
+		const activation = await this.getTenantRouletteConfig.execute({
+			tenantId,
+			gameSlug: RULETA_GAME_SLUG,
+		});
+
+		if (
+			!activation.isEnabled ||
+			!activation.config ||
+			!usesStaffExplicitAuthorization(activation.config)
+		) {
+			return { enabled: false, minPurchaseEuros: null };
+		}
+
+		const rules = getParticipationRules(activation.config);
+
+		return {
+			enabled: true,
+			minPurchaseEuros: rules.minPurchaseEuros,
+		};
 	}
 
 	private async listPromotionTargets(tenantId: string): Promise<StaffScanPromotionTarget[]> {

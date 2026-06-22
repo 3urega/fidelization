@@ -2,8 +2,13 @@ import "reflect-metadata";
 
 import { NextResponse } from "next/server";
 
+import { RecordStaffRouletteAuthorizeByQr } from "../../../../contexts/loyalty/customers/application/scan/RecordStaffRouletteAuthorizeByQr";
 import { RecordStaffScanByTarget } from "../../../../contexts/loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { InvalidStampScan } from "../../../../contexts/loyalty/customers/domain/InvalidStampScan";
+import {
+	isRouletteAuthorizeTarget,
+	parseStaffScanTargetInput,
+} from "../../../../contexts/loyalty/customers/domain/StaffScanTarget";
 import { DomainError } from "../../../../contexts/shared/domain/DomainError";
 import { container } from "../../../../contexts/shared/infrastructure/dependency-injection/diod.config";
 import { HttpNextResponse } from "../../../../contexts/shared/infrastructure/http/HttpNextResponse";
@@ -23,6 +28,7 @@ type Body = {
 	targetType?: unknown;
 	targetId?: unknown;
 	stampTypeId?: unknown;
+	purchaseAmountEuros?: unknown;
 };
 
 export async function POST(request: Request): Promise<Response> {
@@ -43,7 +49,48 @@ export async function POST(request: Request): Promise<Response> {
 		);
 	}
 
+	let target;
+
 	try {
+		target = parseStaffScanTargetInput({
+			targetType: body.targetType,
+			targetId: body.targetId,
+		});
+	} catch (error) {
+		if (error instanceof InvalidStampScan) {
+			return HttpNextResponse.domainError(error, 400);
+		}
+
+		throw error;
+	}
+
+	try {
+		if (isRouletteAuthorizeTarget(target.targetType)) {
+			if (
+				body.purchaseAmountEuros === undefined ||
+				typeof body.purchaseAmountEuros !== "number" ||
+				!Number.isFinite(body.purchaseAmountEuros)
+			) {
+				return HttpNextResponse.domainError(
+					new InvalidStampScan("purchaseAmountEuros is required for roulette_authorize scans"),
+					400,
+				);
+			}
+
+			const result = await container.get(RecordStaffRouletteAuthorizeByQr).execute({
+				tenantId: auth.session.tenantId,
+				qrValue: body.qrValue,
+				purchaseAmountEuros: body.purchaseAmountEuros,
+				createdByUserId: auth.session.userId,
+				staffRole: auth.session.role as TenantRole,
+			});
+
+			return NextResponse.json({
+				customer: customerToJson(result.customer),
+				outcomes: staffScanOutcomesToJson(result.outcomes),
+			});
+		}
+
 		const result = await container.get(RecordStaffScanByTarget).execute({
 			tenantId: auth.session.tenantId,
 			qrValue: body.qrValue,

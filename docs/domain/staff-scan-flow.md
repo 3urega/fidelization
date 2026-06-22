@@ -115,15 +115,17 @@ Multiple lines may appear (e.g. punto + producto anotado; producto anotado + tar
 |--------------|--------|
 | `stamp_campaign` | +1 punto (MVP fijo) + +1 sello **solo** en `targetId` (esa campaña) |
 | `promotion` | +1 punto + registrar uso promoción (`RecordStaffScanByTarget`) |
+| `roulette_authorize` | Solo autoriza ruleta v2 (`AuthorizeRouletteSpin`); **no** registra visita ni puntos. Body incluye `purchaseAmountEuros`. |
 
-`targetType` + `targetId` are **required** on `POST /api/loyalty/scan`.
+`targetType` + `targetId` are **required** on `POST /api/loyalty/scan` for stamp/promo. For `roulette_authorize`, `targetId` is optional (default `ruleta`).
 
 ## API (target)
 
-- `GET /api/loyalty/scan/targets` — lista tarjetas activas + promos activas para el picker.
-- `POST /api/loyalty/scan` — body `{ qrValue, targetType, targetId }` → `{ customer, outcomes[] }`.
+- `GET /api/loyalty/scan/targets` — lista tarjetas activas + promos + `rouletteAuthorize { enabled, minPurchaseEuros }` cuando config v2 `staff_explicit`.
+- `POST /api/loyalty/scan` — body `{ qrValue, targetType, targetId [, purchaseAmountEuros] }` → `{ customer, outcomes[] }`.
+- `GET /api/loyalty/games/ruleta/scan-context` — `{ unlockEnabled, authorizeEnabled, minPurchaseEuros }` (legacy vs v2).
 
-`outcomes[]` discriminated union: `point_recorded`, `stamp_added`, `card_completed`, `card_already_completed`, `promotion_applied`, `promotion_exhausted`, `roulette_spin_granted` (Premium + ruleta activa + `rules.trigger: after_staff_scan`; incluye `expiresAt` ISO).
+`outcomes[]` discriminated union: `point_recorded`, `stamp_added`, `card_completed`, `card_already_completed`, `promotion_applied`, `promotion_exhausted`, `roulette_spin_granted` (legacy `after_staff_scan`; incluye `expiresAt` ISO), `roulette_auth_granted`, `roulette_auth_denied` (v2 `staff_explicit`; rechazos de negocio en **200** con `reasonCode` + `message`).
 
 ## Edge cases (dominio)
 

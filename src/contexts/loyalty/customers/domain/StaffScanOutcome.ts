@@ -1,3 +1,12 @@
+import { PlanFeatureNotAvailable } from "../../../billing/subscriptions/domain/PlanFeatureNotAvailable";
+import { RouletteGameDisabled } from "../../games/domain/RouletteGameDisabled";
+import { RouletteGameNotAvailable } from "../../games/domain/RouletteGameNotAvailable";
+import { RouletteMinPurchaseNotMet } from "../../games/domain/RouletteMinPurchaseNotMet";
+import { RouletteNotEnrolled } from "../../games/domain/RouletteNotEnrolled";
+import { RouletteParticipationPeriodExpired } from "../../games/domain/RouletteParticipationPeriodExpired";
+import { RoulettePendingAuthorization } from "../../games/domain/RoulettePendingAuthorization";
+import { RouletteQuotaExhausted } from "../../games/domain/RouletteQuotaExhausted";
+
 export type StaffScanOutcomeKind =
 	| "point_recorded"
 	| "stamp_added"
@@ -5,7 +14,17 @@ export type StaffScanOutcomeKind =
 	| "card_already_completed"
 	| "promotion_applied"
 	| "promotion_exhausted"
-	| "roulette_spin_granted";
+	| "roulette_spin_granted"
+	| "roulette_auth_granted"
+	| "roulette_auth_denied";
+
+export type RouletteAuthDeniedReasonCode =
+	| "not_enrolled"
+	| "quota_exhausted"
+	| "daily_limit"
+	| "min_purchase"
+	| "game_disabled"
+	| "pending_auth";
 
 export type StaffScanPointRecordedOutcome = {
 	kind: "point_recorded";
@@ -52,6 +71,18 @@ export type StaffScanRouletteSpinGrantedOutcome = {
 	expiresAt: string;
 };
 
+export type StaffScanRouletteAuthGrantedOutcome = {
+	kind: "roulette_auth_granted";
+	expiresAt: string;
+	purchaseAmountEuros: number;
+};
+
+export type StaffScanRouletteAuthDeniedOutcome = {
+	kind: "roulette_auth_denied";
+	reasonCode: RouletteAuthDeniedReasonCode;
+	message: string;
+};
+
 export type StaffScanOutcome =
 	| StaffScanPointRecordedOutcome
 	| StaffScanStampAddedOutcome
@@ -59,7 +90,9 @@ export type StaffScanOutcome =
 	| StaffScanCardAlreadyCompletedOutcome
 	| StaffScanPromotionAppliedOutcome
 	| StaffScanPromotionExhaustedOutcome
-	| StaffScanRouletteSpinGrantedOutcome;
+	| StaffScanRouletteSpinGrantedOutcome
+	| StaffScanRouletteAuthGrantedOutcome
+	| StaffScanRouletteAuthDeniedOutcome;
 
 const STAFF_SCAN_OUTCOME_KINDS = new Set<string>([
 	"point_recorded",
@@ -69,6 +102,8 @@ const STAFF_SCAN_OUTCOME_KINDS = new Set<string>([
 	"promotion_applied",
 	"promotion_exhausted",
 	"roulette_spin_granted",
+	"roulette_auth_granted",
+	"roulette_auth_denied",
 ]);
 
 export function isStaffScanOutcome(value: unknown): value is StaffScanOutcome {
@@ -79,6 +114,77 @@ export function isStaffScanOutcome(value: unknown): value is StaffScanOutcome {
 	const kind = (value as { kind: unknown }).kind;
 
 	return typeof kind === "string" && STAFF_SCAN_OUTCOME_KINDS.has(kind);
+}
+
+export function mapRouletteAuthorizeErrorToDeniedOutcome(
+	error: unknown,
+): StaffScanRouletteAuthDeniedOutcome {
+	if (error instanceof RouletteNotEnrolled) {
+		return {
+			kind: "roulette_auth_denied",
+			reasonCode: "not_enrolled",
+			message: "El cliente no ha activado la ruleta en la app",
+		};
+	}
+
+	if (error instanceof RouletteParticipationPeriodExpired) {
+		return {
+			kind: "roulette_auth_denied",
+			reasonCode: "not_enrolled",
+			message:
+				"El periodo de participación terminó · pide al cliente que reactive la ruleta en la app",
+		};
+	}
+
+	if (error instanceof RouletteQuotaExhausted) {
+		if (error.scope === "daily") {
+			return {
+				kind: "roulette_auth_denied",
+				reasonCode: "daily_limit",
+				message: "Ya autorizaste el giro de hoy",
+			};
+		}
+
+		return {
+			kind: "roulette_auth_denied",
+			reasonCode: "quota_exhausted",
+			message: "Sin giros disponibles en este periodo",
+		};
+	}
+
+	if (error instanceof RouletteMinPurchaseNotMet) {
+		return {
+			kind: "roulette_auth_denied",
+			reasonCode: "min_purchase",
+			message: `Importe ${error.purchaseAmountEuros}€ · mínimo ${error.minPurchaseEuros}€`,
+		};
+	}
+
+	if (error instanceof RoulettePendingAuthorization) {
+		return {
+			kind: "roulette_auth_denied",
+			reasonCode: "pending_auth",
+			message: "Ya tiene un giro pendiente de usar",
+		};
+	}
+
+	if (
+		error instanceof RouletteGameDisabled ||
+		error instanceof RouletteGameNotAvailable ||
+		error instanceof PlanFeatureNotAvailable
+	) {
+		return {
+			kind: "roulette_auth_denied",
+			reasonCode: "game_disabled",
+			message: "Ruleta desactivada",
+		};
+	}
+
+	return {
+		kind: "roulette_auth_denied",
+		reasonCode: "game_disabled",
+		message: "No se pudo autorizar la ruleta",
+	};
 }
 
 export function formatStaffScanOutcomeMessage(outcome: StaffScanOutcome): string {
@@ -97,6 +203,10 @@ export function formatStaffScanOutcomeMessage(outcome: StaffScanOutcome): string
 			return "¡La promoción ya ha sido agotada!";
 		case "roulette_spin_granted":
 			return `Ruleta desbloqueada hasta ${new Date(outcome.expiresAt).toLocaleString("es-ES")}`;
+		case "roulette_auth_granted":
+			return `Autorizado: puede girar en la app hasta ${new Date(outcome.expiresAt).toLocaleString("es-ES")}`;
+		case "roulette_auth_denied":
+			return outcome.message;
 		default: {
 			const exhaustive: never = outcome;
 

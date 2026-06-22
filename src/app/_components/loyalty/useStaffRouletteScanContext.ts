@@ -4,13 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 
 type ScanContextResponse = {
 	unlockEnabled?: boolean;
+	authorizeEnabled?: boolean;
+	minPurchaseEuros?: number | null;
 };
 
 export function useStaffRouletteScanContext(): {
 	unlockEnabled: boolean;
+	authorizeEnabled: boolean;
+	minPurchaseEuros: number | null;
 	loading: boolean;
 } {
 	const [unlockEnabled, setUnlockEnabled] = useState(false);
+	const [authorizeEnabled, setAuthorizeEnabled] = useState(false);
+	const [minPurchaseEuros, setMinPurchaseEuros] = useState<number | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	const load = useCallback(async (): Promise<void> => {
@@ -23,14 +29,22 @@ export function useStaffRouletteScanContext(): {
 
 			if (!response.ok) {
 				setUnlockEnabled(false);
+				setAuthorizeEnabled(false);
+				setMinPurchaseEuros(null);
 
 				return;
 			}
 
 			const data = (await response.json()) as ScanContextResponse;
 			setUnlockEnabled(data.unlockEnabled === true);
+			setAuthorizeEnabled(data.authorizeEnabled === true);
+			setMinPurchaseEuros(
+				typeof data.minPurchaseEuros === "number" ? data.minPurchaseEuros : null,
+			);
 		} catch {
 			setUnlockEnabled(false);
+			setAuthorizeEnabled(false);
+			setMinPurchaseEuros(null);
 		} finally {
 			setLoading(false);
 		}
@@ -40,5 +54,5 @@ export function useStaffRouletteScanContext(): {
 		void load();
 	}, [load]);
 
-	return { unlockEnabled, loading };
+	return { unlockEnabled, authorizeEnabled, minPurchaseEuros, loading };
 }

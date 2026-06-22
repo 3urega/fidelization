@@ -15,7 +15,13 @@ export type StaffScanPromotionTarget = {
 	maxUsesPerUser: number | null;
 };
 
+export type StaffScanRouletteAuthorizeTarget = {
+	enabled: boolean;
+	minPurchaseEuros: number | null;
+};
+
 export type StaffScanTargets = {
 	stampCampaigns: StaffScanCampaignTarget[];
 	promotions: StaffScanPromotionTarget[];
+	rouletteAuthorize: StaffScanRouletteAuthorizeTarget;
 };

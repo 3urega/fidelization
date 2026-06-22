@@ -64,6 +64,12 @@ function main(): void {
 		{ targetType: "promotion", targetId: "promo-uuid" },
 	);
 
+	assertParseOk(
+		"parse roulette_authorize without targetId",
+		{ targetType: "roulette_authorize" },
+		{ targetType: "roulette_authorize", targetId: "ruleta" },
+	);
+
 	assertParseFails("missing targetType", { targetId: "x" });
 	assertParseFails("invalid targetType", { targetType: "stampTypeId", targetId: "x" });
 	assertParseFails("missing targetId", { targetType: "stamp_campaign" });

@@ -1,7 +1,10 @@
 /* eslint-disable no-console -- CLI verify script */
 import "dotenv/config";
 
+import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
+import { ResolveTenantEffectivePlanFeatures } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantEffectivePlanFeatures";
 import { ResolveTenantSubscriptionPlan } from "../src/contexts/billing/subscriptions/application/resolve/ResolveTenantSubscriptionPlan";
+import { GetTenantRouletteConfig } from "../src/contexts/loyalty/games/application/config/GetTenantRouletteConfig";
 import {
 	BASIC_PLAN_FEATURES,
 	PRO_PLAN_FEATURES,
@@ -325,6 +328,11 @@ function buildUseCase(plan: SubscriptionPlan): ListStaffScanTargets {
 	const tenantRepository = new MutableStubTenantRepository(baseTenant(plan.id, plan.name));
 	const billingRepository = new InMemoryTenantBillingRepository([planBasic, planPro]);
 	const resolvePlan = new ResolveTenantSubscriptionPlan(tenantRepository, billingRepository);
+	const resolveEffective = new ResolveTenantEffectivePlanFeatures(resolvePlan, tenantRepository);
+	const assertFeature = new AssertTenantPlanFeature(resolveEffective);
+	const getConfig = {
+		execute: async () => ({ isEnabled: false, config: null }),
+	} as GetTenantRouletteConfig;
 
 	return new ListStaffScanTargets(
 		tenantRepository,
@@ -332,6 +340,8 @@ function buildUseCase(plan: SubscriptionPlan): ListStaffScanTargets {
 		new InMemoryStampTypeRepository([cafeType]),
 		new InMemoryPromotionRepository(promotions),
 		resolvePlan,
+		assertFeature,
+		getConfig,
 	);
 }
 
@@ -396,6 +406,13 @@ async function main(): Promise<void> {
 		}
 
 		console.log("✅ two active campaigns same stampTypeId → two rows");
+
+		if (ownerTargets.rouletteAuthorize.enabled) {
+			console.error("❌ rouletteAuthorize should be disabled without v2 activation", ownerTargets.rouletteAuthorize);
+			process.exit(1);
+		}
+
+		console.log("✅ rouletteAuthorize disabled without staff_explicit config");
 
 		if (ownerTargets.promotions.length !== 1 || ownerTargets.promotions[0]?.id !== promoActiveId) {
 			console.error("❌ Pro plan should include only active in-window promo", ownerTargets.promotions);

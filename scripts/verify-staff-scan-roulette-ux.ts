@@ -13,9 +13,16 @@ async function main(): Promise<void> {
 	const scanContext = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/games/ruleta/scan-context`, {
 		headers: ownerHeaders,
 	});
-	const scanContextBody = (await scanContext.json()) as { unlockEnabled?: boolean };
+	const scanContextBody = (await scanContext.json()) as {
+		unlockEnabled?: boolean;
+		authorizeEnabled?: boolean;
+	};
 
-	if (scanContext.status !== 200 || typeof scanContextBody.unlockEnabled !== "boolean") {
+	if (
+		scanContext.status !== 200 ||
+		typeof scanContextBody.unlockEnabled !== "boolean" ||
+		typeof scanContextBody.authorizeEnabled !== "boolean"
+	) {
 		console.error("❌ GET scan-context", scanContext.status, scanContextBody);
 		process.exit(1);
 	}

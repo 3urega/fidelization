@@ -1,6 +1,5 @@
 import { Service } from "diod";
 
-import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/application/guard/AssertTenantPlanFeature";
 import { LoyaltyTransaction } from "../../../loyalty_transactions/domain/LoyaltyTransaction";
 import { LoyaltyTransactionRepository } from "../../../loyalty_transactions/domain/LoyaltyTransactionRepository";
 import { TenantRole } from "../../../../tenants/memberships/domain/TenantRole";
@@ -10,10 +9,13 @@ import { TenantRepository } from "../../../../tenants/tenants/domain/TenantRepos
 import { TenantStatus } from "../../../../tenants/tenants/domain/TenantStatus";
 import { Customer } from "../../domain/Customer";
 import { CustomerRepository } from "../../domain/CustomerRepository";
+import { InvalidStampScan } from "../../domain/InvalidStampScan";
 import { StaffScanForbidden } from "../../domain/StaffScanForbidden";
 import type { StaffScanOutcome } from "../../domain/StaffScanOutcome";
-import { parseStaffScanTargetInput } from "../../domain/StaffScanTarget";
+import { isRouletteAuthorizeTarget, parseStaffScanTargetInput } from "../../domain/StaffScanTarget";
 import { DEFAULT_POINTS_PER_VISIT } from "../../domain/StampProgressSummary";
+import { GetTenantRouletteConfig } from "../../../games/application/config/GetTenantRouletteConfig";
+import { usesLegacyStaffScanAuthorization } from "../../../games/domain/RouletteConfig";
 import { IssueRouletteSpinEligibility } from "../../../games/application/eligibility/IssueRouletteSpinEligibility";
 import { ApplyCustomerLoyaltyOutcome } from "../loyalty/ApplyCustomerLoyaltyOutcome";
 import { ResolveCustomerByQrForStaffScan } from "./ResolveCustomerByQrForStaffScan";
@@ -41,6 +43,7 @@ export class RecordStaffScanByTarget {
 		private readonly resolveCustomerByQr: ResolveCustomerByQrForStaffScan,
 		private readonly loyaltyTransactionRepository: LoyaltyTransactionRepository,
 		private readonly applyLoyaltyOutcome: ApplyCustomerLoyaltyOutcome,
+		private readonly getTenantRouletteConfig: GetTenantRouletteConfig,
 		private readonly issueRouletteSpinEligibility: IssueRouletteSpinEligibility,
 	) {}
 
@@ -55,6 +58,12 @@ export class RecordStaffScanByTarget {
 			targetType: params.targetType,
 			targetId: params.targetId,
 		});
+
+		if (isRouletteAuthorizeTarget(target.targetType)) {
+			throw new InvalidStampScan(
+				"roulette_authorize scans must use purchaseAmountEuros via the roulette authorize flow",
+			);
+		}
 
 		const trimmedQr = params.qrValue.trim();
 		const customer = await this.resolveCustomerByQr.execute({
@@ -125,17 +134,26 @@ export class RecordStaffScanByTarget {
 			}
 		}
 
-		const rouletteEligibility = await this.issueRouletteSpinEligibility.execute({
+		const rouletteActivation = await this.getTenantRouletteConfig.execute({
 			tenantId: params.tenantId,
-			customerId: updated.id,
-			triggerRef: pointsTransaction.toPrimitives().id,
 		});
 
-		if (rouletteEligibility) {
-			outcomes.push({
-				kind: "roulette_spin_granted",
-				expiresAt: rouletteEligibility.expiresAt,
+		if (
+			rouletteActivation.config &&
+			usesLegacyStaffScanAuthorization(rouletteActivation.config)
+		) {
+			const rouletteEligibility = await this.issueRouletteSpinEligibility.execute({
+				tenantId: params.tenantId,
+				customerId: updated.id,
+				triggerRef: pointsTransaction.toPrimitives().id,
 			});
+
+			if (rouletteEligibility) {
+				outcomes.push({
+					kind: "roulette_spin_granted",
+					expiresAt: rouletteEligibility.expiresAt,
+				});
+			}
 		}
 
 		return { customer: updated, outcomes };

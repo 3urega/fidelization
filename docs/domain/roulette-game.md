@@ -191,7 +191,7 @@ Phase W (#115–#117) analytics: implementar **después** de X o adaptar read mo
 | [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | **Implemented** 2026-06-22 — [`verify:roulette-participation-use-case`](../../package.json) |
 | [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | **Implemented** 2026-06-22 — `verify:roulette-owner-config` |
 | [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | **Implemented** 2026-06-22 — `verify:roulette-client-participation*` |
-| [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | [`roulette-staff-authorize-scan.md`](../issues/roulette-staff-authorize-scan.md) |
+| [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | **Implemented** 2026-06-22 — `verify:roulette-staff-authorize*` |
 | [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | [`phase-x-roulette-flow-verify-docs.md`](../issues/phase-x-roulette-flow-verify-docs.md) |
 
 Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../issues/manifest.phase-x-roulette-participation-flow.json).
@@ -226,6 +226,19 @@ Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../i
 | UI cliente | [`RouletteParticipationCard.tsx`](../../src/app/_components/loyalty/games/RouletteParticipationCard.tsx), [`PlatformEstablishmentDetail.tsx`](../../src/app/(mobile)/home/establishments/[slug]/PlatformEstablishmentDetail.tsx), [`RouletteSpinClient.tsx`](../../src/app/(mobile)/home/establishments/[slug]/ruleta/RouletteSpinClient.tsx) |
 | Client helpers | [`rouletteClientState.ts`](../../src/lib/roulette/rouletteClientState.ts), [`roulettePublicStateClient.ts`](../../src/lib/roulette/roulettePublicStateClient.ts) |
 | Verifies | `npm run verify:roulette-client-participation-use-case`, `npm run verify:roulette-client-participation` (dev + `DATABASE_URL`) |
+
+## Implementation status (X4)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Target staff | [`StaffScanTarget.ts`](../../src/contexts/loyalty/customers/domain/StaffScanTarget.ts) — `roulette_authorize` |
+| Outcomes | [`StaffScanOutcome.ts`](../../src/contexts/loyalty/customers/domain/StaffScanOutcome.ts) — `roulette_auth_granted` / `roulette_auth_denied` |
+| Use case | [`RecordStaffRouletteAuthorizeByQr.ts`](../../src/contexts/loyalty/customers/application/scan/RecordStaffRouletteAuthorizeByQr.ts) |
+| Legacy gate | [`RecordStaffScanByTarget.ts`](../../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget.ts) — `IssueRouletteSpinEligibility` solo si `usesLegacyStaffScanAuthorization` |
+| Scan context | [`GetStaffRouletteScanContext.ts`](../../src/contexts/loyalty/games/application/config/GetStaffRouletteScanContext.ts) — `authorizeEnabled` |
+| Targets API | [`ListStaffScanTargets.ts`](../../src/contexts/loyalty/customers/application/scan/ListStaffScanTargets.ts) — `rouletteAuthorize` |
+| UI `/scan` | [`StaffScanTargetPicker.tsx`](../../src/app/_components/loyalty/StaffScanTargetPicker.tsx), [`StaffScanForm.tsx`](../../src/app/_components/loyalty/StaffScanForm.tsx) |
+| Verifies | `npm run verify:roulette-staff-authorize-use-case`, `npm run verify:roulette-staff-authorize` (dev + `DATABASE_URL`) |
 
 ## Fuera de alcance global
 

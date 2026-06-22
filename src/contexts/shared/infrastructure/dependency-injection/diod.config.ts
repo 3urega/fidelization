@@ -104,6 +104,7 @@ import { ApplyCustomerLoyaltyOutcome } from "../../../loyalty/customers/applicat
 import { RecordPromotionUse } from "../../../loyalty/customers/application/promotions/RecordPromotionUse";
 import { ResolveCustomerByQrForStaffScan } from "../../../loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { RecordStaffScanByTarget } from "../../../loyalty/customers/application/scan/RecordStaffScanByTarget";
+import { RecordStaffRouletteAuthorizeByQr } from "../../../loyalty/customers/application/scan/RecordStaffRouletteAuthorizeByQr";
 import { ListStaffScanTargets } from "../../../loyalty/customers/application/scan/ListStaffScanTargets";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
 import { JoinTenantAsCustomer } from "../../../loyalty/customers/application/join/JoinTenantAsCustomer";
@@ -393,6 +394,7 @@ builder.registerAndUse(RedeemCustomerReward);
 builder.registerAndUse(ApplyCustomerLoyaltyOutcome);
 builder.registerAndUse(ResolveCustomerByQrForStaffScan);
 builder.registerAndUse(RecordStaffScanByTarget);
+builder.registerAndUse(RecordStaffRouletteAuthorizeByQr);
 builder.registerAndUse(ListStaffScanTargets);
 builder.registerAndUse(RecordPromotionUse);
 builder.registerAndUse(AuthenticateCustomerByQr);

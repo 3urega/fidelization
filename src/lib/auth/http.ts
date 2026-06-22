@@ -455,6 +455,10 @@ export function staffScanTargetsToJson(targets: StaffScanTargets): Record<string
 	return {
 		stampCampaigns: targets.stampCampaigns.map(staffScanCampaignTargetToJson),
 		promotions: targets.promotions.map(staffScanPromotionTargetToJson),
+		rouletteAuthorize: {
+			enabled: targets.rouletteAuthorize.enabled,
+			minPurchaseEuros: targets.rouletteAuthorize.minPurchaseEuros,
+		},
 	};
 }
 
@@ -491,6 +495,23 @@ export function staffScanOutcomeToJson(outcome: StaffScanOutcome): Record<string
 				promotionId: outcome.promotionId,
 				promotionTitle: outcome.promotionTitle,
 				maxUsesPerUser: outcome.maxUsesPerUser,
+			};
+		case "roulette_spin_granted":
+			return {
+				kind: outcome.kind,
+				expiresAt: outcome.expiresAt,
+			};
+		case "roulette_auth_granted":
+			return {
+				kind: outcome.kind,
+				expiresAt: outcome.expiresAt,
+				purchaseAmountEuros: outcome.purchaseAmountEuros,
+			};
+		case "roulette_auth_denied":
+			return {
+				kind: outcome.kind,
+				reasonCode: outcome.reasonCode,
+				message: outcome.message,
 			};
 		default: {
 			const exhaustive: never = outcome;

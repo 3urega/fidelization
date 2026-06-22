@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type ReactElement, useCallback, useEffect, useState } from "react";
 
+import { ROULETTE_AUTHORIZE_TARGET_ID } from "../../../contexts/loyalty/customers/domain/StaffScanTarget";
 import { LoyaltyCardBackground } from "./LoyaltyCardBackground";
 import type { LoyaltyCardBackgroundVariant } from "./loyaltyCardBackgrounds";
 import { resolveLoyaltyCardBackground } from "./loyaltyCardBackgrounds";
@@ -10,7 +11,7 @@ import { LoyaltyProgress } from "./LoyaltyProgress";
 import { parseLoyaltyVisualTemplate } from "./loyaltyVisualTemplates";
 
 export type StaffScanSelectedTarget = {
-	targetType: "stamp_campaign" | "promotion";
+	targetType: "stamp_campaign" | "promotion" | "roulette_authorize";
 	targetId: string;
 };
 
@@ -31,9 +32,15 @@ type StaffScanPromotionTarget = {
 	maxUsesPerUser: number | null;
 };
 
+type StaffScanRouletteAuthorizeTarget = {
+	enabled: boolean;
+	minPurchaseEuros: number | null;
+};
+
 type ScanTargetsResponse = {
 	stampCampaigns?: StaffScanCampaignTarget[];
 	promotions?: StaffScanPromotionTarget[];
+	rouletteAuthorize?: StaffScanRouletteAuthorizeTarget;
 	error?: { description?: string };
 };
 
@@ -64,6 +71,10 @@ export function StaffScanTargetPicker({
 }: StaffScanTargetPickerProps): ReactElement {
 	const [campaigns, setCampaigns] = useState<StaffScanCampaignTarget[]>([]);
 	const [promotions, setPromotions] = useState<StaffScanPromotionTarget[]>([]);
+	const [rouletteAuthorize, setRouletteAuthorize] = useState<StaffScanRouletteAuthorizeTarget>({
+		enabled: false,
+		minPurchaseEuros: null,
+	});
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -80,6 +91,7 @@ export function StaffScanTargetPicker({
 			if (!response.ok) {
 				setCampaigns([]);
 				setPromotions([]);
+				setRouletteAuthorize({ enabled: false, minPurchaseEuros: null });
 				setError(body.error?.description ?? "No se pudieron cargar las tarjetas.");
 
 				return;
@@ -87,9 +99,13 @@ export function StaffScanTargetPicker({
 
 			setCampaigns(body.stampCampaigns ?? []);
 			setPromotions(body.promotions ?? []);
+			setRouletteAuthorize(
+				body.rouletteAuthorize ?? { enabled: false, minPurchaseEuros: null },
+			);
 		} catch {
 			setCampaigns([]);
 			setPromotions([]);
+			setRouletteAuthorize({ enabled: false, minPurchaseEuros: null });
 			setError("Error de red al cargar tarjetas y promociones.");
 		} finally {
 			setLoading(false);
@@ -108,10 +124,13 @@ export function StaffScanTargetPicker({
 		return <p className="text-sm text-error">{error}</p>;
 	}
 
-	if (campaigns.length === 0 && promotions.length === 0) {
+	const hasRoulette = rouletteAuthorize.enabled;
+	const hasCampaignsOrPromos = campaigns.length > 0 || promotions.length > 0;
+
+	if (!hasCampaignsOrPromos && !hasRoulette) {
 		return (
 			<div className="flex flex-col gap-2">
-				<p className="text-sm text-muted">No hay tarjetas ni promociones activas.</p>
+				<p className="text-sm text-muted">No hay tarjetas, promociones ni ruleta activa.</p>
 				<p className="text-xs text-muted">
 					Crea campañas en{" "}
 					<Link href="/settings/stamps" className="text-primary underline">
@@ -126,12 +145,45 @@ export function StaffScanTargetPicker({
 	return (
 		<div className="flex flex-col gap-5">
 			<div className="flex flex-col gap-1">
-				<h2 className="text-sm font-medium text-foreground">Elige tarjeta o promoción</h2>
+				<h2 className="text-sm font-medium text-foreground">Elige acción</h2>
 				<p className="text-xs text-muted">
-					El progreso del cliente se actualiza al escanear. Selecciona una opción antes de
-					introducir el QR.
+					Selecciona tarjeta, promoción o autorización de ruleta antes de introducir el QR.
 				</p>
 			</div>
+
+			{hasRoulette ? (
+				<div className="flex flex-col gap-3">
+					<h3 className="text-sm font-medium text-foreground">Ruleta</h3>
+					<button
+						type="button"
+						disabled={disabled}
+						className={[
+							"w-full rounded-xl border bg-surface p-4 text-left transition-opacity disabled:opacity-60",
+							selectionBorderClass(
+								isSelected(selectedTarget, "roulette_authorize", ROULETTE_AUTHORIZE_TARGET_ID),
+							),
+						].join(" ")}
+						onClick={() =>
+							onSelectTarget({
+								targetType: "roulette_authorize",
+								targetId: ROULETTE_AUTHORIZE_TARGET_ID,
+							})
+						}
+					>
+						<div className="flex flex-col gap-1 text-sm">
+							<span className="font-medium text-foreground">Autorizar giro de ruleta</span>
+							<span className="text-muted">
+								El cliente ya activó la ruleta en la app. Introduce el importe y escanea su QR.
+							</span>
+							{rouletteAuthorize.minPurchaseEuros !== null ? (
+								<span className="text-xs text-muted">
+									Compra mínima: {rouletteAuthorize.minPurchaseEuros}€
+								</span>
+							) : null}
+						</div>
+					</button>
+				</div>
+			) : null}
 
 			{campaigns.length > 0 ? (
 				<ul className="flex flex-col gap-3">
