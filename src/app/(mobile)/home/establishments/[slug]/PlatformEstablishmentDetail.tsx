@@ -9,10 +9,12 @@ import {
 	type StampProgressRow,
 } from "../../../../_components/loyalty/LoyaltyCard";
 import { StampCampaignCards } from "../../../../_components/loyalty/StampCampaignCards";
+import { RouletteParticipationCard } from "../../../../_components/loyalty/games/RouletteParticipationCard";
 import { EstablishmentHeroCover } from "../../../../_components/platform-app/EstablishmentHeroCover";
 import { PlatformUserQrModal } from "../../../../_components/platform-app/PlatformUserQrModal";
 import { platformFetch } from "../../../../../lib/platform/apiUrl";
 import { platformRoutes } from "../../../../../lib/platform/routes";
+import type { RoulettePublicStateResponse } from "../../../../../lib/roulette/roulettePublicStateClient";
 import { Button } from "../../../../_components/ui/Button";
 import { Card } from "../../../../_components/ui/Card";
 import { HoverTooltip } from "../../../../_components/ui/HoverTooltip";
@@ -50,12 +52,6 @@ type EstablishmentDetailResponse = {
 	stampProgress?: StampProgressRow[];
 	userQrValue?: string | null;
 	error?: { description?: string };
-};
-
-type RoulettePublicState = {
-	isEnabled: boolean;
-	canSpin: boolean;
-	eligibility: { expiresAt: string } | null;
 };
 
 function EstablishmentProfileInfo({ tenant }: { tenant: EstablishmentTenant }): ReactElement | null {
@@ -160,7 +156,25 @@ export function PlatformEstablishmentDetail(): ReactElement {
 	const [loading, setLoading] = useState(true);
 	const [joining, setJoining] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
-	const [rouletteState, setRouletteState] = useState<RoulettePublicState | null>(null);
+	const [rouletteState, setRouletteState] = useState<RoulettePublicStateResponse | null>(null);
+	const [rouletteEnrolling, setRouletteEnrolling] = useState(false);
+
+	const loadRouletteState = useCallback(async (): Promise<void> => {
+		if (!slug) {
+			return;
+		}
+
+		const response = await platformFetch(
+			`/api/user/establishments/${encodeURIComponent(slug)}/games/ruleta`,
+		);
+
+		if (!response.ok) {
+			return;
+		}
+
+		const body = (await response.json()) as RoulettePublicStateResponse;
+		setRouletteState(body);
+	}, [slug]);
 
 	const loadDetail = useCallback(async (): Promise<void> => {
 		if (!slug) {
@@ -211,35 +225,34 @@ export function PlatformEstablishmentDetail(): ReactElement {
 	}, []);
 
 	useEffect(() => {
-		let cancelled = false;
-
-		async function loadRouletteState(): Promise<void> {
-			if (!slug) {
-				return;
-			}
-
-			const response = await platformFetch(
-				`/api/user/establishments/${encodeURIComponent(slug)}/games/ruleta`,
-			);
-
-			if (cancelled || !response.ok) {
-				return;
-			}
-
-			const body = (await response.json()) as RoulettePublicState;
-			setRouletteState(body);
-		}
-
 		if (detail?.mode === "interaction" && detail.customer) {
 			void loadRouletteState();
 		} else {
 			setRouletteState(null);
 		}
+	}, [detail?.mode, detail?.customer?.id, loadRouletteState]);
 
-		return () => {
-			cancelled = true;
-		};
-	}, [slug, detail?.mode, detail?.customer?.id]);
+	async function handleRouletteEnroll(): Promise<void> {
+		setRouletteEnrolling(true);
+		setError(null);
+
+		const response = await platformFetch(
+			`/api/user/establishments/${encodeURIComponent(slug)}/games/ruleta/enroll`,
+			{ method: "POST" },
+		);
+
+		const body = (await response.json()) as { error?: { description?: string } };
+
+		if (!response.ok) {
+			setError(body.error?.description ?? "No se pudo activar la ruleta");
+			setRouletteEnrolling(false);
+
+			return;
+		}
+
+		setRouletteEnrolling(false);
+		await loadRouletteState();
+	}
 
 	async function handleJoin(): Promise<void> {
 		setJoining(true);
@@ -332,29 +345,12 @@ export function PlatformEstablishmentDetail(): ReactElement {
 					) : null}
 
 					{rouletteState?.isEnabled ? (
-						<Card>
-							<div className="flex flex-col gap-3">
-								<div>
-									<h2 className="text-sm font-medium text-foreground">Ruleta de premios</h2>
-									<p className="mt-1 text-sm text-muted">
-										{rouletteState.canSpin
-											? "Tienes un giro disponible. ¡Prueba suerte!"
-											: rouletteState.eligibility
-												? "Has usado tu giro. Vuelve tras una nueva visita."
-												: "Pide en caja que escaneen tu QR para desbloquear la ruleta."}
-									</p>
-								</div>
-								<Link href={platformRoutes.homeEstablishmentRoulette(slug)} className="w-full">
-									<Button type="button" className="w-full" variant={rouletteState.canSpin ? "primary" : "secondary"}>
-										{rouletteState.canSpin
-											? "Girar ruleta"
-											: rouletteState.eligibility
-												? "Ver ruleta"
-												: "Cómo desbloquear la ruleta"}
-									</Button>
-								</Link>
-							</div>
-						</Card>
+						<RouletteParticipationCard
+							slug={slug}
+							state={rouletteState}
+							enrolling={rouletteEnrolling}
+							onEnroll={handleRouletteEnroll}
+						/>
 					) : null}
 				</>
 			) : null}

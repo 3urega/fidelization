@@ -105,6 +105,27 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 		});
 	}
 
+	async listRecentByCustomer(
+		tenantIdValue: string,
+		customerIdValue: string,
+		limit: number,
+	): Promise<RouletteSpin[]> {
+		return this.spins
+			.filter((spin) => {
+				const primitives = spin.toPrimitives();
+
+				return (
+					primitives.tenantId === tenantIdValue && primitives.customerId === customerIdValue
+				);
+			})
+			.sort(
+				(a, b) =>
+					new Date(b.toPrimitives().createdAt).getTime() -
+					new Date(a.toPrimitives().createdAt).getTime(),
+			)
+			.slice(0, limit);
+	}
+
 	get(id: string): RouletteSpin | undefined {
 		return this.spins.find((spin) => spin.toPrimitives().id === id);
 	}

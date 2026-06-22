@@ -12,17 +12,16 @@ import { AuthorizeRouletteSpin } from "../src/contexts/loyalty/games/application
 import { EnrollCustomerInRoulette } from "../src/contexts/loyalty/games/application/participation/EnrollCustomerInRoulette";
 import { GetRouletteParticipationState } from "../src/contexts/loyalty/games/application/participation/GetRouletteParticipationState";
 import { ResolveRouletteParticipationUsage } from "../src/contexts/loyalty/games/application/participation/ResolveRouletteParticipationUsage";
+import { AssertRouletteSpinAccess } from "../src/contexts/loyalty/games/application/spin/AssertRouletteSpinAccess";
+import { GetRoulettePublicState } from "../src/contexts/loyalty/games/application/spin/GetRoulettePublicState";
+import { ListRecentRouletteSpinsForCustomer } from "../src/contexts/loyalty/games/application/spin/ListRecentRouletteSpinsForCustomer";
 import {
 	createDefaultRouletteConfigV2,
 	getParticipationRules,
 	parseRouletteConfig,
 } from "../src/contexts/loyalty/games/domain/RouletteConfig";
-import { RouletteMinPurchaseNotMet } from "../src/contexts/loyalty/games/domain/RouletteMinPurchaseNotMet";
-import { RouletteNotEnrolled } from "../src/contexts/loyalty/games/domain/RouletteNotEnrolled";
 import { RouletteParticipation } from "../src/contexts/loyalty/games/domain/RouletteParticipation";
 import { RouletteParticipationRepository } from "../src/contexts/loyalty/games/domain/RouletteParticipationRepository";
-import { RoulettePendingAuthorization } from "../src/contexts/loyalty/games/domain/RoulettePendingAuthorization";
-import { RouletteQuotaExhausted } from "../src/contexts/loyalty/games/domain/RouletteQuotaExhausted";
 import { RouletteSpin } from "../src/contexts/loyalty/games/domain/RouletteSpin";
 import { RouletteSpinEligibility } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibility";
 import { RouletteSpinEligibilityRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibilityRepository";
@@ -35,11 +34,12 @@ import { TenantGameActivationRepository } from "../src/contexts/loyalty/games/do
 import { PlatformGame } from "../src/contexts/platform/domain/PlatformGame";
 import { PlatformGameRepository } from "../src/contexts/platform/domain/PlatformGameRepository";
 
-const tenantId = "00000000-0000-4000-8000-0000000000x1";
-const customerId = "00000000-0000-4000-8000-0000000000x2";
+const tenantId = "00000000-0000-4000-8000-0000000000c1";
+const customerId = "00000000-0000-4000-8000-0000000000c2";
 const gameId = "00000000-0000-4000-8000-000000000030";
 
 const v2Config = createDefaultRouletteConfigV2();
+const rules = getParticipationRules(v2Config);
 
 class InMemoryTenantGameActivationRepository extends TenantGameActivationRepository {
 	private row: TenantGameActivation | null = null;
@@ -272,7 +272,7 @@ class StubAssertTenantPlanFeature {
 	}
 }
 
-function buildStack(
+function buildPublicStateStack(
 	activationRepository: InMemoryTenantGameActivationRepository,
 	participationRepository: InMemoryRouletteParticipationRepository,
 	spinRepository: InMemoryRouletteSpinRepository,
@@ -292,19 +292,33 @@ function buildStack(
 	);
 	const getConfig = new GetTenantRouletteConfig(activationRepository);
 	const resolveUsage = new ResolveRouletteParticipationUsage(spinRepository, eligibilityRepository);
+	const assertAccess = new AssertRouletteSpinAccess(
+		assertFeature,
+		platformGameRepository,
+		getConfig,
+		spinRepository,
+	);
+	const getParticipationState = new GetRouletteParticipationState(
+		getConfig,
+		participationRepository,
+		eligibilityRepository,
+		resolveUsage,
+	);
+	const listRecentSpins = new ListRecentRouletteSpinsForCustomer(spinRepository);
 
 	return {
+		publicState: new GetRoulettePublicState(
+			assertAccess,
+			getConfig,
+			getParticipationState,
+			listRecentSpins,
+			eligibilityRepository,
+		),
 		enroll: new EnrollCustomerInRoulette(
 			assertFeature,
 			platformGameRepository,
 			getConfig,
 			participationRepository,
-		),
-		state: new GetRouletteParticipationState(
-			getConfig,
-			participationRepository,
-			eligibilityRepository,
-			resolveUsage,
 		),
 		authorize: new AuthorizeRouletteSpin(
 			assertFeature,
@@ -318,36 +332,7 @@ function buildStack(
 	};
 }
 
-async function expectError<T>(
-	label: string,
-	action: () => Promise<unknown>,
-	errorType: new (...args: never[]) => T,
-): Promise<void> {
-	try {
-		await action();
-		console.error(`❌ ${label}: expected ${errorType.name}`);
-		process.exit(1);
-	} catch (error) {
-		if (!(error instanceof errorType)) {
-			console.error(`❌ ${label}: wrong error`, error);
-			process.exit(1);
-		}
-	}
-
-	console.log(`✅ ${label}`);
-}
-
 async function main(): Promise<void> {
-	const parsedV2 = parseRouletteConfig(v2Config.toPrimitives());
-	const rules = getParticipationRules(parsedV2);
-
-	if (parsedV2.toPrimitives().version !== 2 || rules.authorizationMode !== "staff_explicit") {
-		console.error("❌ v2 config parse", parsedV2.toPrimitives());
-		process.exit(1);
-	}
-
-	console.log("✅ parseRouletteConfig v2");
-
 	const activationRepository = new InMemoryTenantGameActivationRepository();
 	const participationRepository = new InMemoryRouletteParticipationRepository();
 	const spinRepository = new InMemoryRouletteSpinRepository();
@@ -362,110 +347,103 @@ async function main(): Promise<void> {
 		}),
 	);
 
-	const { enroll, state, authorize } = buildStack(
+	const stack = buildPublicStateStack(
 		activationRepository,
 		participationRepository,
 		spinRepository,
 		eligibilityRepository,
 	);
 
-	const notEnrolled = await state.execute({ tenantId, customerId });
-
-	if (notEnrolled.status !== "not_enrolled") {
-		console.error("❌ initial state should be not_enrolled", notEnrolled);
-		process.exit(1);
-	}
-
-	console.log("✅ GetRouletteParticipationState not_enrolled");
-
-	await expectError(
-		"AuthorizeRouletteSpin without enrollment",
-		() => authorize.execute({ tenantId, customerId, purchaseAmountEuros: 15 }),
-		RouletteNotEnrolled,
-	);
-
-	const enrolled = await enroll.execute({ tenantId, customerId });
-	const enrolledAt = new Date(enrolled.enrolledAt);
-	const periodEndsAt = new Date(enrolled.periodEndsAt);
-	const expectedPeriodMs = rules.participationPeriodDays * 24 * 60 * 60 * 1000;
+	const beforeEnroll = await stack.publicState.execute({ tenantId, customerId });
 
 	if (
-		!enrolled.participationId ||
-		Math.abs(periodEndsAt.getTime() - enrolledAt.getTime() - expectedPeriodMs) > 1000
+		beforeEnroll.authorizationMode !== "staff_explicit" ||
+		beforeEnroll.participationStatus !== "not_enrolled" ||
+		beforeEnroll.canSpin ||
+		beforeEnroll.blockReason !== "not_enrolled" ||
+		beforeEnroll.segments.length === 0
 	) {
-		console.error("❌ EnrollCustomerInRoulette periodEndsAt", enrolled);
+		console.error("❌ public state before enroll", beforeEnroll);
 		process.exit(1);
 	}
 
-	console.log("✅ EnrollCustomerInRoulette creates participation period");
+	console.log("✅ GetRoulettePublicState not_enrolled with segments");
 
-	const activeState = await state.execute({ tenantId, customerId });
+	await stack.enroll.execute({ tenantId, customerId });
+	const afterEnroll = await stack.publicState.execute({ tenantId, customerId });
 
 	if (
-		activeState.status !== "active" ||
-		activeState.spinsRemainingInPeriod !== rules.maxSpinsInPeriod ||
-		activeState.spinsRemainingToday !== rules.maxSpinsPerDay
+		afterEnroll.participationStatus !== "active" ||
+		afterEnroll.canSpin ||
+		afterEnroll.blockReason !== "awaiting_staff_authorization" ||
+		afterEnroll.conditionsLabel !== "Mín. 10€ en caja" ||
+		afterEnroll.spinsRemainingInPeriod !== rules.maxSpinsInPeriod
 	) {
-		console.error("❌ active participation state", activeState);
+		console.error("❌ public state after enroll", afterEnroll);
 		process.exit(1);
 	}
 
-	console.log("✅ GetRouletteParticipationState active with full quota");
+	console.log("✅ GetRoulettePublicState active after enroll (no spin yet)");
 
-	await expectError(
-		"AuthorizeRouletteSpin below min purchase",
-		() => authorize.execute({ tenantId, customerId, purchaseAmountEuros: 8 }),
-		RouletteMinPurchaseNotMet,
-	);
+	const secondEnroll = await stack.enroll.execute({ tenantId, customerId });
 
-	const authorized = await authorize.execute({
+	if (secondEnroll.status !== "active") {
+		console.error("❌ enroll should be idempotent", secondEnroll);
+		process.exit(1);
+	}
+
+	console.log("✅ EnrollCustomerInRoulette idempotent in active period");
+
+	await stack.authorize.execute({
 		tenantId,
 		customerId,
 		purchaseAmountEuros: 15,
-		triggerRef: "scan-auth-1",
+		triggerRef: "verify-client-auth",
 	});
 
-	if (!authorized.eligibilityId || !authorized.expiresAt) {
-		console.error("❌ AuthorizeRouletteSpin should grant eligibility", authorized);
-		process.exit(1);
-	}
-
-	const savedEligibility = await eligibilityRepository.findActiveByCustomer(tenantId, customerId);
+	const afterAuth = await stack.publicState.execute({ tenantId, customerId });
 
 	if (
-		!savedEligibility ||
-		savedEligibility.toPrimitives().authorizedPurchaseEuros !== 15
+		afterAuth.participationStatus !== "authorized_ready" ||
+		!afterAuth.canSpin ||
+		afterAuth.blockReason !== null ||
+		!afterAuth.eligibility?.expiresAt
 	) {
-		console.error("❌ eligibility should store purchase amount", savedEligibility?.toPrimitives());
+		console.error("❌ public state after staff authorization", afterAuth);
 		process.exit(1);
 	}
 
-	console.log("✅ AuthorizeRouletteSpin persists consumable eligibility");
+	console.log("✅ GetRoulettePublicState authorized_ready with canSpin");
 
-	const afterAuth = await state.execute({ tenantId, customerId });
-
-	if (
-		!afterAuth.pendingAuthorization ||
-		afterAuth.spinsRemainingInPeriod !== rules.maxSpinsInPeriod - 1
-	) {
-		console.error("❌ state after authorization", afterAuth);
-		process.exit(1);
-	}
-
-	console.log("✅ GetRouletteParticipationState reflects reserved quota");
-
-	await expectError(
-		"AuthorizeRouletteSpin blocks pending authorization",
-		() => authorize.execute({ tenantId, customerId, purchaseAmountEuros: 20 }),
-		RoulettePendingAuthorization,
+	spinRepository.seedSpin(
+		RouletteSpin.create({
+			tenantId,
+			customerId,
+			segmentId: v2Config.toPrimitives().segments[0]!.id,
+			segmentIndex: 0,
+			prizeType: "points",
+			prizePayload: { points: 10 },
+			triggerSource: "staff_scan",
+			triggerRef: "verify-spin-1",
+			configSnapshot: v2Config.toPrimitives(),
+		}),
 	);
 
-	const periodLimitedConfig = parseRouletteConfig({
+	const withHistory = await stack.publicState.execute({ tenantId, customerId });
+
+	if (withHistory.recentSpins.length !== 1 || !withHistory.recentSpins[0]?.segmentLabel) {
+		console.error("❌ recentSpins should list last spin", withHistory.recentSpins);
+		process.exit(1);
+	}
+
+	console.log("✅ ListRecentRouletteSpinsForCustomer in public state");
+
+	const customConfig = parseRouletteConfig({
 		...v2Config.toPrimitives(),
 		rules: {
 			...rules,
-			maxSpinsInPeriod: 1,
-			maxSpinsPerDay: 1,
+			participationConditionsText: "Compra un menú del día",
+			minPurchaseEuros: null,
 		},
 	});
 
@@ -474,85 +452,23 @@ async function main(): Promise<void> {
 			tenantId,
 			gameSlug: RULETA_GAME_SLUG,
 			isEnabled: true,
-			config: periodLimitedConfig,
+			config: customConfig,
 		}),
 	);
 
 	participationRepository.rows = [];
 	eligibilityRepository.rows = [];
-	spinRepository.spins = [];
-	await enroll.execute({ tenantId, customerId });
-	await authorize.execute({ tenantId, customerId, purchaseAmountEuros: 15 });
-	await eligibilityRepository.save(eligibilityRepository.rows[0]!.consume("spin-period-1"));
-	spinRepository.seedSpin(
-		RouletteSpin.create({
-			tenantId,
-			customerId,
-			segmentId: "00000000-0000-4000-8000-000000000e01",
-			segmentIndex: 0,
-			prizeType: "none",
-			prizePayload: {},
-			triggerSource: "staff_scan",
-			triggerRef: "spin-period-1",
-			configSnapshot: periodLimitedConfig.toPrimitives(),
-		}),
-	);
+	await stack.enroll.execute({ tenantId, customerId });
+	const customLabel = await stack.publicState.execute({ tenantId, customerId });
 
-	await expectError(
-		"AuthorizeRouletteSpin period quota exhausted",
-		() => authorize.execute({ tenantId, customerId, purchaseAmountEuros: 20 }),
-		RouletteQuotaExhausted,
-	);
+	if (customLabel.conditionsLabel !== "Compra un menú del día") {
+		console.error("❌ conditionsLabel should prefer owner text", customLabel.conditionsLabel);
+		process.exit(1);
+	}
 
-	console.log("✅ AuthorizeRouletteSpin enforces period quota");
+	console.log("✅ buildConditionsLabel prefers participationConditionsText");
 
-	eligibilityRepository.rows = [];
-	spinRepository.spins = [];
-	participationRepository.rows = [];
-
-	const dailyConfig = parseRouletteConfig({
-		...v2Config.toPrimitives(),
-		rules: {
-			...rules,
-			maxSpinsInPeriod: 5,
-			maxSpinsPerDay: 1,
-		},
-	});
-
-	activationRepository.setRow(
-		TenantGameActivation.create({
-			tenantId,
-			gameSlug: RULETA_GAME_SLUG,
-			isEnabled: true,
-			config: dailyConfig,
-		}),
-	);
-
-	await enroll.execute({ tenantId, customerId });
-	await authorize.execute({ tenantId, customerId, purchaseAmountEuros: 12 });
-	await eligibilityRepository.save(eligibilityRepository.rows[0]!.consume("spin-daily-1"));
-	spinRepository.seedSpin(
-		RouletteSpin.create({
-			tenantId,
-			customerId,
-			segmentId: "00000000-0000-4000-8000-000000000e01",
-			segmentIndex: 0,
-			prizeType: "none",
-			prizePayload: {},
-			triggerSource: "staff_scan",
-			triggerRef: "spin-daily-1",
-			configSnapshot: dailyConfig.toPrimitives(),
-		}),
-	);
-
-	await expectError(
-		"AuthorizeRouletteSpin daily quota exhausted",
-		() => authorize.execute({ tenantId, customerId, purchaseAmountEuros: 12 }),
-		RouletteQuotaExhausted,
-	);
-
-	console.log("✅ AuthorizeRouletteSpin enforces daily quota");
-	console.log("✅ verify:roulette-participation-use-case passed");
+	console.log("\n✅ verify:roulette-client-participation-use-case passed");
 }
 
 void main();

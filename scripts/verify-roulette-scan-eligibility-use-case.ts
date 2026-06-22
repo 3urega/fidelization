@@ -12,10 +12,14 @@ import { IssueRouletteSpinEligibility } from "../src/contexts/loyalty/games/appl
 import { GetTenantRouletteConfig } from "../src/contexts/loyalty/games/application/config/GetTenantRouletteConfig";
 import { AssertRouletteSpinAccess } from "../src/contexts/loyalty/games/application/spin/AssertRouletteSpinAccess";
 import { ExecuteRouletteSpin } from "../src/contexts/loyalty/games/application/spin/ExecuteRouletteSpin";
+import { GetRouletteParticipationState } from "../src/contexts/loyalty/games/application/participation/GetRouletteParticipationState";
+import { ResolveRouletteParticipationUsage } from "../src/contexts/loyalty/games/application/participation/ResolveRouletteParticipationUsage";
 import { GetRoulettePublicState } from "../src/contexts/loyalty/games/application/spin/GetRoulettePublicState";
+import { ListRecentRouletteSpinsForCustomer } from "../src/contexts/loyalty/games/application/spin/ListRecentRouletteSpinsForCustomer";
 import { RouletteSpinEligibility } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibility";
 import { RouletteSpinEligibilityRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibilityRepository";
 import { RouletteSpinNotEligible } from "../src/contexts/loyalty/games/domain/RouletteSpinNotEligible";
+import { RouletteParticipationRepository } from "../src/contexts/loyalty/games/domain/RouletteParticipationRepository";
 import { RouletteSpinRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinRepository";
 import { RouletteSpinUnitOfWork } from "../src/contexts/loyalty/games/domain/RouletteSpinUnitOfWork";
 import {
@@ -151,6 +155,14 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 
 	async listRecentByCustomer(): Promise<never[]> {
 		return [];
+	}
+}
+
+class InMemoryRouletteParticipationRepository extends RouletteParticipationRepository {
+	async save(): Promise<void> {}
+
+	async findByTenantAndCustomer(): Promise<null> {
+		return null;
 	}
 }
 
@@ -304,7 +316,18 @@ async function main(): Promise<void> {
 		getConfig,
 		spinRepository,
 	);
-	const publicState = new GetRoulettePublicState(assertAccess, getConfig, eligibilityRepository);
+	const publicState = new GetRoulettePublicState(
+		assertAccess,
+		getConfig,
+		new GetRouletteParticipationState(
+			getConfig,
+			new InMemoryRouletteParticipationRepository(),
+			eligibilityRepository,
+			new ResolveRouletteParticipationUsage(spinRepository, eligibilityRepository),
+		),
+		new ListRecentRouletteSpinsForCustomer(spinRepository),
+		eligibilityRepository,
+	);
 	const locked = await publicState.execute({ tenantId, customerId: "other-customer" });
 
 	if (locked.canSpin || locked.eligibility !== null) {

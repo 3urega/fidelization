@@ -30,6 +30,7 @@ import { RouletteSpinNotEligible } from "../src/contexts/loyalty/games/domain/Ro
 import { RouletteSpin, type RouletteSpinPrimitives } from "../src/contexts/loyalty/games/domain/RouletteSpin";
 import { RouletteSpinEligibility } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibility";
 import { RouletteSpinEligibilityRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinEligibilityRepository";
+import { RouletteParticipationRepository } from "../src/contexts/loyalty/games/domain/RouletteParticipationRepository";
 import { RouletteSpinRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinRepository";
 import { RouletteSpinUnitOfWork } from "../src/contexts/loyalty/games/domain/RouletteSpinUnitOfWork";
 import {
