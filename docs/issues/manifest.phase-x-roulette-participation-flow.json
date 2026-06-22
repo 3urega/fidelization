@@ -4,10 +4,6 @@
   "label": "roulette-participation-flow",
   "issues": [
     {
-      "title": "Phase X1: Roulette config v2 + customer participation domain (enrollment + quota)",
-      "bodyFile": "docs/issues/roulette-config-v2-participation-domain.md"
-    },
-    {
       "title": "Phase X2: Owner roulette config v2 UI (period, quota, min purchase)",
       "bodyFile": "docs/issues/roulette-owner-config-v2-ui.md"
     },

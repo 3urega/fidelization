@@ -11,6 +11,13 @@ export abstract class RouletteSpinRepository {
 		since: Date,
 	): Promise<number>;
 
+	abstract countByCustomerBetween(
+		tenantId: string,
+		customerId: string,
+		start: Date,
+		end: Date,
+	): Promise<number>;
+
 	abstract listPendingRedeemByCustomer(
 		tenantId: string,
 		customerId: string,

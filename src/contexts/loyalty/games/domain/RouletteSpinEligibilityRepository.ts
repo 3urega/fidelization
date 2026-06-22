@@ -13,4 +13,11 @@ export abstract class RouletteSpinEligibilityRepository {
 		tenantId: string,
 		customerId: string,
 	): Promise<RouletteSpinEligibility | null>;
+
+	abstract countUnconsumedCreatedBetween(
+		tenantId: string,
+		customerId: string,
+		start: Date,
+		end: Date,
+	): Promise<number>;
 }

@@ -4,6 +4,7 @@ import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/appli
 import { isOwnerVisiblePlatformGameStatus } from "../../../../platform/domain/PlatformGameStatus";
 import { PlatformGameRepository } from "../../../../platform/domain/PlatformGameRepository";
 import { GetTenantRouletteConfig } from "./GetTenantRouletteConfig";
+import { usesLegacyStaffScanAuthorization } from "../../domain/RouletteConfig";
 import { RULETA_GAME_SLUG } from "../../domain/TenantGameActivation";
 
 export type GetStaffRouletteScanContextParams = {
@@ -46,10 +47,8 @@ export class GetStaffRouletteScanContext {
 			return { unlockEnabled: false };
 		}
 
-		const trigger = activation.config.toPrimitives().rules.trigger;
-
 		return {
-			unlockEnabled: trigger === "after_staff_scan",
+			unlockEnabled: usesLegacyStaffScanAuthorization(activation.config),
 		};
 	}
 }

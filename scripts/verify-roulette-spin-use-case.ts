@@ -129,6 +129,25 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 		}).length;
 	}
 
+	async countByCustomerBetween(
+		tenantIdValue: string,
+		customerIdValue: string,
+		start: Date,
+		end: Date,
+	): Promise<number> {
+		return this.spins.filter((spin) => {
+			const primitives = spin.toPrimitives();
+			const createdAt = new Date(primitives.createdAt);
+
+			return (
+				primitives.tenantId === tenantIdValue &&
+				primitives.customerId === customerIdValue &&
+				createdAt >= start &&
+				createdAt < end
+			);
+		}).length;
+	}
+
 	async listPendingRedeemByCustomer(): Promise<RouletteSpin[]> {
 		return [];
 	}
@@ -187,6 +206,26 @@ class InMemoryRouletteSpinEligibilityRepository extends RouletteSpinEligibilityR
 		this.rows = [eligibility];
 
 		return eligibility;
+	}
+
+	async countUnconsumedCreatedBetween(
+		tenantIdValue: string,
+		customerIdValue: string,
+		start: Date,
+		end: Date,
+	): Promise<number> {
+		return this.rows.filter((row) => {
+			const primitives = row.toPrimitives();
+			const createdAt = new Date(primitives.createdAt);
+
+			return (
+				primitives.tenantId === tenantIdValue &&
+				primitives.customerId === customerIdValue &&
+				primitives.consumedAt === null &&
+				createdAt >= start &&
+				createdAt < end
+			);
+		}).length;
 	}
 }
 

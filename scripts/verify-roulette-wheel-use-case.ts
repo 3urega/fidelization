@@ -1,6 +1,6 @@
 /* eslint-disable no-console -- CLI verify script */
 import { InvalidRouletteConfig } from "../src/contexts/loyalty/games/domain/InvalidRouletteConfig";
-import { parseRouletteConfig } from "../src/contexts/loyalty/games/domain/RouletteConfig";
+import { parseRouletteConfig, getParticipationRules } from "../src/contexts/loyalty/games/domain/RouletteConfig";
 import type { RoulettePrizeType } from "../src/contexts/loyalty/games/domain/RoulettePrizeType";
 import { RouletteSegment } from "../src/contexts/loyalty/games/domain/RouletteSegment";
 import { RouletteSegmentsExhausted } from "../src/contexts/loyalty/games/domain/RouletteSegmentsExhausted";
@@ -134,7 +134,37 @@ function segmentFrom(input: {
 function main(): void {
 	assertParseOk("parse demo config", DEMO_CONFIG);
 
-	assertParseFails("reject version !== 1", { ...DEMO_CONFIG, version: 2 });
+	assertParseFails("reject version 3", { ...DEMO_CONFIG, version: 3 });
+	assertParseOk("parse v2 config", {
+		...DEMO_CONFIG,
+		version: 2,
+		rules: {
+			participationPeriodDays: 7,
+			maxSpinsInPeriod: 3,
+			maxSpinsPerDay: 1,
+			minPurchaseEuros: 10,
+			requiresEnrollment: true,
+			authorizationMode: "staff_explicit",
+			eligibilityTtlHours: 24,
+		},
+	});
+
+	const migrated = parseRouletteConfig(DEMO_CONFIG);
+	const participationRules = getParticipationRules(migrated);
+
+	if (
+		participationRules.participationPeriodDays !== 7 ||
+		participationRules.maxSpinsInPeriod !== DEMO_RULES.maxSpinsPerWeek ||
+		participationRules.maxSpinsPerDay !== DEMO_RULES.maxSpinsPerDay ||
+		participationRules.authorizationMode !== "after_staff_scan" ||
+		participationRules.requiresEnrollment !== false
+	) {
+		console.error("❌ v1 migration to participation rules", participationRules);
+		process.exit(1);
+	}
+
+	console.log("✅ v1 config migrates to participation rules");
+
 	assertParseFails("reject 1 segment", {
 		version: 1,
 		segments: [SEGMENT_NONE],

@@ -4,6 +4,7 @@ import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/appli
 import { isOwnerVisiblePlatformGameStatus } from "../../../../platform/domain/PlatformGameStatus";
 import { PlatformGameRepository } from "../../../../platform/domain/PlatformGameRepository";
 import { GetTenantRouletteConfig } from "../config/GetTenantRouletteConfig";
+import { getRateLimitRules, usesLegacyStaffScanAuthorization } from "../../domain/RouletteConfig";
 import { RouletteSpinEligibility } from "../../domain/RouletteSpinEligibility";
 import { RouletteSpinEligibilityRepository } from "../../domain/RouletteSpinEligibilityRepository";
 import { RULETA_GAME_SLUG } from "../../domain/TenantGameActivation";
@@ -54,13 +55,12 @@ export class IssueRouletteSpinEligibility {
 			return null;
 		}
 
-		const rules = activation.config.toPrimitives().rules;
-
-		if (rules.trigger !== "after_staff_scan") {
+		if (!usesLegacyStaffScanAuthorization(activation.config)) {
 			return null;
 		}
 
-		const expiresAt = new Date(Date.now() + rules.eligibilityTtlHours * 60 * 60 * 1000);
+		const { eligibilityTtlHours } = getRateLimitRules(activation.config);
+		const expiresAt = new Date(Date.now() + eligibilityTtlHours * 60 * 60 * 1000);
 		const existing = await this.eligibilityRepository.findUnconsumedByCustomer(
 			params.tenantId,
 			params.customerId,

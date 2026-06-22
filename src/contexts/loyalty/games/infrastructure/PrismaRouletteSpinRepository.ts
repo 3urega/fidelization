@@ -60,6 +60,24 @@ export class PrismaRouletteSpinRepository extends RouletteSpinRepository {
 		});
 	}
 
+	async countByCustomerBetween(
+		tenantId: string,
+		customerId: string,
+		start: Date,
+		end: Date,
+	): Promise<number> {
+		return prisma.rouletteSpin.count({
+			where: {
+				tenantId,
+				customerId,
+				createdAt: {
+					gte: start,
+					lt: end,
+				},
+			},
+		});
+	}
+
 	async listPendingRedeemByCustomer(tenantId: string, customerId: string): Promise<RouletteSpin[]> {
 		const rows = await prisma.rouletteSpin.findMany({
 			where: {

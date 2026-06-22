@@ -1,6 +1,7 @@
 import { Service } from "diod";
 
 import { GetTenantRouletteConfig } from "../config/GetTenantRouletteConfig";
+import { getRateLimitRules } from "../../domain/RouletteConfig";
 import { AssertRouletteSpinAccess } from "./AssertRouletteSpinAccess";
 import { RouletteSpinEligibilityRepository } from "../../domain/RouletteSpinEligibilityRepository";
 
@@ -52,11 +53,7 @@ export class GetRoulettePublicState {
 				canSpin: false,
 				segments: [],
 				rules: activation.config
-					? {
-							maxSpinsPerDay: activation.config.toPrimitives().rules.maxSpinsPerDay,
-							maxSpinsPerWeek: activation.config.toPrimitives().rules.maxSpinsPerWeek,
-							eligibilityTtlHours: activation.config.toPrimitives().rules.eligibilityTtlHours,
-						}
+					? getRateLimitRules(activation.config)
 					: DEFAULT_RULES,
 				eligibility: null,
 			};
@@ -68,11 +65,7 @@ export class GetRoulettePublicState {
 			label: segment.label,
 			color: segment.color,
 		}));
-		const rules = {
-			maxSpinsPerDay: primitives.rules.maxSpinsPerDay,
-			maxSpinsPerWeek: primitives.rules.maxSpinsPerWeek,
-			eligibilityTtlHours: primitives.rules.eligibilityTtlHours,
-		};
+		const rules = getRateLimitRules(activation.config);
 
 		const activeEligibility = await this.eligibilityRepository.findActiveByCustomer(
 			params.tenantId,

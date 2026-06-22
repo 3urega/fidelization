@@ -19,6 +19,7 @@ export class PrismaRouletteSpinEligibilityRepository extends RouletteSpinEligibi
 				consumedAt: p.consumedAt ? new Date(p.consumedAt) : null,
 				consumedSpinId: p.consumedSpinId,
 				triggerRef: p.triggerRef,
+				authorizedPurchaseEuros: p.authorizedPurchaseEuros,
 				createdAt: new Date(p.createdAt),
 			},
 			update: {
@@ -26,6 +27,7 @@ export class PrismaRouletteSpinEligibilityRepository extends RouletteSpinEligibi
 				consumedAt: p.consumedAt ? new Date(p.consumedAt) : null,
 				consumedSpinId: p.consumedSpinId,
 				triggerRef: p.triggerRef,
+				authorizedPurchaseEuros: p.authorizedPurchaseEuros,
 				createdAt: new Date(p.createdAt),
 			},
 		});
@@ -65,6 +67,25 @@ export class PrismaRouletteSpinEligibilityRepository extends RouletteSpinEligibi
 		return row ? this.mapRow(row) : null;
 	}
 
+	async countUnconsumedCreatedBetween(
+		tenantId: string,
+		customerId: string,
+		start: Date,
+		end: Date,
+	): Promise<number> {
+		return prisma.rouletteSpinEligibility.count({
+			where: {
+				tenantId,
+				customerId,
+				consumedAt: null,
+				createdAt: {
+					gte: start,
+					lt: end,
+				},
+			},
+		});
+	}
+
 	private mapRow(row: {
 		id: string;
 		tenantId: string;
@@ -73,6 +94,7 @@ export class PrismaRouletteSpinEligibilityRepository extends RouletteSpinEligibi
 		consumedAt: Date | null;
 		consumedSpinId: string | null;
 		triggerRef: string | null;
+		authorizedPurchaseEuros: number | null;
 		createdAt: Date;
 	}): RouletteSpinEligibility {
 		return RouletteSpinEligibility.fromPrimitives({
@@ -83,6 +105,7 @@ export class PrismaRouletteSpinEligibilityRepository extends RouletteSpinEligibi
 			consumedAt: row.consumedAt?.toISOString() ?? null,
 			consumedSpinId: row.consumedSpinId,
 			triggerRef: row.triggerRef,
+			authorizedPurchaseEuros: row.authorizedPurchaseEuros,
 			createdAt: row.createdAt.toISOString(),
 		});
 	}

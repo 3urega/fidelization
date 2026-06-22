@@ -124,6 +124,10 @@ class InMemoryRouletteSpinEligibilityRepository extends RouletteSpinEligibilityR
 			}) ?? null
 		);
 	}
+
+	async countUnconsumedCreatedBetween(): Promise<number> {
+		return 0;
+	}
 }
 
 class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
@@ -134,6 +138,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 	}
 
 	async countByCustomerSince(): Promise<number> {
+		return 0;
+	}
+
+	async countByCustomerBetween(): Promise<number> {
 		return 0;
 	}
 }

@@ -8,6 +8,7 @@ export type RouletteSpinEligibilityPrimitives = {
 	consumedAt: string | null;
 	consumedSpinId: string | null;
 	triggerRef: string | null;
+	authorizedPurchaseEuros: number | null;
 	createdAt: string;
 };
 
@@ -16,6 +17,7 @@ export type RouletteSpinEligibilityCreateParams = {
 	customerId: string;
 	expiresAt: Date;
 	triggerRef?: string | null;
+	authorizedPurchaseEuros?: number | null;
 };
 
 export class RouletteSpinEligibility {
@@ -30,6 +32,7 @@ export class RouletteSpinEligibility {
 			consumedAt: null,
 			consumedSpinId: null,
 			triggerRef: params.triggerRef ?? null,
+			authorizedPurchaseEuros: params.authorizedPurchaseEuros ?? null,
 			createdAt: new Date().toISOString(),
 		});
 	}

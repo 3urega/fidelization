@@ -85,6 +85,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 		return 0;
 	}
 
+	async countByCustomerBetween(): Promise<number> {
+		return 0;
+	}
+
 	async listPendingRedeemByCustomer(
 		tenantIdValue: string,
 		customerIdValue: string,

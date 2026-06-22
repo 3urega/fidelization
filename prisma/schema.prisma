@@ -121,6 +121,7 @@ model Tenant {
   gameActivations    TenantGameActivation[]
   rouletteSpins      RouletteSpin[]
   rouletteSpinEligibilities RouletteSpinEligibility[]
+  rouletteParticipations RouletteParticipation[]
   platformBroadcasts      PlatformBroadcast[]
 
   @@map("tenants")
@@ -169,6 +170,7 @@ model Customer {
   promotionUsages CustomerPromotionUsage[]
   rouletteSpins RouletteSpin[]
   rouletteSpinEligibilities RouletteSpinEligibility[]
+  rouletteParticipations RouletteParticipation[]
 
   @@unique([userId, tenantId])
   @@index([tenantId])
@@ -507,10 +509,28 @@ model RouletteSpinEligibility {
   consumedAt     DateTime? @map("consumed_at")
   consumedSpinId String?   @map("consumed_spin_id")
   triggerRef     String?   @map("trigger_ref")
+  authorizedPurchaseEuros Float? @map("authorized_purchase_euros")
   createdAt      DateTime  @default(now()) @map("created_at")
   tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, customerId, consumedAt, expiresAt])
   @@map("roulette_spin_eligibilities")
+}
+
+model RouletteParticipation {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  customerId   String   @map("customer_id")
+  enrolledAt   DateTime @map("enrolled_at")
+  periodEndsAt DateTime @map("period_ends_at")
+  status       String   @default("active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, customerId])
+  @@index([tenantId, customerId])
+  @@map("roulette_participations")
 }

@@ -4,6 +4,7 @@ import { AssertTenantPlanFeature } from "../../../../billing/subscriptions/appli
 import { isOwnerVisiblePlatformGameStatus } from "../../../../platform/domain/PlatformGameStatus";
 import { PlatformGameRepository } from "../../../../platform/domain/PlatformGameRepository";
 import { GetTenantRouletteConfig } from "../config/GetTenantRouletteConfig";
+import { getRateLimitRules } from "../../domain/RouletteConfig";
 import { RouletteGameDisabled } from "../../domain/RouletteGameDisabled";
 import { RouletteGameNotAvailable } from "../../domain/RouletteGameNotAvailable";
 import { RouletteSpinRateLimitExceeded } from "../../domain/RouletteSpinRateLimitExceeded";
@@ -50,7 +51,7 @@ export class AssertRouletteSpinAccess {
 			throw new RouletteGameDisabled();
 		}
 
-		const { maxSpinsPerDay, maxSpinsPerWeek } = activation.config.toPrimitives().rules;
+		const { maxSpinsPerDay, maxSpinsPerWeek } = getRateLimitRules(activation.config);
 		await this.assertUnderRateLimits(params.tenantId, params.customerId, maxSpinsPerDay, maxSpinsPerWeek);
 
 		return { isEnabled: true, maxSpinsPerDay, maxSpinsPerWeek };

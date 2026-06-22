@@ -188,13 +188,24 @@ Phase W (#115–#117) analytics: implementar **después** de X o adaptar read mo
 
 | # | Título | Body |
 |---|--------|------|
-| [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | [`roulette-config-v2-participation-domain.md`](../issues/roulette-config-v2-participation-domain.md) |
+| [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | **Implemented** 2026-06-22 — [`verify:roulette-participation-use-case`](../../package.json) |
 | [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | [`roulette-owner-config-v2-ui.md`](../issues/roulette-owner-config-v2-ui.md) |
 | [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | [`roulette-client-enrollment-ui.md`](../issues/roulette-client-enrollment-ui.md) |
 | [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | [`roulette-staff-authorize-scan.md`](../issues/roulette-staff-authorize-scan.md) |
 | [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | [`phase-x-roulette-flow-verify-docs.md`](../issues/phase-x-roulette-flow-verify-docs.md) |
 
 Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../issues/manifest.phase-x-roulette-participation-flow.json).
+
+## Implementation status (X1)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Config v2 + migrate v1 | [`RouletteConfig.ts`](../../src/contexts/loyalty/games/domain/RouletteConfig.ts) |
+| Participations table | `roulette_participations` (Prisma migration `20260622120000`) |
+| Domain | `RouletteParticipation`, quota helpers, typed errors (`RouletteNotEnrolled`, `RouletteQuotaExhausted`, …) |
+| Use cases | `EnrollCustomerInRoulette`, `GetRouletteParticipationState`, `AuthorizeRouletteSpin` |
+| Eligibility extension | `authorizedPurchaseEuros` on `roulette_spin_eligibilities` |
+| Domain verify | `npm run verify:roulette-participation-use-case` |
 
 ## Fuera de alcance global
 
