@@ -10,6 +10,7 @@ import {
 	TENANT_SLUG_HEADER,
 } from "../src/lib/tenant/forwardResolvedTenantHeaders";
 import { RULETA_GAME_SLUG } from "../src/contexts/loyalty/games/domain/TenantGameActivation";
+import { parseRouletteConfig } from "../src/contexts/loyalty/games/domain/RouletteConfig";
 import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
 import { DEMO_ROULETTE_CONFIG } from "../src/lib/roulette/demoRouletteConfig";
 import { prisma } from "../src/lib/prisma";
@@ -25,14 +26,15 @@ import { grantSpinEligibilityViaStaffScan } from "./lib/staff-scan-verify-helper
 const PLAN_BASIC_ID = "00000000-0000-4000-8000-000000000004";
 const PLAN_PREMIUM_ID = "00000000-0000-4000-8000-000000000007";
 
-const pointsSpinConfig = {
-	...DEMO_ROULETTE_CONFIG,
+/** Legacy v1 config — regression for after_staff_scan auto-eligibility (independent of demo v2). */
+const legacyEligibilityConfig = parseRouletteConfig({
+	version: 1,
 	segments: [
 		{
 			id: "00000000-0000-4000-8000-000000000801",
 			label: "+10 puntos",
 			weight: 100,
-			prizeType: "points" as const,
+			prizeType: "points",
 			prize: { points: 10 },
 			stockLimit: null,
 			stockUsed: 0,
@@ -41,20 +43,19 @@ const pointsSpinConfig = {
 			id: "00000000-0000-4000-8000-000000000802",
 			label: "Sin premio",
 			weight: 1,
-			prizeType: "none" as const,
+			prizeType: "none",
 			prize: {},
 			stockLimit: null,
 			stockUsed: 0,
 		},
 	],
 	rules: {
-		...DEMO_ROULETTE_CONFIG.rules,
 		maxSpinsPerDay: 2,
 		maxSpinsPerWeek: 5,
 		eligibilityTtlHours: 24,
-		trigger: "after_staff_scan" as const,
+		trigger: "after_staff_scan",
 	},
-};
+}).toPrimitives();
 
 function tenantHeaders(extra: Record<string, string> = {}): Record<string, string> {
 	return {
@@ -138,9 +139,9 @@ async function main(): Promise<void> {
 			tenantId: DEMO_TENANT_ID,
 			gameSlug: RULETA_GAME_SLUG,
 			isEnabled: true,
-			config: pointsSpinConfig,
+			config: legacyEligibilityConfig,
 		},
-		update: { isEnabled: true, config: pointsSpinConfig },
+		update: { isEnabled: true, config: legacyEligibilityConfig },
 	});
 
 	const lockedState = await fetch(
@@ -280,6 +281,11 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ expired eligibility blocks canSpin");
+
+	await prisma.tenantGameActivation.update({
+		where: { tenantId_gameSlug: { tenantId: DEMO_TENANT_ID, gameSlug: RULETA_GAME_SLUG } },
+		data: { config: DEMO_ROULETTE_CONFIG },
+	});
 
 	await prisma.tenant.update({
 		where: { id: DEMO_TENANT_ID },

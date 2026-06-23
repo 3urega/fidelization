@@ -85,6 +85,7 @@
     "verify:roulette-client-participation": "tsx scripts/verify-roulette-client-participation.ts",
     "verify:roulette-staff-authorize-use-case": "tsx scripts/verify-roulette-staff-authorize-use-case.ts",
     "verify:roulette-staff-authorize": "tsx scripts/verify-roulette-staff-authorize.ts",
+    "verify:roulette-participation-flow-e2e": "tsx scripts/verify-roulette-participation-flow-e2e.ts",
     "verify:stamp-campaign-adopt-template-use-case": "tsx scripts/verify-stamp-campaign-adopt-template-use-case.ts",
     "verify:stamp-campaign-adopt-template": "tsx scripts/verify-stamp-campaign-adopt-template.ts",
     "verify:business-register": "tsx scripts/verify-business-register.ts",

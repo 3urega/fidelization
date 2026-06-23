@@ -1,10 +1,10 @@
 # Ruleta de fidelización (gamification)
 
-**Status:** **Implemented (MVP ruleta)** — V1 ([#108](https://github.com/3urega/fidelization/issues/108), 2026-06-20) through V7 ([#114](https://github.com/3urega/fidelization/issues/114), 2026-06-20).
+**Status:** **Implemented** — Phase V ([#108](https://github.com/3urega/fidelization/issues/108)–[#114](https://github.com/3urega/fidelization/issues/114), 2026-06-20) + Phase X participación v2 ([#118](https://github.com/3urega/fidelization/issues/118)–[#122](https://github.com/3urega/fidelization/issues/122), 2026-06-22).
 
 ## Overview
 
-Primer juego implementado del motor de gamificación (`platform_games.slug = "ruleta"`). Owner Premium configura segmentos ponderados; el cliente gira tras una visita validada (staff scan); el **servidor** decide el premio; la animación solo refleja el resultado.
+Primer juego implementado del motor de gamificación (`platform_games.slug = "ruleta"`). Owner Premium configura segmentos ponderados, cuota por periodo e importe mínimo; el cliente **activa la ruleta en la app**, el staff **autoriza el giro en caja** con importe; el **servidor** decide el premio; la animación solo refleja el resultado.
 
 **Feature flag:** `gamification` (plan Premium). Catálogo global en `platform_games`; configuración por tenant en `tenant_game_activations`.
 
@@ -17,24 +17,42 @@ Primer juego implementado del motor de gamificación (`platform_games.slug = "ru
 3. Un giro = evento auditable (`roulette_spins` + opcional `LoyaltyTransaction`).
 4. Mobile-first en `/home/establishments/[slug]`.
 
-## Flujo MVP
+## Flujo operativo v2 (staff_explicit)
+
+Config v2 con `authorizationMode: staff_explicit` (default demo/seed). Visita/sello y ruleta son **acciones independientes** en `/scan`.
 
 ```text
-Staff scan (visita/punto) → elegibilidad de giro (TTL 24h)
-Cliente abre detalle local → CTA «Girar ruleta»
-POST spin → segmentIndex + premio → animación UI
-Premio puntos/sello → reflejado en loyalty me / detalle
-Premio físico → pending_redeem (canje staff v2)
+Owner configura ruleta v2 (premios, cuota periodo, min €)
+  → Cliente activa ruleta en app del local (enroll)
+  → Ve giros restantes, condiciones, premios posibles
+  → Paga en caja → staff: «Autorizar giro ruleta» + importe € + QR
+  → OK: outcome roulette_auth_granted → cliente puede girar en app
+  → KO: outcome roulette_auth_denied (not_enrolled, min_purchase, quota_exhausted…)
+  → Cliente POST spin → segmentIndex + premio → animación UI
+  → Premio puntos/sello → reflejado en detalle / loyalty
+  → Premio físico → pending_redeem (canje staff Flujo B)
 ```
 
-### Pantalla staff `/scan` (Flujo A vs B)
+### Pantalla staff `/scan` (v2)
 
-| Caso en caja | Qué hace el empleado | UI |
-|--------------|---------------------|-----|
-| «Quiero girar la ruleta» | Formulario **principal**: tarjeta → QR → Registrar visita | Banner 3 pasos + outcome «Ruleta desbloqueada…» |
-| «Gané un café en la ruleta» | Sección **colapsada** Canjear premio físico | Auto-búsqueda tras scan o QR manual |
+| Caso en caja | Qué hace el empleado | Outcome / UI |
+|--------------|---------------------|--------------|
+| «Quiero girar la ruleta» (v2) | Picker **Autorizar giro ruleta** → importe € → QR | `roulette_auth_granted` o `roulette_auth_denied` |
+| «Registro visita / sello» | Tarjeta o promoción → QR → Registrar visita | `point_recorded` + sello/promo (sin ruleta en v2) |
+| «Gané un café en la ruleta» | Sección colapsada **Canjear premio físico** | Canje `pending_redeem` |
 
-Copy operativo: no confundir «buscar premios pendientes» con desbloquear un giro nuevo. Ver [`staff-scan-flow.md`](staff-scan-flow.md) § Staff scan + ruleta.
+Copy operativo: no confundir autorizar un giro nuevo con canjear un premio físico ya ganado. Ver [`staff-scan-flow.md`](staff-scan-flow.md) § Staff scan + ruleta.
+
+### Dual mode y migración v1 → v2
+
+| Modo | Config | Desbloqueo ruleta | Verify regresión |
+|------|--------|-------------------|------------------|
+| **v2 (target)** | `authorizationMode: staff_explicit` | Target `roulette_authorize` + `purchaseAmountEuros` | `verify:roulette-participation-flow-e2e`, `verify:roulette-staff-authorize*` |
+| **Legacy (superseded)** | v1 `trigger: after_staff_scan` o v2 migrado con ese modo | Scan sello/promo → `roulette_spin_granted` | `verify:roulette-scan-eligibility*` |
+
+- El editor owner ([`rouletteEditorUtils.ts`](../../src/lib/roulette/rouletteEditorUtils.ts)) migra reglas v1 al cargar; no hay script masivo de BD en Phase X.
+- Demo/seed usan [`DEMO_ROULETTE_CONFIG`](../../src/lib/roulette/demoRouletteConfig.ts) v2.
+- Helpers de dominio: `usesLegacyStaffScanAuthorization` / `usesStaffExplicitAuthorization` en [`RouletteConfig.ts`](../../src/contexts/loyalty/games/domain/RouletteConfig.ts).
 
 ## Modelo de datos (target)
 
@@ -60,21 +78,21 @@ Config JSON versionada: segmentos con `weight`, `prizeType`, stock opcional, reg
 
 Solo premios `physical` en `pending_redeem`; owner/employee; segundo redeem → `RouletteSpinAlreadyRedeemed` (409).
 
-## Implementation status (V6)
+## Implementation status (V6 — legacy, superseded by Phase X)
 
 | Artefacto | Ruta |
 |-----------|------|
 | Eligibility table | `roulette_spin_eligibilities` (Prisma migration) |
 | Domain | `RouletteSpinEligibility`, `RouletteSpinNotEligible` |
-| Issue use case | `IssueRouletteSpinEligibility` — emisión tras staff scan |
-| Scan integration | `RecordStaffScanByTarget` → outcome `roulette_spin_granted` |
+| Issue use case | `IssueRouletteSpinEligibility` — emisión tras staff scan **solo si** `usesLegacyStaffScanAuthorization` |
+| Scan integration | `RecordStaffScanByTarget` → outcome `roulette_spin_granted` (legacy) |
 | Spin gate | `GetRoulettePublicState` / `ExecuteRouletteSpin` requieren elegibilidad activa |
 | Consumo atómico | `PrismaRouletteSpinUnitOfWork` — spin + `consumedAt` en `$transaction` |
 | Staff outcome | `StaffScanOutcome` kind `roulette_spin_granted` + `expiresAt` |
-| Domain verify | `npm run verify:roulette-scan-eligibility-use-case` |
-| E2E verify | `npm run verify:roulette-scan-eligibility` (dev + `DATABASE_URL`) |
+| Domain verify | `npm run verify:roulette-scan-eligibility-use-case` (**legacy regression**) |
+| E2E verify | `npm run verify:roulette-scan-eligibility` (dev + `DATABASE_URL`; config v1) |
 
-Reglas: una elegibilidad no consumida por customer/tenant; nuevo scan **renueva** `expiresAt`; `canSpin` = gates Premium + ruleta activa + rate limits + elegibilidad activa; giro consume elegibilidad (`triggerSource: staff_scan`, `triggerRef: eligibilityId`).
+Reglas legacy: scan sello/promo puede desbloquear ruleta automáticamente; nuevo scan **renueva** `expiresAt`. En config v2 `staff_explicit` este side-effect **no** se ejecuta — usar Flujo X4 (`roulette_authorize`).
 
 ## Implementation status (V5)
 
@@ -159,20 +177,9 @@ Patrones a reutilizar: `StampScanTimeWindows` + `env.appTimezone`, `ListStampCam
 
 Manifest: [`docs/issues/manifest.phase-w-roulette-analytics.json`](../issues/manifest.phase-w-roulette-analytics.json).
 
-## Phase X — Participación cliente + autorización caja (draft)
+## Phase X — Participación cliente + autorización caja (**complete**)
 
-**Problema:** el MVP (Phase V6) concede elegibilidad de ruleta **automáticamente** al registrar cualquier visita de sello/promo, sin opt-in del cliente, sin cuota por periodo de participación, sin importe mínimo, y sin acción explícita «Autorizar giro» en caja.
-
-**Flujo target:**
-
-```text
-Owner configura (premios, %, cuota periodo, min €)
-  → Cliente activa ruleta en app del local
-  → Ve giros restantes, condiciones, premios posibles, historial
-  → Paga en caja → staff: QR + «Autorizar giro ruleta» + importe
-  → OK: app lista para girar | KO: mensaje claro (no activada, sin cuota, importe bajo…)
-  → Cliente gira → premio servidor
-```
+**Problema resuelto:** el MVP (Phase V6) concedía elegibilidad de ruleta **automáticamente** al registrar cualquier visita de sello/promo. Phase X introduce opt-in, cuota por periodo, importe mínimo y autorización explícita en caja.
 
 | Gap MVP | Target X |
 |---------|----------|
@@ -188,13 +195,11 @@ Phase W (#115–#117) analytics: implementar **después** de X o adaptar read mo
 
 | # | Título | Body |
 |---|--------|------|
-| [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | **Implemented** 2026-06-22 — [`verify:roulette-participation-use-case`](../../package.json) |
+| [#118](https://github.com/3urega/fidelization/issues/118) | Phase X1: Roulette config v2 + customer participation domain | **Implemented** 2026-06-22 — `verify:roulette-participation-use-case` |
 | [#119](https://github.com/3urega/fidelization/issues/119) | Phase X2: Owner roulette config v2 UI | **Implemented** 2026-06-22 — `verify:roulette-owner-config` |
 | [#120](https://github.com/3urega/fidelization/issues/120) | Phase X3: Client enrollment + rich state + app UI | **Implemented** 2026-06-22 — `verify:roulette-client-participation*` |
 | [#121](https://github.com/3urega/fidelization/issues/121) | Phase X4: Staff authorize roulette spin | **Implemented** 2026-06-22 — `verify:roulette-staff-authorize*` |
-| [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | [`phase-x-roulette-flow-verify-docs.md`](../issues/phase-x-roulette-flow-verify-docs.md) |
-
-Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../issues/manifest.phase-x-roulette-participation-flow.json).
+| [#122](https://github.com/3urega/fidelization/issues/122) | Phase X5: Phase X docs, verifies and migration | **Implemented** 2026-06-22 — `verify:roulette-participation-flow-e2e` |
 
 ## Implementation status (X1)
 
@@ -239,6 +244,16 @@ Manifest: [`docs/issues/manifest.phase-x-roulette-participation-flow.json`](../i
 | Targets API | [`ListStaffScanTargets.ts`](../../src/contexts/loyalty/customers/application/scan/ListStaffScanTargets.ts) — `rouletteAuthorize` |
 | UI `/scan` | [`StaffScanTargetPicker.tsx`](../../src/app/_components/loyalty/StaffScanTargetPicker.tsx), [`StaffScanForm.tsx`](../../src/app/_components/loyalty/StaffScanForm.tsx) |
 | Verifies | `npm run verify:roulette-staff-authorize-use-case`, `npm run verify:roulette-staff-authorize` (dev + `DATABASE_URL`) |
+
+## Implementation status (X5)
+
+| Artefacto | Ruta |
+|-----------|------|
+| E2E flujo completo v2 | [`verify-roulette-participation-flow-e2e.ts`](../../scripts/verify-roulette-participation-flow-e2e.ts) — enroll → authorize → spin → premio + `quota_exhausted` |
+| Docs flujo v2 | Este doc § Flujo operativo v2; [`staff-scan-flow.md`](staff-scan-flow.md) § Staff scan + ruleta |
+| AGENTS.md | Flujo operativo caja + app; verifies Phase X |
+| Legacy superseded | Phase V6 documentado como legacy; código dual mode conservado |
+| Verify | `npm run verify:roulette-participation-flow-e2e` (dev + `DATABASE_URL`) |
 
 ## Fuera de alcance global
 

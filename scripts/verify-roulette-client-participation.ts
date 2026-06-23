@@ -25,6 +25,7 @@ import type { RouletteConfigPrimitives } from "../src/contexts/loyalty/games/dom
 import { TenantGameActivationRepository } from "../src/contexts/loyalty/games/domain/TenantGameActivationRepository";
 import { PlatformGame } from "../src/contexts/platform/domain/PlatformGame";
 import { PlatformGameRepository } from "../src/contexts/platform/domain/PlatformGameRepository";
+import type { RouletteConfigPrimitivesV2 } from "../src/contexts/loyalty/games/domain/RouletteConfig";
 import { DEMO_ROULETTE_CONFIG } from "../src/lib/roulette/demoRouletteConfig";
 import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
 import { prisma } from "../src/lib/prisma";
@@ -32,6 +33,31 @@ import { apexBaseUrl, ensureDemoTenantActive, tenantSlug } from "./lib/customer-
 
 const PLAN_PREMIUM_ID = "00000000-0000-4000-8000-000000000007";
 const gameId = "00000000-0000-4000-8000-000000000030";
+
+/** Deterministic config so POST spin always awards points (no stamp/promo targets required). */
+const clientParticipationConfig: RouletteConfigPrimitivesV2 = {
+	...DEMO_ROULETTE_CONFIG,
+	segments: [
+		{
+			id: "00000000-0000-4000-8000-000000000c01",
+			label: "+10 puntos client participation",
+			weight: 100,
+			prizeType: "points",
+			prize: { points: 10 },
+			stockLimit: null,
+			stockUsed: 0,
+		},
+		{
+			id: "00000000-0000-4000-8000-000000000c02",
+			label: "Sin premio",
+			weight: 1,
+			prizeType: "none",
+			prize: {},
+			stockLimit: null,
+			stockUsed: 0,
+		},
+	],
+};
 
 class PrismaBackedParticipationRepository extends RouletteParticipationRepository {
 	async save(participation: RouletteParticipation): Promise<void> {
@@ -375,9 +401,9 @@ async function main(): Promise<void> {
 			tenantId: DEMO_TENANT_ID,
 			gameSlug: RULETA_GAME_SLUG,
 			isEnabled: true,
-			config: DEMO_ROULETTE_CONFIG,
+			config: clientParticipationConfig,
 		},
-		update: { isEnabled: true, config: DEMO_ROULETTE_CONFIG },
+		update: { isEnabled: true, config: clientParticipationConfig },
 	});
 
 	const cookie = await registerUser();
@@ -563,6 +589,11 @@ async function main(): Promise<void> {
 	}
 
 	console.log("✅ ruleta page shell renders");
+
+	await prisma.tenantGameActivation.update({
+		where: { tenantId_gameSlug: { tenantId: DEMO_TENANT_ID, gameSlug: RULETA_GAME_SLUG } },
+		data: { config: DEMO_ROULETTE_CONFIG },
+	});
 
 	await prisma.tenant.update({
 		where: { id: DEMO_TENANT_ID },

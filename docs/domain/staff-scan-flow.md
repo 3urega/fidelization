@@ -41,27 +41,58 @@
 | Scan form | [`StaffScanForm.tsx`](../../src/app/_components/loyalty/StaffScanForm.tsx) |
 | Page | [`/scan`](../../src/app/(app)/scan/page.tsx) — [`StaffScanPageClient.tsx`](../../src/app/(app)/scan/StaffScanPageClient.tsx) |
 
-## Staff scan + ruleta (Flujo A vs B)
+## Staff scan + ruleta (Flujo A-v2, A-legacy y B)
 
-**Flujo A — Cliente quiere girar (caja, habitual):**
+### Flujo A-v2 — Autorizar giro ruleta (config `staff_explicit`)
 
-1. Empleado elige **una tarjeta o promoción** en el formulario principal.
+Independiente de visita/sello. El cliente debe haber activado la ruleta en su app.
+
+1. Empleado elige **Autorizar giro de ruleta** en el picker.
+2. Introduce el **importe de la compra** (€).
+3. Pega/escanea el QR del cliente.
+4. Pulsa **Autorizar giro de ruleta**.
+5. Outcome `roulette_auth_granted` (éxito) o `roulette_auth_denied` con motivo (`not_enrolled`, `min_purchase`, `quota_exhausted`, …).
+6. El cliente gira en su app (`/home/establishments/[slug]/ruleta`).
+
+### Flujo A-legacy — Registrar visita y desbloquear ruleta (config `after_staff_scan`, superseded)
+
+Solo si `scan-context.unlockEnabled === true`. Mezcla visita loyalty con ruleta.
+
+1. Empleado elige **una tarjeta o promoción**.
 2. Pega/escanea el QR del cliente.
-3. Pulsa **Registrar visita** (o **Registrar visita y desbloquear ruleta** si ruleta activa con `after_staff_scan`).
-4. Outcome `roulette_spin_granted` → el cliente gira en su app (`/home/establishments/[slug]/ruleta`).
+3. Pulsa **Registrar visita y desbloquear ruleta**.
+4. Outcome `roulette_spin_granted` → el cliente gira en su app.
 
-**Flujo B — Cliente ya ganó premio físico (secundario):**
+### Flujo B — Cliente ya ganó premio físico (secundario)
 
 1. Sección colapsada **Canjear premio físico (ruleta)** en `/scan`.
-2. Tras registrar visita, se auto-buscan premios `pending_redeem` del mismo QR; también búsqueda manual.
+2. Tras cualquier scan, se auto-buscan premios `pending_redeem` del mismo QR; también búsqueda manual.
 3. Empleado marca **Canjeado** cuando entrega el premio.
+
+| Caso | Target / acción | Outcome principal |
+|------|-----------------|-------------------|
+| Ruleta v2 | `roulette_authorize` + `purchaseAmountEuros` | `roulette_auth_granted` / `roulette_auth_denied` |
+| Visita/sello | `stamp_campaign` / `promotion` | `point_recorded` + sello/promo |
+| Ruleta legacy | sello/promo + `after_staff_scan` | + `roulette_spin_granted` |
+| Canje físico | UI colapsada (no scan target) | redeem spin |
 
 | Artefacto | Ruta |
 |-----------|------|
-| Scan context API | `GET /api/loyalty/games/ruleta/scan-context` → `{ unlockEnabled }` |
-| Ruleta hint | [`StaffScanRouletteHint.tsx`](../../src/app/_components/loyalty/StaffScanRouletteHint.tsx) |
+| Scan context API | `GET /api/loyalty/games/ruleta/scan-context` → `{ unlockEnabled, authorizeEnabled, minPurchaseEuros }` |
+| Ruleta hints | [`StaffScanRouletteHint.tsx`](../../src/app/_components/loyalty/StaffScanRouletteHint.tsx) (legacy + authorize) |
 | Canje físico | [`StaffRoulettePendingRedeem.tsx`](../../src/app/_components/loyalty/StaffRoulettePendingRedeem.tsx) |
 | E2E UX verify | `npm run verify:staff-scan-roulette-ux` (dev server) |
+| E2E flujo v2 | `npm run verify:roulette-participation-flow-e2e` (dev + `DATABASE_URL`) |
+| E2E authorize | `npm run verify:roulette-staff-authorize` (dev + `DATABASE_URL`) |
+
+## Implementation status (X4/X5)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Target `roulette_authorize` | [`StaffScanTarget.ts`](../../src/contexts/loyalty/customers/domain/StaffScanTarget.ts) |
+| Authorize use case | [`RecordStaffRouletteAuthorizeByQr.ts`](../../src/contexts/loyalty/customers/application/scan/RecordStaffRouletteAuthorizeByQr.ts) |
+| Legacy gate | [`RecordStaffScanByTarget.ts`](../../src/contexts/loyalty/customers/application/scan/RecordStaffScanByTarget.ts) — sin auto-elegibilidad en v2 |
+| E2E flujo completo | `npm run verify:roulette-participation-flow-e2e` |
 
 ## Implementation status (M5)
 
