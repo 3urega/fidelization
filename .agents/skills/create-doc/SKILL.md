@@ -23,7 +23,7 @@ Based on the current conversation, create new or improve existing documentation 
 ```
 
 4. Ask the user to confirm the target file path before writing.
-5. Update the AGENTS.md index with the new doc.
+5. Update the doc map table in `AGENTS.md` (Documentation section) — do not add verify scripts to AGENTS.md; those live in `package.json`.
 
 ## Rules
 

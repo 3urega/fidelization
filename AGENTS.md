@@ -54,34 +54,90 @@ Detalle: [`docs/business-rules.md`](docs/business-rules.md).
 
 # Architecture
 
-- Next.js 14, Onion Architecture, DDD.
-- **Active contexts**: `identity`, `tenants`, `loyalty`, `billing`, `shared` (infra, DI).
-- **Tenant context (Fase 0):** JWT `tenantId` + `role` — spec: [`docs/teenant-resolution.md`](docs/teenant-resolution.md).
-- **Legacy reference**: `src/contexts/legacy/` — not wired in DI.
-- Frontend: `src/app/`. API: `src/app/api/`.
-- **App Router groups:** `(public)/`, `(auth)/`, `(app)/` owner shell (`/home` ≠ URL `/app`), `(loyalty)/` customer `/app`, `(platform)/` superadmin.
-- **Env:** [`src/lib/env.ts`](src/lib/env.ts), [`.env.example`](.env.example), [`docs/backend/external-services-env.md`](docs/backend/external-services-env.md).
+Next.js 14 · Onion Architecture · DDD · Capacitor (mobile-first).
+
+```
+Código
+├── src/contexts/
+│   ├── identity/          usuarios, auth (JWT kinds: user, tenant, platform, customer)
+│   ├── tenants/           tenant, memberships, owner onboarding
+│   ├── loyalty/           customers, sellos, puntos, rewards, promos, ruleta, scan
+│   ├── billing/           subscriptions tenant, plan gates, Stripe
+│   ├── shared/            infra, DI → diod.config.ts
+│   └── legacy/            MOOC, Femturisme, RAG — no wired in DI
+├── src/app/
+│   ├── api/               thin routes → container.get(UseCase)
+│   ├── (public)/          landing /
+│   ├── (auth)/            /login, /register
+│   ├── (app)/             owner shell → /home, /panel, /scan, /settings (≠ URL /app)
+│   ├── (loyalty)/         customer → /app, /app/card
+│   └── (platform)/        superadmin → /platform/*
+├── src/lib/env.ts         env server-side centralizado
+└── prisma/schema.prisma   esquema Postgres
+
+Tenant (Fase 0): JWT tenantId + role. Spec → docs/teenant-resolution.md
+Env / secrets → .env.example, docs/backend/external-services-env.md
+```
+
+**Convenciones backend** (leer en este orden al tocar API o casos de uso):
+
+```
+docs/backend/
+├── thin-api-routes.md              routes delgadas, sin lógica de negocio
+├── hexagonal-architecture.md       capas dominio / aplicación / infra / puertos
+├── dependency-injection-diod.md    @Service(), diod.config.ts
+├── api-routes-reflect-metadata.md  reflect-metadata en route handlers
+├── session-cookies-localhost-dev.md cookies dev, apex vs subdominio
+└── external-services-env.md        Google OAuth, Stripe, Mapbox, .env
+```
 
 # Documentation
 
-**Do NOT read all docs upfront.** Usar esta tabla y leer solo lo relevante a la tarea:
+**Do NOT read all docs upfront.** Árbol de referencia — abrir solo la rama de la tarea:
 
-| Tarea | Leer primero |
-|-------|----------------|
-| Producto, roles, visión | sección **Product** (este archivo), `docs/domain/saas-architecture.md`, `docs/business-rules.md` |
-| Planes, pricing, ingresos | `docs/domain/business-model.md` (*Implementation status*) |
-| Alta negocio self-service | `docs/domain/business-onboarding.md`, `/register/business`, `/register/business/tenant` |
-| Post-onboarding MVP | `docs/domain/post-onboarding-mvp-roadmap.md` |
-| App consumidor multi-local | `docs/domain/customer-platform-app.md`, `docs/rediseño-home.md` |
-| Staff scan, sellos, ruleta | `docs/domain/staff-scan-flow.md`, `docs/domain/roulette-game.md`, `/scan`, `/settings/stamps` |
-| Promociones | `/settings/promotions`, `/app/card`, `docs/business-rules.md` |
-| Stripe / OAuth / geocoding | `docs/backend/external-services-env.md` |
-| Superadmin | `docs/superadmin.md`, `docs/domain/saas-architecture.md` |
-| Tenant / cookies / middleware | `docs/teenant-resolution.md`, `docs/backend/session-cookies-localhost-dev.md`, `src/middleware.ts` |
-| API, DI, hexagonal | `docs/backend/*` |
-| Datos, Prisma, migraciones | `docs/database/data-model.md`, `prisma/schema.prisma`, skill `.agents/skills/prisma/` |
-| UI, theming | `docs/frontend/style-guidelines.md`, `src/app/theme/tokens.css` |
+```
+docs/
+├── domain/                         producto, flujos, estado vs código
+│   ├── saas-architecture.md        roles, isolation, feature flags, MVP técnico
+│   ├── business-model.md           planes Basic/Pro/Premium, ingresos
+│   ├── business-onboarding.md      registro owner → tenant → plan → checkout
+│   ├── business-rules.md           (también en raíz docs/) puntos, sellos, QR
+│   ├── post-onboarding-mvp-roadmap.md  branding, /app, billing, fases A–X
+│   ├── customer-platform-app.md    app personal #38–45, QR global, /home
+│   ├── staff-scan-flow.md          /scan targets, ruleta v2 + legacy
+│   ├── roulette-game.md            enroll → authorize → spin, config v2
+│   ├── visual-assets-system.md     sellos SVG, LoyaltyProgress
+│   └── …                           otros specs por fase (geocoding, map, etc.)
+├── teenant-resolution.md           subdominio target; JWT/membership hoy
+├── business-rules.md               reglas de dominio (guardrails)
+├── superadmin.md                   dashboard /platform, CRUD operativo
+├── code-style.md                   convenciones TS/React del repo
+├── backend/                        → ver árbol en sección Architecture
+├── database/
+│   ├── data-model.md               tablas implementadas + roadmap
+│   ├── not-null-fields.md
+│   ├── table-naming-singular-plural-convention.md
+│   └── text-over-varchar-char-convention.md
+├── frontend/
+│   └── style-guidelines.md         theme tokens, sin colores hardcodeados
+├── testing/
+│   ├── mock-objects.md
+│   └── object-mothers.md
+└── issues/README.md                flujo plan-to-issues → GitHub → kanban
 
-**Agent skills:** `.agents/skills/` — `prisma`, `plan-to-issues`, `publish-github-issues`, `kanban-board`.
+.agents/skills/
+├── prisma/                         schema, migrate, seed, DATABASE_URL
+├── plan-to-issues/                 plan .md → docs/issues + manifest
+├── publish-github-issues/          manifest → gh issue create
+└── kanban-board/                   implement, close, cleanup drafts
+```
+
+| Tarea rápida | Empezar por |
+|--------------|-------------|
+| Producto / roles | sección **Product** + `domain/saas-architecture.md` |
+| API / use case nuevo | `backend/thin-api-routes.md` → hexagonal → DIOD |
+| Prisma / tablas | `database/data-model.md` + skill `prisma/` |
+| Login atascado / cookies | `backend/session-cookies-localhost-dev.md` |
+| UI / theming | `frontend/style-guidelines.md`, `src/app/theme/tokens.css` |
 
 **Flujo issues:** `docs/issues/README.md` — plan-to-issues → publish-github-issues → kanban-board (al cerrar, eliminar body/manifest en docs).

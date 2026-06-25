@@ -53,7 +53,7 @@ Extrae: objetivo, criterios de aceptación, dependencias, verifies mencionados y
 
 Dedica tiempo a investigar **antes** de proponer slices. No basta con leer la issue.
 
-1. **`AGENTS.md`** — producto, convenciones, verifies, mapa «Cuándo leer cada doc».
+1. **`AGENTS.md`** — producto, convenciones, mapa «Cuándo leer cada doc». Verifies: descubrir en `package.json` (`verify:*`).
 2. **Docs de arquitectura** (según el tipo de issue; leer solo lo relevante):
    - API / casos de uso: [`docs/backend/thin-api-routes.md`](../../../docs/backend/thin-api-routes.md), [`hexagonal-architecture.md`](../../../docs/backend/hexagonal-architecture.md), [`dependency-injection-diod.md`](../../../docs/backend/dependency-injection-diod.md), [`api-routes-reflect-metadata.md`](../../../docs/backend/api-routes-reflect-metadata.md)
    - Dominio / reglas: [`docs/business-rules.md`](../../../docs/business-rules.md), [`docs/domain/saas-architecture.md`](../../../docs/domain/saas-architecture.md)

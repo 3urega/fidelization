@@ -228,4 +228,4 @@ Copia `.env.example` → `.env` y sustituye los placeholders.
 - Planes comerciales: [`docs/domain/business-model.md`](../domain/business-model.md)
 - Onboarding owner + checkout: [`docs/domain/business-onboarding.md`](../domain/business-onboarding.md)
 - App personal + Google OAuth (#45): [`docs/domain/customer-platform-app.md`](../domain/customer-platform-app.md)
-- Comandos verify: sección **Useful commands** en [`AGENTS.md`](../../AGENTS.md)
+- Comandos verify: scripts `verify:*` en [`package.json`](../../package.json) (convención en [`AGENTS.md`](../../AGENTS.md))
