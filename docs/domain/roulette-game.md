@@ -170,8 +170,8 @@ Objetivo: responder operativamente «¿cuánto se ha girado hoy y qué premios s
 | # | Título | Estado |
 |---|--------|--------|
 | [#115](https://github.com/3urega/fidelization/issues/115) | Phase W1: Owner roulette activity dashboard | **Implemented** 2026-06-22 |
-| [#116](https://github.com/3urega/fidelization/issues/116) | Phase W2: Customer detail promotions + roulette history | Open |
-| [#117](https://github.com/3urega/fidelization/issues/117) | Phase W3: Phase W verify scripts + docs | Open |
+| [#116](https://github.com/3urega/fidelization/issues/116) | Phase W2: Customer detail promotions + roulette history | **Implemented** 2026-09-10 |
+| [#117](https://github.com/3urega/fidelization/issues/117) | Phase W3: Phase W verify scripts + docs | **Implemented** 2026-09-10 |
 
 ## Implementation status (W1)
 
@@ -184,7 +184,24 @@ Objetivo: responder operativamente «¿cuánto se ha girado hoy y qué premios s
 | UI | Tab **Actividad** en [`/settings/games/ruleta`](../../src/app/(app)/settings/games/ruleta/page.tsx) — [`RouletteActivityDashboard.tsx`](../../src/app/_components/loyalty/games/RouletteActivityDashboard.tsx) |
 | Verifies | `npm run verify:roulette-activity-use-case`, `npm run verify:roulette-activity-dashboard` |
 
-Manifest (W2–W3): [`docs/issues/manifest.phase-w-roulette-analytics.json`](../issues/manifest.phase-w-roulette-analytics.json).
+## Implementation status (W2)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Domain | [`CustomerDetailView`](../../src/contexts/loyalty/customers/domain/analytics/CustomerDetail.ts) — `promotions[]`, `rouletteSpins[]` |
+| Use case | [`GetTenantCustomerDetail`](../../src/contexts/loyalty/customers/application/analytics/GetTenantCustomerDetail.ts) — `ListCustomerPromotionSummaries`, gate `gamification` + `ListRecentRouletteSpinsForCustomer` (limit 50) |
+| API / JSON | `GET /api/loyalty/customers/[id]` — [`customerZoneDetailToJson`](../../src/lib/auth/http.ts) |
+| UI | Secciones Promociones y Ruleta en [`CustomerDetailPanel.tsx`](../../src/app/_components/loyalty/customer-zone/CustomerDetailPanel.tsx) |
+| Verifies | `npm run verify:customer-detail-promotions-roulette-use-case`, `npm run verify:customer-detail-promotions-roulette` |
+
+## Implementation status (W3)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Operativa | [`AGENTS.md`](../../AGENTS.md) — rutas Phase W + bloque `verify:*` W |
+| Verifies registry | [`package.json`](../../package.json) — scripts listados en W1/W2 + regresión `verify:customer-zone-use-case` |
+
+Phase W cerrada (#115–#117). Manifest `manifest.phase-w-roulette-analytics.json` eliminado al cerrar #117.
 
 ## Phase X — Participación cliente + autorización caja (**complete**)
 
@@ -197,8 +214,6 @@ Manifest (W2–W3): [`docs/issues/manifest.phase-w-roulette-analytics.json`](../
 | Scan sello = desbloqueo ruleta | Target staff `roulette_authorize` separado |
 | Sin importe mínimo | `minPurchaseEuros` + campo importe en scan |
 | App: «Pide en caja…» genérico | Estados: not_enrolled → active → authorized_ready → spin |
-
-Phase W (#116–#117) analytics ficha cliente: pendiente.
 
 ### GitHub issues (published)
 

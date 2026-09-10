@@ -9,13 +9,46 @@ import {
 	formatActivityDate,
 	formatCustomerSince,
 	formatCustomerZoneError,
+	formatPromotionType,
+	formatPromotionUsage,
 	formatRewardRedeemedDate,
+	formatRouletteSpinStatus,
 } from "../../../../lib/loyalty/customerZone";
 import { Button } from "../../ui/Button";
 import { Card } from "../../ui/Card";
 import { CustomerZoneStatusBadge } from "./CustomerZoneStatusBadge";
 
 const QUICK_ACTIONS = ["Regalar sello", "Regalar recompensa", "Añadir nota"] as const;
+
+function rouletteSpinStatusClassName(
+	status: NonNullable<CustomerZoneDetailResponse["rouletteSpins"]>[number]["status"],
+): string {
+	const base = "inline-flex rounded-theme border border-border bg-background px-2 py-0.5 text-xs font-medium";
+
+	switch (status) {
+		case "pending_redeem":
+			return `${base} text-primary`;
+		case "expired":
+			return `${base} text-error`;
+		case "applied":
+		default:
+			return `${base} text-muted`;
+	}
+}
+
+function formatRoulettePrizeType(
+	prizeType: NonNullable<CustomerZoneDetailResponse["rouletteSpins"]>[number]["prizeType"],
+): string {
+	switch (prizeType) {
+		case "points":
+			return "Puntos";
+		case "physical":
+			return "Premio físico";
+		case "none":
+		default:
+			return "Sin premio";
+	}
+}
 
 export function CustomerDetailPanel(): ReactElement {
 	const params = useParams();
@@ -110,6 +143,8 @@ export function CustomerDetailPanel(): ReactElement {
 	const stampProgress = detail.stampProgress ?? [];
 	const recentActivity = detail.recentActivity ?? [];
 	const rewardsRedeemed = detail.rewardsRedeemed ?? [];
+	const promotions = detail.promotions ?? [];
+	const rouletteSpins = detail.rouletteSpins ?? [];
 
 	return (
 		<div className="flex flex-col gap-8">
@@ -208,6 +243,70 @@ export function CustomerDetailPanel(): ReactElement {
 							</li>
 						))}
 					</ul>
+				)}
+			</section>
+
+			<section className="flex flex-col gap-3">
+				<h2 className="font-medium text-foreground">Promociones</h2>
+				{promotions.length === 0 ? (
+					<Card className="p-4">
+						<p className="text-sm text-muted">Sin promociones activas.</p>
+					</Card>
+				) : (
+					<ul className="flex flex-col gap-3">
+						{promotions.map((promotion) => (
+							<li key={promotion.id}>
+								<Card className="p-4">
+									<div className="flex flex-wrap items-start justify-between gap-2">
+										<p className="font-medium text-foreground">{promotion.title}</p>
+										<span className="text-xs text-muted">{formatPromotionType(promotion.type)}</span>
+									</div>
+									<p className="mt-2 text-sm text-foreground">
+										{formatPromotionUsage(promotion.usedCount, promotion.maxUsesPerUser)}
+									</p>
+									{!promotion.isActive ? (
+										<p className="mt-1 text-xs text-muted">Inactiva</p>
+									) : null}
+								</Card>
+							</li>
+						))}
+					</ul>
+				)}
+			</section>
+
+			<section className="flex flex-col gap-3">
+				<h2 className="font-medium text-foreground">Ruleta</h2>
+				{rouletteSpins.length === 0 ? (
+					<Card className="p-4">
+						<p className="text-sm text-muted">Sin giros de ruleta registrados.</p>
+					</Card>
+				) : (
+					<Card className="overflow-hidden p-0">
+						<ul className="divide-y divide-border">
+							{rouletteSpins.map((spin) => (
+								<li
+									key={spin.id}
+									className="flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+								>
+									<div className="flex min-w-0 flex-col gap-1">
+										<span className="font-medium text-foreground">{spin.segmentLabel}</span>
+										<span className="text-muted">
+											{formatRoulettePrizeType(spin.prizeType)} ·{" "}
+											{formatActivityDate(spin.createdAt)}
+										</span>
+										{spin.redeemedAt ? (
+											<span className="text-xs text-muted">
+												Canjeado {formatActivityDate(spin.redeemedAt)}
+											</span>
+										) : null}
+									</div>
+									<span className={rouletteSpinStatusClassName(spin.status)}>
+										{formatRouletteSpinStatus(spin.status)}
+									</span>
+								</li>
+							))}
+						</ul>
+					</Card>
 				)}
 			</section>
 

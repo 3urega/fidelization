@@ -20,6 +20,16 @@ Convención: `*-use-case` = dominio sin servidor; sin sufijo = E2E (dev en `:300
 
 Tras cambios en un bounded context, ejecutar los verifies del mismo prefijo (p. ej. `verify:roulette-*`).
 
+**Phase W — analytics ruleta + ficha cliente** (detalle [`docs/domain/roulette-game.md`](docs/domain/roulette-game.md) § Phase W):
+
+```bash
+npm run verify:roulette-activity-use-case
+npm run verify:roulette-activity-dashboard          # E2E API + smoke /settings/games/ruleta
+npm run verify:customer-detail-promotions-roulette-use-case
+npm run verify:customer-detail-promotions-roulette  # E2E ficha cliente promos + ruleta
+npm run verify:customer-zone-use-case               # regresión GetTenantCustomerDetail
+```
+
 # Product
 
 SaaS multi-tenant de fidelización para hostelería (puntos, sellos, QR, recompensas, promociones, planes Basic/Pro/Premium). **Tipos de usuario:** superadmin plataforma, owner, empleado, cliente (app móvil). **Stack:** Next.js 14 + Capacitor, mobile-first.
@@ -51,6 +61,7 @@ Detalle: [`docs/business-rules.md`](docs/business-rules.md).
 - Platform app (#38–45): [`docs/domain/customer-platform-app.md`](docs/domain/customer-platform-app.md)
 - Superadmin (#71–84): [`docs/superadmin.md`](docs/superadmin.md)
 - Ruleta v2: [`docs/domain/roulette-game.md`](docs/domain/roulette-game.md)
+- **Phase W (owner):** `/settings/games/ruleta` — pestañas Configuración | **Actividad** (KPI giros del día, drill-down premio → clientes); `/customers/[id]` — ficha con promociones activas (uso) e historial ruleta (Premium + `gamification`). APIs: `GET /api/loyalty/games/ruleta/activity/summary`, `GET .../activity/spins`, `GET /api/loyalty/customers/[id]`.
 
 # Architecture
 

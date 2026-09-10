@@ -64,6 +64,24 @@ export type CustomerZoneDetailReward = {
 	redeemedAt: string;
 };
 
+export type CustomerZoneDetailPromotion = {
+	id: string;
+	title: string;
+	type: "discount" | "bundle" | "seasonal";
+	isActive: boolean;
+	usedCount: number;
+	maxUsesPerUser: number | null;
+};
+
+export type CustomerZoneDetailRouletteSpin = {
+	id: string;
+	segmentLabel: string;
+	prizeType: "none" | "points" | "physical";
+	status: "pending_redeem" | "applied" | "expired";
+	createdAt: string;
+	redeemedAt: string | null;
+};
+
 export type CustomerZoneDetailResponse = {
 	id?: string;
 	name?: string;
@@ -76,6 +94,8 @@ export type CustomerZoneDetailResponse = {
 	stampProgress?: CustomerZoneDetailStampProgress[];
 	recentActivity?: CustomerZoneDetailActivity[];
 	rewardsRedeemed?: CustomerZoneDetailReward[];
+	promotions?: CustomerZoneDetailPromotion[];
+	rouletteSpins?: CustomerZoneDetailRouletteSpin[];
 	error?: {
 		description?: string;
 		type?: string;
@@ -189,6 +209,36 @@ const STATUS_LABELS: Record<CustomerEngagementStatus, string> = {
 
 export function formatCustomerZoneStatus(status: CustomerEngagementStatus): string {
 	return STATUS_LABELS[status];
+}
+
+const PROMOTION_TYPE_LABELS: Record<CustomerZoneDetailPromotion["type"], string> = {
+	discount: "Descuento",
+	bundle: "Pack",
+	seasonal: "Temporada",
+};
+
+export function formatPromotionType(type: CustomerZoneDetailPromotion["type"]): string {
+	return PROMOTION_TYPE_LABELS[type];
+}
+
+export function formatPromotionUsage(usedCount: number, maxUsesPerUser: number | null): string {
+	if (maxUsesPerUser === null) {
+		const label = usedCount === 1 ? "uso" : "usos";
+
+		return `Sin límite · ${usedCount} ${label}`;
+	}
+
+	return `${usedCount}/${maxUsesPerUser} usos`;
+}
+
+const ROULETTE_SPIN_STATUS_LABELS: Record<CustomerZoneDetailRouletteSpin["status"], string> = {
+	pending_redeem: "Pendiente de canje",
+	applied: "Aplicado",
+	expired: "Expirado",
+};
+
+export function formatRouletteSpinStatus(status: CustomerZoneDetailRouletteSpin["status"]): string {
+	return ROULETTE_SPIN_STATUS_LABELS[status];
 }
 
 export function formatDaysSinceLastVisit(iso: string | null, referenceDate: Date = new Date()): string {

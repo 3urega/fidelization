@@ -2,10 +2,10 @@
 
 import { type ReactElement, useState } from "react";
 
-import { RouletteActivityDashboard } from "../../../_components/loyalty/games/RouletteActivityDashboard";
-import { RouletteConfigEditor } from "../../../_components/loyalty/RouletteConfigEditor";
-import { PageHeader } from "../../../_components/shell/PageHeader";
-import { Button } from "../../../_components/ui/Button";
+import { RouletteActivityDashboard } from "../../../../_components/loyalty/games/RouletteActivityDashboard";
+import { RouletteConfigEditor } from "../../../../_components/loyalty/RouletteConfigEditor";
+import { PageHeader } from "../../../../_components/shell/PageHeader";
+import { Button } from "../../../../_components/ui/Button";
 
 type RouletteSettingsTab = "config" | "activity";
 

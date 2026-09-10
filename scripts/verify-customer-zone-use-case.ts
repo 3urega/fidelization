@@ -20,6 +20,16 @@ import {
 	TenantCustomerAnalyticsRepository,
 } from "../src/contexts/loyalty/customers/domain/analytics/TenantCustomerAnalyticsRepository";
 import { GetCustomerStampProgress } from "../src/contexts/loyalty/customers/application/profile/GetCustomerStampProgress";
+import { ListRecentRouletteSpinsForCustomer } from "../src/contexts/loyalty/games/application/spin/ListRecentRouletteSpinsForCustomer";
+import { RouletteSpinRepository } from "../src/contexts/loyalty/games/domain/RouletteSpinRepository";
+import { ListCustomerPromotionSummaries } from "../src/contexts/loyalty/promotions/application/list/ListCustomerPromotionSummaries";
+import { PlanFeatureNotAvailable } from "../src/contexts/billing/subscriptions/domain/PlanFeatureNotAvailable";
+import {
+	BASIC_PLAN_FEATURES,
+	type SubscriptionPlanFeatures,
+} from "../src/contexts/billing/subscriptions/domain/SubscriptionPlanFeatures";
+import { SubscriptionPlan } from "../src/contexts/billing/subscriptions/domain/SubscriptionPlan";
+import { AssertTenantPlanFeature } from "../src/contexts/billing/subscriptions/application/guard/AssertTenantPlanFeature";
 import { StampCampaign } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaign";
 import { StampCampaignRepository } from "../src/contexts/loyalty/stamp_campaigns/domain/StampCampaignRepository";
 import { CustomerStampProgress } from "../src/contexts/loyalty/stamp_campaigns/domain/CustomerStampProgress";
@@ -222,6 +232,63 @@ class InMemoryTenantCustomerAnalyticsRepository extends TenantCustomerAnalyticsR
 	}
 }
 
+class StubListCustomerPromotionSummaries {
+	async execute(): Promise<never[]> {
+		return [];
+	}
+}
+
+class StubAssertTenantPlanFeature {
+	constructor(private readonly features: SubscriptionPlanFeatures) {}
+
+	async execute(params: {
+		tenantId: string;
+		feature: "gamification";
+	}): Promise<SubscriptionPlan> {
+		if (!this.features.gamification) {
+			throw new PlanFeatureNotAvailable(params.tenantId, params.feature);
+		}
+
+		return SubscriptionPlan.fromPrimitives({
+			id: "plan-stub",
+			name: "stub",
+			priceMonthly: 0,
+			priceYearly: 0,
+			features: this.features,
+			limits: { employees: 3 },
+			isActive: true,
+		});
+	}
+}
+
+class EmptyRouletteSpinRepository extends RouletteSpinRepository {
+	async save(): Promise<void> {}
+
+	async searchById(): Promise<null> {
+		return null;
+	}
+
+	async countByCustomerSince(): Promise<number> {
+		return 0;
+	}
+
+	async countByCustomerBetween(): Promise<number> {
+		return 0;
+	}
+
+	async listPendingRedeemByCustomer(): Promise<never[]> {
+		return [];
+	}
+
+	async listRecentByCustomer(): Promise<never[]> {
+		return [];
+	}
+
+	async listByTenantBetween(): Promise<never[]> {
+		return [];
+	}
+}
+
 class InMemoryStampCampaignRepository extends StampCampaignRepository {
 	constructor(
 		private readonly campaigns: StampCampaign[],
@@ -379,6 +446,9 @@ async function main(): Promise<void> {
 		tenantRepository,
 		analyticsRepository,
 		getCustomerStampProgress,
+		new StubListCustomerPromotionSummaries() as unknown as ListCustomerPromotionSummaries,
+		new StubAssertTenantPlanFeature(BASIC_PLAN_FEATURES) as unknown as AssertTenantPlanFeature,
+		new ListRecentRouletteSpinsForCustomer(new EmptyRouletteSpinRepository()),
 	);
 
 	const anaDays = CustomerEngagementClassifier.daysSinceLastVisit(
@@ -496,6 +566,8 @@ async function main(): Promise<void> {
 	assert(detail.stampProgress.length === 1, "expected one stamp progress row");
 	assert(detail.recentActivity.length === 2, "expected two activity rows");
 	assert(detail.rewardsRedeemed.length === 1, "expected one redeemed reward");
+	assert(detail.promotions.length === 0, "expected empty promotions on Basic stub");
+	assert(detail.rouletteSpins.length === 0, "expected empty rouletteSpins without gamification");
 
 	console.log("✅ GetTenantCustomerDetail composes snapshot + progress + activity");
 

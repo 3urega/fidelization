@@ -20,7 +20,10 @@ import {
 import {
 	findRouletteAuthGrantedOutcome,
 } from "./lib/staff-scan-verify-helpers";
-import { loginOwnerForBrandingVerify } from "./lib/tenant-branding-verify-helpers";
+import {
+	brandingVerifyBaseUrl,
+	loginOwnerForBrandingVerify,
+} from "./lib/tenant-branding-verify-helpers";
 import {
 	TENANT_ID_HEADER,
 	TENANT_SLUG_HEADER,
@@ -153,6 +156,22 @@ async function main(): Promise<void> {
 		cookie: `session=${ownerCookie}`,
 		"Content-Type": "application/json",
 	});
+
+	const ruletaPage = await fetch(`${brandingVerifyBaseUrl}/settings/games/ruleta`, {
+		headers: { cookie: ownerHeaders.cookie ?? "" },
+	});
+	const ruletaHtml = await ruletaPage.text();
+
+	if (
+		ruletaPage.status !== 200 ||
+		!ruletaHtml.includes("Actividad") ||
+		!ruletaHtml.includes("Configuración")
+	) {
+		console.error("❌ GET /settings/games/ruleta page smoke:", ruletaPage.status);
+		process.exit(1);
+	}
+
+	console.log("✅ GET /settings/games/ruleta page includes Actividad tab");
 
 	const { cookie: userCookie, qrValue } = await registerUser();
 
