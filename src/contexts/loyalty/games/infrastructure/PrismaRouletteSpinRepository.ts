@@ -2,6 +2,7 @@ import { Service } from "diod";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../../../../lib/prisma";
+import type { RouletteSpinTenantReadRow } from "../domain/RouletteActivityRead";
 import type { RoulettePrizeType } from "../domain/RoulettePrizeType";
 import type { RouletteConfigPrimitives } from "../domain/RouletteConfig";
 import {
@@ -11,6 +12,7 @@ import {
 } from "../domain/RouletteSpin";
 import type { RouletteSegmentPrize } from "../domain/RouletteSegment";
 import { RouletteSpinRepository } from "../domain/RouletteSpinRepository";
+import type { ListRouletteSpinsByTenantBetweenOptions } from "../domain/RouletteSpinRepository";
 
 @Service()
 export class PrismaRouletteSpinRepository extends RouletteSpinRepository {
@@ -104,6 +106,48 @@ export class PrismaRouletteSpinRepository extends RouletteSpinRepository {
 		});
 
 		return rows.map((row) => this.mapRow(row));
+	}
+
+	async listByTenantBetween(
+		tenantId: string,
+		start: Date,
+		end: Date,
+		options?: ListRouletteSpinsByTenantBetweenOptions,
+	): Promise<RouletteSpinTenantReadRow[]> {
+		const excludeTypes = options?.prizeTypesExclude ?? [];
+		const rows = await prisma.rouletteSpin.findMany({
+			where: {
+				tenantId,
+				createdAt: { gte: start, lt: end },
+				...(options?.segmentId ? { segmentId: options.segmentId } : {}),
+				...(excludeTypes.length > 0
+					? { prizeType: { notIn: excludeTypes } }
+					: {}),
+			},
+			include: {
+				customer: {
+					select: { name: true },
+				},
+			},
+			orderBy: { createdAt: "desc" },
+		});
+
+		return rows.map((row) => {
+			const spin = this.mapRow(row);
+
+			return {
+				spinId: spin.toPrimitives().id,
+				customerId: spin.toPrimitives().customerId,
+				customerName: row.customer.name,
+				segmentId: spin.toPrimitives().segmentId,
+				segmentIndex: spin.toPrimitives().segmentIndex,
+				prizeType: spin.toPrimitives().prizeType,
+				status: spin.toPrimitives().status,
+				createdAt: row.createdAt,
+				redeemedAt: row.redeemedAt,
+				segmentLabel: spin.segmentLabel(),
+			};
+		});
 	}
 
 	private mapRow(row: {

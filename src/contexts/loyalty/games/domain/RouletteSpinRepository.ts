@@ -1,4 +1,10 @@
+import type { RouletteSpinTenantReadRow } from "./RouletteActivityRead";
 import { RouletteSpin } from "./RouletteSpin";
+
+export type ListRouletteSpinsByTenantBetweenOptions = {
+	segmentId?: string;
+	prizeTypesExclude?: string[];
+};
 
 export abstract class RouletteSpinRepository {
 	abstract save(spin: RouletteSpin): Promise<void>;
@@ -28,4 +34,11 @@ export abstract class RouletteSpinRepository {
 		customerId: string,
 		limit: number,
 	): Promise<RouletteSpin[]>;
+
+	abstract listByTenantBetween(
+		tenantId: string,
+		start: Date,
+		end: Date,
+		options?: ListRouletteSpinsByTenantBetweenOptions,
+	): Promise<RouletteSpinTenantReadRow[]>;
 }

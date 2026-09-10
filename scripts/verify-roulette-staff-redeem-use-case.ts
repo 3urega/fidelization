@@ -126,6 +126,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 			.slice(0, limit);
 	}
 
+	async listByTenantBetween(): Promise<never[]> {
+		return [];
+	}
+
 	get(id: string): RouletteSpin | undefined {
 		return this.spins.find((spin) => spin.toPrimitives().id === id);
 	}

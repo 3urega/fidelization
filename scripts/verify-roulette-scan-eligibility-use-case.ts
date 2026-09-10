@@ -156,6 +156,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 	async listRecentByCustomer(): Promise<never[]> {
 		return [];
 	}
+
+	async listByTenantBetween(): Promise<never[]> {
+		return [];
+	}
 }
 
 class InMemoryRouletteParticipationRepository extends RouletteParticipationRepository {

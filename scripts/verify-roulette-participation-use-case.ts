@@ -160,6 +160,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 			.slice(0, limit);
 	}
 
+	async listByTenantBetween(): Promise<never[]> {
+		return [];
+	}
+
 	seedSpin(spin: RouletteSpin): void {
 		this.spins.push(spin);
 	}

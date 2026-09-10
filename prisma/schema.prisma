@@ -498,6 +498,7 @@ model RouletteSpin {
   customer       Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, customerId, createdAt])
+  @@index([tenantId, createdAt])
   @@map("roulette_spins")
 }
 

@@ -191,3 +191,24 @@ export function buildZonedRollingPeriodWindow(
 
 	return { start: periodStart, end: periodEnd };
 }
+
+/** Single calendar day in timezone (date string YYYY-MM-DD). */
+export function dayWindowForCalendarDate(
+	calendarDate: string,
+	timeZone: string,
+): TimeWindowBounds {
+	const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(calendarDate.trim());
+
+	if (!match) {
+		throw new Error("calendarDate must be YYYY-MM-DD");
+	}
+
+	const year = Number(match[1]);
+	const month = Number(match[2]);
+	const day = Number(match[3]);
+	const start = zonedLocalToUtc(year, month, day, 0, 0, 0, timeZone);
+	const nextDay = addCalendarDays(year, month, day, 1);
+	const end = zonedLocalToUtc(nextDay.year, nextDay.month, nextDay.day, 0, 0, 0, timeZone);
+
+	return { start, end };
+}

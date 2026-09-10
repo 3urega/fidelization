@@ -73,6 +73,8 @@ import { IssueRouletteSpinEligibility } from "../../../loyalty/games/application
 import { EnrollCustomerInRoulette } from "../../../loyalty/games/application/participation/EnrollCustomerInRoulette";
 import { GetRouletteParticipationState } from "../../../loyalty/games/application/participation/GetRouletteParticipationState";
 import { AuthorizeRouletteSpin } from "../../../loyalty/games/application/participation/AuthorizeRouletteSpin";
+import { GetRouletteActivitySummary } from "../../../loyalty/games/application/activity/GetRouletteActivitySummary";
+import { ListRouletteActivitySpins } from "../../../loyalty/games/application/activity/ListRouletteActivitySpins";
 import { ResolveRouletteParticipationUsage } from "../../../loyalty/games/application/participation/ResolveRouletteParticipationUsage";
 import { AssertRouletteSpinAccess } from "../../../loyalty/games/application/spin/AssertRouletteSpinAccess";
 import { ExecuteRouletteSpin } from "../../../loyalty/games/application/spin/ExecuteRouletteSpin";
@@ -461,6 +463,8 @@ builder.registerAndUse(ResolveRouletteParticipationUsage);
 builder.registerAndUse(EnrollCustomerInRoulette);
 builder.registerAndUse(GetRouletteParticipationState);
 builder.registerAndUse(AuthorizeRouletteSpin);
+builder.registerAndUse(GetRouletteActivitySummary);
+builder.registerAndUse(ListRouletteActivitySpins);
 builder.register(RouletteSpinUnitOfWork).use(PrismaRouletteSpinUnitOfWork);
 builder.registerAndUse(PrismaRouletteSpinUnitOfWork);
 builder.registerAndUse(AssertRouletteSpinAccess);

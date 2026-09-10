@@ -298,6 +298,10 @@ class InMemoryRouletteSpinRepository extends RouletteSpinRepository {
 	async listRecentByCustomer(): Promise<[]> {
 		return [];
 	}
+
+	async listByTenantBetween(): Promise<never[]> {
+		return [];
+	}
 }
 
 class StubPlatformGameRepository extends PlatformGameRepository {

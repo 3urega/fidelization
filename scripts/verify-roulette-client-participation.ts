@@ -151,6 +151,10 @@ class PrismaBackedSpinRepository extends RouletteSpinRepository {
 	async listRecentByCustomer(): Promise<never[]> {
 		return [];
 	}
+
+	async listByTenantBetween(): Promise<never[]> {
+		return [];
+	}
 }
 
 class PrismaBackedEligibilityRepository extends RouletteSpinEligibilityRepository {
