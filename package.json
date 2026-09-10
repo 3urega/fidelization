@@ -82,6 +82,7 @@
     "verify:roulette-staff-redeem": "tsx scripts/verify-roulette-staff-redeem.ts",
     "verify:roulette-participation-use-case": "tsx scripts/verify-roulette-participation-use-case.ts",
     "verify:roulette-activity-use-case": "tsx scripts/verify-roulette-activity-use-case.ts",
+    "verify:roulette-activity-dashboard": "tsx scripts/verify-roulette-activity-dashboard.ts",
     "verify:roulette-client-participation-use-case": "tsx scripts/verify-roulette-client-participation-use-case.ts",
     "verify:roulette-client-participation": "tsx scripts/verify-roulette-client-participation.ts",
     "verify:roulette-staff-authorize-use-case": "tsx scripts/verify-roulette-staff-authorize-use-case.ts",

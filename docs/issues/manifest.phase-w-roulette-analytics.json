@@ -4,10 +4,6 @@
   "label": "roulette-analytics",
   "issues": [
     {
-      "title": "Phase W1: Owner roulette activity dashboard (daily summary + prize drill-down)",
-      "bodyFile": "docs/issues/roulette-activity-dashboard.md"
-    },
-    {
       "title": "Phase W2: Customer detail: active promotions and roulette spin history",
       "bodyFile": "docs/issues/customer-detail-promotions-roulette.md"
     },

@@ -301,6 +301,22 @@ export function customerZoneDetailToJson(
 			rewardName: row.rewardName,
 			redeemedAt: row.redeemedAt.toISOString(),
 		})),
+		promotions: detail.promotions.map((row) => ({
+			id: row.id,
+			title: row.title,
+			type: row.type,
+			isActive: row.isActive,
+			usedCount: row.usedCount,
+			maxUsesPerUser: row.maxUsesPerUser,
+		})),
+		rouletteSpins: detail.rouletteSpins.map((row) => ({
+			id: row.id,
+			segmentLabel: row.segmentLabel,
+			prizeType: row.prizeType,
+			status: row.status,
+			createdAt: row.createdAt.toISOString(),
+			redeemedAt: row.redeemedAt?.toISOString() ?? null,
+		})),
 	};
 }
 

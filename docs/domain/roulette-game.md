@@ -156,7 +156,7 @@ Reglas legacy: scan sello/promo puede desbloquear ruleta automáticamente; nuevo
 
 Manifest: [`docs/issues/manifest.phase-v-roulette-game.json`](../issues/manifest.phase-v-roulette-game.json).
 
-## Phase W — Analytics owner + ficha cliente (draft)
+## Phase W — Analytics owner + ficha cliente
 
 Objetivo: responder operativamente «¿cuánto se ha girado hoy y qué premios salieron?» y «¿qué tiene este cliente?» (tarjetas, promos, ruleta).
 
@@ -165,17 +165,26 @@ Objetivo: responder operativamente «¿cuánto se ha girado hoy y qué premios s
 | Dashboard ruleta | «Hoy: 3 giros · 1 premio: llavero» | Clic premio → clientes ganadores + enlace a ficha |
 | Ficha `/customers/[id]` | Sellos (ya), promos activas + uso, historial giros | Complementa actividad reciente y recompensas |
 
-Patrones a reutilizar: `StampScanTimeWindows` + `env.appTimezone`, `ListStampCampaignDashboard`, `ListCustomerPromotionSummaries`, `roulette_spins.configSnapshot` para labels históricos.
+### GitHub issues
 
-### GitHub issues (published)
+| # | Título | Estado |
+|---|--------|--------|
+| [#115](https://github.com/3urega/fidelization/issues/115) | Phase W1: Owner roulette activity dashboard | **Implemented** 2026-06-22 |
+| [#116](https://github.com/3urega/fidelization/issues/116) | Phase W2: Customer detail promotions + roulette history | Open |
+| [#117](https://github.com/3urega/fidelization/issues/117) | Phase W3: Phase W verify scripts + docs | Open |
 
-| # | Título | Body |
-|---|--------|------|
-| [#115](https://github.com/3urega/fidelization/issues/115) | Phase W1: Owner roulette activity dashboard (daily summary + prize drill-down) | [`roulette-activity-dashboard.md`](../issues/roulette-activity-dashboard.md) |
-| [#116](https://github.com/3urega/fidelization/issues/116) | Phase W2: Customer detail: active promotions and roulette spin history | [`customer-detail-promotions-roulette.md`](../issues/customer-detail-promotions-roulette.md) |
-| [#117](https://github.com/3urega/fidelization/issues/117) | Phase W3: Phase W verify scripts, AGENTS.md and roulette analytics docs | [`phase-w-roulette-analytics-verify-docs.md`](../issues/phase-w-roulette-analytics-verify-docs.md) |
+## Implementation status (W1)
 
-Manifest: [`docs/issues/manifest.phase-w-roulette-analytics.json`](../issues/manifest.phase-w-roulette-analytics.json).
+| Artefacto | Ruta |
+|-----------|------|
+| Read repo | `RouletteSpinRepository.listByTenantBetween` — [`PrismaRouletteSpinRepository.ts`](../../src/contexts/loyalty/games/infrastructure/PrismaRouletteSpinRepository.ts) |
+| Index | `roulette_spins_tenant_id_created_at_idx` (migration `20260622140000`) |
+| Use cases | [`GetRouletteActivitySummary`](../../src/contexts/loyalty/games/application/activity/GetRouletteActivitySummary.ts), [`ListRouletteActivitySpins`](../../src/contexts/loyalty/games/application/activity/ListRouletteActivitySpins.ts) |
+| APIs | `GET /api/loyalty/games/ruleta/activity/summary`, `GET .../activity/spins` |
+| UI | Tab **Actividad** en [`/settings/games/ruleta`](../../src/app/(app)/settings/games/ruleta/page.tsx) — [`RouletteActivityDashboard.tsx`](../../src/app/_components/loyalty/games/RouletteActivityDashboard.tsx) |
+| Verifies | `npm run verify:roulette-activity-use-case`, `npm run verify:roulette-activity-dashboard` |
+
+Manifest (W2–W3): [`docs/issues/manifest.phase-w-roulette-analytics.json`](../issues/manifest.phase-w-roulette-analytics.json).
 
 ## Phase X — Participación cliente + autorización caja (**complete**)
 
@@ -189,7 +198,7 @@ Manifest: [`docs/issues/manifest.phase-w-roulette-analytics.json`](../issues/man
 | Sin importe mínimo | `minPurchaseEuros` + campo importe en scan |
 | App: «Pide en caja…» genérico | Estados: not_enrolled → active → authorized_ready → spin |
 
-Phase W (#115–#117) analytics: implementar **después** de X o adaptar read models.
+Phase W (#116–#117) analytics ficha cliente: pendiente.
 
 ### GitHub issues (published)
 

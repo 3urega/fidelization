@@ -1,4 +1,7 @@
 import type { CustomerEngagementStatus } from "./CustomerEngagementStatus";
+import type { PromotionType } from "../../../promotions/domain/Promotion";
+import type { RoulettePrizeType } from "../../../games/domain/RoulettePrizeType";
+import type { RouletteSpinStatus } from "../../../games/domain/RouletteSpin";
 
 export type CustomerActivityRow = {
 	occurredAt: Date;
@@ -19,6 +22,24 @@ export type CustomerDetailStampProgress = {
 	stampTypeLabel: string;
 };
 
+export type CustomerDetailPromotion = {
+	id: string;
+	title: string;
+	type: PromotionType;
+	isActive: boolean;
+	usedCount: number;
+	maxUsesPerUser: number | null;
+};
+
+export type CustomerDetailRouletteSpin = {
+	id: string;
+	segmentLabel: string;
+	prizeType: RoulettePrizeType;
+	status: RouletteSpinStatus;
+	createdAt: Date;
+	redeemedAt: Date | null;
+};
+
 export type CustomerDetailView = {
 	id: string;
 	name: string;
@@ -31,4 +52,6 @@ export type CustomerDetailView = {
 	stampProgress: CustomerDetailStampProgress[];
 	recentActivity: CustomerActivityRow[];
 	rewardsRedeemed: CustomerRedeemedRewardRow[];
+	promotions: CustomerDetailPromotion[];
+	rouletteSpins: CustomerDetailRouletteSpin[];
 };
