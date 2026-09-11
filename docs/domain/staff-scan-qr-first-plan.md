@@ -339,7 +339,7 @@ Manifest: [`manifest.phase-y-staff-scan-qr-first.json`](../issues/manifest.phase
 
 | Slice | GitHub | Body file |
 |-------|--------|-----------|
-| Y1 | [#123](https://github.com/3urega/fidelization/issues/123) | [`staff-scan-session-domain-api.md`](../issues/staff-scan-session-domain-api.md) |
+| Y1 | [#123](https://github.com/3urega/fidelization/issues/123) **Closed** | Session read model + `GET /api/loyalty/scan/session` |
 | Y2 | [#124](https://github.com/3urega/fidelization/issues/124) | [`staff-scan-identify-hub-ui.md`](../issues/staff-scan-identify-hub-ui.md) |
 | Y3a | [#125](https://github.com/3urega/fidelization/issues/125) | [`staff-scan-session-loyalty-panels.md`](../issues/staff-scan-session-loyalty-panels.md) |
 | Y3b | [#126](https://github.com/3urega/fidelization/issues/126) | [`staff-scan-session-ruleta-redeem-panels.md`](../issues/staff-scan-session-ruleta-redeem-panels.md) |

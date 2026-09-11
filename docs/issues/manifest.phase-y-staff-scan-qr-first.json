@@ -12,10 +12,6 @@
   },
   "issues": [
     {
-      "title": "Phase Y1: Staff scan session read model + GET /api/loyalty/scan/session",
-      "bodyFile": "docs/issues/staff-scan-session-domain-api.md"
-    },
-    {
       "title": "Phase Y2: /scan QR-first identify step + activity hub UI",
       "bodyFile": "docs/issues/staff-scan-identify-hub-ui.md"
     },
