@@ -226,6 +226,7 @@ async function runE2eTests(): Promise<void> {
 		profile.status !== 200 ||
 		!profileHtml.includes("Tu perfil") ||
 		!profileHtml.includes("Información personal") ||
+		!profileHtml.includes("/home/map") ||
 		profileHtml.includes("Confirmar zona") ||
 		profileHtml.includes("Buscar con geocodificación")
 	) {

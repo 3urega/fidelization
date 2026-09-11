@@ -52,16 +52,46 @@ El parámetro `radiusKm` deja de **filtrar** resultados; solo puede usarse en AP
 
 ## Issues GitHub (Phase U)
 
-Manifest: [`docs/issues/manifest.phase-u-map-screen-discover-sort.json`](../issues/manifest.phase-u-map-screen-discover-sort.json)
-
-| # | Issue | Valor |
-|---|-------|-------|
-| [#103](https://github.com/3urega/fidelization/issues/103) | U1: Discover sort-by-distance, show all | Backend: no filtrar por radio |
-| [#104](https://github.com/3urega/fidelization/issues/104) | U2: Map screen `/home/map` | Pantalla mapa + editor zona |
-| [#105](https://github.com/3urega/fidelization/issues/105) | U3: App header icons | Perfil icono + Ver en el mapa |
-| [#106](https://github.com/3urega/fidelization/issues/106) | U4: Profile slim + CTA routes | Quitar mapa del perfil; links al mapa |
-| [#107](https://github.com/3urega/fidelization/issues/107) | U5: Verify + docs Phase U | E2E + cierre batch |
+| # | Issue | Estado |
+|---|-------|--------|
+| [#103](https://github.com/3urega/fidelization/issues/103) | U1: Discover sort-by-distance, show all | **Implemented** 2026-06-19 |
+| [#104](https://github.com/3urega/fidelization/issues/104) | U2: Map screen `/home/map` | **Implemented** 2026-06-19 |
+| [#105](https://github.com/3urega/fidelization/issues/105) | U3: App header icons | **Implemented** 2026-06-19 |
+| [#106](https://github.com/3urega/fidelization/issues/106) | U4: Profile slim + CTA routes | **Implemented** 2026-06-19 |
+| [#107](https://github.com/3urega/fidelization/issues/107) | U5: Verify + docs Phase U | **Implemented** 2026-09-11 |
 
 **Orden sugerido:** U1 → U2 → U3 → U4 → U5 (U3 puede ir en paralelo con U2).
+
+## Implementation status (U1)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Use case | [`ListDiscoverableEstablishments`](../../src/contexts/tenants/tenants/application/list/ListDiscoverableEstablishments.ts) — sort-by-distance, sin filtro radio |
+| API | `GET /api/user/establishments?lat=&lng=` |
+| Verifies | `npm run verify:discover-sort-all-establishments-use-case`, `npm run verify:discover-sort-all-establishments` |
+
+## Implementation status (U2)
+
+| Artefacto | Ruta |
+|-----------|------|
+| UI | [`/home/map`](../../src/app/(mobile)/home/map/page.tsx) — [`PlatformSearchZoneMapScreen.tsx`](../../src/app/(mobile)/home/map/PlatformSearchZoneMapScreen.tsx) |
+| Verifies | `npm run verify:search-zone-map-screen` |
+
+## Implementation status (U3–U4)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Header | [`PlatformAppHeader`](../../src/app/_components/platform-app/PlatformAppHeader.tsx) — icono perfil + «Ver en el mapa» |
+| Perfil slim | [`/home/profile`](../../src/app/(mobile)/home/profile/) — resumen zona, link `/home/map` |
+| Verifies | `npm run verify:platform-user-profile-shell`, `npm run verify:platform-user-search-zone-editor`, `npm run verify:discover-grid-search-zone` |
+
+## Implementation status (U5)
+
+| Artefacto | Ruta |
+|-----------|------|
+| Operativa | [`AGENTS.md`](../../AGENTS.md) — rutas Phase U + bloque `verify:*` |
+| Verifies registry | [`package.json`](../../package.json) — scripts canónicos U1/U2 + aliases `verify:discover-establishments-near*` |
+
+Phase U cerrada (#103–#107). Manifest `manifest.phase-u-map-screen-discover-sort.json` eliminado al cerrar #107.
 
 **Relacionado:** [`platform-user-profile-search-zone.md`](platform-user-profile-search-zone.md), [`platform-user-search-zone-interactive-map.md`](platform-user-search-zone-interactive-map.md).

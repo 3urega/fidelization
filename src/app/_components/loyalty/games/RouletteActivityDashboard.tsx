@@ -7,8 +7,8 @@ import {
 	type RouletteActivitySpinsResponse,
 	type RouletteActivitySummaryResponse,
 } from "../../../../lib/loyalty/rouletteActivityDashboard";
-import { Button } from "../ui/Button";
-import { Card } from "../ui/Card";
+import { Button } from "../../ui/Button";
+import { Card } from "../../ui/Card";
 
 function formatSpinTime(iso: string): string {
 	return new Date(iso).toLocaleString("es-ES", {

@@ -11,7 +11,7 @@ import {
 import { DEMO_TENANT_ID } from "../src/lib/tenant/mockTenantBySlug";
 
 /**
- * Phase S5 #97 — discover grid + saved search zone + copy UX.
+ * Phase S5 #97 + Phase U grid — discover grid + saved search zone + copy UX.
  * Unit: resolveDiscoverActiveNear; E2E: search zone PATCH + near API (dev + DATABASE_URL).
  */
 const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000").replace(/\/$/, "");
@@ -229,7 +229,12 @@ async function assertSearchZoneGridE2E(): Promise<void> {
 			process.exit(1);
 		}
 
-		console.log("✅ GET /home shell includes Explorar tab (grid UX hydrates client-side)");
+		if (!homeHtml.includes("/home/map") || !homeHtml.includes("Ver en el mapa")) {
+			console.error("❌ GET /home missing map screen CTA (Phase U3)", home.status);
+			process.exit(1);
+		}
+
+		console.log("✅ GET /home shell includes Explorar tab + map link (grid UX hydrates client-side)");
 	} finally {
 		await prisma.tenant.update({
 			where: { id: DEMO_TENANT_ID },

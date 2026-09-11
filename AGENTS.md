@@ -30,6 +30,17 @@ npm run verify:customer-detail-promotions-roulette  # E2E ficha cliente promos +
 npm run verify:customer-zone-use-case               # regresión GetTenantCustomerDetail
 ```
 
+**Phase U — mapa app personal + discover sort-all** (detalle [`docs/domain/platform-user-map-screen.md`](docs/domain/platform-user-map-screen.md)):
+
+```bash
+npm run verify:discover-sort-all-establishments-use-case
+npm run verify:discover-sort-all-establishments       # E2E lat/lng incluye locales lejanos
+npm run verify:search-zone-map-screen                 # E2E /home/map + PATCH zona + suggest
+npm run verify:discover-grid-search-zone
+npm run verify:platform-user-search-zone-editor
+npm run verify:platform-user-profile-shell            # header U3 + perfil slim U4
+```
+
 # Product
 
 SaaS multi-tenant de fidelización para hostelería (puntos, sellos, QR, recompensas, promociones, planes Basic/Pro/Premium). **Tipos de usuario:** superadmin plataforma, owner, empleado, cliente (app móvil). **Stack:** Next.js 14 + Capacitor, mobile-first.
@@ -59,6 +70,7 @@ Detalle: [`docs/business-rules.md`](docs/business-rules.md).
 **Rutas y features por área:**
 - Owner / loyalty / staff scan: [`docs/domain/post-onboarding-mvp-roadmap.md`](docs/domain/post-onboarding-mvp-roadmap.md), [`docs/domain/staff-scan-flow.md`](docs/domain/staff-scan-flow.md)
 - Platform app (#38–45): [`docs/domain/customer-platform-app.md`](docs/domain/customer-platform-app.md)
+- **Phase U (app personal):** `/home/map` (zona + mapa), `/home/profile` (resumen zona, sin editor embebido), discover «Explorar» orden por distancia sin filtrar por radio — [`docs/domain/platform-user-map-screen.md`](docs/domain/platform-user-map-screen.md)
 - Superadmin (#71–84): [`docs/superadmin.md`](docs/superadmin.md)
 - Ruleta v2: [`docs/domain/roulette-game.md`](docs/domain/roulette-game.md)
 - **Phase W (owner):** `/settings/games/ruleta` — pestañas Configuración | **Actividad** (KPI giros del día, drill-down premio → clientes); `/customers/[id]` — ficha con promociones activas (uso) e historial ruleta (Premium + `gamification`). APIs: `GET /api/loyalty/games/ruleta/activity/summary`, `GET .../activity/spins`, `GET /api/loyalty/customers/[id]`.
