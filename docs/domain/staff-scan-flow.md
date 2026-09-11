@@ -65,9 +65,13 @@ Solo si `scan-context.unlockEnabled === true`. Mezcla visita loyalty con ruleta.
 
 ### Flujo B — Cliente ya ganó premio físico (secundario)
 
-1. Sección colapsada **Canjear premio físico (ruleta)** en `/scan`.
-2. Tras cualquier scan, se auto-buscan premios `pending_redeem` del mismo QR; también búsqueda manual.
-3. Empleado marca **Canjeado** cuando entrega el premio.
+**Target UX (Phase Y, #126):** hub `/scan/session` → **Canjear premio físico (ruleta)** → [`/scan/session/redeem`](../../src/app/(app)/scan/session/redeem/page.tsx) con QR ya identificado en sesión (`pendingQrValue`).
+
+1. Tras identificar al cliente en `/scan`, el hub muestra premios pendientes en el badge.
+2. En la ruta redeem se listan spins `pending_redeem` vía `GET /api/loyalty/games/ruleta/spins/pending?qrValue=`.
+3. Empleado marca **Marcar canjeado** → `POST .../spins/[id]/redeem`.
+
+Legacy colapsado en `/scan`: [`StaffRoulettePendingRedeem.tsx`](../../src/app/_components/loyalty/StaffRoulettePendingRedeem.tsx) (retirar en Y5 / #128).
 
 | Caso | Target / acción | Outcome principal |
 |------|-----------------|-------------------|
@@ -80,7 +84,9 @@ Solo si `scan-context.unlockEnabled === true`. Mezcla visita loyalty con ruleta.
 |-----------|------|
 | Scan context API | `GET /api/loyalty/games/ruleta/scan-context` → `{ unlockEnabled, authorizeEnabled, minPurchaseEuros }` |
 | Ruleta hints | [`StaffScanRouletteHint.tsx`](../../src/app/_components/loyalty/StaffScanRouletteHint.tsx) (legacy + authorize) |
-| Canje físico | [`StaffRoulettePendingRedeem.tsx`](../../src/app/_components/loyalty/StaffRoulettePendingRedeem.tsx) |
+| Ruleta panel (Y3b) | [`StaffScanRuletaPanel.tsx`](../../src/app/_components/loyalty/StaffScanRuletaPanel.tsx) — `/scan/session/ruleta` |
+| Canje panel (Y3b) | [`StaffScanRedeemPanel.tsx`](../../src/app/_components/loyalty/StaffScanRedeemPanel.tsx) — `/scan/session/redeem` |
+| Canje legacy (sin uso en `/scan`) | [`StaffRoulettePendingRedeem.tsx`](../../src/app/_components/loyalty/StaffRoulettePendingRedeem.tsx) |
 | E2E UX verify | `npm run verify:staff-scan-roulette-ux` (dev server) |
 | E2E flujo v2 | `npm run verify:roulette-participation-flow-e2e` (dev + `DATABASE_URL`) |
 | E2E authorize | `npm run verify:roulette-staff-authorize` (dev + `DATABASE_URL`) |

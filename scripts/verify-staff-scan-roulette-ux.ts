@@ -103,6 +103,52 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET /scan/session/loyalty route");
 
+	const ruletaPage = await fetch(`${brandingVerifyBaseUrl}/scan/session/ruleta`, {
+		headers: ownerHeaders,
+	});
+
+	if (ruletaPage.status !== 200) {
+		console.error("❌ GET /scan/session/ruleta page", ruletaPage.status);
+		process.exit(1);
+	}
+
+	const ruletaHtml = await ruletaPage.text();
+
+	if (!ruletaHtml.includes("Autorización y estado de participación")) {
+		console.error("❌ /scan/session/ruleta missing panel description");
+		process.exit(1);
+	}
+
+	if (ruletaHtml.includes("siguiente fase de implementación")) {
+		console.error("❌ /scan/session/ruleta should not show placeholder copy");
+		process.exit(1);
+	}
+
+	console.log("✅ GET /scan/session/ruleta route");
+
+	const redeemPage = await fetch(`${brandingVerifyBaseUrl}/scan/session/redeem`, {
+		headers: ownerHeaders,
+	});
+
+	if (redeemPage.status !== 200) {
+		console.error("❌ GET /scan/session/redeem page", redeemPage.status);
+		process.exit(1);
+	}
+
+	const redeemHtml = await redeemPage.text();
+
+	if (!redeemHtml.includes("Canjear premio físico")) {
+		console.error("❌ /scan/session/redeem missing redeem panel title");
+		process.exit(1);
+	}
+
+	if (redeemHtml.includes("siguiente fase de implementación")) {
+		console.error("❌ /scan/session/redeem should not show placeholder copy");
+		process.exit(1);
+	}
+
+	console.log("✅ GET /scan/session/redeem route");
+
 	const noSession = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/games/ruleta/scan-context`);
 
 	if (noSession.status !== 401) {

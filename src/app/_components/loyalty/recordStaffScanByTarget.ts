@@ -2,7 +2,10 @@ import {
 	isStaffScanOutcome,
 	type StaffScanOutcome,
 } from "../../../contexts/loyalty/customers/domain/StaffScanOutcome";
-import type { StaffScanTargetType } from "../../../contexts/loyalty/customers/domain/StaffScanTarget";
+import {
+	ROULETTE_AUTHORIZE_TARGET_ID,
+	type StaffScanTargetType,
+} from "../../../contexts/loyalty/customers/domain/StaffScanTarget";
 
 type ScanResponse = {
 	customer?: {
@@ -35,6 +38,19 @@ export type StaffScanRecordFailure = {
 
 export type StaffScanRecordResult = StaffScanRecordSuccess | StaffScanRecordFailure;
 
+export type RecordStaffScanByTargetParams =
+	| {
+			qrValue: string;
+			targetType: Extract<StaffScanTargetType, "stamp_campaign" | "promotion">;
+			targetId: string;
+	  }
+	| {
+			qrValue: string;
+			targetType: "roulette_authorize";
+			targetId?: string;
+			purchaseAmountEuros: number;
+	  };
+
 function parseOutcomes(value: unknown[] | undefined): StaffScanOutcome[] {
 	if (!Array.isArray(value)) {
 		return [];
@@ -43,15 +59,25 @@ function parseOutcomes(value: unknown[] | undefined): StaffScanOutcome[] {
 	return value.filter(isStaffScanOutcome);
 }
 
-export async function recordStaffScanByTarget(params: {
-	qrValue: string;
-	targetType: Extract<StaffScanTargetType, "stamp_campaign" | "promotion">;
-	targetId: string;
-}): Promise<StaffScanRecordResult> {
+export async function recordStaffScanByTarget(
+	params: RecordStaffScanByTargetParams,
+): Promise<StaffScanRecordResult> {
 	const trimmedQr = params.qrValue.trim();
 
 	if (!trimmedQr) {
 		return { ok: false, errorMessage: "Falta el código QR del cliente. Identifica de nuevo desde Escanear QR." };
+	}
+
+	const body: Record<string, unknown> = {
+		qrValue: trimmedQr,
+		targetType: params.targetType,
+	};
+
+	if (params.targetType === "roulette_authorize") {
+		body.targetId = params.targetId ?? ROULETTE_AUTHORIZE_TARGET_ID;
+		body.purchaseAmountEuros = params.purchaseAmountEuros;
+	} else {
+		body.targetId = params.targetId;
 	}
 
 	try {
@@ -59,26 +85,22 @@ export async function recordStaffScanByTarget(params: {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				qrValue: trimmedQr,
-				targetType: params.targetType,
-				targetId: params.targetId,
-			}),
+			body: JSON.stringify(body),
 		});
 
-		const body = (await response.json()) as ScanResponse;
+		const responseBody = (await response.json()) as ScanResponse;
 
 		if (!response.ok) {
 			return {
 				ok: false,
-				errorMessage: body.error?.description ?? "No se pudo completar el escaneo.",
+				errorMessage: responseBody.error?.description ?? "No se pudo completar el escaneo.",
 			};
 		}
 
 		return {
 			ok: true,
-			outcomes: parseOutcomes(body.outcomes),
-			customer: body.customer ?? null,
+			outcomes: parseOutcomes(responseBody.outcomes),
+			customer: responseBody.customer ?? null,
 		};
 	} catch {
 		return { ok: false, errorMessage: "Error de red al registrar el escaneo." };

@@ -12,10 +12,6 @@
   },
   "issues": [
     {
-      "title": "Phase Y3b: Staff scan ruleta + physical redeem panels",
-      "bodyFile": "docs/issues/staff-scan-session-ruleta-redeem-panels.md"
-    },
-    {
       "title": "Phase Y4: QR camera on staff scan identify step",
       "bodyFile": "docs/issues/staff-scan-qr-camera-identify.md"
     },
