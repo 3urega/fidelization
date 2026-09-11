@@ -2,8 +2,8 @@
 
 import { type ReactElement, Suspense } from "react";
 
-import { StaffScanSessionLayout } from "../../../_components/loyalty/StaffScanSessionLayout";
-import { StaffScanSessionPlaceholderPanel } from "../../../_components/loyalty/StaffScanSessionPlaceholderPanel";
+import { StaffScanSessionLayout } from "../../../../_components/loyalty/StaffScanSessionLayout";
+import { StaffScanSessionPlaceholderPanel } from "../../../../_components/loyalty/StaffScanSessionPlaceholderPanel";
 
 function LoyaltyPanelContent(): ReactElement {
 	return (

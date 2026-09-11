@@ -40,17 +40,45 @@ async function main(): Promise<void> {
 
 	const html = await scanPage.text();
 
-	if (!html.includes("Canjear premio físico (ruleta)")) {
-		console.error("❌ /scan missing physical redeem section title");
+	if (!html.includes("Identifica al cliente")) {
+		console.error("❌ /scan missing QR-first description");
 		process.exit(1);
 	}
 
-	if (!html.includes("Registrar visita")) {
-		console.error("❌ /scan missing primary scan action");
+	if (!html.includes("Continuar")) {
+		console.error("❌ /scan missing identify continue action");
 		process.exit(1);
 	}
 
-	console.log("✅ GET /scan page roulette UX copy");
+	if (html.includes("Registrar visita")) {
+		console.error("❌ /scan should not show legacy primary scan action");
+		process.exit(1);
+	}
+
+	if (html.includes("Canjear premio físico (ruleta)")) {
+		console.error("❌ /scan should not embed legacy redeem section");
+		process.exit(1);
+	}
+
+	console.log("✅ GET /scan page QR-first UX copy");
+
+	const sessionHub = await fetch(`${brandingVerifyBaseUrl}/scan/session`, {
+		headers: ownerHeaders,
+	});
+
+	if (sessionHub.status !== 200) {
+		console.error("❌ GET /scan/session page", sessionHub.status);
+		process.exit(1);
+	}
+
+	const sessionHtml = await sessionHub.text();
+
+	if (!sessionHtml.includes("Elige actividad") && !sessionHtml.includes("Redirigiendo")) {
+		console.error("❌ /scan/session missing hub or redirect copy");
+		process.exit(1);
+	}
+
+	console.log("✅ GET /scan/session route");
 
 	const noSession = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/games/ruleta/scan-context`);
 
