@@ -80,6 +80,29 @@ async function main(): Promise<void> {
 
 	console.log("✅ GET /scan/session route");
 
+	const loyaltyPage = await fetch(`${brandingVerifyBaseUrl}/scan/session/loyalty`, {
+		headers: ownerHeaders,
+	});
+
+	if (loyaltyPage.status !== 200) {
+		console.error("❌ GET /scan/session/loyalty page", loyaltyPage.status);
+		process.exit(1);
+	}
+
+	const loyaltyHtml = await loyaltyPage.text();
+
+	if (!loyaltyHtml.includes("Tarjetas y promociones")) {
+		console.error("❌ /scan/session/loyalty missing loyalty panel title");
+		process.exit(1);
+	}
+
+	if (loyaltyHtml.includes("siguiente fase de implementación")) {
+		console.error("❌ /scan/session/loyalty should not show placeholder copy");
+		process.exit(1);
+	}
+
+	console.log("✅ GET /scan/session/loyalty route");
+
 	const noSession = await fetch(`${brandingVerifyBaseUrl}/api/loyalty/games/ruleta/scan-context`);
 
 	if (noSession.status !== 401) {

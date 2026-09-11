@@ -12,14 +12,6 @@
   },
   "issues": [
     {
-      "title": "Phase Y2: /scan QR-first identify step + activity hub UI",
-      "bodyFile": "docs/issues/staff-scan-identify-hub-ui.md"
-    },
-    {
-      "title": "Phase Y3a: Staff scan loyalty panels (stamps + promotions)",
-      "bodyFile": "docs/issues/staff-scan-session-loyalty-panels.md"
-    },
-    {
       "title": "Phase Y3b: Staff scan ruleta + physical redeem panels",
       "bodyFile": "docs/issues/staff-scan-session-ruleta-redeem-panels.md"
     },

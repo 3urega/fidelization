@@ -340,8 +340,8 @@ Manifest: [`manifest.phase-y-staff-scan-qr-first.json`](../issues/manifest.phase
 | Slice | GitHub | Body file |
 |-------|--------|-----------|
 | Y1 | [#123](https://github.com/3urega/fidelization/issues/123) **Closed** | Session read model + `GET /api/loyalty/scan/session` |
-| Y2 | [#124](https://github.com/3urega/fidelization/issues/124) | [`staff-scan-identify-hub-ui.md`](../issues/staff-scan-identify-hub-ui.md) |
-| Y3a | [#125](https://github.com/3urega/fidelization/issues/125) | [`staff-scan-session-loyalty-panels.md`](../issues/staff-scan-session-loyalty-panels.md) |
+| Y2 | [#124](https://github.com/3urega/fidelization/issues/124) **Closed** | QR-first identify + activity hub UI |
+| Y3a | [#125](https://github.com/3urega/fidelization/issues/125) **Closed** | Loyalty panels (`StaffScanLoyaltyPanel`) |
 | Y3b | [#126](https://github.com/3urega/fidelization/issues/126) | [`staff-scan-session-ruleta-redeem-panels.md`](../issues/staff-scan-session-ruleta-redeem-panels.md) |
 | Y4 | [#127](https://github.com/3urega/fidelization/issues/127) | [`staff-scan-qr-camera-identify.md`](../issues/staff-scan-qr-camera-identify.md) |
 | Y5 | [#128](https://github.com/3urega/fidelization/issues/128) | [`staff-scan-qr-first-cleanup-docs.md`](../issues/staff-scan-qr-first-cleanup-docs.md) |
@@ -362,3 +362,4 @@ Manifest: [`manifest.phase-y-staff-scan-qr-first.json`](../issues/manifest.phase
 |-------|------|
 | 2026-09-11 | Borrador inicial a partir de conversación UX administrador `/scan`. |
 | 2026-09-11 | Batch Phase Y: 6 issues draft + manifest. |
+| 2026-09-11 | Y3a implemented (#125): loyalty panels en `/scan/session/loyalty`. |
