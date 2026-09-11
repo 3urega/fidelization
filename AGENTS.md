@@ -127,7 +127,8 @@ docs/
 │   ├── business-rules.md           (también en raíz docs/) puntos, sellos, QR
 │   ├── post-onboarding-mvp-roadmap.md  branding, /app, billing, fases A–X
 │   ├── customer-platform-app.md    app personal #38–45, QR global, /home
-│   ├── staff-scan-flow.md          /scan targets, ruleta v2 + legacy
+│   ├── staff-scan-flow.md          /scan targets, ruleta v2 + legacy (UX actual)
+│   ├── staff-scan-qr-first-plan.md /scan QR-first — hub + estado cliente (plan Phase Y)
 │   ├── roulette-game.md            enroll → authorize → spin, config v2
 │   ├── visual-assets-system.md     sellos SVG, LoyaltyProgress
 │   └── …                           otros specs por fase (geocoding, map, etc.)

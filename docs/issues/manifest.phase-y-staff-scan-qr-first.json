@@ -1,0 +1,39 @@
+{
+  "repo": "3urega/fidelization",
+  "sourceDoc": "docs/domain/staff-scan-qr-first-plan.md",
+  "label": "phase-y-staff-scan-qr-first",
+  "published": {
+    "123": "https://github.com/3urega/fidelization/issues/123",
+    "124": "https://github.com/3urega/fidelization/issues/124",
+    "125": "https://github.com/3urega/fidelization/issues/125",
+    "126": "https://github.com/3urega/fidelization/issues/126",
+    "127": "https://github.com/3urega/fidelization/issues/127",
+    "128": "https://github.com/3urega/fidelization/issues/128"
+  },
+  "issues": [
+    {
+      "title": "Phase Y1: Staff scan session read model + GET /api/loyalty/scan/session",
+      "bodyFile": "docs/issues/staff-scan-session-domain-api.md"
+    },
+    {
+      "title": "Phase Y2: /scan QR-first identify step + activity hub UI",
+      "bodyFile": "docs/issues/staff-scan-identify-hub-ui.md"
+    },
+    {
+      "title": "Phase Y3a: Staff scan loyalty panels (stamps + promotions)",
+      "bodyFile": "docs/issues/staff-scan-session-loyalty-panels.md"
+    },
+    {
+      "title": "Phase Y3b: Staff scan ruleta + physical redeem panels",
+      "bodyFile": "docs/issues/staff-scan-session-ruleta-redeem-panels.md"
+    },
+    {
+      "title": "Phase Y4: QR camera on staff scan identify step",
+      "bodyFile": "docs/issues/staff-scan-qr-camera-identify.md"
+    },
+    {
+      "title": "Phase Y5: Staff scan QR-first cleanup + domain docs",
+      "bodyFile": "docs/issues/staff-scan-qr-first-cleanup-docs.md"
+    }
+  ]
+}

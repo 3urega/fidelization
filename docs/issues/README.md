@@ -57,6 +57,8 @@ powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifes
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-t-interactive-search-zone-map.json
 # Phase V — roulette gamification game (publicado #108-#114)
 powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-v-roulette-game.json
+# Phase Y — staff scan QR-first (publicado #123-#128)
+powershell -File scripts/publish-github-issues.ps1 -Manifest docs/issues/manifest.phase-y-staff-scan-qr-first.json
 ```
 
 ## After close on GitHub

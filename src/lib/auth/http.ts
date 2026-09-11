@@ -6,6 +6,11 @@ import { Customer } from "../../contexts/loyalty/customers/domain/Customer";
 import type { StampAddedSummary } from "../../contexts/loyalty/customers/domain/StampProgressSummary";
 import type { StaffScanOutcome } from "../../contexts/loyalty/customers/domain/StaffScanOutcome";
 import type {
+	StaffScanPromotion,
+	StaffScanSessionStampCard,
+	StaffScanSessionView,
+} from "../../contexts/loyalty/customers/domain/StaffScanSession";
+import type {
 	StaffScanCampaignTarget,
 	StaffScanPromotionTarget,
 	StaffScanTargets,
@@ -475,6 +480,66 @@ export function staffScanTargetsToJson(targets: StaffScanTargets): Record<string
 			enabled: targets.rouletteAuthorize.enabled,
 			minPurchaseEuros: targets.rouletteAuthorize.minPurchaseEuros,
 		},
+	};
+}
+
+function staffScanSessionStampCardToJson(card: StaffScanSessionStampCard): Record<string, unknown> {
+	return {
+		campaignId: card.campaignId,
+		campaignName: card.campaignName,
+		current: card.current,
+		required: card.required,
+		completed: card.completed,
+		stampTypeId: card.stampTypeId,
+		stampTypeLabel: card.stampTypeLabel,
+		visualTemplate: card.visualTemplate,
+		cardBackgroundVariant: card.cardBackgroundVariant,
+		conditions: card.conditions,
+		canAddStamp: card.canAddStamp,
+		blockReason: card.blockReason ?? null,
+	};
+}
+
+function staffScanSessionPromotionToJson(promotion: StaffScanPromotion): Record<string, unknown> {
+	return {
+		id: promotion.id,
+		title: promotion.title,
+		description: promotion.description,
+		maxUsesPerUser: promotion.maxUsesPerUser,
+		usedCount: promotion.usedCount,
+		canApply: promotion.canApply,
+		blockReason: promotion.blockReason ?? null,
+	};
+}
+
+export function staffScanSessionToJson(session: StaffScanSessionView): Record<string, unknown> {
+	return {
+		customer: {
+			id: session.customer.id,
+			name: session.customer.name,
+			pointsBalance: session.customer.pointsBalance,
+			visitsCount: session.customer.visitsCount,
+		},
+		tenantCapabilities: {
+			stampCampaignsEnabled: session.tenantCapabilities.stampCampaignsEnabled,
+			promotionsEnabled: session.tenantCapabilities.promotionsEnabled,
+			roulette: session.tenantCapabilities.roulette
+				? {
+						unlockEnabled: session.tenantCapabilities.roulette.unlockEnabled,
+						authorizeEnabled: session.tenantCapabilities.roulette.authorizeEnabled,
+						minPurchaseEuros: session.tenantCapabilities.roulette.minPurchaseEuros,
+					}
+				: null,
+			physicalRedeemEnabled: session.tenantCapabilities.physicalRedeemEnabled,
+		},
+		stampCards: session.stampCards.map(staffScanSessionStampCardToJson),
+		promotions: session.promotions.map(staffScanSessionPromotionToJson),
+		roulette: session.roulette
+			? {
+					participation: session.roulette.participation,
+					pendingPhysicalCount: session.roulette.pendingPhysicalCount,
+				}
+			: null,
 	};
 }
 

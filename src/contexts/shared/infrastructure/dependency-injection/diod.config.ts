@@ -107,6 +107,7 @@ import { RecordPromotionUse } from "../../../loyalty/customers/application/promo
 import { ResolveCustomerByQrForStaffScan } from "../../../loyalty/customers/application/scan/ResolveCustomerByQrForStaffScan";
 import { RecordStaffScanByTarget } from "../../../loyalty/customers/application/scan/RecordStaffScanByTarget";
 import { RecordStaffRouletteAuthorizeByQr } from "../../../loyalty/customers/application/scan/RecordStaffRouletteAuthorizeByQr";
+import { GetStaffScanSessionContext } from "../../../loyalty/customers/application/scan/GetStaffScanSessionContext";
 import { ListStaffScanTargets } from "../../../loyalty/customers/application/scan/ListStaffScanTargets";
 import { RegisterCustomer } from "../../../loyalty/customers/application/register/RegisterCustomer";
 import { JoinTenantAsCustomer } from "../../../loyalty/customers/application/join/JoinTenantAsCustomer";
@@ -398,6 +399,7 @@ builder.registerAndUse(ResolveCustomerByQrForStaffScan);
 builder.registerAndUse(RecordStaffScanByTarget);
 builder.registerAndUse(RecordStaffRouletteAuthorizeByQr);
 builder.registerAndUse(ListStaffScanTargets);
+builder.registerAndUse(GetStaffScanSessionContext);
 builder.registerAndUse(RecordPromotionUse);
 builder.registerAndUse(AuthenticateCustomerByQr);
 builder.registerAndUse(CustomerSessionVerifier);

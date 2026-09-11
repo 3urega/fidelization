@@ -129,6 +129,8 @@
     "verify:staff-scan-roulette-ux": "tsx scripts/verify-staff-scan-roulette-ux.ts",
     "verify:staff-scan-record-by-target-use-case": "tsx scripts/verify-staff-scan-record-by-target-use-case.ts",
     "verify:staff-scan-record-by-target": "tsx scripts/verify-staff-scan-record-by-target.ts",
+    "verify:staff-scan-session-use-case": "tsx scripts/verify-staff-scan-session-use-case.ts",
+    "verify:staff-scan-session": "tsx scripts/verify-staff-scan-session.ts",
     "verify:customer-stamp-scan-targeted": "tsx scripts/verify-customer-stamp-scan-targeted.ts",
     "verify:customer-stamp-progress-use-case": "tsx scripts/verify-customer-stamp-progress-use-case.ts",
     "verify:customer-stamp-progress": "tsx scripts/verify-customer-stamp-progress.ts",
